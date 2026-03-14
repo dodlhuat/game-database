@@ -1,0 +1,19 @@
+// ============================================================
+// Haupt-SCSS Entry Point
+// Importiert alle Partials in der richtigen Reihenfolge
+// ============================================================
+
+// 1. Design Tokens (müssen zuerst kommen)
+@use 'variables' as *;
+
+// 2. Utilities
+@use 'mixins' as *;
+
+// 3. Browser-Normalisierung
+@use 'reset';
+
+// 4. Basis-Typografie
+@use 'typography';
+
+// 5. Animationen
+@use 'animations';

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(mkdir:*)",
+      "Bash(php --version)",
+      "Read(//usr/local/**)",
+      "Read(//c/Users/dodlh/AppData/Roaming/Composer/vendor/**)",
+      "Read(//c//**)",
+      "Read(//c/Users/dodlh/scoop/**)",
+      "Read(//c/Users/dodlh/.config//**)",
+      "Read(//c/Users/dodlh/AppData/Local/Programs//**)",
+      "Bash(docker:*)",
+      "Bash(BACKEND_PATH=\"C:\\\\\\\\Users\\\\\\\\dodlh\\\\\\\\Github\\\\\\\\game-database\\\\\\\\game-database\\\\\\\\backend\" && docker run --rm -v \"${BACKEND_PATH}:/app\" -w //app composer:latest create-project laravel/laravel . --prefer-dist 2>&1 | tail -10)",
+      "Bash(npx:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)"
+    ]
+  }
+}

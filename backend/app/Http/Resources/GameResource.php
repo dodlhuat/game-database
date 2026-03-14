@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class GameResource extends JsonResource
+{
+    public function toArray(Request $request): array
+    {
+        return [
+            'id'              => $this->id,
+            'title'           => $this->title,
+            'slug'            => $this->slug,
+            'description'     => $this->description,
+            'category'        => new CategoryResource($this->whenLoaded('category')),
+            'tags'            => TagResource::collection($this->whenLoaded('tags')),
+            'min_players'     => $this->min_players,
+            'max_players'     => $this->max_players,
+            'duration_min'    => $this->duration_min,
+            'difficulty'      => $this->difficulty,
+            'language'        => $this->language,
+            'year'            => $this->year,
+            'cover_image_url' => $this->cover_image_url,
+            'is_active'       => $this->is_active,
+            'available_copies' => $this->whenCounted('available_copies'),
+            'total_copies'    => $this->whenCounted('copies'),
+            'avg_rating'      => $this->whenCounted('reviews') ? null : $this->when(
+                $this->relationLoaded('reviews'),
+                fn() => $this->reviews->avg('rating')
+            ),
+            'reviews_count'   => $this->whenCounted('reviews'),
+            'is_favorited'    => $this->when(isset($this->is_favorited), $this->is_favorited),
+            'created_at'      => $this->created_at,
+        ];
+    }
+}
