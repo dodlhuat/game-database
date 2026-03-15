@@ -50,6 +50,30 @@
 
           <div class="detail__info">
 
+            <!-- Action Buttons -->
+            <div class="detail__actions">
+              <template v-if="auth.isLoggedIn && auth.isActive">
+                <button
+                  v-if="game.available_copies_count > 0"
+                  class="detail__btn detail__btn--primary"
+                  @click="openLoanModal"
+                >
+                  Jetzt ausleihen
+                </button>
+                <button
+                  v-else
+                  class="detail__btn detail__btn--secondary"
+                  @click="handleReserve"
+                  :disabled="reserving"
+                >
+                  {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
+                </button>
+              </template>
+              <NuxtLink v-else-if="!auth.isLoggedIn" to="/login" class="detail__btn detail__btn--primary">
+                Anmelden zum Ausleihen
+              </NuxtLink>
+            </div>
+
             <p v-if="game.short_description" class="detail__short-desc">
               {{ game.short_description }}
             </p>
@@ -120,14 +144,129 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { Game } from '~/composables/useGames'
+import { Modal } from '~/assets/basix/js/modal'
+import { DatePicker } from '~/assets/basix/js/datepicker'
 
 const route = useRoute()
 const { fetchGame } = useGames()
+const { createLoan, addReservation } = useLoans()
+const auth = useAuthStore()
 
 const loading = ref(true)
 const game = ref<Game | null>(null)
 const year = new Date().getFullYear()
+const reserving = ref(false)
 
+const todayStr = () => new Date().toISOString().slice(0, 10)
+const defaultDueStr = () => new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+
+const loanDates = { start_date: todayStr(), due_date: defaultDueStr() }
+
+const DE_LOCALES = {
+  days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+  months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+}
+
+function openLoanModal() {
+  if (!game.value) return
+
+  loanDates.start_date = todayStr()
+  loanDates.due_date = defaultDueStr()
+
+  const content = `
+    <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem">
+      <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${game.value.title}</p>
+      <div style="display:flex;flex-direction:column;gap:.35rem">
+        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Ausleihbeginn</label>
+        <input id="dp-start" type="text" value="${loanDates.start_date}" placeholder="Datum wählen" style="cursor:pointer" readonly />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.35rem">
+        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Rückgabe bis</label>
+        <input id="dp-due" type="text" value="${loanDates.due_date}" placeholder="Datum wählen" style="cursor:pointer" readonly />
+      </div>
+      <div id="loan-msg" style="display:none;font-size:.85rem;margin:0"></div>
+    </div>`
+
+  const footer = `
+    <div style="display:flex;gap:.75rem;justify-content:flex-end">
+      <button id="loan-cancel" class="button">Abbrechen</button>
+      <button id="loan-submit" class="button button-primary">Ausleihen bestätigen</button>
+    </div>`
+
+  const modal = new Modal({ content, header: 'Spiel ausleihen', footer, closeable: true })
+  modal.show()
+
+  setTimeout(() => {
+    const startInput = document.getElementById('dp-start') as HTMLInputElement | null
+    const dueInput = document.getElementById('dp-due') as HTMLInputElement | null
+
+    if (startInput) {
+      new DatePicker(startInput, {
+        mode: 'single',
+        startDay: 1,
+        locales: DE_LOCALES,
+        format: (d: Date) => d.toISOString().slice(0, 10),
+        onSelect: (d) => { loanDates.start_date = (d as Date).toISOString().slice(0, 10) },
+      })
+    }
+
+    if (dueInput) {
+      new DatePicker(dueInput, {
+        mode: 'single',
+        startDay: 1,
+        locales: DE_LOCALES,
+        format: (d: Date) => d.toISOString().slice(0, 10),
+        onSelect: (d) => { loanDates.due_date = (d as Date).toISOString().slice(0, 10) },
+      })
+    }
+
+    document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
+    document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
+  }, 50)
+}
+
+async function submitLoan(modal: InstanceType<typeof Modal>) {
+  if (!game.value) return
+
+  const copy = game.value.copies?.find(c => c.is_available)
+  const msgEl = document.getElementById('loan-msg') as HTMLElement | null
+  const submitBtn = document.getElementById('loan-submit') as HTMLButtonElement | null
+
+  if (!copy) {
+    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = 'Keine verfügbare Kopie gefunden.'; msgEl.style.display = 'block' }
+    return
+  }
+
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Wird bearbeitet…' }
+  if (msgEl) { msgEl.style.display = 'none' }
+
+  try {
+    await createLoan({ copy_id: copy.id, start_date: loanDates.start_date, due_date: loanDates.due_date })
+    if (msgEl) { msgEl.style.color = 'var(--success)'; msgEl.textContent = 'Ausleihe erfolgreich! Du findest sie in deinem Dashboard.'; msgEl.style.display = 'block' }
+    game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)
+    setTimeout(() => modal.hide(), 2000)
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.data?.message ?? 'Ausleihe fehlgeschlagen. Bitte versuche es erneut.'; msgEl.style.display = 'block' }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Ausleihen bestätigen' }
+  }
+}
+
+async function handleReserve() {
+  if (!game.value) return
+  reserving.value = true
+  try {
+    await addReservation(game.value.id)
+    alert('Du wurdest auf die Warteliste gesetzt.')
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    alert(err?.data?.message ?? 'Vormerken fehlgeschlagen.')
+  } finally {
+    reserving.value = false
+  }
+}
+
+// ── Game meta ────────────────────────────────────────────────────
 const DIFFICULTY: Record<string, string> = {
   EASY: 'Leicht', MEDIUM: 'Mittel', HARD: 'Schwer', EXPERT: 'Experte',
 }
@@ -329,6 +468,42 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 
   &__info { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  // Action buttons
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background 0.2s, opacity 0.2s;
+
+    &--primary {
+      background: $amber;
+      color: #0F0E0C;
+      &:hover { background: darken(#D4921E, 8%); }
+    }
+
+    &--secondary {
+      background: transparent;
+      color: $amber;
+      border: 1px solid $amber-25;
+      &:hover { background: $amber-08; }
+    }
+
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
 
   &__short-desc {
     font-size: 1.05rem;

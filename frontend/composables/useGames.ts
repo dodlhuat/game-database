@@ -19,6 +19,7 @@ export interface Game {
   copies_count: number
   reviews_count: number
   is_favorited?: boolean
+  copies?: { id: number; condition: string; is_available: boolean }[]
 }
 
 export interface GameFilters {

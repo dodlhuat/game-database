@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImageUploadService
 {
@@ -13,26 +14,18 @@ class ImageUploadService
             $this->deleteByUrl($oldUrl);
         }
 
-        $result = Cloudinary::upload($file->getRealPath(), [
-            'folder'         => 'game-database/covers',
-            'transformation' => [
-                'width'   => 600,
-                'height'  => 800,
-                'crop'    => 'fill',
-                'quality' => 'auto',
-                'fetch_format' => 'auto',
-            ],
-        ]);
+        $filename = 'covers/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
 
-        return $result->getSecurePath();
+        return Storage::disk('public')->url($filename);
     }
 
     public function deleteByUrl(string $url): void
     {
-        // Cloudinary Public ID aus URL extrahieren
-        preg_match('/\/v\d+\/(.+)\.\w+$/', $url, $matches);
-        if (!empty($matches[1])) {
-            Cloudinary::destroy($matches[1]);
+        // Pfad relativ zum public-Disk extrahieren
+        $path = preg_replace('#^.*/storage/#', '', $url);
+        if ($path) {
+            Storage::disk('public')->delete($path);
         }
     }
 }

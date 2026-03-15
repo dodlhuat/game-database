@@ -12,6 +12,10 @@ class CopyResource extends JsonResource
         return [
             'id'        => $this->id,
             'game_id'   => $this->game_id,
+            'game'      => $this->whenLoaded('game', fn() => [
+                'id'    => $this->game->id,
+                'title' => $this->game->title,
+            ]),
             'condition' => $this->condition,
             'qr_code'   => $this->qr_code,
             'notes'     => $this->notes,

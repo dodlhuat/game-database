@@ -27,14 +27,15 @@ class GameResource extends JsonResource
             'year'              => $this->year,
             'cover_image_url' => $this->cover_image_url,
             'is_active'       => $this->is_active,
-            'available_copies' => $this->whenCounted('available_copies'),
-            'total_copies'    => $this->whenCounted('copies'),
+            'available_copies_count' => $this->whenCounted('available_copies_count', $this->available_copies_count ?? 0),
+            'copies_count'          => $this->whenCounted('copies', $this->copies_count ?? 0),
             'avg_rating'      => $this->whenCounted('reviews') ? null : $this->when(
                 $this->relationLoaded('reviews'),
                 fn() => $this->reviews->avg('rating')
             ),
             'reviews_count'   => $this->whenCounted('reviews'),
             'is_favorited'    => $this->when(isset($this->is_favorited), $this->is_favorited),
+            'copies'          => CopyResource::collection($this->whenLoaded('copies')),
             'created_at'      => $this->created_at,
         ];
     }

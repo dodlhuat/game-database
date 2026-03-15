@@ -27,7 +27,12 @@
       "Bash(cd:*)",
       "Bash(curl:*)",
       "Bash(rm:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//c/Users/dodlh/Github/game-database/game-database/**)",
+      "Bash(done)"
     ]
   }
 }

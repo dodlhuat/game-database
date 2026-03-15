@@ -11,6 +11,7 @@
         <span class="icon icon-layers-outline" aria-hidden="true" />
       </div>
       <span
+        v-if="game.copies_count > 0"
         class="game-card__badge"
         :class="game.available_copies_count > 0 ? 'game-card__badge--avail' : 'game-card__badge--out'"
       >
@@ -120,13 +121,13 @@ $amber-30:     rgba(212, 146, 30, 0.30);
     border-radius: 999px;
 
     &--avail {
-      background: var(--success-muted);
-      color: var(--success);
+      background: #166534;
+      color: #bbf7d0;
     }
 
     &--out {
-      background: var(--accent-color-muted);
-      color: var(--accent-text);
+      background: #7c2d12;
+      color: #fed7aa;
     }
   }
 
