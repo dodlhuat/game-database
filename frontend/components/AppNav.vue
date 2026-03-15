@@ -24,15 +24,14 @@
       <li v-show="auth.isLoggedIn">
         <button class="flyout-logout-btn" @click="handleLogout">Abmelden</button>
       </li>
+      <li class="flyout-divider" aria-hidden="true" />
+      <li class="flyout-legal-item"><NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink></li>
+      <li class="flyout-legal-item"><NuxtLink to="/privacy">Datenschutz</NuxtLink></li>
+      <li class="flyout-legal-item"><NuxtLink to="/cookies">Cookie-Richtlinien</NuxtLink></li>
     </ul>
 
-    <div class="flyout-footer flyout-footer--legal" style="--delay: 0.6s">
-      <nav class="flyout-legal-nav">
-        <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink>
-        <NuxtLink to="/privacy">Datenschutz</NuxtLink>
-        <NuxtLink to="/cookies">Cookie-Richtlinien</NuxtLink>
-      </nav>
-      <p class="flyout-copy">&copy; {{ year }} Spielothek</p>
+    <div class="flyout-footer" style="--delay: 0.6s">
+      <p class="flyout-copy">&copy; {{ year }} AUA</p>
     </div>
   </div>
 
@@ -41,7 +40,7 @@
     <div class="l-nav__inner">
       <NuxtLink to="/" class="l-nav__brand">
         <span class="l-nav__brand-hex" aria-hidden="true">⬡</span>
-        <span class="l-nav__brand-name">Spielothek</span>
+        <span class="l-nav__brand-name">AUA</span>
       </NuxtLink>
 
       <div class="l-nav__actions">
@@ -229,28 +228,24 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &:hover { color: $hero-text; }
 }
 
-:global(#flyoutMenu .flyout-footer--legal) {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+:global(#flyoutMenu li.flyout-divider) {
+  height: 1px;
+  background: $hero-divider;
+  margin: 0.75rem 0;
+  pointer-events: none;
+  list-style: none;
 }
 
-.flyout-legal-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-
-  a {
-    font-size: 0.82rem !important;
-    font-weight: 500 !important;
-    letter-spacing: 0 !important;
-    color: $hero-muted-70 !important;
-    text-decoration: none;
-    transition: color 0.2s;
-    transform: none !important;
-    transition-delay: 0s !important;
-    &:hover { color: $hero-text !important; }
-  }
+:global(#flyoutMenu li.flyout-legal-item a) {
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: $hero-muted-70 !important;
+  text-decoration: none;
+  transition: color 0.2s;
+  transform: none !important;
+  transition-delay: 0s !important;
+  &:hover { color: $hero-text !important; }
 }
 
 .flyout-copy {

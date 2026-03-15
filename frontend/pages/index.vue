@@ -14,13 +14,13 @@
       <div class="hero__body">
         <p class="hero__eyebrow">Brettspiel-Ausleihplattform</p>
         <h1 class="hero__title">
-          Entdecke.<br>
-          Leihe.<br>
-          <em class="hero__title-em">Spiel.</em>
+          Alle.<br>
+          Unsere.<br>
+          <em class="hero__title-em">Abenteuer.</em>
         </h1>
         <p class="hero__desc">
           Greife auf unsere wachsende Sammlung von Brettspielen zu —
-          kostenlos ausleihen, einfach zurückgeben, gemeinsam genießen.
+          ausleihen, einfach zurückgeben, gemeinsam genießen.
         </p>
 
         <div class="hero__cta-row">
@@ -108,7 +108,7 @@
       <div class="l-footer__inner">
         <div class="l-footer__brand">
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">Spielothek</span>
+          <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
           <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
@@ -116,7 +116,7 @@
           <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
           <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} Spielothek. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
       </div>
     </footer>
 

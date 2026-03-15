@@ -10,7 +10,7 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">Spielothek</p>
+        <p class="page-hero__eyebrow">AUA</p>
         <h1 class="page-hero__title">Spielesammlung</h1>
         <p v-if="!loading && meta.total" class="page-hero__count">
           {{ meta.total }} Spiele entdecken
@@ -101,7 +101,7 @@
       <div class="l-footer__inner">
         <div class="l-footer__brand">
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">Spielothek</span>
+          <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
           <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
@@ -109,7 +109,7 @@
           <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
           <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} Spielothek. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
       </div>
     </footer>
 

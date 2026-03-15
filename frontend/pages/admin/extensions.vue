@@ -87,8 +87,8 @@
 
     <footer class="l-footer">
       <div class="l-footer__inner">
-        <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">Spielothek</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} Spielothek</p>
+        <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
+        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
       </div>
     </footer>
   </div>
