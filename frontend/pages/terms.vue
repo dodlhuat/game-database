@@ -1,0 +1,53 @@
+<template>
+  <main class="content">
+    <h1>Nutzungsbedingungen</h1>
+
+    <div v-if="loading" class="spinner"></div>
+
+    <div v-else-if="!terms" class="alert alert-default">
+      <p>Nutzungsbedingungen sind derzeit nicht verfügbar.</p>
+    </div>
+
+    <div v-else class="card">
+      <div class="header">
+        <small>Version {{ terms.version }} — veröffentlicht am {{ formatDate(terms.published_at) }}</small>
+      </div>
+      <div class="body terms-content">{{ terms.content }}</div>
+    </div>
+  </main>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
+const api = useApi()
+
+interface TermsVersion {
+  version: string
+  content: string
+  published_at: string
+}
+
+const loading = ref(true)
+const terms = ref<TermsVersion | null>(null)
+
+onMounted(async () => {
+  try {
+    terms.value = await api.get<TermsVersion>('/terms')
+  } catch {
+    terms.value = null
+  } finally {
+    loading.value = false
+  }
+})
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('de-DE', { dateStyle: 'long' })
+}
+</script>
+
+<style scoped>
+.terms-content {
+  white-space: pre-line;
+}
+</style>

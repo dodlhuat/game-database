@@ -1,39 +1,43 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Spiele verwalten</h1>
     <NuxtLink to="/admin">← Admin</NuxtLink>
 
-    <UiButton @click="openCreate">Spiel hinzufügen</UiButton>
+    <button class="button-primary" @click="openCreate">Spiel hinzufügen</button>
 
-    <div v-if="loading">Lädt...</div>
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>Titel</th>
-          <th>Kategorie</th>
-          <th>Kopien</th>
-          <th>Aktiv</th>
-          <th>Aktionen</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="game in games" :key="game.id">
-          <td>{{ game.title }}</td>
-          <td>{{ game.category?.name ?? '—' }}</td>
-          <td>{{ game.copies_count }}</td>
-          <td>{{ game.is_active ? 'Ja' : 'Nein' }}</td>
-          <td>
-            <UiButton size="sm" variant="secondary" @click="openEdit(game)">Bearbeiten</UiButton>
-            <UiButton size="sm" variant="danger" @click="remove(game.id)">Löschen</UiButton>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Titel</th>
+            <th>Kategorie</th>
+            <th>Kopien</th>
+            <th>Aktiv</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="game in games" :key="game.id">
+            <td>{{ game.title }}</td>
+            <td>{{ game.category?.name ?? '—' }}</td>
+            <td>{{ game.copies_count }}</td>
+            <td>{{ game.is_active ? 'Ja' : 'Nein' }}</td>
+            <td>
+              <button class="button" @click="openEdit(game)">Bearbeiten</button>
+              <button class="button-error" @click="remove(game.id)">Löschen</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Formular (Create / Edit) -->
-    <div v-if="form.open">
-      <h2>{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h2>
+    <div v-if="form.open" class="card">
+      <div class="header">
+        <h2>{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h2>
+      </div>
 
       <UiInput v-model="form.title" label="Titel" required />
       <UiInput v-model="form.slug" label="Slug" required />
@@ -46,9 +50,11 @@
         </select>
       </label>
 
-      <UiInput v-model="form.min_players" label="Min. Spieler" type="number" />
-      <UiInput v-model="form.max_players" label="Max. Spieler" type="number" />
-      <UiInput v-model="form.duration_min" label="Dauer (Min.)" type="number" />
+      <div class="row">
+        <div class="column"><UiInput v-model="form.min_players" label="Min. Spieler" type="number" /></div>
+        <div class="column"><UiInput v-model="form.max_players" label="Max. Spieler" type="number" /></div>
+        <div class="column"><UiInput v-model="form.duration_min" label="Dauer (Min.)" type="number" /></div>
+      </div>
 
       <label>Schwierigkeit
         <select v-model="form.difficulty">
@@ -60,22 +66,26 @@
         </select>
       </label>
 
-      <UiInput v-model="form.language" label="Sprache" />
-      <UiInput v-model="form.year" label="Jahr" type="number" />
+      <div class="row">
+        <div class="column"><UiInput v-model="form.language" label="Sprache" /></div>
+        <div class="column"><UiInput v-model="form.year" label="Jahr" type="number" /></div>
+      </div>
 
       <label>Coverbild
         <input type="file" accept="image/*" @change="onFileChange" />
       </label>
 
       <label>
-        <input v-model="form.is_active" type="checkbox" />
+        <input v-model="form.is_active" type="checkbox" class="styled-checkbox" />
         Aktiv
       </label>
 
-      <p v-if="formError" role="alert">{{ formError }}</p>
+      <div v-if="formError" class="alert alert-error" role="alert">{{ formError }}</div>
 
-      <UiButton :loading="saving" @click="save">Speichern</UiButton>
-      <UiButton variant="secondary" @click="closeForm">Abbrechen</UiButton>
+      <div class="row spacing-top">
+        <UiButton :loading="saving" @click="save">Speichern</UiButton>
+        <button class="button" @click="closeForm">Abbrechen</button>
+      </div>
     </div>
   </main>
 </template>

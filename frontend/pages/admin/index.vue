@@ -1,56 +1,56 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Admin Dashboard</h1>
 
-    <div v-if="loading">Lädt...</div>
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
     <div v-else-if="stats">
-      <section>
-        <h2>Mitglieder</h2>
-        <ul>
-          <li>Gesamt: {{ stats.users.total }}</li>
-          <li>
-            Ausstehend:
+      <!-- Stats -->
+      <div class="row">
+        <div class="card column">
+          <strong>Mitglieder</strong>
+          <p>Gesamt: {{ stats.users.total }}</p>
+          <p>
+            Aktiv: {{ stats.users.active }} &nbsp;
             <NuxtLink to="/admin/users?status=PENDING">
-              {{ stats.users.pending }}
+              Ausstehend: {{ stats.users.pending }}
             </NuxtLink>
             <UiBadge v-if="stats.users.pending > 0" variant="pending">!</UiBadge>
-          </li>
-          <li>Aktiv: {{ stats.users.active }}</li>
-        </ul>
-      </section>
+          </p>
+        </div>
 
-      <section>
-        <h2>Ausleihen</h2>
-        <ul>
-          <li>Aktiv: {{ stats.loans.active }}</li>
-          <li>
-            Überfällig:
-            <NuxtLink to="/admin/loans?status=OVERDUE">{{ stats.loans.overdue }}</NuxtLink>
+        <div class="card column">
+          <strong>Ausleihen</strong>
+          <p>Aktiv: {{ stats.loans.active }}</p>
+          <p>
+            <NuxtLink to="/admin/loans?status=OVERDUE">Überfällig: {{ stats.loans.overdue }}</NuxtLink>
             <UiBadge v-if="stats.loans.overdue > 0" variant="loaned">!</UiBadge>
-          </li>
-          <li>Heute zurückgegeben: {{ stats.loans.returned_today }}</li>
-        </ul>
-      </section>
+          </p>
+          <p>Heute zurückgegeben: {{ stats.loans.returned_today }}</p>
+        </div>
 
-      <section>
-        <h2>Verlängerungsanträge</h2>
-        <ul>
-          <li>
-            Offen:
-            <NuxtLink to="/admin/extensions">{{ stats.extensions.pending }}</NuxtLink>
+        <div class="card column">
+          <strong>Verlängerungsanträge</strong>
+          <p>
+            <NuxtLink to="/admin/extensions">Offen: {{ stats.extensions.pending }}</NuxtLink>
             <UiBadge v-if="stats.extensions.pending > 0" variant="pending">!</UiBadge>
-          </li>
-        </ul>
-      </section>
+          </p>
+        </div>
+      </div>
 
-      <nav>
-        <NuxtLink to="/admin/users">Mitglieder verwalten</NuxtLink>
-        <NuxtLink to="/admin/games">Spiele verwalten</NuxtLink>
-        <NuxtLink to="/admin/copies">Kopien verwalten</NuxtLink>
-        <NuxtLink to="/admin/loans">Ausleihen</NuxtLink>
-        <NuxtLink to="/admin/extensions">Verlängerungsanträge</NuxtLink>
-      </nav>
+      <!-- Navigation -->
+      <div class="card">
+        <div class="header"><h2>Verwaltung</h2></div>
+        <nav class="row">
+          <NuxtLink class="button column" to="/admin/users">Mitglieder</NuxtLink>
+          <NuxtLink class="button column" to="/admin/games">Spiele</NuxtLink>
+          <NuxtLink class="button column" to="/admin/copies">Kopien</NuxtLink>
+          <NuxtLink class="button column" to="/admin/loans">Ausleihen</NuxtLink>
+          <NuxtLink class="button column" to="/admin/extensions">Verlängerungsanträge</NuxtLink>
+          <NuxtLink class="button column" to="/admin/newsletters">Newsletter</NuxtLink>
+          <NuxtLink class="button column" to="/admin/damage-reports">Schadensmeldungen</NuxtLink>
+        </nav>
+      </div>
     </div>
   </main>
 </template>

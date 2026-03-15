@@ -33,7 +33,9 @@ services:
     working_dir: /var/www/backend
     volumes:
       - ./backend:/var/www/backend
-      - /var/www/backend/vendor   # vendor nicht überschreiben
+      - backend_storage_framework:/var/www/backend/storage/framework
+      - backend_storage_logs:/var/www/backend/storage/logs
+      - backend_bootstrap_cache:/var/www/backend/bootstrap/cache
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -71,12 +73,17 @@ services:
       - "3000:3000"
     environment:
       NUXT_PUBLIC_API_BASE: http://localhost:8000/api
-      # Nuxt im Docker auf 0.0.0.0 binden damit der Port erreichbar ist
       NUXT_HOST: 0.0.0.0
       NUXT_PORT: 3000
+      # Polling statt native file-watching (nötig für Windows bind-mounts)
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
     command: sh -c "npm install && npm run dev"
     depends_on:
       - nginx
 
 volumes:
   postgres_data:
+  backend_storage_framework:
+  backend_storage_logs:
+  backend_bootstrap_cache:

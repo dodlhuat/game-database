@@ -1,44 +1,50 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Verlängerungsanträge</h1>
     <NuxtLink to="/admin">← Admin</NuxtLink>
 
-    <div v-if="loading">Lädt...</div>
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
-    <p v-else-if="!extensions.length">Keine offenen Anträge.</p>
+    <div v-else-if="!extensions.length" class="alert alert-default">Keine offenen Anträge.</div>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>Mitglied</th>
-          <th>Spiel</th>
-          <th>Aktuell fällig</th>
-          <th>Beantragt bis</th>
-          <th>Beantragt am</th>
-          <th>Aktionen</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="ext in extensions" :key="ext.id">
-          <td>{{ ext.loan?.user?.name }}</td>
-          <td>{{ ext.loan?.copy?.game?.title }}</td>
-          <td>{{ formatDate(ext.loan?.due_date) }}</td>
-          <td>{{ formatDate(ext.requested_due_date) }}</td>
-          <td>{{ formatDate(ext.requested_at) }}</td>
-          <td>
-            <UiButton size="sm" @click="approve(ext.id)">Genehmigen</UiButton>
-            <UiButton size="sm" variant="danger" @click="openReject(ext)">Ablehnen</UiButton>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Mitglied</th>
+            <th>Spiel</th>
+            <th>Aktuell fällig</th>
+            <th>Beantragt bis</th>
+            <th>Beantragt am</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="ext in extensions" :key="ext.id">
+            <td>{{ ext.loan?.user?.name }}</td>
+            <td>{{ ext.loan?.copy?.game?.title }}</td>
+            <td>{{ formatDate(ext.loan?.due_date) }}</td>
+            <td>{{ formatDate(ext.requested_due_date) }}</td>
+            <td>{{ formatDate(ext.requested_at) }}</td>
+            <td>
+              <button class="button-primary" @click="approve(ext.id)">Genehmigen</button>
+              <button class="button-error" @click="openReject(ext)">Ablehnen</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Ablehnungs-Dialog -->
-    <div v-if="rejectTarget">
-      <h3>Ablehnen: {{ rejectTarget.loan?.copy?.game?.title }}</h3>
+    <div v-if="rejectTarget" class="card">
+      <div class="header">
+        <h3>Ablehnen: {{ rejectTarget.loan?.copy?.game?.title }}</h3>
+      </div>
       <UiInput v-model="rejectNote" label="Begründung (optional)" />
-      <UiButton variant="danger" :loading="processing" @click="submitReject">Ablehnen</UiButton>
-      <UiButton variant="secondary" @click="rejectTarget = null">Abbrechen</UiButton>
+      <div class="row spacing-top">
+        <button class="button-error" :disabled="processing" @click="submitReject">Ablehnen</button>
+        <button class="button" @click="rejectTarget = null">Abbrechen</button>
+      </div>
     </div>
   </main>
 </template>

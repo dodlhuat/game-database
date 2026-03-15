@@ -6,6 +6,7 @@ interface User {
   email: string
   role: 'MEMBER' | 'ADMIN'
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
+  newsletter_opt_in: boolean
 }
 
 interface AuthState {

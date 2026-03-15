@@ -1,10 +1,11 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Mitgliederverwaltung</h1>
+    <NuxtLink to="/admin">← Admin</NuxtLink>
 
-    <div v-if="pending">Lädt...</div>
+    <div v-if="pending" class="center"><div class="spinner"></div></div>
 
-    <div v-else>
+    <div v-else class="table-wrapper">
       <table>
         <thead>
           <tr>
@@ -25,11 +26,11 @@
             <td>{{ formatDate(user.created_at) }}</td>
             <td>
               <template v-if="user.status === 'PENDING'">
-                <UiButton size="sm" @click="approve(user.id)">Freischalten</UiButton>
-                <UiButton size="sm" variant="danger" @click="reject(user.id)">Ablehnen</UiButton>
+                <button class="button-primary" @click="approve(user.id)">Freischalten</button>
+                <button class="button-error" @click="reject(user.id)">Ablehnen</button>
               </template>
               <template v-else-if="user.status === 'ACTIVE'">
-                <UiButton size="sm" variant="danger" @click="suspend(user.id)">Sperren</UiButton>
+                <button class="button-error" @click="suspend(user.id)">Sperren</button>
               </template>
             </td>
           </tr>

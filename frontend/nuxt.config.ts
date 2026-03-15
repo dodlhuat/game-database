@@ -2,23 +2,26 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
+  ssr: false,
+
+  // Nuxt 4 setzt srcDir standardmäßig auf 'app/' — wir nutzen die Projektroot-Struktur
+  srcDir: '.',
+  dir: {
+    app: 'app',
+  },
 
   modules: [
     '@pinia/nuxt',
   ],
 
   // SCSS global in alle Komponenten einbinden
-  css: ['~/assets/styles/index.scss'],
+  css: ['~/assets/basix/css/style.scss', '~/assets/styles/index.scss'],
 
   vite: {
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: `
-            @use "~/assets/styles/variables" as *;
-            @use "~/assets/styles/mixins" as *;
-          `,
-        },
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 300,
       },
     },
   },

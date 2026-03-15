@@ -1,0 +1,55 @@
+@use "properties";
+@use "parameters" as *;
+
+.styled-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: auto;
+
+  & + label {
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    margin-bottom: calc($spacing / 2);
+  }
+
+  & + label::before {
+    content: '';
+    margin-right: 10px;
+    display: inline-block;
+    width: $spacing;
+    height: $spacing;
+    transition: border 0.3s;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    margin-top: 2px;
+  }
+
+  &:hover + label::before {
+    border-color: rgba(0, 0, 0, 0.5);
+  }
+
+  &:checked + label::before {
+    background: var(--accent-color);
+  }
+
+  &:disabled + label {
+    color: var(--disabled);
+    cursor: auto;
+  }
+
+  &:disabled + label::before {
+    box-shadow: none;
+    background: var(--disabled);
+  }
+
+  &:checked + label::after {
+    content: url("../icons/checkmark-outline.svg");
+    filter: invert(100%) sepia(100%) saturate(2%) hue-rotate(180deg) brightness(101%) contrast(101%);
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: $spacing;
+    height: $spacing;
+  }
+}

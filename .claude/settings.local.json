@@ -14,7 +14,19 @@
       "Bash(BACKEND_PATH=\"C:\\\\\\\\Users\\\\\\\\dodlh\\\\\\\\Github\\\\\\\\game-database\\\\\\\\game-database\\\\\\\\backend\" && docker run --rm -v \"${BACKEND_PATH}:/app\" -w //app composer:latest create-project laravel/laravel . --prefer-dist 2>&1 | tail -10)",
       "Bash(npx:*)",
       "Bash(npm install:*)",
-      "Bash(npm ls:*)"
+      "Bash(npm ls:*)",
+      "Read(//c/Users/dodlh/Github/game-database/game-database/backend/**)",
+      "Bash(composer install:*)",
+      "Read(//c/Users/dodlh/AppData/Roaming/**)",
+      "Read(//c/ProgramData/ComposerSetup/**)",
+      "Bash(php -v)",
+      "Read(//c/c/Users/dodlh/**)",
+      "Bash(wsl:*)",
+      "Bash(docker compose:*)",
+      "Bash(sleep:*)",
+      "Bash(cd:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)"
     ]
   }
 }

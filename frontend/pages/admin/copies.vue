@@ -1,42 +1,46 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Kopien verwalten</h1>
     <NuxtLink to="/admin">← Admin</NuxtLink>
 
-    <UiButton @click="openCreate">Kopie hinzufügen</UiButton>
+    <button class="button-primary" @click="openCreate">Kopie hinzufügen</button>
 
-    <div v-if="loading">Lädt...</div>
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>Spiel</th>
-          <th>Zustand</th>
-          <th>QR-Code</th>
-          <th>Verfügbar</th>
-          <th>Aktionen</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="copy in copies" :key="copy.id">
-          <td>{{ copy.game?.title }}</td>
-          <td>{{ copy.condition }}</td>
-          <td>{{ copy.qr_code ?? '—' }}</td>
-          <td>
-            <UiBadge :variant="copy.is_available ? 'available' : 'loaned'">
-              {{ copy.is_available ? 'Ja' : 'Nein' }}
-            </UiBadge>
-          </td>
-          <td>
-            <UiButton size="sm" variant="secondary" @click="openEdit(copy)">Bearbeiten</UiButton>
-            <UiButton size="sm" variant="danger" @click="remove(copy.id)">Löschen</UiButton>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Spiel</th>
+            <th>Zustand</th>
+            <th>QR-Code</th>
+            <th>Verfügbar</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="copy in copies" :key="copy.id">
+            <td>{{ copy.game?.title }}</td>
+            <td>{{ copy.condition }}</td>
+            <td>{{ copy.qr_code ?? '—' }}</td>
+            <td>
+              <UiBadge :variant="copy.is_available ? 'available' : 'loaned'">
+                {{ copy.is_available ? 'Ja' : 'Nein' }}
+              </UiBadge>
+            </td>
+            <td>
+              <button class="button" @click="openEdit(copy)">Bearbeiten</button>
+              <button class="button-error" @click="remove(copy.id)">Löschen</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div v-if="form.open">
-      <h2>{{ form.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h2>
+    <div v-if="form.open" class="card">
+      <div class="header">
+        <h2>{{ form.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h2>
+      </div>
 
       <label>Spiel
         <select v-model="form.game_id" required>
@@ -57,9 +61,12 @@
       <UiInput v-model="form.qr_code" label="QR-Code (optional, wird automatisch generiert)" />
       <UiInput v-model="form.notes" label="Notizen" />
 
-      <p v-if="formError" role="alert">{{ formError }}</p>
-      <UiButton :loading="saving" @click="save">Speichern</UiButton>
-      <UiButton variant="secondary" @click="form.open = false">Abbrechen</UiButton>
+      <div v-if="formError" class="alert alert-error" role="alert">{{ formError }}</div>
+
+      <div class="row spacing-top">
+        <UiButton :loading="saving" @click="save">Speichern</UiButton>
+        <button class="button" @click="form.open = false">Abbrechen</button>
+      </div>
     </div>
   </main>
 </template>

@@ -1,0 +1,68 @@
+@use "properties";
+@use "parameters" as *;
+
+.chat-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: $spacing;
+  gap: 10px;
+}
+
+.message {
+  max-width: 75%;
+  padding: $spacing calc($spacing * 1.5);
+  border-radius: 8px;
+  position: relative;
+  line-height: calc($spacing * 1.2);
+  color: var(--primary-text);
+  box-shadow: $shadow;
+  word-wrap: break-word;
+}
+
+/* Metadata (time) */
+.message-meta {
+  display: block;
+  font-size: calc($spacing * 0.8);
+  color: var(--primary-text);
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* Incoming Message */
+.message-incoming {
+  align-self: flex-start;
+  background-color: var(--background);
+  border-top-left-radius: 0;
+}
+
+.message-incoming::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top-color: var(--secondary-background);
+  border-right: 0;
+  margin-top: -0px;
+}
+
+.message-outgoing {
+  align-self: flex-end;
+  background-color: var(--accent-color-lighten);
+  border-top-right-radius: 0;
+}
+
+.message-outgoing::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-top-color: var(--accent-color-lighten);
+  border-left: 0;
+}

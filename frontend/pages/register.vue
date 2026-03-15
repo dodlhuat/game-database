@@ -1,62 +1,64 @@
 <template>
-  <main>
-    <h1>Registrieren</h1>
+  <main class="content center" style="min-height: 80vh;">
+    <div class="card" style="width: 100%; max-width: 480px;">
+      <div class="header"><h1>Registrieren</h1></div>
 
-    <div v-if="success">
-      <p>{{ success }}</p>
-      <NuxtLink to="/login">Zum Login</NuxtLink>
+      <div v-if="success" class="alert alert-success">
+        <p>{{ success }}</p>
+        <NuxtLink to="/login">Zum Login</NuxtLink>
+      </div>
+
+      <form v-else @submit.prevent="submit">
+        <UiInput
+          v-model="form.name"
+          label="Name"
+          :error="errors.name"
+          required
+          autocomplete="name"
+        />
+        <UiInput
+          v-model="form.email"
+          type="email"
+          label="E-Mail"
+          :error="errors.email"
+          required
+          autocomplete="email"
+        />
+        <UiInput
+          v-model="form.password"
+          type="password"
+          label="Passwort"
+          :error="errors.password"
+          required
+          autocomplete="new-password"
+        />
+        <UiInput
+          v-model="form.password_confirmation"
+          type="password"
+          label="Passwort wiederholen"
+          :error="errors.password_confirmation"
+          required
+          autocomplete="new-password"
+        />
+
+        <label>
+          <input v-model="form.newsletter_opt_in" type="checkbox" class="styled-checkbox" />
+          Newsletter abonnieren
+        </label>
+
+        <label>
+          <input v-model="form.terms_accepted" type="checkbox" class="styled-checkbox" required />
+          Ich akzeptiere die <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink>
+        </label>
+        <p v-if="errors.terms_accepted" class="error-text" role="alert">{{ errors.terms_accepted }}</p>
+
+        <div v-if="serverError" class="alert alert-error" role="alert">{{ serverError }}</div>
+
+        <UiButton type="submit" :loading="loading">Registrieren</UiButton>
+      </form>
+
+      <p>Bereits Mitglied? <NuxtLink to="/login">Einloggen</NuxtLink></p>
     </div>
-
-    <form v-else @submit.prevent="submit">
-      <UiInput
-        v-model="form.name"
-        label="Name"
-        :error="errors.name"
-        required
-        autocomplete="name"
-      />
-      <UiInput
-        v-model="form.email"
-        type="email"
-        label="E-Mail"
-        :error="errors.email"
-        required
-        autocomplete="email"
-      />
-      <UiInput
-        v-model="form.password"
-        type="password"
-        label="Passwort"
-        :error="errors.password"
-        required
-        autocomplete="new-password"
-      />
-      <UiInput
-        v-model="form.password_confirmation"
-        type="password"
-        label="Passwort wiederholen"
-        :error="errors.password_confirmation"
-        required
-        autocomplete="new-password"
-      />
-
-      <label>
-        <input v-model="form.newsletter_opt_in" type="checkbox" />
-        Newsletter abonnieren
-      </label>
-
-      <label>
-        <input v-model="form.terms_accepted" type="checkbox" required />
-        Ich akzeptiere die <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink>
-      </label>
-      <p v-if="errors.terms_accepted" role="alert">{{ errors.terms_accepted }}</p>
-
-      <p v-if="serverError" role="alert">{{ serverError }}</p>
-
-      <UiButton type="submit" :loading="loading">Registrieren</UiButton>
-    </form>
-
-    <p>Bereits Mitglied? <NuxtLink to="/login">Einloggen</NuxtLink></p>
   </main>
 </template>
 
@@ -110,3 +112,10 @@ async function submit() {
   }
 }
 </script>
+
+<style scoped>
+.error-text {
+  color: var(--error);
+  font-size: 0.875rem;
+}
+</style>

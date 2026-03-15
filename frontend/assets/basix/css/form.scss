@@ -1,0 +1,115 @@
+@use "properties";
+@use "parameters" as *;
+
+textarea, select, .select .dropdown, input {
+  width: 100%;
+  border: 1px solid var(--divider);
+  border-radius: calc($border-radius / 2);
+  padding: calc($spacing / 2);
+  box-sizing: border-box;
+  background-color: var(--background);
+  min-height: $form-height;
+  font-size: $spacing;
+  color: var(--primary-text);
+}
+
+select {
+  padding: calc($border-radius / 2);
+}
+
+.select-group {
+  .dropdown {
+    position: relative;
+    background-color: var(--background);
+  }
+
+  .dropdown-selected {
+    border: 1px solid var(--divider);
+    padding: 0 calc($border-radius * 2);
+    border-radius: calc($border-radius / 2);
+    cursor: pointer;
+    background: var(--background);
+    height: $form-height;
+    line-height: $form-height;
+
+    &::after {
+      font-family: "Material Symbols Outlined 24pt", serif;
+      content: "\e5cf";
+      float: right;
+      color: var(--primary-text);
+    }
+  }
+
+  .dropdown-options {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    border: 1px solid var(--divider);
+    border-radius: calc($border-radius / 2);
+    display: none;
+    flex-direction: column;
+    z-index: 10;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: var(--background);
+  }
+
+  .dropdown-option {
+    padding: 10px;
+    cursor: pointer;
+  }
+
+  .dropdown-option:hover {
+    background: var(--divider);
+  }
+
+  .dropdown-option.selected {
+    background: var(--secondary-background);
+    color: var(--secondary-text);
+  }
+
+  .dropdown.open .dropdown-options {
+    display: flex;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .dropdown-options-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: #333;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-weight: bold;
+
+      &.hidden {
+        display: block;
+      }
+
+      .dropdown-options-icon {
+        position: absolute;
+        right: 45px;
+        cursor: pointer;
+      }
+    }
+
+    .dropdown-options {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: none;
+      border-radius: 0;
+      padding-top: 60px;
+      font-size: 1.2rem;
+    }
+  }
+}

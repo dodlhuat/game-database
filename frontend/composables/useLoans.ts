@@ -65,6 +65,9 @@ export function useLoans() {
   const removeReservation = (reservationId: number) =>
     api.delete(`/reservations/${reservationId}`)
 
+  const reportDamage = (loanId: number, description: string, photoUrl?: string) =>
+    api.post('/damage-reports', { loan_id: loanId, description, photo_url: photoUrl || undefined })
+
   return {
     fetchDashboard,
     fetchLoans,
@@ -75,5 +78,6 @@ export function useLoans() {
     removeFavorite,
     addReservation,
     removeReservation,
+    reportDamage,
   }
 }

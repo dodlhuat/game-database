@@ -1,47 +1,57 @@
 <template>
-  <main>
-    <div v-if="loading">Lädt...</div>
+  <main class="content">
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
     <div v-else-if="!game">
-      <p>Spiel nicht gefunden.</p>
-      <NuxtLink to="/games">Zurück zum Katalog</NuxtLink>
+      <div class="alert alert-default">
+        <p>Spiel nicht gefunden.</p>
+        <NuxtLink to="/games">Zurück zum Katalog</NuxtLink>
+      </div>
     </div>
 
     <div v-else>
       <NuxtLink to="/games">← Zurück</NuxtLink>
 
-      <img v-if="game.cover_image_url" :src="game.cover_image_url" :alt="game.title" />
+      <div class="row">
+        <div v-if="game.cover_image_url" class="column" style="max-width: 280px; flex: 0 0 auto;">
+          <img :src="game.cover_image_url" :alt="game.title" style="width: 100%; border-radius: 0.4rem;" />
+        </div>
 
-      <h1>{{ game.title }}</h1>
+        <div class="column">
+          <div class="card">
+            <div class="header">
+              <h1>{{ game.title }}</h1>
+              <UiBadge :variant="game.available_copies_count > 0 ? 'available' : 'loaned'">
+                {{ game.available_copies_count > 0
+                  ? `${game.available_copies_count} Kopie(n) verfügbar`
+                  : 'Aktuell ausgeliehen' }}
+              </UiBadge>
+            </div>
 
-      <UiBadge :variant="game.available_copies_count > 0 ? 'available' : 'loaned'">
-        {{ game.available_copies_count > 0
-          ? `${game.available_copies_count} Kopie(n) verfügbar`
-          : 'Aktuell ausgeliehen' }}
-      </UiBadge>
+            <p v-if="game.category">Kategorie: {{ game.category.name }}</p>
 
-      <p v-if="game.category">Kategorie: {{ game.category.name }}</p>
+            <ul v-if="hasMeta">
+              <li v-if="game.min_players">
+                Spieler: {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}
+              </li>
+              <li v-if="game.duration_min">Dauer: ca. {{ game.duration_min }} Min.</li>
+              <li v-if="game.difficulty">Schwierigkeit: {{ difficultyLabel(game.difficulty!) }}</li>
+              <li v-if="game.language">Sprache: {{ game.language }}</li>
+              <li v-if="game.year">Jahr: {{ game.year }}</li>
+            </ul>
 
-      <ul v-if="hasMeta">
-        <li v-if="game.min_players">
-          Spieler: {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}
-        </li>
-        <li v-if="game.duration_min">Dauer: ca. {{ game.duration_min }} Min.</li>
-        <li v-if="game.difficulty">Schwierigkeit: {{ difficultyLabel(game.difficulty!) }}</li>
-        <li v-if="game.language">Sprache: {{ game.language }}</li>
-        <li v-if="game.year">Jahr: {{ game.year }}</li>
-      </ul>
+            <div v-if="game.tags?.length" class="chips">
+              <span v-for="tag in game.tags" :key="tag.id" class="chip">{{ tag.name }}</span>
+            </div>
 
-      <div v-if="game.tags?.length">
-        <UiBadge v-for="tag in game.tags" :key="tag.id" variant="info">{{ tag.name }}</UiBadge>
+            <p v-if="game.description">{{ game.description }}</p>
+          </div>
+        </div>
       </div>
-
-      <p v-if="game.description">{{ game.description }}</p>
 
       <!-- Reviews -->
       <section v-if="game.reviews_count">
         <h2>Bewertungen ({{ game.reviews_count }})</h2>
-        <!-- Reviews werden in Phase 4 vollständig eingebunden -->
       </section>
     </div>
   </main>
@@ -89,7 +99,6 @@ onMounted(async () => {
   }
 })
 
-// SEO
 useHead(() => ({
   title: game.value ? `${game.value.title} — Spielekatalog` : 'Spiel nicht gefunden',
 }))

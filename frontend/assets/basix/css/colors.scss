@@ -1,0 +1,33 @@
+@use "properties";
+
+body {
+  background: var(--background);
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.warning-bg {
+  background: var(--warning);
+}
+
+.error {
+  color: var(--error);
+}
+
+.error-bg {
+  background: var(--error);
+}
+
+.success {
+  color: var(--success);
+}
+
+.success-bg {
+  background: var(--success);
+}
+
+.default-bg {
+  background: var(--divider);
+}

@@ -30,8 +30,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/backend
 
-# Berechtigungen für Laravel Storage
-RUN chown -R www-data:www-data /var/www
+# Entrypoint: erstellt Verzeichnisse in named volumes und setzt Permissions
+COPY docker/php/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 9000
-CMD ["php-fpm"]
+ENTRYPOINT ["/entrypoint.sh"]

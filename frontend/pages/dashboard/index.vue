@@ -1,94 +1,151 @@
 <template>
-  <main>
+  <main class="content">
     <h1>Mein Dashboard</h1>
     <p>Willkommen, {{ auth.user?.name }}</p>
 
-    <div v-if="loading">Lädt...</div>
+    <div v-if="loading" class="center"><div class="spinner"></div></div>
 
     <div v-else>
       <!-- Statistiken -->
-      <section>
-        <h2>Übersicht</h2>
-        <ul>
-          <li>Aktive Ausleihen: {{ data?.stats.active_loans_count }}</li>
-          <li>Überfällig: {{ data?.stats.overdue_count }}</li>
-          <li>Reservierungen: {{ data?.stats.reservations_count }}</li>
-          <li>Ausleihen gesamt: {{ data?.stats.total_loans }}</li>
-        </ul>
-      </section>
+      <div class="row">
+        <div class="card column">
+          <strong>Aktive Ausleihen</strong>
+          <p>{{ data?.stats.active_loans_count }}</p>
+        </div>
+        <div class="card column">
+          <strong>Überfällig</strong>
+          <p>{{ data?.stats.overdue_count }}</p>
+        </div>
+        <div class="card column">
+          <strong>Reservierungen</strong>
+          <p>{{ data?.stats.reservations_count }}</p>
+        </div>
+        <div class="card column">
+          <strong>Ausleihen gesamt</strong>
+          <p>{{ data?.stats.total_loans }}</p>
+        </div>
+      </div>
 
       <!-- Aktive Ausleihen -->
-      <section>
-        <h2>Aktive Ausleihen</h2>
+      <div class="card">
+        <div class="header"><h2>Aktive Ausleihen</h2></div>
         <p v-if="!activeLoans.length">Keine aktiven Ausleihen.</p>
-        <ul v-else>
-          <li v-for="loan in activeLoans" :key="loan.id">
-            <NuxtLink :to="`/games/${loan.game?.slug}`">{{ loan.game?.title }}</NuxtLink>
-            <UiBadge :variant="loanStatusVariant(loan)">{{ loanStatusLabel(loan) }}</UiBadge>
-            <span>Fällig: {{ formatDate(loan.due_date) }}</span>
-
-            <!-- Verlängerungsantrag -->
-            <template v-if="loan.status !== 'RETURNED'">
-              <template v-if="pendingExtension(loan)">
-                <UiBadge variant="pending">Verlängerung beantragt</UiBadge>
-              </template>
-              <template v-else>
-                <UiButton size="sm" variant="secondary" @click="openExtension(loan)">
-                  Verlängerung beantragen
-                </UiButton>
-              </template>
-            </template>
-
-            <UiButton size="sm" @click="openReturn(loan)">Zurückgeben</UiButton>
-          </li>
-        </ul>
-      </section>
+        <div v-else class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Spiel</th>
+                <th>Status</th>
+                <th>Fällig</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="loan in activeLoans" :key="loan.id">
+                <td><NuxtLink :to="`/games/${loan.game?.slug}`">{{ loan.game?.title }}</NuxtLink></td>
+                <td><UiBadge :variant="loanStatusVariant(loan)">{{ loanStatusLabel(loan) }}</UiBadge></td>
+                <td>{{ formatDate(loan.due_date) }}</td>
+                <td>
+                  <template v-if="loan.status !== 'RETURNED'">
+                    <UiBadge v-if="pendingExtension(loan)" variant="pending">Verlängerung beantragt</UiBadge>
+                    <button v-else class="button" @click="openExtension(loan)">Verlängerung beantragen</button>
+                  </template>
+                  <button class="button" @click="openReturn(loan)">Zurückgeben</button>
+                  <button class="button-error" @click="openDamage(loan)">Schaden melden</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <!-- Reservierungen -->
-      <section>
-        <h2>Meine Reservierungen</h2>
+      <div class="card">
+        <div class="header"><h2>Meine Reservierungen</h2></div>
         <p v-if="!reservations.length">Keine aktiven Reservierungen.</p>
-        <ul v-else>
-          <li v-for="res in reservations" :key="res.id">
-            {{ res.game?.title }} — Position {{ res.position }}
-            <UiButton size="sm" variant="danger" @click="cancelReservation(res.id)">Entfernen</UiButton>
-          </li>
-        </ul>
-      </section>
+        <div v-else class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Spiel</th>
+                <th>Position</th>
+                <th>Aktionen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="res in reservations" :key="res.id">
+                <td>{{ res.game?.title }}</td>
+                <td>{{ res.position }}</td>
+                <td><button class="button-error" @click="cancelReservation(res.id)">Entfernen</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <!-- Ausleihhistorie -->
-      <section>
-        <h2>Letzte Ausleihen</h2>
+      <div class="card">
+        <div class="header"><h2>Letzte Ausleihen</h2></div>
         <p v-if="!loanHistory.length">Noch keine zurückgegebenen Ausleihen.</p>
-        <ul v-else>
-          <li v-for="loan in loanHistory" :key="loan.id">
-            {{ loan.game?.title }} — {{ formatDate(loan.returned_at!) }}
-          </li>
-        </ul>
-      </section>
+        <div v-else class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Spiel</th>
+                <th>Zurückgegeben</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="loan in loanHistory" :key="loan.id">
+                <td>{{ loan.game?.title }}</td>
+                <td>{{ formatDate(loan.returned_at!) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- Rückgabe-Dialog -->
-    <div v-if="returnLoan">
-      <h3>Spiel zurückgeben: {{ returnLoan.game?.title }}</h3>
+    <div v-if="returnLoan" class="card">
+      <div class="header"><h3>Spiel zurückgeben: {{ returnLoan.game?.title }}</h3></div>
+      <label>Zustand</label>
       <select v-model="returnCondition">
         <option value="GOOD">Gut</option>
         <option value="WORN">Abgenutzt</option>
         <option value="DAMAGED">Beschädigt</option>
       </select>
-      <UiButton :loading="returning" @click="submitReturn">Bestätigen</UiButton>
-      <UiButton variant="secondary" @click="returnLoan = null">Abbrechen</UiButton>
+      <div class="row spacing-top">
+        <UiButton :loading="returning" @click="submitReturn">Bestätigen</UiButton>
+        <button class="button" @click="returnLoan = null">Abbrechen</button>
+      </div>
+    </div>
+
+    <!-- Schadensmeldungs-Dialog -->
+    <div v-if="damageLoan" class="card">
+      <div class="header"><h3>Schaden melden: {{ damageLoan.game?.title }}</h3></div>
+      <UiInput v-model="damageDescription" label="Beschreibung" />
+      <UiInput v-model="damagePhotoUrl" label="Foto-URL (optional)" />
+      <div class="row spacing-top">
+        <UiButton :loading="reporting" @click="submitDamage">Melden</UiButton>
+        <button class="button" @click="damageLoan = null">Abbrechen</button>
+      </div>
     </div>
 
     <!-- Verlängerungs-Dialog -->
-    <div v-if="extensionLoan">
-      <h3>Verlängerung beantragen: {{ extensionLoan.game?.title }}</h3>
+    <div v-if="extensionLoan" class="card">
+      <div class="header"><h3>Verlängerung beantragen: {{ extensionLoan.game?.title }}</h3></div>
       <UiInput v-model="extensionDate" type="date" label="Neues Rückgabedatum" />
-      <UiButton :loading="extending" @click="submitExtension">Beantragen</UiButton>
-      <UiButton variant="secondary" @click="extensionLoan = null">Abbrechen</UiButton>
+      <div class="row spacing-top">
+        <UiButton :loading="extending" @click="submitExtension">Beantragen</UiButton>
+        <button class="button" @click="extensionLoan = null">Abbrechen</button>
+      </div>
     </div>
 
-    <UiButton variant="secondary" @click="handleLogout">Abmelden</UiButton>
+    <div class="row spacing-top">
+      <NuxtLink to="/account">Konto-Einstellungen</NuxtLink>
+      <button class="button" @click="handleLogout">Abmelden</button>
+    </div>
   </main>
 </template>
 
@@ -100,7 +157,7 @@ definePageMeta({ middleware: ['auth'] })
 
 const auth = useAuthStore()
 const { logout } = useAuth()
-const { fetchDashboard, returnLoan: doReturn, requestExtension, removeReservation } = useLoans()
+const { fetchDashboard, returnLoan: doReturn, requestExtension, removeReservation, reportDamage } = useLoans()
 
 const loading = ref(true)
 const data = ref<DashboardData | null>(null)
@@ -112,6 +169,11 @@ const returning = ref(false)
 const extensionLoan = ref<Loan | null>(null)
 const extensionDate = ref('')
 const extending = ref(false)
+
+const damageLoan = ref<Loan | null>(null)
+const damageDescription = ref('')
+const damagePhotoUrl = ref('')
+const reporting = ref(false)
 
 const activeLoans = computed(() => data.value?.active_loans.data ?? [])
 const loanHistory = computed(() => data.value?.loan_history.data ?? [])
@@ -156,6 +218,23 @@ async function submitExtension() {
     extensionLoan.value = null
   } finally {
     extending.value = false
+  }
+}
+
+function openDamage(loan: Loan) {
+  damageLoan.value = loan
+  damageDescription.value = ''
+  damagePhotoUrl.value = ''
+}
+
+async function submitDamage() {
+  if (!damageLoan.value || !damageDescription.value) return
+  reporting.value = true
+  try {
+    await reportDamage(damageLoan.value.id, damageDescription.value, damagePhotoUrl.value || undefined)
+    damageLoan.value = null
+  } finally {
+    reporting.value = false
   }
 }
 

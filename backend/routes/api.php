@@ -23,6 +23,7 @@ Route::prefix('auth')->group(function () {
 Route::get('/games', [\App\Http\Controllers\GameController::class, 'index']);
 Route::get('/games/{game:slug}', [\App\Http\Controllers\GameController::class, 'show']);
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
+Route::get('/terms', [\App\Http\Controllers\TermsController::class, 'show']);
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -59,6 +60,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index']);
+
+    // Konto
+    Route::patch('/account', [\App\Http\Controllers\AccountController::class, 'update']);
 });
 
 // ----------------------------------------------------------------
@@ -91,6 +95,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Newsletter
     Route::get('/newsletters', [\App\Http\Controllers\Admin\NewsletterController::class, 'index']);
     Route::post('/newsletters', [\App\Http\Controllers\Admin\NewsletterController::class, 'store']);
+
+    // Schadensmeldungen
+    Route::get('/damage-reports', [\App\Http\Controllers\Admin\DamageReportController::class, 'index']);
 
     // Dashboard-Übersicht
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);

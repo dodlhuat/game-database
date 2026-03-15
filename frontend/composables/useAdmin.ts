@@ -66,6 +66,17 @@ export function useAdmin() {
   const rejectExtension = (id: number, adminNote?: string) =>
     api.patch(`/admin/extensions/${id}/reject`, { admin_note: adminNote })
 
+  // Newsletters
+  const fetchNewsletters = () =>
+    api.get<{ data: unknown[] }>('/admin/newsletters')
+
+  const sendNewsletter = (subject: string, body: string) =>
+    api.post('/admin/newsletters', { subject, body })
+
+  // Damage Reports
+  const fetchDamageReports = (params?: Record<string, string | number>) =>
+    api.get<{ data: unknown[] }>('/admin/damage-reports', { params })
+
   return {
     fetchStats,
     fetchAdminGames, createGame, updateGame, deleteGame,
@@ -73,5 +84,7 @@ export function useAdmin() {
     fetchCopies, createCopy, updateCopy, deleteCopy,
     fetchAdminLoans, markOverdue,
     fetchExtensions, approveExtension, rejectExtension,
+    fetchNewsletters, sendNewsletter,
+    fetchDamageReports,
   }
 }

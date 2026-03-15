@@ -1,31 +1,33 @@
 <template>
-  <main>
-    <h1>Anmelden</h1>
+  <main class="content center" style="min-height: 80vh;">
+    <div class="card" style="width: 100%; max-width: 420px;">
+      <div class="header"><h1>Anmelden</h1></div>
 
-    <form @submit.prevent="submit">
-      <UiInput
-        v-model="form.email"
-        type="email"
-        label="E-Mail"
-        :error="errors.email"
-        required
-        autocomplete="email"
-      />
-      <UiInput
-        v-model="form.password"
-        type="password"
-        label="Passwort"
-        :error="errors.password"
-        required
-        autocomplete="current-password"
-      />
+      <form @submit.prevent="submit">
+        <UiInput
+          v-model="form.email"
+          type="email"
+          label="E-Mail"
+          :error="errors.email"
+          required
+          autocomplete="email"
+        />
+        <UiInput
+          v-model="form.password"
+          type="password"
+          label="Passwort"
+          :error="errors.password"
+          required
+          autocomplete="current-password"
+        />
 
-      <p v-if="statusMessage" role="alert">{{ statusMessage }}</p>
+        <div v-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
 
-      <UiButton type="submit" :loading="loading">Einloggen</UiButton>
-    </form>
+        <UiButton type="submit" :loading="loading">Einloggen</UiButton>
+      </form>
 
-    <p>Noch kein Konto? <NuxtLink to="/register">Jetzt registrieren</NuxtLink></p>
+      <p>Noch kein Konto? <NuxtLink to="/register">Jetzt registrieren</NuxtLink></p>
+    </div>
   </main>
 </template>
 
