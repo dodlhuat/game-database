@@ -23,6 +23,16 @@ export function useAdmin() {
   const deleteGame = (id: number) =>
     api.delete(`/admin/games/${id}`)
 
+  // Tags
+  const fetchAdminTags = () =>
+    api.get<{ data: { id: number; name: string; slug: string }[] }>('/admin/tags')
+
+  const createTag = (name: string) =>
+    api.post<{ data: { id: number; name: string; slug: string } }>('/admin/tags', { name })
+
+  const deleteTag = (id: number) =>
+    api.delete(`/admin/tags/${id}`)
+
   // Categories
   const fetchAdminCategories = () =>
     api.get<{ data: unknown[] }>('/admin/categories')
@@ -80,6 +90,7 @@ export function useAdmin() {
   return {
     fetchStats,
     fetchAdminGames, createGame, updateGame, deleteGame,
+    fetchAdminTags, createTag, deleteTag,
     fetchAdminCategories, createCategory, updateCategory, deleteCategory,
     fetchCopies, createCopy, updateCopy, deleteCopy,
     fetchAdminLoans, markOverdue,

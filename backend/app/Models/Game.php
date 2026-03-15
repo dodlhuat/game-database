@@ -13,10 +13,13 @@ class Game extends Model
         'title',
         'slug',
         'description',
+        'short_description',
         'category_id',
         'min_players',
         'max_players',
+        'min_age',
         'duration_min',
+        'duration_max',
         'difficulty',
         'language',
         'year',
@@ -30,7 +33,9 @@ class Game extends Model
             'is_active' => 'boolean',
             'min_players' => 'integer',
             'max_players' => 'integer',
+            'min_age' => 'integer',
             'duration_min' => 'integer',
+            'duration_max' => 'integer',
             'year' => 'integer',
         ];
     }

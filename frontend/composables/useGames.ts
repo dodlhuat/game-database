@@ -3,11 +3,14 @@ export interface Game {
   title: string
   slug: string
   description: string | null
+  short_description: string | null
   category: { id: number; name: string; slug: string } | null
   tags: { id: number; name: string; slug: string }[]
   min_players: number | null
   max_players: number | null
+  min_age: number | null
   duration_min: number | null
+  duration_max: number | null
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT' | null
   language: string | null
   year: number | null

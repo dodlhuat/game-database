@@ -79,6 +79,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Spieleverwaltung
     Route::apiResource('games', \App\Http\Controllers\Admin\GameController::class);
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
+    Route::apiResource('tags', \App\Http\Controllers\Admin\TagController::class)->only(['index', 'store', 'destroy']);
 
     // Kopienverwaltung
     Route::apiResource('copies', \App\Http\Controllers\Admin\CopyController::class);

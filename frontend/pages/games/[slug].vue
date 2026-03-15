@@ -50,6 +50,10 @@
 
           <div class="detail__info">
 
+            <p v-if="game.short_description" class="detail__short-desc">
+              {{ game.short_description }}
+            </p>
+
             <div v-if="hasMeta" class="detail__stats">
               <div v-if="game.min_players" class="detail__stat">
                 <span class="detail__stat-label">Spieler</span>
@@ -57,9 +61,15 @@
                   {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}
                 </span>
               </div>
+              <div v-if="game.min_age" class="detail__stat">
+                <span class="detail__stat-label">Alter</span>
+                <span class="detail__stat-value">ab {{ game.min_age }} J.</span>
+              </div>
               <div v-if="game.duration_min" class="detail__stat">
-                <span class="detail__stat-label">Dauer</span>
-                <span class="detail__stat-value">{{ game.duration_min }} Min.</span>
+                <span class="detail__stat-label">Spielzeit</span>
+                <span class="detail__stat-value">
+                  {{ game.duration_min }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.
+                </span>
               </div>
               <div v-if="game.difficulty" class="detail__stat">
                 <span class="detail__stat-label">Schwierigkeit</span>
@@ -128,8 +138,9 @@ function difficultyLabel(d: string) {
 
 const hasMeta = computed(() =>
   game.value && (
-    game.value.min_players || game.value.duration_min ||
-    game.value.difficulty || game.value.language || game.value.year
+    game.value.min_players || game.value.min_age ||
+    game.value.duration_min || game.value.difficulty ||
+    game.value.language || game.value.year
   )
 )
 
@@ -317,7 +328,15 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     display: block;
   }
 
-  &__info { display: flex; flex-direction: column; gap: 2rem; }
+  &__info { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  &__short-desc {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--primary-text);
+    font-weight: 500;
+    padding-bottom: 0;
+  }
 
   // Stats grid
   &__stats {

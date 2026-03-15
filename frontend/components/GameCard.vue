@@ -22,11 +22,16 @@
       <p v-if="game.category" class="game-card__cat">{{ game.category.name }}</p>
       <h3 class="game-card__title">{{ game.title }}</h3>
 
-      <div v-if="game.min_players || game.duration_min || game.difficulty" class="game-card__meta">
+      <p v-if="game.short_description" class="game-card__short-desc">{{ game.short_description }}</p>
+
+      <div v-if="game.min_players || game.min_age || game.duration_min || game.difficulty" class="game-card__meta">
         <span v-if="game.min_players" class="game-card__chip">
           {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }} Sp.
         </span>
-        <span v-if="game.duration_min" class="game-card__chip">{{ game.duration_min }} Min.</span>
+        <span v-if="game.min_age" class="game-card__chip">ab {{ game.min_age }} J.</span>
+        <span v-if="game.duration_min" class="game-card__chip">
+          {{ game.duration_min }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.
+        </span>
         <span v-if="game.difficulty" class="game-card__chip">{{ difficultyLabel(game.difficulty) }}</span>
       </div>
     </div>
@@ -150,6 +155,17 @@ $amber-30:     rgba(212, 146, 30, 0.30);
     color: var(--primary-text);
     line-height: 1.3;
     margin: 0;
+  }
+
+  &__short-desc {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--secondary-text);
+    padding-bottom: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &__meta {
