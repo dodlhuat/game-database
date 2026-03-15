@@ -26,7 +26,8 @@
       "Bash(sleep:*)",
       "Bash(cd:*)",
       "Bash(curl:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(grep:*)"
     ]
   }
 }
