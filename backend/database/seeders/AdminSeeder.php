@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Game;
+use App\Models\Package;
 use App\Models\Tag;
 use App\Models\TermsVersion;
 use App\Models\User;
@@ -44,8 +45,10 @@ class AdminSeeder extends Seeder
             ['name' => 'Familienspiele',   'description' => 'Spaß für Jung und Alt'],
             ['name' => 'Kartenspiele',     'description' => 'Kompakte Spiele mit Karten'],
             ['name' => 'Kooperationsspiele', 'description' => 'Gemeinsam gewinnen oder verlieren'],
-            ['name' => 'Partyspiele',      'description' => 'Ideal für große Runden'],
-            ['name' => 'Lernspiele',       'description' => 'Spielend lernen'],
+            ['name' => 'Partyspiele',        'description' => 'Ideal für große Runden'],
+            ['name' => 'Lernspiele',         'description' => 'Spielend lernen'],
+            ['name' => 'Trinkspiele',        'description' => 'Lustige Spiele mit Getränken'],
+            ['name' => 'Großgruppenspiele',  'description' => 'Spiele für 8 und mehr Personen'],
         ];
 
         foreach ($categories as $cat) {
@@ -130,5 +133,36 @@ class AdminSeeder extends Seeder
             $game = Game::firstOrCreate(['slug' => $gameData['slug']], $gameData);
             $game->tags()->syncWithoutDetaching($tagIds);
         }
+
+        // Pakete
+        $grossgruppe = Category::where('name', 'Großgruppenspiele')->first();
+        $trinkspiele = Category::where('name', 'Trinkspiele')->first();
+
+        Package::firstOrCreate(['slug' => 'gruppenspiele-paket'], [
+            'name'        => 'Gruppenspiele',
+            'description' => 'Ein Paket mit 8 Spielen für die große Gruppe (8+ Personen) aus dem Bereich Großgruppenspiele.',
+            'type'        => 'CATEGORY',
+            'category_id' => $grossgruppe?->id,
+            'min_games'   => 8,
+            'max_games'   => 8,
+        ]);
+
+        Package::firstOrCreate(['slug' => 'trinkspiele-paket'], [
+            'name'        => 'Trinkspiele',
+            'description' => 'Ein Paket mit 4–6 Trinkspielen aus der Kategorie.',
+            'type'        => 'CATEGORY',
+            'category_id' => $trinkspiele?->id,
+            'min_games'   => 4,
+            'max_games'   => 6,
+        ]);
+
+        Package::firstOrCreate(['slug' => 'ueberraschungspaket-des-monats'], [
+            'name'        => 'Überraschungspaket des Monats',
+            'description' => '3 ausgewählte Spieleempfehlungen – jeden Monat neu zusammengestellt.',
+            'type'        => 'CURATED',
+            'category_id' => null,
+            'min_games'   => 3,
+            'max_games'   => 3,
+        ]);
     }
 }

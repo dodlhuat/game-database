@@ -114,6 +114,11 @@
               <span class="nav-card__label">Newsletter</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
+            <NuxtLink to="/admin/packages" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-gift-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">Pakete</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
             <NuxtLink to="/admin/damage-reports" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-alert-triangle-outline" aria-hidden="true" /></span>
               <span class="nav-card__label">Schadensmeldungen</span>

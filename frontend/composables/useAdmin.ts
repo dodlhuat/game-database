@@ -87,6 +87,19 @@ export function useAdmin() {
   const fetchDamageReports = (params?: Record<string, string | number>) =>
     api.get<{ data: unknown[] }>('/admin/damage-reports', { params })
 
+  // Packages
+  const fetchAdminPackages = () =>
+    api.get<{ data: unknown[] }>('/admin/packages')
+
+  const createPackage = (data: unknown) =>
+    api.post('/admin/packages', data)
+
+  const updatePackage = (id: number, data: unknown) =>
+    api.put(`/admin/packages/${id}`, data)
+
+  const deletePackage = (id: number) =>
+    api.delete(`/admin/packages/${id}`)
+
   return {
     fetchStats,
     fetchAdminGames, createGame, updateGame, deleteGame,
@@ -97,5 +110,6 @@ export function useAdmin() {
     fetchExtensions, approveExtension, rejectExtension,
     fetchNewsletters, sendNewsletter,
     fetchDamageReports,
+    fetchAdminPackages, createPackage, updatePackage, deletePackage,
   }
 }

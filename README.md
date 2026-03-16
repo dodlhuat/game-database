@@ -6,34 +6,46 @@ Eine Plattform zur Verwaltung und Ausleihe von Brettspielen. Mitglieder können 
 
 | Bereich | Technologie |
 |---|---|
-| Backend | Laravel 11 (PHP 8.3) |
+| Backend | Laravel 12 (PHP 8.2+) |
 | Auth | Laravel Sanctum (Token-basiert) |
-| Datenbank | PostgreSQL |
-| Mail | Laravel Mail + Resend (SMTP) |
-| Bilder | Cloudinary |
-| Cron | Laravel Task Scheduling |
-| Frontend | Nuxt.js 3 (Vue 3 + TypeScript) |
-| Styling | Eigene SCSS Komponenten-Library |
-| State | Pinia |
-| Admin | Custom Nuxt.js Frontend (/admin) |
+| Datenbank | PostgreSQL 16 |
+| Bilder | Cloudinary + Intervention Image |
+| Frontend | Nuxt 4 (Vue 3.5 + TypeScript) |
+| Styling | Basix SCSS Komponenten-Library |
+| State | Pinia 3 |
+| Admin | Custom Nuxt Frontend (/admin) |
+| Infrastruktur | Docker Compose (Nginx, PHP-FPM, PostgreSQL, Node) |
 
 ## Projektstruktur (Monorepo)
 
 ```
-game-database/
-├── backend/     # Laravel 11 API
-└── frontend/    # Nuxt.js 3 SPA
+gdata/
+├── backend/          # Laravel 12 API
+├── frontend/         # Nuxt 4 SPA
+├── docker/           # Dockerfiles & Nginx-Konfiguration
+└── docker-compose.yml
 ```
 
 ## Setup
 
-### Voraussetzungen
-- PHP 8.3+
+### Mit Docker (empfohlen)
+
+```bash
+docker compose up
+```
+
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
+
+### Ohne Docker
+
+#### Voraussetzungen
+- PHP 8.2+
 - Composer
 - Node.js 20+
 - PostgreSQL
 
-### Backend
+#### Backend
 
 ```bash
 cd backend
@@ -44,7 +56,7 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -59,11 +71,12 @@ Siehe `backend/.env.example` und `frontend/.env.example` für alle benötigten V
 
 ## Features
 
-- Spielekatalog mit Kategorien, Tags, Schwierigkeitsgrad
+- Spielekatalog mit Kategorien (inkl. Trinkspiele, Großgruppenspiele), Tags, Schwierigkeitsgrad
+- Spielepakete (kategorie-basiert und kuratiert) mit öffentlicher Übersicht und Admin-Verwaltung
 - Ausleihsystem mit Verlängerungs-Workflow
 - Reservierungswarteschlange
 - Bewertungen & Favoriten
 - Schadensmeldungen
 - Newsletter-Versand
-- Admin-Panel (Mitglieder-Freischaltung, Spielverwaltung)
+- Admin-Panel (Mitglieder-Freischaltung, Spiele-, Paket- und Kopienverwaltung)
 - DSGVO-konformes Registrierungsformular

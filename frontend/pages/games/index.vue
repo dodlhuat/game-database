@@ -105,6 +105,7 @@
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
           <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
+          <NuxtLink to="/packages" class="l-footer__link">Pakete</NuxtLink>
           <NuxtLink to="/terms" class="l-footer__link">Nutzungsbedingungen</NuxtLink>
           <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
           <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>

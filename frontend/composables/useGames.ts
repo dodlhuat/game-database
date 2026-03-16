@@ -32,6 +32,20 @@ export interface GameFilters {
   page?: number
 }
 
+export interface Package {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  type: 'CATEGORY' | 'CURATED'
+  category: { id: number; name: string; slug: string } | null
+  min_games: number
+  max_games: number
+  is_active: boolean
+  games?: Game[]
+  games_count?: number
+}
+
 export interface PaginatedGames {
   data: Game[]
   meta: {
@@ -61,5 +75,13 @@ export function useGames() {
     return api.get<{ data: { id: number; name: string; slug: string; games_count: number }[] }>('/categories')
   }
 
-  return { fetchGames, fetchGame, fetchCategories }
+  function fetchPackages() {
+    return api.get<{ data: Package[] }>('/packages')
+  }
+
+  function fetchPackage(slug: string) {
+    return api.get<{ data: Package }>(`/packages/${slug}`)
+  }
+
+  return { fetchGames, fetchGame, fetchCategories, fetchPackages, fetchPackage }
 }

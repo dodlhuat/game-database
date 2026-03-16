@@ -15,6 +15,7 @@
 
     <ul>
       <li><NuxtLink to="/games">Spiele</NuxtLink></li>
+      <li><NuxtLink to="/packages">Pakete</NuxtLink></li>
       <li v-show="auth.isLoggedIn"><NuxtLink to="/dashboard">Mein Konto</NuxtLink></li>
       <li v-show="auth.isLoggedIn && auth.isAdmin">
         <NuxtLink to="/admin" class="flyout-admin-link">Admin-Bereich</NuxtLink>

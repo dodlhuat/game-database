@@ -23,6 +23,8 @@ Route::prefix('auth')->group(function () {
 Route::get('/games', [\App\Http\Controllers\GameController::class, 'index']);
 Route::get('/games/{game:slug}', [\App\Http\Controllers\GameController::class, 'show']);
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
+Route::get('/packages', [\App\Http\Controllers\PackageController::class, 'index']);
+Route::get('/packages/{package:slug}', [\App\Http\Controllers\PackageController::class, 'show']);
 Route::get('/terms', [\App\Http\Controllers\TermsController::class, 'show']);
 
 // ----------------------------------------------------------------
@@ -99,6 +101,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Schadensmeldungen
     Route::get('/damage-reports', [\App\Http\Controllers\Admin\DamageReportController::class, 'index']);
+
+    // Paketverwaltung
+    Route::apiResource('packages', \App\Http\Controllers\Admin\PackageController::class);
 
     // Dashboard-Übersicht
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);
