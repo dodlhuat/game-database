@@ -56,6 +56,11 @@ php artisan migrate --seed
 php artisan serve
 ```
 
+##### Im Container ausführen
+```bash
+docker-compose exec backend php artisan migrate
+```
+
 #### Frontend
 
 ```bash

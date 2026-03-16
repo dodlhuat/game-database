@@ -113,7 +113,7 @@
               <span v-for="tag in game.tags" :key="tag.id" class="detail__tag">{{ tag.name }}</span>
             </div>
 
-            <p v-if="game.description" class="detail__desc">{{ game.description }}</p>
+            <div v-if="game.description" class="detail__desc prose" v-html="game.description" />
 
           </div>
         </div>
@@ -570,6 +570,43 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     line-height: 1.75;
     color: var(--secondary-text);
     padding-bottom: 0;
+  }
+}
+
+// ─── Prose (v-html rich text) ─────────────────────────────────────
+.prose {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--secondary-text);
+
+  :deep(h2) { font-size: 1.25rem; font-weight: 700; color: var(--primary-text); margin: 1.25rem 0 0.5rem; letter-spacing: -0.02em; }
+  :deep(h3) { font-size: 1.05rem; font-weight: 700; color: var(--primary-text); margin: 1rem 0 0.4rem; }
+  :deep(p)  { margin-bottom: 0.75rem; }
+  :deep(p:last-child) { margin-bottom: 0; }
+
+  :deep(ul), :deep(ol) { margin-left: 1.5rem; margin-bottom: 0.75rem; }
+  :deep(ul) { list-style: disc; }
+  :deep(ol) { list-style: decimal; }
+  :deep(li) { margin-bottom: 0.2rem; line-height: 1.65; }
+
+  :deep(strong), :deep(b) { font-weight: 700; color: var(--primary-text); }
+  :deep(em), :deep(i)     { font-style: italic; }
+  :deep(u)                { text-underline-offset: 2px; }
+  :deep(s)                { opacity: 0.6; }
+
+  :deep(a) {
+    color: $amber;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    &:hover { opacity: 0.8; }
+  }
+
+  :deep(blockquote) {
+    border-left: 3px solid $amber-25;
+    padding-left: 1rem;
+    margin: 0.75rem 0;
+    color: var(--secondary-text);
+    font-style: italic;
   }
 }
 

@@ -39,10 +39,8 @@ export interface Package {
   description: string | null
   type: 'CATEGORY' | 'CURATED'
   category: { id: number; name: string; slug: string } | null
-  min_games: number
-  max_games: number
   is_active: boolean
-  games?: Game[]
+  games?: { id: number; title: string; slug: string }[]
   games_count?: number
 }
 

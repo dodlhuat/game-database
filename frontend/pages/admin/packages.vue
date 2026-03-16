@@ -17,10 +17,10 @@
           <span class="page-hero__eyebrow">Administration</span>
         </nav>
         <div class="page-hero__row">
-          <h1 class="page-hero__title">Spiele verwalten</h1>
+          <h1 class="page-hero__title">Pakete verwalten</h1>
           <button class="hero-btn" @click="openCreate">
             <span class="icon icon-plus-outline" aria-hidden="true" />
-            Spiel hinzufügen
+            Paket hinzufügen
           </button>
         </div>
       </div>
@@ -36,40 +36,46 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Spiele</h2>
-            <span class="dash-section__count">{{ games.length }}</span>
+            <h2 class="dash-section__title">Alle Pakete</h2>
+            <span class="dash-section__count">{{ packages.length }}</span>
           </header>
 
-          <div v-if="!games.length" class="dash-empty">
-            <span class="icon icon-book-open-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Spiele vorhanden.</p>
+          <div v-if="!packages.length" class="dash-empty">
+            <span class="icon icon-gift-outline dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">Noch keine Pakete vorhanden.</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Titel</th>
+                  <th>Name</th>
+                  <th>Typ</th>
                   <th>Kategorie</th>
-                  <th>Kopien</th>
+                  <th>Spiele</th>
                   <th>Status</th>
                   <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="game in games" :key="game.id">
-                  <td class="dash-table__primary">{{ game.title }}</td>
-                  <td>{{ game.category?.name ?? '—' }}</td>
-                  <td>{{ game.copies_count }}</td>
+                <tr v-for="pkg in packages" :key="pkg.id">
+                  <td class="dash-table__primary">{{ pkg.name }}</td>
                   <td>
-                    <span class="status-badge" :class="game.is_active ? 'status-badge--active' : 'status-badge--muted'">
-                      {{ game.is_active ? 'Aktiv' : 'Inaktiv' }}
+                    <span class="type-badge" :class="pkg.type === 'CURATED' ? 'type-badge--curated' : 'type-badge--category'">
+                      {{ pkg.type === 'CURATED' ? 'Kuratiert' : 'Kategorie' }}
+                    </span>
+                  </td>
+                  <td>{{ pkg.category?.name ?? '—' }}</td>
+                  <td>{{ pkg.games_count ?? 0 }}</td>
+                  <td>
+                    <span class="status-badge" :class="pkg.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                      {{ pkg.is_active ? 'Aktiv' : 'Inaktiv' }}
                     </span>
                   </td>
                   <td>
                     <div class="action-row">
-                      <button class="action-btn" @click="openEdit(game)">Bearbeiten</button>
-                      <button class="action-btn action-btn--danger" @click="remove(game.id)">Löschen</button>
+                      <button class="action-btn" @click="openEdit(pkg)">Bearbeiten</button>
+                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">Löschen</button>
                     </div>
                   </td>
                 </tr>
@@ -86,7 +92,7 @@
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
         <div class="modal modal--wide">
           <div class="modal__header">
-            <h3 class="modal__title">{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h3>
+            <h3 class="modal__title">{{ form.id ? 'Paket bearbeiten' : 'Paket hinzufügen' }}</h3>
             <button class="modal__close" aria-label="Schließen" @click="closeForm">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
@@ -94,15 +100,19 @@
 
           <div class="modal__body">
             <div class="form-grid">
-              <div class="form-grid__full"><UiInput v-model="form.title" label="Titel" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.short_description" label="Kurzbeschreibung (max. 500 Zeichen)" /></div>
-              <div class="form-grid__full">
-                <label class="form-label">Beschreibung (lang)</label>
-                <UiRichEditor v-model="form.description" />
+              <div class="form-grid__full"><UiInput v-model="form.name" label="Name" required /></div>
+              <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" /></div>
+              <div class="form-grid__full"><UiInput v-model="form.description" label="Beschreibung" /></div>
+
+              <div>
+                <label class="form-label">Typ</label>
+                <select v-model="form.type" class="form-select">
+                  <option value="CURATED">Kuratiert</option>
+                  <option value="CATEGORY">Kategorie</option>
+                </select>
               </div>
 
-              <div class="form-grid__full">
+              <div>
                 <label class="form-label">Kategorie</label>
                 <select v-model="form.category_id" class="form-select">
                   <option :value="null">Keine</option>
@@ -110,63 +120,38 @@
                 </select>
               </div>
 
-              <div><UiInput v-model="form.min_players" label="Min. Spieler" type="number" /></div>
-              <div><UiInput v-model="form.max_players" label="Max. Spieler" type="number" /></div>
-              <div><UiInput v-model="form.min_age" label="Ab Alter" type="number" /></div>
-
-              <div><UiInput v-model="form.duration_min" label="Spielzeit min. (Min.)" type="number" /></div>
-              <div><UiInput v-model="form.duration_max" label="Spielzeit max. (Min.)" type="number" /></div>
-              <div><UiInput v-model="form.year" label="Erscheinungsjahr" type="number" /></div>
-
-              <div>
-                <label class="form-label">Schwierigkeit</label>
-                <select v-model="form.difficulty" class="form-select">
-                  <option value="">Keine</option>
-                  <option value="EASY">Leicht</option>
-                  <option value="MEDIUM">Mittel</option>
-                  <option value="HARD">Schwer</option>
-                  <option value="EXPERT">Experte</option>
-                </select>
-              </div>
-
-              <div><UiInput v-model="form.language" label="Sprache" /></div>
-
+              <!-- Spielauswahl -->
               <div class="form-grid__full">
-                <label class="form-label">Tags</label>
-                <div class="tag-picker">
+                <label class="form-label">
+                  Spiele
+                  <span v-if="form.game_ids.length" class="form-label__count">{{ form.game_ids.length }} ausgewählt</span>
+                </label>
+                <div class="game-search">
+                  <input
+                    v-model="gameSearch"
+                    type="text"
+                    class="game-search__input"
+                    placeholder="Spiele suchen…"
+                  />
+                </div>
+                <div class="game-picker">
                   <label
-                    v-for="tag in allTags"
-                    :key="tag.id"
-                    class="tag-chip"
-                    :class="{ 'tag-chip--selected': form.tag_ids.includes(tag.id) }"
+                    v-for="game in filteredGames"
+                    :key="game.id"
+                    class="game-chip"
+                    :class="{ 'game-chip--selected': form.game_ids.includes(game.id) }"
                   >
-                    <input type="checkbox" :value="tag.id" v-model="form.tag_ids" class="tag-chip__input" />
-                    {{ tag.name }}
+                    <input type="checkbox" :value="game.id" v-model="form.game_ids" class="game-chip__input" />
+                    {{ game.title }}
                   </label>
+                  <p v-if="!filteredGames.length" class="game-picker__empty">Keine Spiele gefunden.</p>
                 </div>
-                <div class="tag-add">
-                  <UiInput v-model="newTagName" placeholder="Neuer Tag…" style="flex:1" />
-                  <button class="action-btn" :disabled="!newTagName.trim()" @click="addTag">Hinzufügen</button>
-                </div>
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-label">Coverbild</label>
-                <div v-if="form.existingCoverUrl && !form.coverFile" class="cover-preview">
-                  <img :src="form.existingCoverUrl" alt="Aktuelles Coverbild" class="cover-preview__img" />
-                  <p class="cover-preview__hint">Neues Bild auswählen um das bestehende zu ersetzen.</p>
-                </div>
-                <div v-if="form.coverFile" class="cover-preview">
-                  <img :src="coverPreviewUrl" alt="Vorschau" class="cover-preview__img" />
-                  <button type="button" class="cover-preview__remove" @click="form.coverFile = null">Entfernen</button>
-                </div>
-                <input type="file" accept="image/*" class="form-file" @change="onFileChange" />
               </div>
 
               <div class="form-grid__full">
                 <label class="form-check">
                   <input v-model="form.is_active" type="checkbox" />
-                  <span>Spiel aktiv schalten</span>
+                  <span>Paket aktiv schalten</span>
                 </label>
               </div>
             </div>
@@ -200,88 +185,117 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag } = useAdmin()
+const { fetchAdminPackages, createPackage, updatePackage, deletePackage, fetchAdminCategories, fetchAdminGames } = useAdmin()
 
-interface Game {
-  id: number; title: string; slug: string; description: string | null; short_description: string | null
-  category: { id: number; name: string } | null; copies_count: number; is_active: boolean
-  min_players: number | null; max_players: number | null; min_age: number | null
-  duration_min: number | null; duration_max: number | null; difficulty: string | null
-  language: string | null; year: number | null; tags: { id: number; name: string }[]
-  cover_image_url: string | null
+interface PackageItem {
+  id: number
+  name: string
+  slug: string
+  description: string | null
+  type: 'CATEGORY' | 'CURATED'
+  category: { id: number; name: string } | null
+  games_count: number
+  games: { id: number; title: string }[]
+  is_active: boolean
+}
+
+interface GameOption {
+  id: number
+  title: string
 }
 
 const year = new Date().getFullYear()
 const loading = ref(true)
-const coverPreviewUrl = computed(() => form.coverFile ? URL.createObjectURL(form.coverFile) : null)
 const saving = ref(false)
 const formError = ref('')
-const games = ref<Game[]>([])
+const packages = ref<PackageItem[]>([])
 const categories = ref<{ id: number; name: string }[]>([])
-const allTags = ref<{ id: number; name: string; slug: string }[]>([])
-const newTagName = ref('')
+const allGames = ref<GameOption[]>([])
+const gameSearch = ref('')
+
+const filteredGames = computed(() => {
+  const q = gameSearch.value.trim().toLowerCase()
+  if (!q) return allGames.value
+  return allGames.value.filter(g => g.title.toLowerCase().includes(q))
+})
 
 const form = reactive({
-  open: false, id: null as number | null,
-  title: '', slug: '', description: '', short_description: '',
+  open: false,
+  id: null as number | null,
+  name: '',
+  slug: '',
+  description: '',
+  type: 'CURATED' as 'CATEGORY' | 'CURATED',
   category_id: null as number | null,
-  min_players: '', max_players: '', min_age: '',
-  duration_min: '', duration_max: '',
-  difficulty: '', language: '', year: '',
-  is_active: true, tag_ids: [] as number[],
-  coverFile: null as File | null,
-  existingCoverUrl: null as string | null,
+  game_ids: [] as number[],
+  is_active: true,
 })
 
 onMounted(async () => {
   await load()
-  const [catData, tagData] = await Promise.all([fetchAdminCategories(), fetchAdminTags()])
+  const [catData, gameData] = await Promise.all([fetchAdminCategories(), fetchAdminGames()])
   categories.value = catData.data as { id: number; name: string }[]
-  allTags.value = tagData.data
+  allGames.value = (gameData.data as GameOption[]).map(g => ({ id: g.id, title: g.title }))
 })
 
 async function load() {
   loading.value = true
-  try { const data = await fetchAdminGames(); games.value = data.data as Game[] }
-  finally { loading.value = false }
+  try {
+    const data = await fetchAdminPackages()
+    packages.value = data.data as PackageItem[]
+  } finally {
+    loading.value = false
+  }
 }
 
 function openCreate() {
-  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null })
+  Object.assign(form, { open: true, id: null, name: '', slug: '', description: '', type: 'CURATED', category_id: null, game_ids: [], is_active: true })
+  gameSearch.value = ''
   formError.value = ''
 }
 
-function openEdit(game: Game) {
-  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null })
+function openEdit(pkg: PackageItem) {
+  Object.assign(form, {
+    open: true, id: pkg.id,
+    name: pkg.name, slug: pkg.slug, description: pkg.description ?? '',
+    type: pkg.type, category_id: pkg.category?.id ?? null,
+    game_ids: pkg.games?.map(g => g.id) ?? [],
+    is_active: pkg.is_active,
+  })
+  gameSearch.value = ''
   formError.value = ''
 }
 
 function closeForm() { form.open = false }
-function onFileChange(e: Event) { form.coverFile = (e.target as HTMLInputElement).files?.[0] ?? null }
-
-async function addTag() {
-  const name = newTagName.value.trim()
-  if (!name) return
-  try { const res = await createTag(name); allTags.value.push(res.data); form.tag_ids.push(res.data.id); newTagName.value = '' } catch {}
-}
 
 async function save() {
-  saving.value = true; formError.value = ''
+  saving.value = true
+  formError.value = ''
   try {
-    const fd = new FormData()
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'min_players', 'max_players', 'min_age', 'duration_min', 'duration_max', 'difficulty', 'language', 'year'] as const
-    fields.forEach((f) => { if (form[f] !== '' && form[f] !== null) fd.append(f, String(form[f])) })
-    fd.append('is_active', form.is_active ? '1' : '0')
-    form.tag_ids.forEach(id => fd.append('tag_ids[]', String(id)))
-    if (form.coverFile) fd.append('cover_image', form.coverFile)
-    form.id ? await updateGame(form.id, fd) : await createGame(fd)
-    await load(); closeForm()
+    const payload: Record<string, unknown> = {
+      name: form.name,
+      type: form.type,
+      game_ids: form.game_ids,
+      is_active: form.is_active,
+    }
+    if (form.slug) payload.slug = form.slug
+    if (form.description) payload.description = form.description
+    if (form.category_id !== null) payload.category_id = form.category_id
+
+    form.id ? await updatePackage(form.id, payload) : await createPackage(payload)
+    await load()
+    closeForm()
   } catch (err: unknown) {
     formError.value = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
-  } finally { saving.value = false }
+  } finally {
+    saving.value = false
+  }
 }
 
-async function remove(id: number) { await deleteGame(id); await load() }
+async function remove(id: number) {
+  await deletePackage(id)
+  await load()
+}
 </script>
 
 <style lang="scss" scoped>
@@ -346,6 +360,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .status-badge--active { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
 .status-badge--muted  { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
+.type-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
+.type-badge--curated  { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
+.type-badge--category { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {
   display: inline-flex; align-items: center; gap: 0.35rem;
@@ -353,14 +371,13 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
   &:hover { border-color: var(--accent-color); color: var(--accent-text); }
   &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } }
-  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 // ─── Modal ────────────────────────────────────────────────────────
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
 .modal {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-  &--wide { max-width: 700px; }
+  &--wide { max-width: 660px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
   &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
@@ -373,61 +390,66 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
 // ─── Form Elements ────────────────────────────────────────────────
 .form-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem 1rem;
-  @media (max-width: 600px) { grid-template-columns: 1fr; }
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem 1rem;
+  @media (max-width: 500px) { grid-template-columns: 1fr; }
   &__full { grid-column: 1 / -1; }
 }
 
-.form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
+.form-label {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em;
 
-.form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
-
-.form-file { display: block; width: 100%; font-size: 0.875rem; color: var(--secondary-text); padding: 0.4rem 0; }
-
-.cover-preview {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  padding: 0.75rem;
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-
-  &__img {
-    width: 64px;
-    height: 64px;
-    object-fit: cover;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-
-  &__hint {
-    font-size: 0.8rem;
-    color: var(--secondary-text);
-    padding-bottom: 0;
-  }
-
-  &__remove {
-    font-size: 0.78rem;
-    font-weight: 600;
-    font-family: inherit;
-    color: #f87171;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    &:hover { text-decoration: underline; }
+  &__count {
+    font-size: 0.72rem; font-weight: 700;
+    color: $amber; background: $amber-08; border: 1px solid $amber-25;
+    border-radius: 999px; padding: 0.1rem 0.45rem;
   }
 }
+
+.form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
 
 .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--primary-text); cursor: pointer; user-select: none; input { accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer; } }
 
 .form-error { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
 
-.tag-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
-.tag-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; border: 1px solid var(--divider); border-radius: 999px; font-size: 0.8rem; cursor: pointer; user-select: none; transition: border-color 0.15s, background 0.15s; &--selected { border-color: var(--accent-color); background: var(--accent-color-muted); color: var(--accent-text); } &__input { display: none; } }
-.tag-add { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+// ─── Game Picker ──────────────────────────────────────────────────
+.game-search {
+  margin-bottom: 0.5rem;
+
+  &__input {
+    display: block; width: 100%; height: 36px; padding: 0 0.75rem;
+    border: 1px solid var(--divider); border-radius: 8px;
+    background: var(--background); color: var(--primary-text);
+    font-size: 0.875rem; font-family: inherit;
+    transition: border-color 0.2s;
+    &:focus { outline: none; border-color: var(--accent-color); }
+  }
+}
+
+.game-picker {
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  background: var(--background);
+
+  &__empty { font-size: 0.82rem; color: var(--secondary-text); padding-bottom: 0; width: 100%; }
+}
+
+.game-chip {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--divider); border-radius: 999px;
+  font-size: 0.8rem; cursor: pointer; user-select: none;
+  transition: border-color 0.15s, background 0.15s;
+
+  &--selected { border-color: var(--accent-color); background: var(--accent-color-muted); color: var(--accent-text); }
+  &__input { display: none; }
+}
 
 // ─── Footer ───────────────────────────────────────────────────────
 .l-footer { background: $hero-bg; border-top: 1px solid $hero-divider; padding: 1.75rem 1.5rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; } &__brand { display: flex; align-items: center; gap: 0.4rem; } &__hex { font-size: 1.1rem; color: $amber; } &__name { font-size: 0.9rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; } &__copy { font-size: 0.8rem; color: $hero-muted-50; padding-bottom: 0; } }
