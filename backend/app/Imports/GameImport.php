@@ -37,8 +37,9 @@ class GameImport implements ToModel, WithHeadingRow
             $categoryId = $category->id;
         }
 
-        // Prüfen ob Spiel bereits existiert (by slug)
-        $existing = Game::where('slug', $slug)->first();
+        // ID vorhanden → Update, sonst → Neu
+        $id = isset($row['id']) && $row['id'] !== '' ? (int) $row['id'] : null;
+        $existing = $id ? Game::find($id) : null;
         $isNew = $existing === null;
 
         $data = array_filter([

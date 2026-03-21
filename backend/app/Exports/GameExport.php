@@ -20,6 +20,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     public function headings(): array
     {
         return [
+            'id',
             'title',
             'slug',
             'short_description',
@@ -41,6 +42,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     public function map($game): array
     {
         return [
+            $game->id,
             $game->title,
             $game->slug,
             $game->short_description,
