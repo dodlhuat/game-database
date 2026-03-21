@@ -18,10 +18,21 @@
         </nav>
         <div class="page-hero__row">
           <h1 class="page-hero__title">Spiele verwalten</h1>
-          <button class="hero-btn" @click="openCreate">
-            <span class="icon icon-plus-outline" aria-hidden="true" />
-            Spiel hinzufügen
-          </button>
+          <div class="hero-actions">
+            <button class="hero-btn hero-btn--secondary" :disabled="exporting" @click="doExport">
+              <span class="icon icon-download-outline" aria-hidden="true" />
+              {{ exporting ? 'Exportiere…' : 'Excel Export' }}
+            </button>
+            <label class="hero-btn hero-btn--secondary" :class="{ 'hero-btn--loading': importing }">
+              <span class="icon icon-cloud-upload-outline" aria-hidden="true" />
+              {{ importing ? 'Importiere…' : 'Excel Import' }}
+              <input type="file" accept=".xlsx,.xls,.csv" class="hero-file-input" :disabled="importing" @change="doImport" />
+            </label>
+            <button class="hero-btn" @click="openCreate">
+              <span class="icon icon-plus-outline" aria-hidden="true" />
+              Spiel hinzufügen
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -182,6 +193,41 @@
       </div>
     </Transition>
 
+    <!-- ── Import Ergebnis Modal ────────────────────────────────── -->
+    <Transition name="modal">
+      <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">Import abgeschlossen</h3>
+            <button class="modal__close" aria-label="Schließen" @click="importResult = null">
+              <span class="icon icon-close-outline" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="modal__body">
+            <div class="import-result">
+              <div class="import-result__row">
+                <span class="import-result__label">Neue Spiele</span>
+                <span class="import-result__value import-result__value--new">{{ importResult.new }}</span>
+              </div>
+              <div class="import-result__row">
+                <span class="import-result__label">Aktualisierte Spiele</span>
+                <span class="import-result__value import-result__value--updated">{{ importResult.updated }}</span>
+              </div>
+              <div class="import-result__divider" />
+              <div class="import-result__row">
+                <span class="import-result__label">Gesamt verarbeitet</span>
+                <span class="import-result__value">{{ importResult.total }}</span>
+              </div>
+            </div>
+            <div v-if="importError" class="form-error">{{ importError }}</div>
+          </div>
+          <div class="modal__actions">
+            <button class="action-btn" @click="importResult = null">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
       <div class="l-footer__inner">
@@ -200,7 +246,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag } = useAdmin()
+const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames } = useAdmin()
 
 interface Game {
   id: number; title: string; slug: string; description: string | null; short_description: string | null
@@ -213,6 +259,10 @@ interface Game {
 
 const year = new Date().getFullYear()
 const loading = ref(true)
+const importing = ref(false)
+const exporting = ref(false)
+const importResult = ref<{ new: number; updated: number; total: number } | null>(null)
+const importError = ref('')
 const coverPreviewUrl = computed(() => form.coverFile ? URL.createObjectURL(form.coverFile) : null)
 const saving = ref(false)
 const formError = ref('')
@@ -282,6 +332,31 @@ async function save() {
 }
 
 async function remove(id: number) { await deleteGame(id); await load() }
+
+async function doImport(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  importing.value = true
+  importError.value = ''
+  try {
+    const result = await importGames(file)
+    importResult.value = result
+    await load()
+  } catch (err: unknown) {
+    importError.value = (err as { message?: string }).message ?? 'Import fehlgeschlagen.'
+    importResult.value = { new: 0, updated: 0, total: 0 }
+  } finally {
+    importing.value = false
+    ;(e.target as HTMLInputElement).value = ''
+  }
+}
+
+async function doExport() {
+  exporting.value = true
+  try { await exportGames() }
+  catch (err: unknown) { alert((err as { message?: string }).message ?? 'Export fehlgeschlagen.') }
+  finally { exporting.value = false }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -313,6 +388,8 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
 
+.hero-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
 .hero-btn {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit;
@@ -320,7 +397,16 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   transition: opacity 0.2s;
   .icon { width: 16px; height: 16px; }
   &:hover { opacity: 0.88; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &--secondary {
+    background: transparent; color: $hero-text;
+    border: 1px solid rgba(238,232,223,0.2);
+    &:hover { background: rgba(238,232,223,0.06); opacity: 1; }
+  }
+  &--loading { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 }
+
+.hero-file-input { display: none; }
 
 .admin-content { flex: 1; padding: 2rem 1.5rem 4rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; } }
 .admin-state { display: flex; justify-content: center; align-items: center; min-height: 200px; }
@@ -428,6 +514,17 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .tag-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
 .tag-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; border: 1px solid var(--divider); border-radius: 999px; font-size: 0.8rem; cursor: pointer; user-select: none; transition: border-color 0.15s, background 0.15s; &--selected { border-color: var(--accent-color); background: var(--accent-color-muted); color: var(--accent-text); } &__input { display: none; } }
 .tag-add { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; }
+
+// ─── Import Result ────────────────────────────────────────────────
+.import-result {
+  display: flex; flex-direction: column; gap: 0; padding: 0.25rem 0;
+  &__row { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0; }
+  &__label { font-size: 0.9rem; color: var(--secondary-text); }
+  &__value { font-size: 1rem; font-weight: 700; color: var(--primary-text); }
+  &__value--new { color: #4ade80; }
+  &__value--updated { color: $amber; }
+  &__divider { height: 1px; background: var(--divider); margin: 0.25rem 0; }
+}
 
 // ─── Footer ───────────────────────────────────────────────────────
 .l-footer { background: $hero-bg; border-top: 1px solid $hero-divider; padding: 1.75rem 1.5rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; } &__brand { display: flex; align-items: center; gap: 0.4rem; } &__hex { font-size: 1.1rem; color: $amber; } &__name { font-size: 0.9rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; } &__copy { font-size: 0.8rem; color: $hero-muted-50; padding-bottom: 0; } }

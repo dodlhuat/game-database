@@ -124,6 +124,11 @@
               <span class="nav-card__label">Schadensmeldungen</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
+            <NuxtLink to="/admin/loan-settings" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-settings-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">Ausleih-Einstellungen</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
             </div>
           </section>
 

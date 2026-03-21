@@ -17,3 +17,16 @@
 
 // 5. Animationen
 @import 'animations';
+
+// 6. Bibliotheks-Overrides
+// basix push-menu.scss wendet position:fixed + margin-left:-250px auf ALLE
+// <nav>-Elemente an. Da wir flyout-menu verwenden, müssen diese Stile zurückgesetzt werden.
+nav {
+  position: static;
+  top: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  margin: 0;
+  transition: none;
+}

@@ -217,7 +217,6 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 700px;
     padding: 4rem 1.5rem 6rem;
     padding-left: max(1.5rem, calc((100vw - 1200px) / 2 + 1.5rem));
   }

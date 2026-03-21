@@ -20,6 +20,7 @@ export interface Game {
   reviews_count: number
   is_favorited?: boolean
   copies?: { id: number; condition: string; is_available: boolean }[]
+  earliest_available_at?: string | null
 }
 
 export interface GameFilters {

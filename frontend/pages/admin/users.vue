@@ -13,7 +13,13 @@
           </NuxtLink>
           <span class="page-hero__eyebrow">Administration</span>
         </nav>
-        <h1 class="page-hero__title">Mitgliederverwaltung</h1>
+        <div class="page-hero__row">
+          <h1 class="page-hero__title">Mitgliederverwaltung</h1>
+          <button class="hero-btn" @click="openCreate">
+            <span class="icon icon-plus-outline" aria-hidden="true" />
+            Benutzer anlegen
+          </button>
+        </div>
       </div>
     </section>
 
@@ -39,6 +45,7 @@
                 <tr>
                   <th>Name</th>
                   <th>E-Mail</th>
+                  <th>Rolle</th>
                   <th>Status</th>
                   <th>Registriert</th>
                   <th>Aktionen</th>
@@ -48,12 +55,14 @@
                 <tr v-for="user in users" :key="user.id">
                   <td class="dash-table__primary">{{ user.name }}</td>
                   <td class="text-muted">{{ user.email }}</td>
+                  <td class="text-muted">{{ user.role }}</td>
                   <td>
                     <span class="status-badge" :class="statusClass(user.status)">{{ statusLabel(user.status) }}</span>
                   </td>
                   <td class="text-muted">{{ formatDate(user.created_at) }}</td>
                   <td>
                     <div class="action-row">
+                      <button class="action-btn" @click="openEdit(user)">Bearbeiten</button>
                       <template v-if="user.status === 'PENDING'">
                         <button class="action-btn action-btn--success" @click="approve(user.id)">Freischalten</button>
                         <button class="action-btn action-btn--danger" @click="reject(user.id)">Ablehnen</button>
@@ -61,7 +70,6 @@
                       <template v-else-if="user.status === 'ACTIVE'">
                         <button class="action-btn action-btn--danger" @click="suspend(user.id)">Sperren</button>
                       </template>
-                      <span v-else class="text-muted text-sm">—</span>
                     </div>
                   </td>
                 </tr>
@@ -70,6 +78,93 @@
           </div>
         </section>
 
+      </div>
+    </div>
+
+    <!-- ── Create Modal ──────────────────────────────────────────── -->
+    <div v-if="showCreate" class="modal-overlay" @click.self="showCreate = false">
+      <div class="modal-box">
+        <header class="modal-box__header">
+          <h2 class="modal-box__title">Benutzer anlegen</h2>
+          <button class="modal-box__close" @click="showCreate = false" aria-label="Schließen">
+            <span class="icon icon-close-outline" />
+          </button>
+        </header>
+        <form class="modal-box__body" @submit.prevent="submitCreate">
+          <div class="form-field">
+            <label class="form-label">Name</label>
+            <input v-model="createForm.name" class="form-input" type="text" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label">E-Mail</label>
+            <input v-model="createForm.email" class="form-input" type="email" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Passwort</label>
+            <input v-model="createForm.password" class="form-input" type="password" required minlength="8" />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Rolle</label>
+            <select v-model="createForm.role" class="form-input">
+              <option value="MEMBER">MEMBER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Status</label>
+            <select v-model="createForm.status" class="form-input">
+              <option value="PENDING">PENDING</option>
+              <option value="ACTIVE">ACTIVE</option>
+            </select>
+          </div>
+          <p v-if="createError" class="form-error">{{ createError }}</p>
+          <div class="modal-box__footer">
+            <button type="button" class="action-btn" @click="showCreate = false">Abbrechen</button>
+            <button type="submit" class="action-btn action-btn--success" :disabled="createLoading">
+              {{ createLoading ? 'Wird angelegt…' : 'Anlegen' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ── Edit Modal ────────────────────────────────────────────── -->
+    <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
+      <div class="modal-box">
+        <header class="modal-box__header">
+          <h2 class="modal-box__title">Benutzer bearbeiten</h2>
+          <button class="modal-box__close" @click="showEdit = false" aria-label="Schließen">
+            <span class="icon icon-close-outline" />
+          </button>
+        </header>
+        <form class="modal-box__body" @submit.prevent="submitEdit">
+          <div class="form-field">
+            <label class="form-label">Name</label>
+            <input v-model="editForm.name" class="form-input" type="text" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label">E-Mail</label>
+            <input v-model="editForm.email" class="form-input" type="email" required />
+          </div>
+          <div class="form-field">
+            <label class="form-label">Rolle</label>
+            <select v-model="editForm.role" class="form-input">
+              <option value="MEMBER">MEMBER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Neues Passwort <span class="text-muted">(leer lassen = unverändert)</span></label>
+            <input v-model="editForm.password" class="form-input" type="password" minlength="8" />
+          </div>
+          <p v-if="editError" class="form-error">{{ editError }}</p>
+          <div class="modal-box__footer">
+            <button type="button" class="action-btn" @click="showEdit = false">Abbrechen</button>
+            <button type="submit" class="action-btn action-btn--success" :disabled="editLoading">
+              {{ editLoading ? 'Wird gespeichert…' : 'Speichern' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -94,6 +189,71 @@ const year = new Date().getFullYear()
 const users = ref<User[]>([])
 const pending = ref(true)
 
+// ── Create ──────────────────────────────────────────────────────
+const showCreate = ref(false)
+const createLoading = ref(false)
+const createError = ref('')
+const createForm = ref({ name: '', email: '', password: '', role: 'MEMBER', status: 'PENDING' })
+
+function openCreate() {
+  createForm.value = { name: '', email: '', password: '', role: 'MEMBER', status: 'PENDING' }
+  createError.value = ''
+  showCreate.value = true
+}
+
+async function submitCreate() {
+  createLoading.value = true
+  createError.value = ''
+  try {
+    const user = await api.post<User>('/admin/users', createForm.value)
+    users.value.unshift(user)
+    showCreate.value = false
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    createError.value = err?.data?.message ?? 'Fehler beim Anlegen.'
+  } finally {
+    createLoading.value = false
+  }
+}
+
+// ── Edit ────────────────────────────────────────────────────────
+const showEdit = ref(false)
+const editLoading = ref(false)
+const editError = ref('')
+const editUserId = ref<number | null>(null)
+const editForm = ref({ name: '', email: '', role: 'MEMBER', password: '' })
+
+function openEdit(user: User) {
+  editUserId.value = user.id
+  editForm.value = { name: user.name, email: user.email, role: user.role, password: '' }
+  editError.value = ''
+  showEdit.value = true
+}
+
+async function submitEdit() {
+  if (!editUserId.value) return
+  editLoading.value = true
+  editError.value = ''
+  const payload: Record<string, string> = {
+    name: editForm.value.name,
+    email: editForm.value.email,
+    role: editForm.value.role,
+  }
+  if (editForm.value.password) payload.password = editForm.value.password
+  try {
+    const updated = await api.put<User>(`/admin/users/${editUserId.value}`, payload)
+    const idx = users.value.findIndex(u => u.id === editUserId.value)
+    if (idx !== -1) users.value[idx] = { ...users.value[idx], ...updated }
+    showEdit.value = false
+  } catch (e: unknown) {
+    const err = e as { data?: { message?: string } }
+    editError.value = err?.data?.message ?? 'Fehler beim Speichern.'
+  } finally {
+    editLoading.value = false
+  }
+}
+
+// ── Status actions ──────────────────────────────────────────────
 onMounted(async () => { try { const data = await api.get<{ data: User[] }>('/admin/users'); users.value = data.data } finally { pending.value = false } })
 
 async function approve(id: number) { await api.patch(`/admin/users/${id}/approve`); const u = users.value.find(u => u.id === id); if (u) u.status = 'ACTIVE' }
@@ -112,7 +272,9 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
-.page-hero { position: relative; background: $hero-bg; padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem; overflow: hidden; &__backdrop { position: absolute; inset: 0; pointer-events: none; } &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; } &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); } &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; } &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; } &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } } &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; } &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; } }
+.page-hero { position: relative; background: $hero-bg; padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem; overflow: hidden; &__backdrop { position: absolute; inset: 0; pointer-events: none; } &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; } &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); } &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; } &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; } &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } } &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; } &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; } &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; } }
+
+.hero-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; color: #0F0E0C; background: $amber; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; .icon { width: 16px; height: 16px; } &:hover { background: darken(#D4921E, 8%); } }
 
 .admin-content { flex: 1; padding: 2rem 1.5rem 4rem; &__inner { max-width: 1100px; margin: 0 auto; } }
 .admin-state { display: flex; justify-content: center; align-items: center; min-height: 200px; }
@@ -134,10 +296,19 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 .status-badge--muted   { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-.action-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit; color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap; &:hover { border-color: var(--accent-color); color: var(--accent-text); } &--success { color: #4ade80; border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.06); &:hover { border-color: rgba(34,197,94,0.5); } } &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } } }
+.action-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit; color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap; &:hover { border-color: var(--accent-color); color: var(--accent-text); } &--success { color: #4ade80; border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.06); &:hover { border-color: rgba(34,197,94,0.5); } } &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } } &:disabled { opacity: 0.5; cursor: not-allowed; } }
 
 .text-muted { color: var(--secondary-text); }
 .text-sm { font-size: 0.8rem; }
+
+// ── Modal ──────────────────────────────────────────────────────────
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+.modal-box { background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 14px; width: 100%; max-width: 480px; overflow: hidden; &__header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--divider); } &__title { font-size: 1rem; font-weight: 700; color: var(--primary-text); margin: 0; letter-spacing: -0.02em; } &__close { background: none; border: none; cursor: pointer; color: var(--secondary-text); display: flex; align-items: center; .icon { width: 20px; height: 20px; } &:hover { color: var(--primary-text); } } &__body { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; } &__footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding-top: 0.5rem; } }
+
+.form-field { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--secondary-text); }
+.form-input { padding: 0.55rem 0.75rem; background: var(--background); border: 1px solid var(--divider); border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: var(--primary-text); outline: none; transition: border-color 0.2s; &:focus { border-color: $amber; } }
+.form-error { font-size: 0.85rem; color: #f87171; margin: 0; padding-bottom: 0; }
 
 .l-footer { background: $hero-bg; border-top: 1px solid $hero-divider; padding: 1.75rem 1.5rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; } &__brand { display: flex; align-items: center; gap: 0.4rem; } &__hex { font-size: 1.1rem; color: $amber; } &__name { font-size: 0.9rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; } &__copy { font-size: 0.8rem; color: $hero-muted-50; padding-bottom: 0; } }
 </style>

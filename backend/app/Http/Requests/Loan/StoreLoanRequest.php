@@ -14,9 +14,7 @@ class StoreLoanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'copy_id'    => ['required', 'integer', 'exists:copies,id'],
-            'start_date' => ['required', 'date', 'after_or_equal:today'],
-            'due_date'   => ['required', 'date', 'after:start_date'],
+            'copy_id' => ['required', 'integer', 'exists:copies,id'],
         ];
     }
 }

@@ -18,11 +18,13 @@ return new class extends Migration
             }
         });
 
-        Schema::create('package_game', function (Blueprint $table) {
-            $table->foreignId('package_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('game_id')->constrained()->cascadeOnDelete();
-            $table->primary(['package_id', 'game_id']);
-        });
+        if (!Schema::hasTable('package_game')) {
+            Schema::create('package_game', function (Blueprint $table) {
+                $table->foreignId('package_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('game_id')->constrained()->cascadeOnDelete();
+                $table->primary(['package_id', 'game_id']);
+            });
+        }
     }
 
     public function down(): void

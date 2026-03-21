@@ -60,14 +60,18 @@
                 >
                   Jetzt ausleihen
                 </button>
-                <button
-                  v-else
-                  class="detail__btn detail__btn--secondary"
-                  @click="handleReserve"
-                  :disabled="reserving"
-                >
-                  {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
-                </button>
+                <template v-else>
+                  <button
+                    class="detail__btn detail__btn--secondary"
+                    @click="handleReserve"
+                    :disabled="reserving"
+                  >
+                    {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
+                  </button>
+                  <span v-if="game.earliest_available_at" class="detail__avail-hint">
+                    Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
+                  </span>
+                </template>
               </template>
               <NuxtLink v-else-if="!auth.isLoggedIn" to="/login" class="detail__btn detail__btn--primary">
                 Anmelden zum Ausleihen
@@ -145,44 +149,51 @@
 import { ref, computed, onMounted } from 'vue'
 import type { Game } from '~/composables/useGames'
 import { Modal } from '~/assets/basix/js/modal'
-import { DatePicker } from '~/assets/basix/js/datepicker'
 
 const route = useRoute()
 const { fetchGame } = useGames()
 const { createLoan, addReservation } = useLoans()
 const auth = useAuthStore()
+const { fetchSettings, getNextAppointment, getDueDate, formatDate, toIsoDate } = useLoanSettings()
 
 const loading = ref(true)
 const game = ref<Game | null>(null)
 const year = new Date().getFullYear()
 const reserving = ref(false)
 
-const todayStr = () => new Date().toISOString().slice(0, 10)
-const defaultDueStr = () => new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10)
+const loanDates = { start_date: '', due_date: '' }
 
-const loanDates = { start_date: todayStr(), due_date: defaultDueStr() }
-
-const DE_LOCALES = {
-  days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
-  months: ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
-}
-
-function openLoanModal() {
+async function openLoanModal() {
   if (!game.value) return
 
-  loanDates.start_date = todayStr()
-  loanDates.due_date = defaultDueStr()
+  let startLabel = '…'
+  let dueLabel = '…'
+
+  try {
+    const settings = await fetchSettings()
+    const appointment = getNextAppointment(settings)
+    const due = getDueDate(appointment, settings)
+    loanDates.start_date = toIsoDate(appointment)
+    loanDates.due_date = toIsoDate(due)
+    startLabel = formatDate(appointment)
+    dueLabel = formatDate(due)
+  } catch {
+    loanDates.start_date = new Date().toISOString().slice(0, 10)
+    loanDates.due_date = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10)
+    startLabel = loanDates.start_date
+    dueLabel = loanDates.due_date
+  }
 
   const content = `
     <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem">
       <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${game.value.title}</p>
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Ausleihbeginn</label>
-        <input id="dp-start" type="text" value="${loanDates.start_date}" placeholder="Datum wählen" style="cursor:pointer" readonly />
+        <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${startLabel}</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Rückgabe bis</label>
-        <input id="dp-due" type="text" value="${loanDates.due_date}" placeholder="Datum wählen" style="cursor:pointer" readonly />
+        <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
       </div>
       <div id="loan-msg" style="display:none;font-size:.85rem;margin:0"></div>
     </div>`
@@ -197,29 +208,6 @@ function openLoanModal() {
   modal.show()
 
   setTimeout(() => {
-    const startInput = document.getElementById('dp-start') as HTMLInputElement | null
-    const dueInput = document.getElementById('dp-due') as HTMLInputElement | null
-
-    if (startInput) {
-      new DatePicker(startInput, {
-        mode: 'single',
-        startDay: 1,
-        locales: DE_LOCALES,
-        format: (d: Date) => d.toISOString().slice(0, 10),
-        onSelect: (d) => { loanDates.start_date = (d as Date).toISOString().slice(0, 10) },
-      })
-    }
-
-    if (dueInput) {
-      new DatePicker(dueInput, {
-        mode: 'single',
-        startDay: 1,
-        locales: DE_LOCALES,
-        format: (d: Date) => d.toISOString().slice(0, 10),
-        onSelect: (d) => { loanDates.due_date = (d as Date).toISOString().slice(0, 10) },
-      })
-    }
-
     document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
     document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
   }, 50)
@@ -503,6 +491,18 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     }
 
     &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &__avail-hint {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--secondary-text);
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    background: var(--secondary-background);
   }
 
   &__short-desc {

@@ -35,7 +35,14 @@ class GameResource extends JsonResource
             ),
             'reviews_count'   => $this->whenCounted('reviews'),
             'is_favorited'    => $this->when(isset($this->is_favorited), $this->is_favorited),
-            'copies'          => CopyResource::collection($this->whenLoaded('copies')),
+            'copies'                => CopyResource::collection($this->whenLoaded('copies')),
+            'earliest_available_at' => $this->when(
+                $this->relationLoaded('copies'),
+                fn() => $this->copies
+                    ->flatMap(fn($copy) => $copy->activeLoans ?? collect())
+                    ->whereIn('status', ['ACTIVE', 'EXTENDED'])
+                    ->min('due_date')
+            ),
             'created_at'      => $this->created_at,
         ];
     }

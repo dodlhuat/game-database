@@ -61,6 +61,11 @@ php artisan serve
 docker-compose exec backend php artisan migrate
 ```
 
+##### SSH auf Windows
+```bash
+ssh -i C:\Users\dodlh\.ssh\id_rsa ftp2113443@www34.world4you.com -p22 -o MACs=hmac-sha2-512
+```
+
 #### Frontend
 
 ```bash

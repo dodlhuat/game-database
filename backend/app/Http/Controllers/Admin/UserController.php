@@ -10,6 +10,8 @@ use App\Notifications\UserRejected;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -30,6 +32,51 @@ class UserController extends Controller
 
     public function show(User $user): UserResource
     {
+        return new UserResource($user);
+    }
+
+    public function store(Request $request): UserResource
+    {
+        $data = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:8'],
+            'role'     => ['required', 'in:MEMBER,ADMIN'],
+            'status'   => ['required', 'in:PENDING,ACTIVE,REJECTED,SUSPENDED'],
+        ]);
+
+        $user = User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role'     => $data['role'],
+            'status'   => $data['status'],
+        ]);
+
+        return new UserResource($user);
+    }
+
+    public function update(Request $request, User $user): UserResource
+    {
+        $data = $request->validate([
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'role'     => ['required', 'in:MEMBER,ADMIN'],
+            'password' => ['nullable', 'string', 'min:8'],
+        ]);
+
+        $update = [
+            'name'  => $data['name'],
+            'email' => $data['email'],
+            'role'  => $data['role'],
+        ];
+
+        if (!empty($data['password'])) {
+            $update['password'] = Hash::make($data['password']);
+        }
+
+        $user->update($update);
+
         return new UserResource($user);
     }
 

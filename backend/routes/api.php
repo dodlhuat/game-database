@@ -20,6 +20,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'store']);
 });
 
+Route::get('/loan-settings', [\App\Http\Controllers\LoanSettingController::class, 'show']);
+
 Route::get('/games', [\App\Http\Controllers\GameController::class, 'index']);
 Route::get('/games/{game:slug}', [\App\Http\Controllers\GameController::class, 'show']);
 Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index']);
@@ -73,12 +75,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     // Mitgliederverwaltung
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index']);
+    Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store']);
     Route::get('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'show']);
+    Route::put('/users/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update']);
     Route::patch('/users/{user}/approve', [\App\Http\Controllers\Admin\UserController::class, 'approve']);
     Route::patch('/users/{user}/reject', [\App\Http\Controllers\Admin\UserController::class, 'reject']);
     Route::patch('/users/{user}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend']);
 
     // Spieleverwaltung
+    Route::post('/games/import', [\App\Http\Controllers\Admin\GameImportExportController::class, 'import']);
+    Route::get('/games/export', [\App\Http\Controllers\Admin\GameImportExportController::class, 'export']);
     Route::apiResource('games', \App\Http\Controllers\Admin\GameController::class);
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::apiResource('tags', \App\Http\Controllers\Admin\TagController::class)->only(['index', 'store', 'destroy']);
@@ -104,6 +110,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Paketverwaltung
     Route::apiResource('packages', \App\Http\Controllers\Admin\PackageController::class);
+
+    // Ausleih-Einstellungen
+    Route::get('/loan-settings', [\App\Http\Controllers\Admin\LoanSettingController::class, 'show']);
+    Route::patch('/loan-settings', [\App\Http\Controllers\Admin\LoanSettingController::class, 'update']);
 
     // Dashboard-Übersicht
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);

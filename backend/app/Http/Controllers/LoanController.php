@@ -7,8 +7,10 @@ use App\Http\Requests\Loan\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
 use App\Models\Copy;
 use App\Models\Loan;
+use App\Models\LoanSetting;
 use App\Models\Reservation;
 use App\Notifications\ReservationAvailable;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -38,17 +40,37 @@ class LoanController extends Controller
             return response()->json(['message' => 'Diese Kopie ist gerade ausgeliehen.'], 422);
         }
 
+        $setting   = LoanSetting::instance();
+        $startDate = $this->calcNextAppointment($setting);
+        $dueDate   = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
+
         $loan = Loan::create([
             'copy_id'    => $copy->id,
             'user_id'    => $request->user()->id,
-            'start_date' => $request->start_date,
-            'due_date'   => $request->due_date,
+            'start_date' => $startDate->toDateString(),
+            'due_date'   => $dueDate->toDateString(),
             'status'     => 'ACTIVE',
         ]);
 
         $loan->load(['copy.game', 'extensions']);
 
         return new LoanResource($loan);
+    }
+
+    private function calcNextAppointment(LoanSetting $setting): Carbon
+    {
+        $today     = Carbon::today();
+        $deadline  = $today->copy()->addDays($setting->grace_days);
+        $startDate = Carbon::parse($setting->start_date);
+        $n         = 0;
+
+        while (true) {
+            $appointment = $startDate->copy()->addDays($n * $setting->interval_days);
+            if ($appointment->gt($deadline)) {
+                return $appointment;
+            }
+            $n++;
+        }
     }
 
     public function show(Request $request, Loan $loan): JsonResponse|LoanResource
