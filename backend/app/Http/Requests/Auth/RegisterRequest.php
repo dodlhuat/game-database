@@ -14,12 +14,26 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password'      => ['required', 'string', 'min:8', 'confirmed'],
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'       => ['required', 'string', 'min:8', 'confirmed'],
             'newsletter_opt_in' => ['boolean'],
             'terms_accepted' => ['required', 'accepted'],
+            'website'        => ['prohibited'],
+            'form_loaded_at' => ['required', 'integer'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $loadedAt = (int) $this->input('form_loaded_at');
+            $elapsed = (int) (microtime(true) * 1000) - $loadedAt;
+
+            if ($elapsed < 3000) {
+                $validator->errors()->add('form', 'Bitte versuche es erneut.');
+            }
+        });
     }
 
     public function messages(): array

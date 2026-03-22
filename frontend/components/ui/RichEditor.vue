@@ -22,7 +22,7 @@
         <button type="button" data-cmd="formatBlock" data-value="h1" title="Heading 1">H1</button>
         <button type="button" data-cmd="formatBlock" data-value="h2" title="Heading 2">H2</button>
         <button type="button" data-cmd="formatBlock" data-value="p" title="Paragraph">
-          <span class="icon icon-format_paragraph" aria-hidden="true" />
+          <strong>P</strong>
         </button>
       </div>
 
@@ -41,38 +41,12 @@
 
       <div class="toolbar-group">
         <button id="linkBtn" type="button" title="Insert link (Ctrl+K)">
-          <span class="icon icon-link" aria-hidden="true" />
+          <span class="icon icon-add" aria-hidden="true" />
         </button>
-        <button id="imageBtn" type="button" title="Insert image">
+        <button id="imageBtn" type="button" title="Insert image" style="display: none;">
           <span class="icon icon-add_photo_alternate" aria-hidden="true" />
         </button>
         <input type="file" id="imageFile" accept="image/*" hidden />
-      </div>
-
-      <div class="toolbar-separator" />
-
-      <div class="toolbar-group">
-        <button id="cleanBtn" type="button" title="Clear formatting">
-          <span class="icon icon-format_clear" aria-hidden="true" />
-        </button>
-        <button id="undoBtn" type="button" title="Undo (Ctrl+Z)">
-          <span class="icon icon-undo" aria-hidden="true" />
-        </button>
-        <button id="redoBtn" type="button" title="Redo (Ctrl+Y)">
-          <span class="icon icon-redo" aria-hidden="true" />
-        </button>
-      </div>
-
-      <div class="toolbar-end">
-        <button id="toggleCodeBtn" type="button" title="Toggle code panel">
-          <span class="icon icon-code" aria-hidden="true" />
-        </button>
-        <button id="saveBtn" type="button" class="toolbar-btn-accent" title="Download HTML (Ctrl+S)">
-          <span class="icon icon-save" aria-hidden="true" />
-        </button>
-        <button id="clearBtn" type="button" class="toolbar-btn-danger" title="Clear all content">
-          <span class="icon icon-delete" aria-hidden="true" />
-        </button>
       </div>
     </div>
 

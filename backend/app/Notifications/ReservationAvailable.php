@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\Game;
+use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class ReservationAvailable extends Notification
 {
-    use Queueable;
+    use Queueable, UsesEmailTemplate;
 
     public function __construct(private Game $game) {}
 
@@ -18,15 +19,13 @@ class ReservationAvailable extends Notification
         return ['mail'];
     }
 
-    public function toMail(): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
         $catalogUrl = env('FRONTEND_URL', 'http://localhost:3000') . '/games/' . $this->game->slug;
 
-        return (new MailMessage)
-            ->subject("„{$this->game->title}" ist jetzt verfügbar!")
-            ->greeting('Gute Neuigkeiten!')
-            ->line("Das Spiel **{$this->game->title}** ist jetzt wieder verfügbar.")
-            ->action('Jetzt ausleihen', $catalogUrl)
-            ->line('Bitte leihe es aus, bevor jemand anderes zugreift.');
+        return $this->buildFromTemplate('reservation_available', [
+            'name' => $notifiable->name,
+            'game' => $this->game->title,
+        ], $catalogUrl);
     }
 }

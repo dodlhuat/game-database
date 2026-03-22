@@ -115,6 +115,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/loan-settings', [\App\Http\Controllers\Admin\LoanSettingController::class, 'show']);
     Route::patch('/loan-settings', [\App\Http\Controllers\Admin\LoanSettingController::class, 'update']);
 
+    // E-Mail-Vorlagen
+    Route::get('/email-templates', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'index']);
+    Route::put('/email-templates/{key}', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'update']);
+    Route::post('/email-templates/{key}/reset', [\App\Http\Controllers\Admin\EmailTemplateController::class, 'reset']);
+
     // Dashboard-Übersicht
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);
 });

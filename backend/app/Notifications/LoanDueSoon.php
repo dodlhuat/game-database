@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\Loan;
+use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class LoanDueSoon extends Notification
 {
-    use Queueable;
+    use Queueable, UsesEmailTemplate;
 
     public function __construct(private Loan $loan) {}
 
@@ -18,16 +19,16 @@ class LoanDueSoon extends Notification
         return ['mail'];
     }
 
-    public function toMail(): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
-        $game = $this->loan->copy->game;
+        $game    = $this->loan->copy->game;
         $dueDate = $this->loan->due_date->format('d.m.Y');
+        $dashboardUrl = env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard';
 
-        return (new MailMessage)
-            ->subject("Erinnerung: Rückgabe von „{$game->title}" am {$dueDate}")
-            ->greeting('Hallo,')
-            ->line("Deine Ausleihe von **{$game->title}** läuft am **{$dueDate}** ab.")
-            ->action('Zum Dashboard', env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard')
-            ->line('Falls du das Spiel länger behalten möchtest, kannst du eine Verlängerung beantragen.');
+        return $this->buildFromTemplate('loan_due_soon', [
+            'name'     => $notifiable->name,
+            'game'     => $game->title,
+            'due_date' => $dueDate,
+        ], $dashboardUrl);
     }
 }

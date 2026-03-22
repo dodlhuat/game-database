@@ -1,5 +1,6 @@
 <template>
   <main class="content">
+    <NuxtLink to="/" class="back-link">← Zurück zur Startseite</NuxtLink>
     <h1>Nutzungsbedingungen</h1>
 
     <div v-if="loading" class="spinner"></div>

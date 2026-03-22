@@ -112,6 +112,16 @@ export function useAdmin() {
   const fetchDamageReports = (params?: Record<string, string | number>) =>
     api.get<{ data: unknown[] }>('/admin/damage-reports', { params })
 
+  // Email Templates
+  const fetchEmailTemplates = () =>
+    api.get<{ data: unknown[] }>('/admin/email-templates')
+
+  const updateEmailTemplate = (key: string, data: unknown) =>
+    api.put(`/admin/email-templates/${key}`, data)
+
+  const resetEmailTemplate = (key: string) =>
+    api.post(`/admin/email-templates/${key}/reset`, {})
+
   // Packages
   const fetchAdminPackages = () =>
     api.get<{ data: unknown[] }>('/admin/packages')
@@ -136,5 +146,6 @@ export function useAdmin() {
     fetchNewsletters, sendNewsletter,
     fetchDamageReports,
     fetchAdminPackages, createPackage, updatePackage, deletePackage,
+    fetchEmailTemplates, updateEmailTemplate, resetEmailTemplate,
   }
 }

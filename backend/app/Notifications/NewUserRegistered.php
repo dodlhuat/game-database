@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewUserRegistered extends Notification
 {
-    use Queueable;
+    use Queueable, UsesEmailTemplate;
 
     public function __construct(private User $newUser) {}
 
@@ -18,17 +19,13 @@ class NewUserRegistered extends Notification
         return ['mail'];
     }
 
-    public function toMail(): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = config('app.url') . '/admin/users/' . $this->newUser->id;
+        $approveUrl = config('frontend.url', env('FRONTEND_URL', 'http://localhost:3000')) . '/admin/users';
 
-        return (new MailMessage)
-            ->subject('Neue Registrierung: ' . $this->newUser->name)
-            ->greeting('Hallo Admin,')
-            ->line('Ein neues Mitglied hat sich registriert und wartet auf Freischaltung.')
-            ->line('**Name:** ' . $this->newUser->name)
-            ->line('**E-Mail:** ' . $this->newUser->email)
-            ->action('Mitglied freischalten', $approveUrl)
-            ->line('Bitte prüfe die Anfrage im Admin-Bereich.');
+        return $this->buildFromTemplate('new_user_registered', [
+            'name'  => $this->newUser->name,
+            'email' => $this->newUser->email,
+        ], $approveUrl);
     }
 }

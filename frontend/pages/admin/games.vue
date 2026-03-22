@@ -80,6 +80,11 @@
                   <td>
                     <div class="action-row">
                       <button class="action-btn" @click="openEdit(game)">Bearbeiten</button>
+                      <button class="action-btn" @click="openCopies(game)">
+                        <span class="icon icon-layers-outline" aria-hidden="true" />
+                        Kopien
+                        <span class="action-btn__badge">{{ game.copies_count }}</span>
+                      </button>
                       <button class="action-btn action-btn--danger" @click="remove(game.id)">Löschen</button>
                     </div>
                   </td>
@@ -92,7 +97,7 @@
       </div>
     </div>
 
-    <!-- ── Formular Modal ───────────────────────────────────────── -->
+    <!-- ── Spiel-Formular Modal ──────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
         <div class="modal modal--wide">
@@ -193,6 +198,116 @@
       </div>
     </Transition>
 
+    <!-- ── Kopien Modal ──────────────────────────────────────────── -->
+    <Transition name="modal">
+      <div v-if="copiesPanel.open" class="modal-overlay" @click.self="closeCopies">
+        <div class="modal modal--wide">
+          <div class="modal__header">
+            <div>
+              <div class="modal__eyebrow">Kopien verwalten</div>
+              <h3 class="modal__title">{{ copiesPanel.gameTitle }}</h3>
+            </div>
+            <button class="modal__close" aria-label="Schließen" @click="closeCopies">
+              <span class="icon icon-close-outline" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div class="modal__body">
+            <div v-if="copiesPanel.loading" class="modal-loading">
+              <div class="spinner" />
+            </div>
+
+            <template v-else>
+              <div class="modal__toolbar">
+                <span class="modal__count">{{ copiesPanel.copies.length }} Kopie{{ copiesPanel.copies.length !== 1 ? 'n' : '' }}</span>
+                <button class="action-btn" @click="openCopyCreate">
+                  <span class="icon icon-plus-outline" aria-hidden="true" />
+                  Kopie hinzufügen
+                </button>
+              </div>
+
+              <div v-if="!copiesPanel.copies.length" class="dash-empty">
+                <span class="icon icon-layers-outline dash-empty__icon" aria-hidden="true" />
+                <p class="dash-empty__text">Noch keine Kopien für dieses Spiel.</p>
+              </div>
+
+              <div v-else class="copies-table-wrap">
+                <table class="dash-table">
+                  <thead>
+                    <tr>
+                      <th>Zustand</th>
+                      <th>QR-Code</th>
+                      <th>Verfügbar</th>
+                      <th>Aktionen</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="copy in copiesPanel.copies" :key="copy.id">
+                      <td>
+                        <span class="status-badge" :class="conditionClass(copy.condition)">
+                          {{ conditionLabel(copy.condition) }}
+                        </span>
+                      </td>
+                      <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
+                      <td>
+                        <span class="status-badge" :class="copy.is_available ? 'status-badge--active' : 'status-badge--danger'">
+                          {{ copy.is_available ? 'Verfügbar' : 'Ausgeliehen' }}
+                        </span>
+                      </td>
+                      <td>
+                        <div class="action-row">
+                          <button class="action-btn" @click="openCopyEdit(copy)">Bearbeiten</button>
+                          <button class="action-btn action-btn--danger" @click="removeCopy(copy.id)">Löschen</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+          </div>
+
+          <div class="modal__actions">
+            <button class="action-btn" @click="closeCopies">Schließen</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── Kopie-Formular Modal ──────────────────────────────────── -->
+    <Transition name="modal">
+      <div v-if="copyForm.open" class="modal-overlay modal-overlay--top" @click.self="copyForm.open = false">
+        <div class="modal">
+          <div class="modal__header">
+            <h3 class="modal__title">{{ copyForm.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h3>
+            <button class="modal__close" aria-label="Schließen" @click="copyForm.open = false">
+              <span class="icon icon-close-outline" aria-hidden="true" />
+            </button>
+          </div>
+
+          <div class="modal__body">
+            <div class="form-field">
+              <label class="form-label">Zustand</label>
+              <select v-model="copyForm.condition" class="form-select">
+                <option value="GOOD">Gut</option>
+                <option value="WORN">Abgenutzt</option>
+                <option value="DAMAGED">Beschädigt</option>
+                <option value="LOCKED">Gesperrt</option>
+              </select>
+            </div>
+            <UiInput v-model="copyForm.qr_code" label="QR-Code (optional)" />
+            <UiInput v-model="copyForm.notes" label="Notizen" />
+            <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
+          </div>
+
+          <div class="modal__actions">
+            <UiButton :loading="copyForm.saving" @click="saveCopy">Speichern</UiButton>
+            <button class="action-btn" @click="copyForm.open = false">Abbrechen</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- ── Import Ergebnis Modal ────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
@@ -246,7 +361,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames } = useAdmin()
+const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames, fetchCopies, createCopy, updateCopy, deleteCopy } = useAdmin()
 
 interface Game {
   id: number; title: string; slug: string; description: string | null; short_description: string | null
@@ -255,6 +370,10 @@ interface Game {
   duration_min: number | null; duration_max: number | null; difficulty: string | null
   language: string | null; year: number | null; tags: { id: number; name: string }[]
   cover_image_url: string | null
+}
+
+interface Copy {
+  id: number; condition: string; qr_code: string | null; notes: string | null; is_available: boolean
 }
 
 const year = new Date().getFullYear()
@@ -271,6 +390,7 @@ const categories = ref<{ id: number; name: string }[]>([])
 const allTags = ref<{ id: number; name: string; slug: string }[]>([])
 const newTagName = ref('')
 
+// ── Spiel-Formular ────────────────────────────────────────────────
 const form = reactive({
   open: false, id: null as number | null,
   title: '', slug: '', description: '', short_description: '',
@@ -281,6 +401,26 @@ const form = reactive({
   is_active: true, tag_ids: [] as number[],
   coverFile: null as File | null,
   existingCoverUrl: null as string | null,
+})
+
+// ── Kopien Panel ──────────────────────────────────────────────────
+const copiesPanel = reactive({
+  open: false,
+  gameId: null as number | null,
+  gameTitle: '',
+  copies: [] as Copy[],
+  loading: false,
+})
+
+// ── Kopie-Formular ────────────────────────────────────────────────
+const copyForm = reactive({
+  open: false,
+  id: null as number | null,
+  condition: 'GOOD',
+  qr_code: '',
+  notes: '',
+  saving: false,
+  error: '',
 })
 
 onMounted(async () => {
@@ -333,6 +473,58 @@ async function save() {
 
 async function remove(id: number) { await deleteGame(id); await load() }
 
+// ── Kopien ────────────────────────────────────────────────────────
+async function openCopies(game: Game) {
+  copiesPanel.gameId = game.id
+  copiesPanel.gameTitle = game.title
+  copiesPanel.open = true
+  copiesPanel.loading = true
+  try {
+    const data = await fetchCopies({ game_id: game.id })
+    copiesPanel.copies = data.data as Copy[]
+  } finally {
+    copiesPanel.loading = false
+  }
+}
+
+function closeCopies() { copiesPanel.open = false }
+
+function openCopyCreate() {
+  Object.assign(copyForm, { open: true, id: null, condition: 'GOOD', qr_code: '', notes: '', error: '' })
+}
+
+function openCopyEdit(copy: Copy) {
+  Object.assign(copyForm, { open: true, id: copy.id, condition: copy.condition, qr_code: copy.qr_code ?? '', notes: copy.notes ?? '', error: '' })
+}
+
+async function saveCopy() {
+  copyForm.saving = true; copyForm.error = ''
+  try {
+    const payload = { game_id: copiesPanel.gameId, condition: copyForm.condition, qr_code: copyForm.qr_code || undefined, notes: copyForm.notes || undefined }
+    copyForm.id ? await updateCopy(copyForm.id, payload) : await createCopy(payload)
+    const data = await fetchCopies({ game_id: copiesPanel.gameId! })
+    copiesPanel.copies = data.data as Copy[]
+    const game = games.value.find(g => g.id === copiesPanel.gameId)
+    if (game) game.copies_count = copiesPanel.copies.length
+    copyForm.open = false
+  } catch (err: unknown) {
+    copyForm.error = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+  } finally { copyForm.saving = false }
+}
+
+async function removeCopy(id: number) {
+  try {
+    await deleteCopy(id)
+    copiesPanel.copies = copiesPanel.copies.filter(c => c.id !== id)
+    const game = games.value.find(g => g.id === copiesPanel.gameId)
+    if (game) game.copies_count = copiesPanel.copies.length
+  } catch (err: unknown) { alert((err as { message?: string }).message ?? 'Fehler.') }
+}
+
+function conditionLabel(c: string) { const m: Record<string, string> = { GOOD: 'Gut', WORN: 'Abgenutzt', DAMAGED: 'Beschädigt', LOCKED: 'Gesperrt' }; return m[c] ?? c }
+function conditionClass(c: string) { const m: Record<string, string> = { GOOD: 'status-badge--active', WORN: 'status-badge--pending', DAMAGED: 'status-badge--danger', LOCKED: 'status-badge--muted' }; return m[c] ?? '' }
+
+// ── Import / Export ───────────────────────────────────────────────
 async function doImport(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (!file) return
@@ -419,6 +611,8 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .dash-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; padding: 3rem 1.5rem; color: var(--secondary-text); &__icon { width: 2rem; height: 2rem; opacity: 0.35; } &__text { font-size: 0.9rem; padding-bottom: 0; } }
 
 .table-wrap { overflow-x: auto; }
+.copies-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--divider); margin-top: 0.75rem; }
+
 .dash-table {
   width: 100%; border-collapse: collapse; font-size: 0.875rem;
   th { padding: 0.7rem 1.5rem; text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--secondary-text); background: var(--background); border-bottom: 1px solid var(--divider); white-space: nowrap; }
@@ -428,31 +622,46 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__primary { font-weight: 600; }
 }
 
+.text-mono { font-family: monospace; font-size: 0.8rem; color: var(--secondary-text); }
+
 .status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
-.status-badge--active { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.status-badge--muted  { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
+.status-badge--active  { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+.status-badge--pending { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
+.status-badge--danger  { background: rgba(239,68,68,0.10); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.status-badge--muted   { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {
   display: inline-flex; align-items: center; gap: 0.35rem;
   padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit;
   color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
+  .icon { width: 14px; height: 14px; }
   &:hover { border-color: var(--accent-color); color: var(--accent-text); }
   &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
+  &__badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; font-size: 0.7rem; font-weight: 700; background: $amber-08; color: $amber; border: 1px solid $amber-25; border-radius: 999px; }
 }
 
 // ─── Modal ────────────────────────────────────────────────────────
-.modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto;
+  &--top { z-index: 210; background: rgba(0,0,0,0.4); backdrop-filter: none; }
+}
 .modal {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
   &--wide { max-width: 700px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
+  &__eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: $amber; margin-bottom: 0.2rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
   &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
   &__body { margin-bottom: 1.5rem; max-height: 65vh; overflow-y: auto; }
+  &__toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  &__count { font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); }
   &__actions { display: flex; gap: 0.75rem; }
 }
+
+.modal-loading { display: flex; justify-content: center; align-items: center; padding: 2rem; }
 
 .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .modal { transition: opacity 0.2s ease, transform 0.2s ease; } }
 .modal-enter-from, .modal-leave-to { opacity: 0; .modal { opacity: 0; transform: translateY(8px) scale(0.98); } }
@@ -464,6 +673,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__full { grid-column: 1 / -1; }
 }
 
+.form-field { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.75rem; }
 .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
 
 .form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
@@ -471,45 +681,16 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .form-file { display: block; width: 100%; font-size: 0.875rem; color: var(--secondary-text); padding: 0.4rem 0; }
 
 .cover-preview {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  padding: 0.75rem;
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-
-  &__img {
-    width: 64px;
-    height: 64px;
-    object-fit: cover;
-    border-radius: 6px;
-    flex-shrink: 0;
-  }
-
-  &__hint {
-    font-size: 0.8rem;
-    color: var(--secondary-text);
-    padding-bottom: 0;
-  }
-
-  &__remove {
-    font-size: 0.78rem;
-    font-weight: 600;
-    font-family: inherit;
-    color: #f87171;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    &:hover { text-decoration: underline; }
-  }
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; padding: 0.75rem;
+  background: var(--background); border: 1px solid var(--divider); border-radius: 8px;
+  &__img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
+  &__hint { font-size: 0.8rem; color: var(--secondary-text); padding-bottom: 0; }
+  &__remove { font-size: 0.78rem; font-weight: 600; font-family: inherit; color: #f87171; background: transparent; border: none; cursor: pointer; padding: 0; &:hover { text-decoration: underline; } }
 }
 
 .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--primary-text); cursor: pointer; user-select: none; input { accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer; } }
 
-.form-error { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
+.form-error { margin-top: 0.75rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
 
 .tag-picker { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.5rem; }
 .tag-chip { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.65rem; border: 1px solid var(--divider); border-radius: 999px; font-size: 0.8rem; cursor: pointer; user-select: none; transition: border-color 0.15s, background 0.15s; &--selected { border-color: var(--accent-color); background: var(--accent-color-muted); color: var(--accent-text); } &__input { display: none; } }

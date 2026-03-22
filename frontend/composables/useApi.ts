@@ -52,6 +52,11 @@ export function useApi() {
     })
 
     if (!response.ok) {
+      if (response.status === 401) {
+        const auth = useAuthStore()
+        auth.logout()
+        await navigateTo('/login?reason=unauthenticated')
+      }
       const error = await response.json().catch(() => ({ message: 'Unbekannter Fehler' }))
       throw { status: response.status, ...error }
     }

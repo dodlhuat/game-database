@@ -3,33 +3,16 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use App\Models\Game;
 use App\Models\Package;
 use App\Models\Tag;
 use App\Models\TermsVersion;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // Admin-User
-        User::firstOrCreate(
-            ['email' => 'admin@spielothek.de'],
-            [
-                'name'              => 'Admin',
-                'password'          => Hash::make('password'),
-                'role'              => 'ADMIN',
-                'status'            => 'ACTIVE',
-                'newsletter_opt_in' => false,
-                'terms_accepted_at' => now(),
-                'terms_version'     => '1.0',
-            ]
-        );
-
         // Nutzungsbedingungen
         TermsVersion::firstOrCreate(
             ['version' => '1.0'],
@@ -40,98 +23,29 @@ class AdminSeeder extends Seeder
         );
 
         // Kategorien
-        $categories = [
-            ['name' => 'Strategiespiele',  'description' => 'Taktik, Planung und langfristiges Denken'],
-            ['name' => 'Familienspiele',   'description' => 'Spaß für Jung und Alt'],
-            ['name' => 'Kartenspiele',     'description' => 'Kompakte Spiele mit Karten'],
-            ['name' => 'Kooperationsspiele', 'description' => 'Gemeinsam gewinnen oder verlieren'],
-            ['name' => 'Partyspiele',        'description' => 'Ideal für große Runden'],
-            ['name' => 'Lernspiele',         'description' => 'Spielend lernen'],
-            ['name' => 'Trinkspiele',        'description' => 'Lustige Spiele mit Getränken'],
-            ['name' => 'Großgruppenspiele',  'description' => 'Spiele für 8 und mehr Personen'],
+        $categoryNames = [
+            'Strategiespiele', 'Familienspiele', 'Kartenspiele', 'Kooperationsspiele',
+            'Partyspiele', 'Lernspiele', 'Trinkspiele', 'Großgruppenspiele',
         ];
 
-        foreach ($categories as $cat) {
-            Category::firstOrCreate(['name' => $cat['name']], $cat);
+        foreach ($categoryNames as $name) {
+            Category::firstOrCreate(
+                ['name' => $name],
+                ['slug' => Str::slug($name)]
+            );
         }
 
         // Tags
-        $tagNames = ['ab 8', 'ab 12', 'ab 16', '2 Spieler', '2-4 Spieler', '2-6 Spieler', '4+ Spieler',
-                     '30 Min', '60 Min', '90+ Min', 'Einsteiger', 'Experten', 'Bestseller'];
-        $tags = [];
-        foreach ($tagNames as $name) {
-            $tags[$name] = Tag::firstOrCreate(['name' => $name])->id;
-        }
-
-        $strategie = Category::where('name', 'Strategiespiele')->first();
-        $familie   = Category::where('name', 'Familienspiele')->first();
-        $koop      = Category::where('name', 'Kooperationsspiele')->first();
-
-        // Beispielspiele
-        $games = [
-            [
-                'title'       => 'Catan',
-                'slug'        => 'catan',
-                'description' => 'Baue Siedlungen, Städte und Straßen auf der Insel Catan. Tausche Rohstoffe und entwickle dein Reich.',
-                'min_players' => 3,
-                'max_players' => 4,
-                'min_age'     => 10,
-                'duration'    => 90,
-                'category_id' => $strategie?->id,
-                'tags'        => ['ab 8', '2-4 Spieler', '90+ Min', 'Bestseller'],
-            ],
-            [
-                'title'       => 'Ticket to Ride',
-                'slug'        => 'ticket-to-ride',
-                'description' => 'Verbinde Städte mit Zugstrecken quer durch Europa. Wer die längsten Routen baut, gewinnt.',
-                'min_players' => 2,
-                'max_players' => 5,
-                'min_age'     => 8,
-                'duration'    => 60,
-                'category_id' => $familie?->id,
-                'tags'        => ['ab 8', '2-6 Spieler', '60 Min', 'Einsteiger'],
-            ],
-            [
-                'title'       => 'Pandemic',
-                'slug'        => 'pandemic',
-                'description' => 'Rettet gemeinsam die Welt vor vier gefährlichen Seuchen. Ein kooperatives Spiel für 2–4 Spieler.',
-                'min_players' => 2,
-                'max_players' => 4,
-                'min_age'     => 8,
-                'duration'    => 60,
-                'category_id' => $koop?->id,
-                'tags'        => ['ab 8', '2-4 Spieler', '60 Min', 'Bestseller'],
-            ],
-            [
-                'title'       => '7 Wonders',
-                'slug'        => '7-wonders',
-                'description' => 'Führe eine der sieben antiken Weltwunder zum Ruhm. Ein Drafting-Spiel für 2–7 Spieler.',
-                'min_players' => 2,
-                'max_players' => 7,
-                'min_age'     => 10,
-                'duration'    => 30,
-                'category_id' => $strategie?->id,
-                'tags'        => ['ab 12', '2-6 Spieler', '30 Min'],
-            ],
-            [
-                'title'       => 'Dixit',
-                'slug'        => 'dixit',
-                'description' => 'Erzähle mit Bildkarten Geschichten und rate, welche Karte zum Hinweis passt.',
-                'min_players' => 3,
-                'max_players' => 6,
-                'min_age'     => 8,
-                'duration'    => 30,
-                'category_id' => $familie?->id,
-                'tags'        => ['ab 8', '2-6 Spieler', '30 Min', 'Einsteiger'],
-            ],
+        $tagNames = [
+            'ab 8', 'ab 12', 'ab 16', '2 Spieler', '2-4 Spieler', '2-6 Spieler', '4+ Spieler',
+            '30 Min', '60 Min', '90+ Min', 'Einsteiger', 'Experten', 'Bestseller',
         ];
 
-        foreach ($games as $gameData) {
-            $tagIds = collect($gameData['tags'])->map(fn($t) => $tags[$t] ?? null)->filter()->values()->all();
-            unset($gameData['tags']);
-
-            $game = Game::firstOrCreate(['slug' => $gameData['slug']], $gameData);
-            $game->tags()->syncWithoutDetaching($tagIds);
+        foreach ($tagNames as $name) {
+            Tag::firstOrCreate(
+                ['name' => $name],
+                ['slug' => Str::slug($name)]
+            );
         }
 
         // Pakete
@@ -140,20 +54,16 @@ class AdminSeeder extends Seeder
 
         Package::firstOrCreate(['slug' => 'gruppenspiele-paket'], [
             'name'        => 'Gruppenspiele',
-            'description' => 'Ein Paket mit 8 Spielen für die große Gruppe (8+ Personen) aus dem Bereich Großgruppenspiele.',
+            'description' => 'Ein Paket mit Spielen für die große Gruppe (8+ Personen) aus dem Bereich Großgruppenspiele.',
             'type'        => 'CATEGORY',
             'category_id' => $grossgruppe?->id,
-            'min_games'   => 8,
-            'max_games'   => 8,
         ]);
 
         Package::firstOrCreate(['slug' => 'trinkspiele-paket'], [
             'name'        => 'Trinkspiele',
-            'description' => 'Ein Paket mit 4–6 Trinkspielen aus der Kategorie.',
+            'description' => 'Ein Paket mit Trinkspielen aus der Kategorie.',
             'type'        => 'CATEGORY',
             'category_id' => $trinkspiele?->id,
-            'min_games'   => 4,
-            'max_games'   => 6,
         ]);
 
         Package::firstOrCreate(['slug' => 'ueberraschungspaket-des-monats'], [
@@ -161,8 +71,6 @@ class AdminSeeder extends Seeder
             'description' => '3 ausgewählte Spieleempfehlungen – jeden Monat neu zusammengestellt.',
             'type'        => 'CURATED',
             'category_id' => null,
-            'min_games'   => 3,
-            'max_games'   => 3,
         ]);
     }
 }

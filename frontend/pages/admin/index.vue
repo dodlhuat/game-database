@@ -94,11 +94,7 @@
               <span class="nav-card__label">Spiele</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
-            <NuxtLink to="/admin/copies" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-layers-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Kopien</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
-            </NuxtLink>
+
             <NuxtLink to="/admin/loans" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-swap-outline" aria-hidden="true" /></span>
               <span class="nav-card__label">Ausleihen</span>
@@ -122,6 +118,11 @@
             <NuxtLink to="/admin/damage-reports" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-alert-triangle-outline" aria-hidden="true" /></span>
               <span class="nav-card__label">Schadensmeldungen</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
+            <NuxtLink to="/admin/emails" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-email-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">E-Mail-Vorlagen</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/loan-settings" class="nav-card">

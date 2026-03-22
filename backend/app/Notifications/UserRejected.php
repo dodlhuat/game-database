@@ -2,13 +2,14 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class UserRejected extends Notification
 {
-    use Queueable;
+    use Queueable, UsesEmailTemplate;
 
     public function __construct(private ?string $reason = null) {}
 
@@ -17,17 +18,16 @@ class UserRejected extends Notification
         return ['mail'];
     }
 
-    public function toMail(): MailMessage
+    public function toMail(object $notifiable): MailMessage
     {
-        $message = (new MailMessage)
-            ->subject('Deine Registrierung wurde abgelehnt')
-            ->greeting('Hallo,')
-            ->line('Leider wurde deine Registrierung abgelehnt.');
+        $message = $this->buildFromTemplate('user_rejected', [
+            'name' => $notifiable->name,
+        ], '');
 
         if ($this->reason) {
             $message->line('**Grund:** ' . $this->reason);
         }
 
-        return $message->line('Bei Fragen wende dich an uns.');
+        return $message;
     }
 }

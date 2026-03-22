@@ -56,9 +56,7 @@
               </div>
               <p v-if="saveError" class="form-error">{{ saveError }}</p>
               <div class="settings-actions">
-                <button type="submit" class="hero-btn" :disabled="saving">
-                  {{ saving ? 'Wird gespeichert…' : 'Einstellungen speichern' }}
-                </button>
+                <UiButton type="submit" :loading="saving">Einstellungen speichern</UiButton>
                 <span v-if="saved" class="save-success">Gespeichert</span>
               </div>
             </form>
@@ -204,7 +202,6 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 .form-hint { font-size: 0.78rem; color: var(--secondary-text); margin: 0; padding-bottom: 0; }
 .form-error { font-size: 0.85rem; color: #f87171; margin: 0; padding-bottom: 0; }
 
-.hero-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit; color: #0F0E0C; background: $amber; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; &:hover { background: darken(#D4921E, 8%); } &:disabled { opacity: 0.6; cursor: not-allowed; } }
 .save-success { font-size: 0.85rem; font-weight: 600; color: #4ade80; }
 
 .preview-list { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
