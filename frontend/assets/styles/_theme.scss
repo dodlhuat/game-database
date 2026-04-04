@@ -1,0 +1,48 @@
+// ============================================================
+// Theme — Amber Premium
+// Overrides basix default blue (#3D63DD) with the amber palette
+// (#D4921E) used throughout the app. Import after basix in index.scss.
+// ============================================================
+
+:root {
+  // Core accent — amber gold
+  --accent-color:         #D4921E;
+  --accent-color-lighten: #F5D78E;   // lighter amber: link hover, datepicker hover bg
+  --accent-color-text:    #1A1100;   // near-black: text ON amber backgrounds
+  --accent-text:          #D4921E;   // amber: active states, inline accent text
+
+  // Missing variables referenced in page components but undefined in basix
+  --accent-color-muted:   rgba(212, 146, 30, 0.10);
+  --accent-lighten-muted: rgba(212, 146, 30, 0.07);
+  --success-muted:        rgba(46, 139, 87, 0.10);
+}
+
+[data-theme="dark"] {
+  --accent-color:         #D4921E;
+  --accent-color-lighten: rgba(212, 146, 30, 0.22);  // subtle amber wash in dark
+  --accent-color-text:    #EEE8DF;   // cream: text ON amber in dark context
+  --accent-text:          #D4921E;
+
+  --accent-color-muted:   rgba(212, 146, 30, 0.10);
+  --accent-lighten-muted: rgba(212, 146, 30, 0.07);
+  --success-muted:        rgba(92, 198, 137, 0.10);
+}
+
+// ─── Button-primary text ──────────────────────────────────────────
+// basix button-variant mixin hardcodes color:var(--background) for
+// primary buttons. In light mode --background is #F9F9FB (off-white),
+// giving ~2.8:1 contrast on amber — borderline. Override with the
+// high-contrast near-black so amber buttons are always readable.
+
+.button-primary,
+button.button-primary {
+  color: #1A1100;
+
+  &:hover:not(:disabled),
+  &:active:not(:disabled) {
+    color: #1A1100;
+  }
+}
+
+// In dark mode basix button-variant-dark uses color:var(--primary-text)
+// (#EEEEF0 cream) which gives good contrast on amber — leave as-is.

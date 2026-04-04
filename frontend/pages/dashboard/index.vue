@@ -217,21 +217,21 @@
     <!-- ── Rückgabe-Dialog ──────────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="returnLoan" class="modal-overlay" @click.self="returnLoan = null">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Spiel zurückgeben</h3>
-            <button class="modal__close" aria-label="Schließen" @click="returnLoan = null">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">Spiel zurückgeben</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="returnLoan = null">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
-          <p class="modal__game">{{ returnLoan.game?.title }}</p>
-          <label class="modal__label">Zustand</label>
-          <select v-model="returnCondition" class="modal__select">
+          <p class="dialog__game">{{ returnLoan.game?.title }}</p>
+          <label class="dialog__label">Zustand</label>
+          <select v-model="returnCondition" class="dialog__select">
             <option value="GOOD">Gut</option>
             <option value="WORN">Abgenutzt</option>
             <option value="DAMAGED">Beschädigt</option>
           </select>
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <UiButton :loading="returning" @click="submitReturn">Bestätigen</UiButton>
             <button class="action-btn" @click="returnLoan = null">Abbrechen</button>
           </div>
@@ -242,17 +242,17 @@
     <!-- ── Schadensmeldungs-Dialog ──────────────────────────────── -->
     <Transition name="modal">
       <div v-if="damageLoan" class="modal-overlay" @click.self="damageLoan = null">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Schaden melden</h3>
-            <button class="modal__close" aria-label="Schließen" @click="damageLoan = null">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">Schaden melden</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="damageLoan = null">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
-          <p class="modal__game">{{ damageLoan.game?.title }}</p>
+          <p class="dialog__game">{{ damageLoan.game?.title }}</p>
           <UiInput v-model="damageDescription" label="Beschreibung" />
           <UiInput v-model="damagePhotoUrl" label="Foto-URL (optional)" />
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <UiButton :loading="reporting" @click="submitDamage">Melden</UiButton>
             <button class="action-btn" @click="damageLoan = null">Abbrechen</button>
           </div>
@@ -263,16 +263,16 @@
     <!-- ── Verlängerungs-Dialog ─────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="extensionLoan" class="modal-overlay" @click.self="extensionLoan = null">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Verlängerung beantragen</h3>
-            <button class="modal__close" aria-label="Schließen" @click="extensionLoan = null">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">Verlängerung beantragen</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="extensionLoan = null">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
-          <p class="modal__game">{{ extensionLoan.game?.title }}</p>
-          <UiInput v-model="extensionDate" type="date" label="Neues Rückgabedatum" />
-          <div class="modal__actions">
+          <p class="dialog__game">{{ extensionLoan.game?.title }}</p>
+          <UiDatePicker v-model="extensionDate" label="Neues Rückgabedatum" :max-date="maxExtensionDate" />
+          <div class="dialog__actions">
             <UiButton :loading="extending" @click="submitExtension">Beantragen</UiButton>
             <button class="action-btn" @click="extensionLoan = null">Abbrechen</button>
           </div>
@@ -302,7 +302,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { Loan, DashboardData } from '~/composables/useLoans'
+import type { Loan, Reservation, DashboardData } from '~/composables/useLoans'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -327,9 +327,11 @@ const damageDescription = ref('')
 const damagePhotoUrl = ref('')
 const reporting = ref(false)
 
-const activeLoans = computed(() => data.value?.active_loans.data ?? [])
-const loanHistory = computed(() => data.value?.loan_history.data ?? [])
-const reservations = computed(() => (data.value?.reservations as { data: { id: number; position: number; game?: { title: string; slug: string } }[] })?.data ?? [])
+const maxExtensionDate = new Date(); maxExtensionDate.setDate(maxExtensionDate.getDate() + 14)
+
+const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
+const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
+const reservations = computed<Reservation[]>(() => data.value?.reservations ?? [])
 
 onMounted(async () => {
   try {
@@ -862,7 +864,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   &:hover { color: var(--primary-text); }
 }
 
-// ─── Modal ────────────────────────────────────────────────────────
+// ─── Dialog ────────────────────────────────────────────────────────
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -875,7 +877,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   padding: 1.5rem;
 }
 
-.modal {
+.dialog {
   background: var(--secondary-background);
   border: 1px solid var(--divider);
   border-radius: 16px;
@@ -969,7 +971,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
 .modal-leave-active {
   transition: opacity 0.2s ease;
 
-  .modal {
+  .dialog {
     transition: opacity 0.2s ease, transform 0.2s ease;
   }
 }
@@ -978,7 +980,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
 .modal-leave-to {
   opacity: 0;
 
-  .modal {
+  .dialog {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
   }
@@ -1016,6 +1018,10 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     flex-wrap: wrap;
     flex: 1;
     justify-content: center;
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
     @media (max-width: 640px) { justify-content: flex-start; }
   }
 

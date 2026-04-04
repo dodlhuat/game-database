@@ -78,3 +78,8 @@ code {
   padding: 0.1em 0.3em;
   border-radius: $radius-sm;
 }
+
+// Labels auf dunklem Hintergrund (z.B. Auth-Seiten)
+.auth-page label {
+  color: $color-gray-100;
+}

@@ -66,7 +66,7 @@
             <label for="newsletter-opt-in">Newsletter abonnieren</label>
 
             <input v-model="form.terms_accepted" type="checkbox" class="styled-checkbox" id="terms-accepted" required />
-            <label for="terms-accepted">Ich akzeptiere die <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink></label>
+            <label for="terms-accepted" style="white-space: pre;">Ich akzeptiere die <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink></label>
             <p v-if="errors.terms_accepted" class="error-text" role="alert">{{ errors.terms_accepted }}</p>
           </div>
 
@@ -127,7 +127,7 @@ async function submit() {
 
     if (e.errors) {
       Object.entries(e.errors).forEach(([key, msgs]) => {
-        if (key in errors) (errors as Record<string, string>)[key] = msgs[0]
+        if (key in errors) (errors as Record<string, string>)[key] = msgs[0] ?? ''
       })
     } else {
       serverError.value = e.message ?? 'Ein Fehler ist aufgetreten.'

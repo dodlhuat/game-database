@@ -9,12 +9,12 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Pakete" />
+        <AdminBreadcrumb label="Kategorien" />
         <div class="page-hero__row">
-          <h1 class="page-hero__title">Pakete verwalten</h1>
+          <h1 class="page-hero__title">Kategorien verwalten</h1>
           <button class="hero-btn" @click="openCreate">
             <span class="icon icon-plus-outline" aria-hidden="true" />
-            Paket hinzufügen
+            Kategorie hinzufügen
           </button>
         </div>
       </div>
@@ -30,13 +30,13 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Pakete</h2>
-            <span class="dash-section__count">{{ packages.length }}</span>
+            <h2 class="dash-section__title">Alle Kategorien</h2>
+            <span class="dash-section__count">{{ totalCount }}</span>
           </header>
 
-          <div v-if="!packages.length" class="dash-empty">
-            <span class="icon icon-gift-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Pakete vorhanden.</p>
+          <div v-if="!categories.length" class="dash-empty">
+            <span class="icon icon-layers-outline dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">Noch keine Kategorien vorhanden.</p>
           </div>
 
           <div v-else class="table-wrap">
@@ -44,35 +44,66 @@
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Typ</th>
-                  <th>Kategorie</th>
+                  <th>Slug</th>
                   <th>Spiele</th>
                   <th>Status</th>
                   <th>Aktionen</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="pkg in packages" :key="pkg.id">
-                  <td class="dash-table__primary">{{ pkg.name }}</td>
-                  <td>
-                    <span class="type-badge" :class="pkg.type === 'CURATED' ? 'type-badge--curated' : 'type-badge--category'">
-                      {{ pkg.type === 'CURATED' ? 'Kuratiert' : 'Kategorie' }}
-                    </span>
-                  </td>
-                  <td>{{ pkg.category?.name ?? '—' }}</td>
-                  <td>{{ pkg.games_count ?? 0 }}</td>
-                  <td>
-                    <span class="status-badge" :class="pkg.is_active ? 'status-badge--active' : 'status-badge--muted'">
-                      {{ pkg.is_active ? 'Aktiv' : 'Inaktiv' }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="action-row">
-                      <button class="action-btn" @click="openEdit(pkg)">Bearbeiten</button>
-                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">Löschen</button>
-                    </div>
-                  </td>
-                </tr>
+                <template v-for="cat in categories" :key="cat.id">
+                  <!-- Parent row -->
+                  <tr>
+                    <td class="dash-table__primary">{{ cat.name }}</td>
+                    <td class="text-mono text-muted">{{ cat.slug }}</td>
+                    <td>{{ cat.games_count ?? 0 }}</td>
+                    <td>
+                      <span class="status-badge" :class="cat.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                        {{ cat.is_active ? 'Aktiv' : 'Inaktiv' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-row">
+                        <button class="action-btn" @click="openEdit(cat)">Bearbeiten</button>
+                        <button
+                          class="action-btn"
+                          :class="cat.is_active ? 'action-btn--warn' : 'action-btn--ok'"
+                          @click="toggleActive(cat)"
+                        >
+                          {{ cat.is_active ? 'Deaktivieren' : 'Aktivieren' }}
+                        </button>
+                        <button class="action-btn action-btn--danger" @click="remove(cat)">Löschen</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <!-- Child rows -->
+                  <tr v-for="child in cat.children" :key="child.id" class="child-row">
+                    <td class="dash-table__primary">
+                      <span class="child-indent" aria-hidden="true" />
+                      {{ child.name }}
+                    </td>
+                    <td class="text-mono text-muted">{{ child.slug }}</td>
+                    <td>{{ child.games_count ?? 0 }}</td>
+                    <td>
+                      <span class="status-badge" :class="child.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                        {{ child.is_active ? 'Aktiv' : 'Inaktiv' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="action-row">
+                        <button class="action-btn" @click="openEdit(child)">Bearbeiten</button>
+                        <button
+                          class="action-btn"
+                          :class="child.is_active ? 'action-btn--warn' : 'action-btn--ok'"
+                          @click="toggleActive(child)"
+                        >
+                          {{ child.is_active ? 'Deaktivieren' : 'Aktivieren' }}
+                        </button>
+                        <button class="action-btn action-btn--danger" @click="remove(child)">Löschen</button>
+                      </div>
+                    </td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>
@@ -84,9 +115,9 @@
     <!-- ── Formular Modal ───────────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog dialog--wide">
+        <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ form.id ? 'Paket bearbeiten' : 'Paket hinzufügen' }}</h3>
+            <h3 class="dialog__title">{{ form.id ? 'Kategorie bearbeiten' : 'Kategorie hinzufügen' }}</h3>
             <button class="dialog__close" aria-label="Schließen" @click="closeForm">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
@@ -94,58 +125,37 @@
 
           <div class="dialog__body">
             <div class="form-grid">
-              <div class="form-grid__full"><UiInput v-model="form.name" label="Name" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" /></div>
-              <div class="form-grid__full"><UiInput v-model="form.description" label="Beschreibung" /></div>
-
-              <div>
-                <label class="form-label">Typ</label>
-                <select v-model="form.type" class="form-select">
-                  <option value="CURATED">Kuratiert</option>
-                  <option value="CATEGORY">Kategorie</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="form-label">Kategorie</label>
-                <select v-model="form.category_id" class="form-select">
-                  <option :value="null">Keine</option>
-                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                </select>
-              </div>
-
-              <!-- Spielauswahl -->
               <div class="form-grid__full">
-                <label class="form-label">
-                  Spiele
-                  <span v-if="form.game_ids.length" class="form-label__count">{{ form.game_ids.length }} ausgewählt</span>
-                </label>
-                <div class="game-search">
-                  <input
-                    v-model="gameSearch"
-                    type="text"
-                    class="game-search__input"
-                    placeholder="Spiele suchen…"
-                  />
-                </div>
-                <div class="game-picker">
-                  <label
-                    v-for="game in filteredGames"
-                    :key="game.id"
-                    class="game-chip"
-                    :class="{ 'game-chip--selected': form.game_ids.includes(game.id) }"
-                  >
-                    <input type="checkbox" :value="game.id" v-model="form.game_ids" class="game-chip__input" />
-                    {{ game.title }}
-                  </label>
-                  <p v-if="!filteredGames.length" class="game-picker__empty">Keine Spiele gefunden.</p>
-                </div>
+                <UiInput v-model="form.name" label="Name" required @input="autoSlug" />
+              </div>
+              <div class="form-grid__full">
+                <UiInput v-model="form.slug" label="Slug" required />
+              </div>
+
+              <div class="form-grid__full">
+                <label class="form-label">Übergeordnete Kategorie</label>
+                <select v-model="form.parent_id" class="form-select">
+                  <option :value="null">Keine (Hauptkategorie)</option>
+                  <option
+                    v-for="cat in parentOptions"
+                    :key="cat.id"
+                    :value="cat.id"
+                  >{{ cat.name }}</option>
+                </select>
+              </div>
+
+              <div class="form-grid__full">
+                <UiInput v-model="form.icon_url" label="Icon-URL (optional)" />
+              </div>
+
+              <div>
+                <UiInput v-model="form.sort_order" label="Reihenfolge" type="number" />
               </div>
 
               <div class="form-grid__full">
                 <label class="form-check">
                   <input v-model="form.is_active" type="checkbox" />
-                  <span>Paket aktiv schalten</span>
+                  <span>Kategorie aktiv</span>
                 </label>
               </div>
             </div>
@@ -179,95 +189,82 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminPackages, createPackage, updatePackage, deletePackage, fetchAdminCategories, fetchAdminGames } = useAdmin()
+const { fetchAdminCategories, createCategory, updateCategory, patchCategory, deleteCategory } = useAdmin()
 
-interface PackageItem {
+interface CategoryItem {
   id: number
   name: string
   slug: string
-  description: string | null
-  type: 'CATEGORY' | 'CURATED'
-  category: { id: number; name: string } | null
-  games_count: number
-  games: { id: number; title: string }[]
+  icon_url: string | null
+  sort_order: number
+  parent_id: number | null
   is_active: boolean
-}
-
-interface GameOption {
-  id: number
-  title: string
+  games_count?: number
+  children: CategoryItem[]
 }
 
 const year = new Date().getFullYear()
 const loading = ref(true)
 const saving = ref(false)
 const formError = ref('')
-interface CategoryItem { id: number; name: string; is_active: boolean; children: CategoryItem[] }
-const packages = ref<PackageItem[]>([])
-const rawCategories = ref<CategoryItem[]>([])
-const categories = computed(() => {
-  const flat: { id: number; name: string }[] = []
-  for (const cat of rawCategories.value) {
-    flat.push({ id: cat.id, name: cat.name })
-    for (const child of cat.children ?? []) {
-      flat.push({ id: child.id, name: `${cat.name} › ${child.name}` })
-    }
-  }
-  return flat
-})
-const allGames = ref<GameOption[]>([])
-const gameSearch = ref('')
+const categories = ref<CategoryItem[]>([])
 
-const filteredGames = computed(() => {
-  const q = gameSearch.value.trim().toLowerCase()
-  if (!q) return allGames.value
-  return allGames.value.filter(g => g.title.toLowerCase().includes(q))
-})
+const totalCount = computed(() =>
+  categories.value.reduce((n, c) => n + 1 + (c.children?.length ?? 0), 0)
+)
+
+// Top-level categories available as parents (exclude the category being edited)
+const parentOptions = computed(() =>
+  categories.value.filter(c => c.id !== form.id)
+)
 
 const form = reactive({
   open: false,
   id: null as number | null,
   name: '',
   slug: '',
-  description: '',
-  type: 'CURATED' as 'CATEGORY' | 'CURATED',
-  category_id: null as number | null,
-  game_ids: [] as number[],
+  icon_url: '',
+  sort_order: '0' as string | number,
+  parent_id: null as number | null,
   is_active: true,
 })
 
-onMounted(async () => {
-  await load()
-  const [catData, gameData] = await Promise.all([fetchAdminCategories(), fetchAdminGames()])
-  rawCategories.value = catData.data as CategoryItem[]
-  allGames.value = (gameData.data as GameOption[]).map(g => ({ id: g.id, title: g.title }))
-})
+onMounted(load)
 
 async function load() {
   loading.value = true
   try {
-    const data = await fetchAdminPackages()
-    packages.value = data.data as PackageItem[]
+    const data = await fetchAdminCategories()
+    categories.value = data.data as CategoryItem[]
   } finally {
     loading.value = false
   }
 }
 
+function autoSlug() {
+  if (form.id) return // don't overwrite slug when editing
+  form.slug = form.name
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 function openCreate() {
-  Object.assign(form, { open: true, id: null, name: '', slug: '', description: '', type: 'CURATED', category_id: null, game_ids: [], is_active: true })
-  gameSearch.value = ''
+  Object.assign(form, { open: true, id: null, name: '', slug: '', icon_url: '', sort_order: '0', parent_id: null, is_active: true })
   formError.value = ''
 }
 
-function openEdit(pkg: PackageItem) {
+function openEdit(cat: CategoryItem) {
   Object.assign(form, {
-    open: true, id: pkg.id,
-    name: pkg.name, slug: pkg.slug, description: pkg.description ?? '',
-    type: pkg.type, category_id: pkg.category?.id ?? null,
-    game_ids: pkg.games?.map(g => g.id) ?? [],
-    is_active: pkg.is_active,
+    open: true, id: cat.id,
+    name: cat.name, slug: cat.slug,
+    icon_url: cat.icon_url ?? '',
+    sort_order: String(cat.sort_order),
+    parent_id: cat.parent_id,
+    is_active: cat.is_active,
   })
-  gameSearch.value = ''
   formError.value = ''
 }
 
@@ -279,15 +276,14 @@ async function save() {
   try {
     const payload: Record<string, unknown> = {
       name: form.name,
-      type: form.type,
-      game_ids: form.game_ids,
+      slug: form.slug,
+      sort_order: Number(form.sort_order),
+      parent_id: form.parent_id,
       is_active: form.is_active,
     }
-    if (form.slug) payload.slug = form.slug
-    if (form.description) payload.description = form.description
-    if (form.category_id !== null) payload.category_id = form.category_id
+    if (form.icon_url) payload.icon_url = form.icon_url
 
-    form.id ? await updatePackage(form.id, payload) : await createPackage(payload)
+    form.id ? await updateCategory(form.id, payload) : await createCategory(payload)
     await load()
     closeForm()
   } catch (err: unknown) {
@@ -297,8 +293,13 @@ async function save() {
   }
 }
 
-async function remove(id: number) {
-  await deletePackage(id)
+async function toggleActive(cat: CategoryItem) {
+  await patchCategory(cat.id, { is_active: !cat.is_active })
+  await load()
+}
+
+async function remove(cat: CategoryItem) {
+  await deleteCategory(cat.id)
   await load()
 }
 </script>
@@ -361,13 +362,34 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__primary { font-weight: 600; }
 }
 
+.child-row {
+  td { background: rgba(0,0,0,0.15); }
+  &:hover td { background: rgba(0,0,0,0.22) !important; }
+}
+
+.child-indent {
+  display: inline-block;
+  width: 1.1rem;
+  height: 1px;
+  background: var(--divider);
+  margin-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: -8px;
+    width: 1px; height: 8px;
+    background: var(--divider);
+  }
+}
+
+.text-mono { font-family: monospace; font-size: 0.8rem; }
+.text-muted { color: var(--secondary-text); }
+
 .status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
 .status-badge--active { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
 .status-badge--muted  { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
-
-.type-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
-.type-badge--curated  { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
-.type-badge--category { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {
@@ -376,17 +398,18 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
   &:hover { border-color: var(--accent-color); color: var(--accent-text); }
   &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } }
+  &--warn   { color: #fb923c; border-color: rgba(251,146,60,0.25); background: rgba(251,146,60,0.05); &:hover { border-color: rgba(251,146,60,0.5); } }
+  &--ok     { color: #4ade80; border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.05); &:hover { border-color: rgba(34,197,94,0.5); } }
 }
 
 // ─── Modal ────────────────────────────────────────────────────────
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
 .dialog {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
-  &--wide { max-width: 660px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
   &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
-  &__body { margin-bottom: 1.5rem; max-height: 65vh; overflow-y: auto; }
+  &__body { margin-bottom: 1.5rem; }
   &__actions { display: flex; gap: 0.75rem; }
 }
 
@@ -399,62 +422,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   @media (max-width: 500px) { grid-template-columns: 1fr; }
   &__full { grid-column: 1 / -1; }
 }
-
-.form-label {
-  display: flex; align-items: center; gap: 0.4rem;
-  font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em;
-
-  &__count {
-    font-size: 0.72rem; font-weight: 700;
-    color: $amber; background: $amber-08; border: 1px solid $amber-25;
-    border-radius: 999px; padding: 0.1rem 0.45rem;
-  }
-}
-
+.form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
 .form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
-
 .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--primary-text); cursor: pointer; user-select: none; input { accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer; } }
-
 .form-error { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
-
-// ─── Game Picker ──────────────────────────────────────────────────
-.game-search {
-  margin-bottom: 0.5rem;
-
-  &__input {
-    display: block; width: 100%; height: 36px; padding: 0 0.75rem;
-    border: 1px solid var(--divider); border-radius: 8px;
-    background: var(--background); color: var(--primary-text);
-    font-size: 0.875rem; font-family: inherit;
-    transition: border-color 0.2s;
-    &:focus { outline: none; border-color: var(--accent-color); }
-  }
-}
-
-.game-picker {
-  max-height: 200px;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0.6rem;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  background: var(--background);
-
-  &__empty { font-size: 0.82rem; color: var(--secondary-text); padding-bottom: 0; width: 100%; }
-}
-
-.game-chip {
-  display: inline-flex; align-items: center; gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border: 1px solid var(--divider); border-radius: 999px;
-  font-size: 0.8rem; cursor: pointer; user-select: none;
-  transition: border-color 0.15s, background 0.15s;
-
-  &--selected { border-color: var(--accent-color); background: var(--accent-color-muted); color: var(--accent-text); }
-  &__input { display: none; }
-}
 
 // ─── Footer ───────────────────────────────────────────────────────
 .l-footer { background: $hero-bg; border-top: 1px solid $hero-divider; padding: 1.75rem 1.5rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; } &__brand { display: flex; align-items: center; gap: 0.4rem; } &__hex { font-size: 1.1rem; color: $amber; } &__name { font-size: 0.9rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; } &__copy { font-size: 0.8rem; color: $hero-muted-50; padding-bottom: 0; } }

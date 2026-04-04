@@ -77,7 +77,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useAuth } from '~/composables/useAuth'
-import { FlyoutMenu } from '~/assets/basix/js/flyout-menu'
+import { FlyoutMenu } from '@dodlhuat/basix/js/flyout-menu'
 
 const auth = useAuthStore()
 const { logout } = useAuth()

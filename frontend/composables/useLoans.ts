@@ -25,10 +25,16 @@ export interface Loan {
   }[]
 }
 
+export interface Reservation {
+  id: number
+  position: number
+  game?: { title: string; slug: string }
+}
+
 export interface DashboardData {
-  active_loans: { data: Loan[] }
-  loan_history: { data: Loan[] }
-  reservations: { data: unknown[] }
+  active_loans: Loan[]
+  loan_history: Loan[]
+  reservations: Reservation[]
   stats: {
     total_loans: number
     active_loans_count: number

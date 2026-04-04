@@ -463,6 +463,10 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     gap: 1.5rem;
     flex-wrap: wrap;
     flex: 1;
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
     justify-content: center;
     @media (max-width: 640px) { justify-content: flex-start; }
   }

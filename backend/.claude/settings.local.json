@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep:*)",
+      "Bash(npx vue-tsc:*)",
+      "Bash(./node_modules/.bin/vue-tsc --noEmit)",
+      "Bash(\"/c/Users/dodlh/Github/game-database/game-database/frontend/node_modules/.bin/vue-tsc\" --noEmit --project \"/c/Users/dodlh/Github/game-database/game-database/frontend/tsconfig.json\")",
+      "Bash(ls /c/Users/dodlh/Github/game-database/game-database/frontend/.eslint*)",
+      "Bash(ls:*)",
+      "Bash(grep -rn card.css /c/Users/dodlh/Github/game-database/game-database/frontend/ --include=*.ts --include=*.js --include=*.vue --include=*.scss --include=*.css)"
+    ]
+  }
+}

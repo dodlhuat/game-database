@@ -21,6 +21,7 @@ class LoanSettingController extends Controller
             'interval_days'       => ['required', 'integer', 'min:1'],
             'grace_days'          => ['required', 'integer', 'min:0'],
             'loan_duration_weeks' => ['required', 'integer', 'min:1'],
+            'max_extensions'      => ['required', 'integer', 'min:0'],
         ]);
 
         $setting = LoanSetting::instance();

@@ -94,6 +94,11 @@
               <span class="nav-card__label">Spiele</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
+            <NuxtLink to="/admin/categories" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-pricetags-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">Kategorien</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
 
             <NuxtLink to="/admin/loans" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-swap-outline" aria-hidden="true" /></span>

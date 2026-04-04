@@ -320,7 +320,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
   &__hex { font-size: 1.2rem; color: $amber; }
   &__name { font-size: 0.95rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; }
-  &__nav { display: flex; gap: 1.5rem; flex-wrap: wrap; flex: 1; justify-content: center; @media (max-width: 640px) { justify-content: flex-start; } }
+  &__nav { display: flex; gap: 1.5rem; flex-wrap: wrap; flex: 1; justify-content: center; position: static; transform: none; width: auto; height: auto; @media (max-width: 640px) { justify-content: flex-start; } }
   &__link { font-size: 0.85rem; color: $hero-muted; text-decoration: none; transition: color 0.2s; &:hover { color: $hero-text; } }
   &__copy { font-size: 0.8rem; color: $hero-muted-50; margin-left: auto; padding-bottom: 0; @media (max-width: 640px) { margin-left: 0; width: 100%; } }
 }

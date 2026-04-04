@@ -68,6 +68,9 @@ export function useAdmin() {
   const updateCategory = (id: number, data: unknown) =>
     api.put(`/admin/categories/${id}`, data)
 
+  const patchCategory = (id: number, data: unknown) =>
+    api.patch(`/admin/categories/${id}`, data)
+
   const deleteCategory = (id: number) =>
     api.delete(`/admin/categories/${id}`)
 
@@ -139,7 +142,7 @@ export function useAdmin() {
     fetchStats,
     fetchAdminGames, createGame, updateGame, deleteGame, importGames, exportGames,
     fetchAdminTags, createTag, deleteTag,
-    fetchAdminCategories, createCategory, updateCategory, deleteCategory,
+    fetchAdminCategories, createCategory, updateCategory, patchCategory, deleteCategory,
     fetchCopies, createCopy, updateCopy, deleteCopy,
     fetchAdminLoans, markOverdue,
     fetchExtensions, approveExtension, rejectExtension,

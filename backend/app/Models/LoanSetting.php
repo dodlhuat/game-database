@@ -11,6 +11,7 @@ class LoanSetting extends Model
         'interval_days',
         'grace_days',
         'loan_duration_weeks',
+        'max_extensions',
     ];
 
     protected $casts = [
@@ -24,6 +25,7 @@ class LoanSetting extends Model
             'interval_days'       => 14,
             'grace_days'          => 3,
             'loan_duration_weeks' => 4,
+            'max_extensions'      => 2,
         ]);
     }
 }

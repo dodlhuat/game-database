@@ -40,6 +40,15 @@ class LoanController extends Controller
             return response()->json(['message' => 'Diese Kopie ist gerade ausgeliehen.'], 422);
         }
 
+        $alreadyBorrowed = $request->user()->loans()
+            ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
+            ->whereHas('copy', fn ($q) => $q->where('game_id', $copy->game_id))
+            ->exists();
+
+        if ($alreadyBorrowed) {
+            return response()->json(['message' => 'Du hast dieses Spiel bereits ausgeliehen.'], 422);
+        }
+
         $setting   = LoanSetting::instance();
         $startDate = $this->calcNextAppointment($setting);
         $dueDate   = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
@@ -62,15 +71,15 @@ class LoanController extends Controller
         $today     = Carbon::today();
         $deadline  = $today->copy()->addDays($setting->grace_days);
         $startDate = Carbon::parse($setting->start_date);
-        $n         = 0;
 
-        while (true) {
-            $appointment = $startDate->copy()->addDays($n * $setting->interval_days);
-            if ($appointment->gt($deadline)) {
-                return $appointment;
-            }
-            $n++;
+        if ($setting->interval_days <= 0) {
+            return $deadline->copy()->addDay();
         }
+
+        $daysSinceStart = (int) $startDate->diffInDays($deadline, false);
+        $n = $daysSinceStart < 0 ? 0 : (int) floor($daysSinceStart / $setting->interval_days) + 1;
+
+        return $startDate->copy()->addDays($n * $setting->interval_days);
     }
 
     public function show(Request $request, Loan $loan): JsonResponse|LoanResource

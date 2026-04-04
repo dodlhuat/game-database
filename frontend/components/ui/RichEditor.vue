@@ -96,7 +96,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, watch } from 'vue'
-import { Editor } from '~/assets/basix/js/editor'
+import { Editor } from '@dodlhuat/basix/js/editor'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()

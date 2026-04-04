@@ -8,12 +8,7 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
-          <NuxtLink to="/admin" class="page-hero__back">
-            <span class="icon icon-arrow-back-outline" aria-hidden="true" /> Admin
-          </NuxtLink>
-          <span class="page-hero__eyebrow">Administration</span>
-        </nav>
+        <AdminBreadcrumb label="E-Mail-Vorlagen" />
         <h1 class="page-hero__title">E-Mail-Vorlagen</h1>
       </div>
     </section>
@@ -59,18 +54,18 @@
     <!-- ── Edit Modal ────────────────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="modal modal--wide">
-          <div class="modal__header">
+        <div class="dialog dialog--wide">
+          <div class="dialog__header">
             <div>
-              <div class="modal__eyebrow">E-Mail-Vorlage bearbeiten</div>
-              <h3 class="modal__title">{{ meta[form.key]?.label ?? form.key }}</h3>
+              <div class="dialog__eyebrow">E-Mail-Vorlage bearbeiten</div>
+              <h3 class="dialog__title">{{ meta[form.key]?.label ?? form.key }}</h3>
             </div>
-            <button class="modal__close" aria-label="Schließen" @click="closeForm">
+            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
 
-          <div class="modal__body">
+          <div class="dialog__body">
             <!-- Variables hint -->
             <div v-if="meta[form.key]?.vars?.length" class="vars-hint">
               <span class="vars-hint__label">Verfügbare Variablen:</span>
@@ -97,7 +92,7 @@
             <div v-if="formError" class="form-error">{{ formError }}</div>
           </div>
 
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <UiButton :loading="saving" @click="save">Speichern</UiButton>
             <button class="action-btn" @click="closeForm">Abbrechen</button>
             <button class="action-btn action-btn--muted" @click="reset" :disabled="saving">
@@ -269,7 +264,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
   &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
   &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
   &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; }
+  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; }
   &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } }
   &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; }
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
@@ -369,7 +364,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 
 // ─── Modal ────────────────────────────────────────────────────────
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
-.modal {
+.dialog {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 540px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
   &--wide { max-width: 620px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
@@ -380,8 +375,8 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
   &__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
 }
 
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .modal { transition: opacity 0.2s ease, transform 0.2s ease; } }
-.modal-enter-from, .modal-leave-to { opacity: 0; .modal { opacity: 0; transform: translateY(8px) scale(0.98); } }
+.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .dialog { transition: opacity 0.2s ease, transform 0.2s ease; } }
+.modal-enter-from, .modal-leave-to { opacity: 0; .dialog { opacity: 0; transform: translateY(8px) scale(0.98); } }
 
 // ─── Form ─────────────────────────────────────────────────────────
 .vars-hint {

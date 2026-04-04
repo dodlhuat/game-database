@@ -15,13 +15,19 @@ export default defineNuxtConfig({
   ],
 
   // SCSS global in alle Komponenten einbinden
-  css: ['~/assets/basix/css/style.scss', '~/assets/styles/index.scss'],
+  css: ['@dodlhuat/basix/css/style.scss', '~/assets/styles/index.scss'],
 
   vite: {
     server: {
       watch: {
         usePolling: true,
         interval: 300,
+      },
+    },
+    resolve: {
+      alias: {
+        // Package exports map doesn't include ./js/* — alias the whole js/ directory
+        '@dodlhuat/basix/js': '/app/node_modules/@dodlhuat/basix/js',
       },
     },
   },

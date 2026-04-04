@@ -9,13 +9,7 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <nav class="page-hero__breadcrumb" aria-label="Breadcrumb">
-          <NuxtLink to="/admin" class="page-hero__back">
-            <span class="icon icon-arrow-back-outline" aria-hidden="true" />
-            Admin
-          </NuxtLink>
-          <span class="page-hero__eyebrow">Administration</span>
-        </nav>
+        <AdminBreadcrumb label="Spiele" />
         <div class="page-hero__row">
           <h1 class="page-hero__title">Spiele verwalten</h1>
           <div class="hero-actions">
@@ -100,15 +94,15 @@
     <!-- ── Spiel-Formular Modal ──────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="modal modal--wide">
-          <div class="modal__header">
-            <h3 class="modal__title">{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h3>
-            <button class="modal__close" aria-label="Schließen" @click="closeForm">
+        <div class="dialog dialog--wide">
+          <div class="dialog__header">
+            <h3 class="dialog__title">{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
 
-          <div class="modal__body">
+          <div class="dialog__body">
             <div class="form-grid">
               <div class="form-grid__full"><UiInput v-model="form.title" label="Titel" required /></div>
               <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" required /></div>
@@ -190,7 +184,7 @@
             <div v-if="formError" class="form-error">{{ formError }}</div>
           </div>
 
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <UiButton :loading="saving" @click="save">Speichern</UiButton>
             <button class="action-btn" @click="closeForm">Abbrechen</button>
           </div>
@@ -201,25 +195,25 @@
     <!-- ── Kopien Modal ──────────────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="copiesPanel.open" class="modal-overlay" @click.self="closeCopies">
-        <div class="modal modal--wide">
-          <div class="modal__header">
+        <div class="dialog dialog--wide">
+          <div class="dialog__header">
             <div>
-              <div class="modal__eyebrow">Kopien verwalten</div>
-              <h3 class="modal__title">{{ copiesPanel.gameTitle }}</h3>
+              <div class="dialog__eyebrow">Kopien verwalten</div>
+              <h3 class="dialog__title">{{ copiesPanel.gameTitle }}</h3>
             </div>
-            <button class="modal__close" aria-label="Schließen" @click="closeCopies">
+            <button class="dialog__close" aria-label="Schließen" @click="closeCopies">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
 
-          <div class="modal__body">
+          <div class="dialog__body">
             <div v-if="copiesPanel.loading" class="modal-loading">
               <div class="spinner" />
             </div>
 
             <template v-else>
-              <div class="modal__toolbar">
-                <span class="modal__count">{{ copiesPanel.copies.length }} Kopie{{ copiesPanel.copies.length !== 1 ? 'n' : '' }}</span>
+              <div class="dialog__toolbar">
+                <span class="dialog__count">{{ copiesPanel.copies.length }} Kopie{{ copiesPanel.copies.length !== 1 ? 'n' : '' }}</span>
                 <button class="action-btn" @click="openCopyCreate">
                   <span class="icon icon-plus-outline" aria-hidden="true" />
                   Kopie hinzufügen
@@ -267,7 +261,7 @@
             </template>
           </div>
 
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <button class="action-btn" @click="closeCopies">Schließen</button>
           </div>
         </div>
@@ -277,15 +271,15 @@
     <!-- ── Kopie-Formular Modal ──────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="copyForm.open" class="modal-overlay modal-overlay--top" @click.self="copyForm.open = false">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">{{ copyForm.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h3>
-            <button class="modal__close" aria-label="Schließen" @click="copyForm.open = false">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">{{ copyForm.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="copyForm.open = false">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
 
-          <div class="modal__body">
+          <div class="dialog__body">
             <div class="form-field">
               <label class="form-label">Zustand</label>
               <select v-model="copyForm.condition" class="form-select">
@@ -300,7 +294,7 @@
             <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
           </div>
 
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <UiButton :loading="copyForm.saving" @click="saveCopy">Speichern</UiButton>
             <button class="action-btn" @click="copyForm.open = false">Abbrechen</button>
           </div>
@@ -311,14 +305,14 @@
     <!-- ── Import Ergebnis Modal ────────────────────────────────── -->
     <Transition name="modal">
       <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
-        <div class="modal">
-          <div class="modal__header">
-            <h3 class="modal__title">Import abgeschlossen</h3>
-            <button class="modal__close" aria-label="Schließen" @click="importResult = null">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">Import abgeschlossen</h3>
+            <button class="dialog__close" aria-label="Schließen" @click="importResult = null">
               <span class="icon icon-close-outline" aria-hidden="true" />
             </button>
           </div>
-          <div class="modal__body">
+          <div class="dialog__body">
             <div class="import-result">
               <div class="import-result__row">
                 <span class="import-result__label">Neue Spiele</span>
@@ -336,7 +330,7 @@
             </div>
             <div v-if="importError" class="form-error">{{ importError }}</div>
           </div>
-          <div class="modal__actions">
+          <div class="dialog__actions">
             <button class="action-btn" @click="importResult = null">Schließen</button>
           </div>
         </div>
@@ -386,7 +380,18 @@ const coverPreviewUrl = computed(() => form.coverFile ? URL.createObjectURL(form
 const saving = ref(false)
 const formError = ref('')
 const games = ref<Game[]>([])
-const categories = ref<{ id: number; name: string }[]>([])
+interface CategoryItem { id: number; name: string; is_active: boolean; children: CategoryItem[] }
+const rawCategories = ref<CategoryItem[]>([])
+const categories = computed(() => {
+  const flat: { id: number; name: string }[] = []
+  for (const cat of rawCategories.value) {
+    if (cat.is_active) flat.push({ id: cat.id, name: cat.name })
+    for (const child of cat.children ?? []) {
+      if (child.is_active) flat.push({ id: child.id, name: `${cat.name} › ${child.name}` })
+    }
+  }
+  return flat
+})
 const allTags = ref<{ id: number; name: string; slug: string }[]>([])
 const newTagName = ref('')
 
@@ -426,7 +431,7 @@ const copyForm = reactive({
 onMounted(async () => {
   await load()
   const [catData, tagData] = await Promise.all([fetchAdminCategories(), fetchAdminTags()])
-  categories.value = catData.data as { id: number; name: string }[]
+  rawCategories.value = catData.data as CategoryItem[]
   allTags.value = tagData.data
 })
 
@@ -573,7 +578,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
   &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
   &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; }
+  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; }
   &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } }
   &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; }
   &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
@@ -648,7 +653,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto;
   &--top { z-index: 210; background: rgba(0,0,0,0.4); backdrop-filter: none; }
 }
-.modal {
+.dialog {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
   &--wide { max-width: 700px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
@@ -663,8 +668,8 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .modal-loading { display: flex; justify-content: center; align-items: center; padding: 2rem; }
 
-.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .modal { transition: opacity 0.2s ease, transform 0.2s ease; } }
-.modal-enter-from, .modal-leave-to { opacity: 0; .modal { opacity: 0; transform: translateY(8px) scale(0.98); } }
+.modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .dialog { transition: opacity 0.2s ease, transform 0.2s ease; } }
+.modal-enter-from, .modal-leave-to { opacity: 0; .dialog { opacity: 0; transform: translateY(8px) scale(0.98); } }
 
 // ─── Form Elements ────────────────────────────────────────────────
 .form-grid {

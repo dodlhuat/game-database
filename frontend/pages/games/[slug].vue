@@ -148,7 +148,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { Game } from '~/composables/useGames'
-import { Modal } from '~/assets/basix/js/modal'
+import { Modal } from '@dodlhuat/basix/js/modal'
 
 const route = useRoute()
 const { fetchGame } = useGames()
@@ -234,8 +234,8 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)
     setTimeout(() => modal.hide(), 2000)
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string } }
-    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.data?.message ?? 'Ausleihe fehlgeschlagen. Bitte versuche es erneut.'; msgEl.style.display = 'block' }
+    const err = e as { message?: string }
+    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.message ?? 'Ausleihe fehlgeschlagen. Bitte versuche es erneut.'; msgEl.style.display = 'block' }
     if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Ausleihen bestätigen' }
   }
 }
@@ -247,8 +247,8 @@ async function handleReserve() {
     await addReservation(game.value.id)
     alert('Du wurdest auf die Warteliste gesetzt.')
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string } }
-    alert(err?.data?.message ?? 'Vormerken fehlgeschlagen.')
+    const err = e as { message?: string }
+    alert(err?.message ?? 'Vormerken fehlgeschlagen.')
   } finally {
     reserving.value = false
   }
@@ -642,6 +642,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     flex-wrap: wrap;
     flex: 1;
     justify-content: center;
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
     @media (max-width: 640px) { justify-content: flex-start; }
   }
 

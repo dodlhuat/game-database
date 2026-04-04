@@ -13,9 +13,15 @@ class CategoryController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        return CategoryResource::collection(
-            Category::withCount('games')->orderBy('sort_order')->orderBy('name')->get()
-        );
+        // Return all categories (flat) with children loaded and game counts
+        $categories = Category::withCount('games')
+            ->with(['children' => fn ($q) => $q->withCount('games')])
+            ->whereNull('parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        return CategoryResource::collection($categories);
     }
 
     public function store(CategoryRequest $request): CategoryResource
@@ -25,19 +31,21 @@ class CategoryController extends Controller
 
     public function show(Category $category): CategoryResource
     {
-        return new CategoryResource($category->loadCount('games'));
+        return new CategoryResource($category->loadCount('games')->load('children'));
     }
 
     public function update(CategoryRequest $request, Category $category): CategoryResource
     {
         $category->update($request->validated());
 
-        return new CategoryResource($category);
+        return new CategoryResource($category->load('children'));
     }
 
     public function destroy(Category $category): JsonResponse
     {
-        // Spiele auf keine Kategorie setzen
+        // Move children to top level before deleting
+        $category->children()->update(['parent_id' => null]);
+        // Remove category assignment from games
         $category->games()->update(['category_id' => null]);
         $category->delete();
 

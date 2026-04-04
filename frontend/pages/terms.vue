@@ -1,19 +1,20 @@
 <template>
   <main class="content">
     <NuxtLink to="/" class="back-link">← Zurück zur Startseite</NuxtLink>
-    <h1>Nutzungsbedingungen</h1>
-
-    <div v-if="loading" class="spinner"></div>
-
-    <div v-else-if="!terms" class="alert alert-default">
-      <p>Nutzungsbedingungen sind derzeit nicht verfügbar.</p>
-    </div>
-
-    <div v-else class="card">
+    <div class="card">
       <div class="header">
-        <small>Version {{ terms.version }} — veröffentlicht am {{ formatDate(terms.published_at) }}</small>
+        <h1>Nutzungsbedingungen</h1>
       </div>
-      <div class="body terms-content">{{ terms.content }}</div>
+      <div class="body">
+        <div v-if="loading" class="spinner"></div>
+        <div v-else-if="!terms" class="alert alert-default">
+          <p>Nutzungsbedingungen sind derzeit nicht verfügbar.</p>
+        </div>
+        <div v-else class="terms-content">
+          <small v-if="terms">Version {{ terms.version }} — veröffentlicht am {{ formatDate(terms.published_at) }}</small>
+          {{ terms.content }}
+        </div>
+      </div>
     </div>
   </main>
 </template>

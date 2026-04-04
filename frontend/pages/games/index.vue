@@ -430,6 +430,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     flex-wrap: wrap;
     flex: 1;
     justify-content: center;
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
     @media (max-width: 640px) { justify-content: flex-start; }
   }
 

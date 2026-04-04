@@ -18,15 +18,30 @@
 // 5. Animationen
 @import 'animations';
 
-// 6. Bibliotheks-Overrides
-// basix push-menu.scss wendet position:fixed + margin-left:-250px auf ALLE
-// <nav>-Elemente an. Da wir flyout-menu verwenden, müssen diese Stile zurückgesetzt werden.
+// 6. Theme overrides — amber accent replaces basix default blue
+@import 'theme';
+
+// 7. Bibliotheks-Overrides
+// basix push-menu.scss wendet position:fixed + transform:translateX(-100%)
+// auf ALLE <nav>-Elemente an. Zurücksetzen für alle Seiten.
 nav {
   position: static;
   top: auto;
   left: auto;
   width: auto;
   height: auto;
+  transform: none;
   margin: 0;
   transition: none;
+}
+
+// basix card: body/content padding-top statt padding: 0
+.card .body,
+.card .content {
+  padding-top: 1rem;
+}
+
+// basix checkbox: checkmark horizontal position
+.checkbox input[type="checkbox"] + label::after {
+  left: 0;
 }
