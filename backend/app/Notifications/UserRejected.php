@@ -22,7 +22,7 @@ class UserRejected extends Notification
     {
         $message = $this->buildFromTemplate('user_rejected', [
             'name' => $notifiable->name,
-        ], '');
+        ], '', $notifiable);
 
         if ($this->reason) {
             $message->line('**Grund:** ' . $this->reason);

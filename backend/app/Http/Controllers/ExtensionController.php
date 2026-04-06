@@ -12,8 +12,25 @@ class ExtensionController extends Controller
 {
     public function store(StoreExtensionRequest $request, Loan $loan): JsonResponse|ExtensionResource
     {
-        if ($loan->user_id !== $request->user()->id) {
+        $user = $request->user();
+
+        if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
+        }
+
+        if (!$user->isAdmin()) {
+            if (!$user->isMember()) {
+                return response()->json([
+                    'message' => 'Eine aktive Mitgliedschaft ist erforderlich.',
+                    'reason'  => 'membership_required',
+                ], 403);
+            }
+            if (!$user->hasEnoughTokens(1)) {
+                return response()->json([
+                    'message' => 'Nicht genug Token. Verlängern kostet 1 Token.',
+                    'reason'  => 'insufficient_tokens',
+                ], 402);
+            }
         }
 
         if (!in_array($loan->status, ['ACTIVE', 'OVERDUE'])) {
@@ -36,6 +53,10 @@ class ExtensionController extends Controller
             'requested_due_date' => $request->requested_due_date,
             'status'             => 'PENDING',
         ]);
+
+        if (!$user->isAdmin()) {
+            $user->decrement('tokens', 1);
+        }
 
         return new ExtensionResource($extension);
     }

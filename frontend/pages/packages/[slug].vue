@@ -56,15 +56,51 @@
               <li v-for="game in pkg.games" :key="game.id" class="game-list__item">
                 <NuxtLink :to="`/games/${game.slug}`" class="game-list__link">
                   {{ game.title }}
+                  <span
+                    v-if="auth.isLoggedIn && game.available_copies_count !== undefined"
+                    class="game-list__avail"
+                    :class="game.available_copies_count > 0 ? 'game-list__avail--yes' : 'game-list__avail--no'"
+                  >
+                    {{ game.available_copies_count > 0 ? 'Verfügbar' : 'Ausgeliehen' }}
+                  </span>
                   <span class="game-list__arrow" aria-hidden="true">→</span>
                 </NuxtLink>
               </li>
             </ul>
           </div>
 
+          <!-- Borrow Package CTA -->
           <div class="detail__cta">
-            <p class="detail__cta-text">Interesse an diesem Paket? Melde dich an und kontaktiere uns.</p>
-            <NuxtLink v-if="!auth.isLoggedIn" to="/login" class="detail__btn">Jetzt anmelden</NuxtLink>
+            <!-- Not logged in -->
+            <template v-if="!auth.isLoggedIn">
+              <p class="detail__cta-text">Melde dich an um dieses Paket auszuleihen.</p>
+              <NuxtLink to="/login" class="detail__btn">Jetzt anmelden</NuxtLink>
+            </template>
+
+            <!-- Logged in, not a member -->
+            <template v-else-if="!auth.isMember">
+              <p class="detail__cta-text">Nur Mitglieder können Pakete ausleihen.</p>
+              <NuxtLink to="/upgrade" class="detail__btn">Mitglied werden</NuxtLink>
+            </template>
+
+            <!-- Member, package available -->
+            <template v-else-if="pkg.available">
+              <div v-if="loanError" class="alert alert-error" style="margin-bottom: 0.75rem">{{ loanError }}</div>
+              <button
+                v-if="(auth.user?.tokens ?? 0) >= 3"
+                class="detail__btn detail__btn--primary"
+                :disabled="loaning"
+                @click="borrowPackage"
+              >
+                {{ loaning ? 'Wird ausgeliehen…' : 'Paket ausleihen (3 Token)' }}
+              </button>
+              <NuxtLink v-else to="/tokens" class="detail__btn">Nicht genug Token — Aufladen</NuxtLink>
+            </template>
+
+            <!-- Member, package unavailable -->
+            <template v-else>
+              <p class="detail__cta-text">Dieses Paket ist aktuell nicht vollständig verfügbar.</p>
+            </template>
           </div>
         </div>
       </section>
@@ -98,7 +134,10 @@ const route = useRoute()
 const { fetchPackage } = useGames()
 const auth = useAuthStore()
 
+const api = useApi()
 const loading = ref(true)
+const loaning = ref(false)
+const loanError = ref('')
 const pkg = ref<Package | null>(null)
 const year = new Date().getFullYear()
 
@@ -112,6 +151,22 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+async function borrowPackage() {
+  if (!pkg.value) return
+  loaning.value = true
+  loanError.value = ''
+  try {
+    await api.post('/package-loans', { package_id: pkg.value.id })
+    if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 3) })
+    await navigateTo('/dashboard')
+  } catch (err: unknown) {
+    const e = err as { message?: string }
+    loanError.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+  } finally {
+    loaning.value = false
+  }
+}
 
 useHead(() => ({
   title: pkg.value ? `${pkg.value.name} — Pakete` : 'Paket nicht gefunden',
@@ -310,6 +365,20 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     color: var(--secondary-text);
     opacity: 0.4;
     transition: opacity 0.15s;
+  }
+
+  &__avail {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    margin-left: auto;
+    flex-shrink: 0;
+
+    &--yes { background: #166534; color: #bbf7d0; }
+    &--no  { background: #7c2d12; color: #fed7aa; }
   }
 }
 

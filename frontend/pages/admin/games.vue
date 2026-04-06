@@ -67,7 +67,7 @@
                   <td>{{ game.category?.name ?? '—' }}</td>
                   <td>{{ game.copies_count }}</td>
                   <td>
-                    <span class="status-badge" :class="game.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                    <span class="badge" :class="game.is_active ? 'badge-success' : ''">
                       {{ game.is_active ? 'Aktiv' : 'Inaktiv' }}
                     </span>
                   </td>
@@ -162,15 +162,71 @@
 
               <div class="form-grid__full">
                 <label class="form-label">Coverbild</label>
-                <div v-if="form.existingCoverUrl && !form.coverFile" class="cover-preview">
-                  <img :src="form.existingCoverUrl" alt="Aktuelles Coverbild" class="cover-preview__img" />
-                  <p class="cover-preview__hint">Neues Bild auswählen um das bestehende zu ersetzen.</p>
+                <div class="uploader-content">
+                  <div
+                    class="drop-zone"
+                    :class="{ 'drag-over': isDragging }"
+                    @dragover.prevent="isDragging = true"
+                    @dragleave.prevent="isDragging = false"
+                    @drop.prevent="onDrop"
+                    @click="coverInputRef?.click()"
+                  >
+                    <input
+                      ref="coverInputRef"
+                      type="file"
+                      accept="image/*"
+                      style="display:none"
+                      @change="onFileChange"
+                    />
+                    <div class="drop-zone-content">
+                      <div class="icon-container">
+                        <span class="icon icon-image-outline" />
+                      </div>
+                      <span class="primary-text">Bild auswählen oder hierher ziehen</span>
+                      <span class="secondary-text">PNG, JPG, WEBP — max. 5 MB</span>
+                    </div>
+                  </div>
+
+                  <div v-if="form.coverFile || form.existingCoverUrl" class="file-list">
+                    <div class="file-item">
+                      <div class="file-item-header">
+                        <div class="file-info">
+                          <img
+                            :src="form.coverFile ? coverPreviewUrl! : form.existingCoverUrl!"
+                            alt="Vorschau"
+                            style="width:40px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0"
+                          />
+                          <div class="file-details">
+                            <span class="file-name">{{ form.coverFile ? form.coverFile.name : 'Aktuelles Coverbild' }}</span>
+                            <span class="file-size">{{ form.coverFile ? formatFileSize(form.coverFile.size) : '' }}</span>
+                          </div>
+                        </div>
+                        <button type="button" class="remove-btn" @click.stop="removeCover">
+                          <span class="icon icon-close-outline" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="form.coverFile" class="cover-preview">
-                  <img :src="coverPreviewUrl" alt="Vorschau" class="cover-preview__img" />
-                  <button type="button" class="cover-preview__remove" @click="form.coverFile = null">Entfernen</button>
+              </div>
+
+              <div v-if="form.id" class="form-grid__full">
+                <label class="form-label">Weitere Bilder</label>
+                <div class="game-images">
+                  <div v-if="form.existingImages.length" class="game-images__grid">
+                    <div v-for="img in form.existingImages" :key="img.id" class="game-images__item">
+                      <img :src="img.url" alt="Spielbild" class="game-images__thumb" />
+                      <button type="button" class="game-images__remove" @click="removeGameImage(img)" title="Bild löschen">
+                        <span class="icon icon-close-outline" />
+                      </button>
+                    </div>
+                  </div>
+                  <label class="game-images__add" :class="{ 'game-images__add--loading': imageUploading }">
+                    <input ref="imageInputRef" type="file" accept="image/*" multiple style="display:none" :disabled="imageUploading" @change="onImagesChange" />
+                    <span class="icon icon-image-outline" />
+                    <span>{{ imageUploading ? 'Hochladen…' : 'Bilder hinzufügen' }}</span>
+                  </label>
                 </div>
-                <input type="file" accept="image/*" class="form-file" @change="onFileChange" />
               </div>
 
               <div class="form-grid__full">
@@ -238,13 +294,13 @@
                   <tbody>
                     <tr v-for="copy in copiesPanel.copies" :key="copy.id">
                       <td>
-                        <span class="status-badge" :class="conditionClass(copy.condition)">
+                        <span class="badge" :class="conditionClass(copy.condition)">
                           {{ conditionLabel(copy.condition) }}
                         </span>
                       </td>
                       <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
                       <td>
-                        <span class="status-badge" :class="copy.is_available ? 'status-badge--active' : 'status-badge--danger'">
+                        <span class="badge" :class="copy.is_available ? 'badge-success' : 'badge-error'">
                           {{ copy.is_available ? 'Verfügbar' : 'Ausgeliehen' }}
                         </span>
                       </td>
@@ -355,7 +411,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames, fetchCopies, createCopy, updateCopy, deleteCopy } = useAdmin()
+const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames, fetchCopies, createCopy, updateCopy, deleteCopy, uploadGameImages, deleteGameImage } = useAdmin()
 
 interface Game {
   id: number; title: string; slug: string; description: string | null; short_description: string | null
@@ -364,7 +420,10 @@ interface Game {
   duration_min: number | null; duration_max: number | null; difficulty: string | null
   language: string | null; year: number | null; tags: { id: number; name: string }[]
   cover_image_url: string | null
+  images: { id: number; url: string }[]
 }
+
+interface GameImage { id: number; url: string }
 
 interface Copy {
   id: number; condition: string; qr_code: string | null; notes: string | null; is_available: boolean
@@ -377,8 +436,12 @@ const exporting = ref(false)
 const importResult = ref<{ new: number; updated: number; total: number } | null>(null)
 const importError = ref('')
 const coverPreviewUrl = computed(() => form.coverFile ? URL.createObjectURL(form.coverFile) : null)
+const coverInputRef = ref<HTMLInputElement | null>(null)
+const isDragging = ref(false)
 const saving = ref(false)
 const formError = ref('')
+const imageInputRef = ref<HTMLInputElement | null>(null)
+const imageUploading = ref(false)
 const games = ref<Game[]>([])
 interface CategoryItem { id: number; name: string; is_active: boolean; children: CategoryItem[] }
 const rawCategories = ref<CategoryItem[]>([])
@@ -406,6 +469,7 @@ const form = reactive({
   is_active: true, tag_ids: [] as number[],
   coverFile: null as File | null,
   existingCoverUrl: null as string | null,
+  existingImages: [] as GameImage[],
 })
 
 // ── Kopien Panel ──────────────────────────────────────────────────
@@ -442,17 +506,29 @@ async function load() {
 }
 
 function openCreate() {
-  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null })
+  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null, existingImages: [] })
   formError.value = ''
 }
 
-function openEdit(game: Game) {
-  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null })
+async function openEdit(game: Game) {
+  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null, existingImages: [] })
   formError.value = ''
+  // Load game detail to get images
+  try {
+    const detail = await useApi().get<{ data: Game }>(`/admin/games/${game.id}`)
+    form.existingImages = (detail.data as any).images ?? []
+  } catch {}
 }
 
 function closeForm() { form.open = false }
 function onFileChange(e: Event) { form.coverFile = (e.target as HTMLInputElement).files?.[0] ?? null }
+function onDrop(e: DragEvent) {
+  isDragging.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file && file.type.startsWith('image/')) form.coverFile = file
+}
+function removeCover() { form.coverFile = null; form.existingCoverUrl = null; if (coverInputRef.value) coverInputRef.value.value = '' }
+function formatFileSize(bytes: number) { if (bytes < 1024) return `${bytes} B`; if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`; return `${(bytes / (1024 * 1024)).toFixed(1)} MB` }
 
 async function addTag() {
   const name = newTagName.value.trim()
@@ -526,8 +602,35 @@ async function removeCopy(id: number) {
   } catch (err: unknown) { alert((err as { message?: string }).message ?? 'Fehler.') }
 }
 
+// ── Bilder ────────────────────────────────────────────────────────
+async function onImagesChange(e: Event) {
+  if (!form.id) return
+  const files = Array.from((e.target as HTMLInputElement).files ?? [])
+  if (!files.length) return
+  imageUploading.value = true
+  try {
+    const res = await uploadGameImages(form.id, files)
+    form.existingImages.push(...res.images)
+  } catch (err: unknown) {
+    formError.value = (err as { message?: string }).message ?? 'Fehler beim Hochladen.'
+  } finally {
+    imageUploading.value = false
+    if (imageInputRef.value) imageInputRef.value.value = ''
+  }
+}
+
+async function removeGameImage(image: GameImage) {
+  if (!form.id) return
+  try {
+    await deleteGameImage(form.id, image.id)
+    form.existingImages = form.existingImages.filter(i => i.id !== image.id)
+  } catch (err: unknown) {
+    formError.value = (err as { message?: string }).message ?? 'Fehler beim Löschen.'
+  }
+}
+
 function conditionLabel(c: string) { const m: Record<string, string> = { GOOD: 'Gut', WORN: 'Abgenutzt', DAMAGED: 'Beschädigt', LOCKED: 'Gesperrt' }; return m[c] ?? c }
-function conditionClass(c: string) { const m: Record<string, string> = { GOOD: 'status-badge--active', WORN: 'status-badge--pending', DAMAGED: 'status-badge--danger', LOCKED: 'status-badge--muted' }; return m[c] ?? '' }
+function conditionClass(c: string) { const m: Record<string, string> = { GOOD: 'badge-success', WORN: 'badge-warning', DAMAGED: 'badge-error', LOCKED: '' }; return m[c] ?? '' }
 
 // ── Import / Export ───────────────────────────────────────────────
 async function doImport(e: Event) {
@@ -578,9 +681,6 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
   &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
   &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; }
-  &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } }
-  &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; }
   &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
@@ -629,11 +729,6 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .text-mono { font-family: monospace; font-size: 0.8rem; color: var(--secondary-text); }
 
-.status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
-.status-badge--active  { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.status-badge--pending { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
-.status-badge--danger  { background: rgba(239,68,68,0.10); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
-.status-badge--muted   { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {
@@ -683,15 +778,6 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
 
-.form-file { display: block; width: 100%; font-size: 0.875rem; color: var(--secondary-text); padding: 0.4rem 0; }
-
-.cover-preview {
-  display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; padding: 0.75rem;
-  background: var(--background); border: 1px solid var(--divider); border-radius: 8px;
-  &__img { width: 64px; height: 64px; object-fit: cover; border-radius: 6px; flex-shrink: 0; }
-  &__hint { font-size: 0.8rem; color: var(--secondary-text); padding-bottom: 0; }
-  &__remove { font-size: 0.78rem; font-weight: 600; font-family: inherit; color: #f87171; background: transparent; border: none; cursor: pointer; padding: 0; &:hover { text-decoration: underline; } }
-}
 
 .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--primary-text); cursor: pointer; user-select: none; input { accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer; } }
 
@@ -710,6 +796,31 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__value--new { color: #4ade80; }
   &__value--updated { color: $amber; }
   &__divider { height: 1px; background: var(--divider); margin: 0.25rem 0; }
+}
+
+// ─── Game Images ──────────────────────────────────────────────────
+.game-images {
+  display: flex; flex-direction: column; gap: 0.75rem;
+  &__grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  &__item { position: relative; width: 80px; height: 80px; border-radius: 8px; overflow: visible; }
+  &__thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid var(--divider); display: block; }
+  &__remove {
+    position: absolute; top: -6px; right: -6px; z-index: 1;
+    width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--divider);
+    background: var(--secondary-background); color: var(--primary-text);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
+    .icon { width: 12px; height: 12px; }
+    &:hover { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.4); }
+  }
+  &__add {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 600;
+    color: var(--primary-text); background: var(--background); border: 1px solid var(--divider);
+    border-radius: 8px; cursor: pointer; transition: border-color 0.2s;
+    .icon { width: 16px; height: 16px; }
+    &:hover { border-color: var(--accent-color); }
+    &--loading { opacity: 0.5; pointer-events: none; }
+  }
 }
 
 // ─── Footer ───────────────────────────────────────────────────────

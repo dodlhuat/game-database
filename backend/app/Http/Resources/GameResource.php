@@ -34,7 +34,9 @@ class GameResource extends JsonResource
                 fn() => $this->reviews->avg('rating')
             ),
             'reviews_count'   => $this->whenCounted('reviews'),
-            'is_favorited'    => $this->when(isset($this->is_favorited), $this->is_favorited),
+            'is_favorited'      => $this->when(isset($this->is_favorited), $this->is_favorited),
+            'already_borrowed'  => $this->when(isset($this->already_borrowed), $this->already_borrowed),
+            'images'                => $this->whenLoaded('images', fn() => $this->images->map(fn($img) => ['id' => $img->id, 'url' => $img->url])),
             'copies'                => CopyResource::collection($this->whenLoaded('copies')),
             'earliest_available_at' => $this->when(
                 $this->relationLoaded('copies'),

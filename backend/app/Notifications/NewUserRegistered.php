@@ -26,6 +26,6 @@ class NewUserRegistered extends Notification
         return $this->buildFromTemplate('new_user_registered', [
             'name'  => $this->newUser->name,
             'email' => $this->newUser->email,
-        ], $approveUrl);
+        ], $approveUrl, $notifiable);
     }
 }

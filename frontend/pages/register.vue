@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page">
+  <div class="auth-page" data-theme="dark">
     <div class="auth-page__backdrop" aria-hidden="true">
       <div class="auth-page__glow" />
       <div class="auth-page__dots" />

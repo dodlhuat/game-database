@@ -7,9 +7,8 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
 use App\Models\TermsVersion;
 use App\Models\User;
-use App\Notifications\NewUserRegistered;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Notification;
 
 class RegisterController extends Controller
 {
@@ -21,19 +20,17 @@ class RegisterController extends Controller
             'name'              => $request->name,
             'email'             => $request->email,
             'password'          => $request->password,
-            'role'              => 'MEMBER',
+            'role'              => 'USER',
             'status'            => 'PENDING',
             'newsletter_opt_in' => $request->boolean('newsletter_opt_in', false),
             'terms_accepted_at' => now(),
             'terms_version'     => $latestTerms?->version,
         ]);
 
-        // Alle Admins per Mail benachrichtigen
-        $admins = User::where('role', 'ADMIN')->where('status', 'ACTIVE')->get();
-        Notification::send($admins, new NewUserRegistered($user));
+        $user->notify(new VerifyEmailNotification());
 
         return response()->json([
-            'message' => 'Registrierung erfolgreich. Dein Konto wird geprüft und freigeschaltet.',
+            'message' => 'Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.',
             'user'    => new UserResource($user),
         ], 201);
     }

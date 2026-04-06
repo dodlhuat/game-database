@@ -24,12 +24,6 @@ export default defineNuxtConfig({
         interval: 300,
       },
     },
-    resolve: {
-      alias: {
-        // Package exports map doesn't include ./js/* — alias the whole js/ directory
-        '@dodlhuat/basix/js': '/app/node_modules/@dodlhuat/basix/js',
-      },
-    },
   },
 
   // API Base URL aus .env

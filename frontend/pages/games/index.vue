@@ -4,7 +4,7 @@
     <AppNav />
 
     <!-- ── Page Header ─────────────────────────────────────────── -->
-    <section class="page-hero">
+    <section class="page-hero" data-theme="dark">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />
         <div class="page-hero__dots" />

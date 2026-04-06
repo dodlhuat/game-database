@@ -19,7 +19,7 @@ class DashboardController extends Controller
                 'active'  => User::where('status', 'ACTIVE')->count(),
             ],
             'loans' => [
-                'active'   => Loan::whereIn('status', ['ACTIVE', 'EXTENDED'])->count(),
+                'active'   => Loan::whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->count(),
                 'overdue'  => Loan::where('status', 'OVERDUE')->count(),
                 'returned_today' => Loan::where('status', 'RETURNED')
                     ->whereDate('returned_at', today())

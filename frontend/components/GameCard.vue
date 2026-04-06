@@ -11,7 +11,7 @@
         <span class="icon icon-layers-outline" aria-hidden="true" />
       </div>
       <span
-        v-if="game.copies_count > 0"
+        v-if="auth.isLoggedIn && game.copies_count > 0"
         class="game-card__badge"
         :class="game.available_copies_count > 0 ? 'game-card__badge--avail' : 'game-card__badge--out'"
       >
@@ -43,6 +43,8 @@
 import type { Game } from '~/composables/useGames'
 
 defineProps<{ game: Game }>()
+
+const auth = useAuthStore()
 
 const DIFFICULTY: Record<string, string> = {
   EASY: 'Leicht', MEDIUM: 'Mittel', HARD: 'Schwer', EXPERT: 'Experte',

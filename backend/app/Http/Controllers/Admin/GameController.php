@@ -54,7 +54,7 @@ class GameController extends Controller
 
     public function show(Game $game): GameResource
     {
-        $game->load(['category', 'tags', 'copies']);
+        $game->load(['category', 'tags', 'copies', 'images']);
 
         return new GameResource($game);
     }
@@ -85,6 +85,10 @@ class GameController extends Controller
     {
         if ($game->cover_image_url) {
             $this->imageUpload->deleteByUrl($game->cover_image_url);
+        }
+
+        foreach ($game->images as $image) {
+            $this->imageUpload->deleteByUrl($image->url);
         }
 
         $game->delete();

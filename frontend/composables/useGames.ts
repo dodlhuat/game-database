@@ -19,7 +19,9 @@ export interface Game {
   copies_count: number
   reviews_count: number
   is_favorited?: boolean
+  already_borrowed?: boolean
   copies?: { id: number; condition: string; is_available: boolean }[]
+  images?: { id: number; url: string }[]
   earliest_available_at?: string | null
 }
 
@@ -41,8 +43,9 @@ export interface Package {
   type: 'CATEGORY' | 'CURATED'
   category: { id: number; name: string; slug: string } | null
   is_active: boolean
-  games?: { id: number; title: string; slug: string }[]
+  games?: { id: number; title: string; slug: string; available_copies_count?: number }[]
   games_count?: number
+  available?: boolean
 }
 
 export interface PaginatedGames {

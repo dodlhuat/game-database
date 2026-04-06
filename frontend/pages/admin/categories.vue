@@ -58,7 +58,7 @@
                     <td class="text-mono text-muted">{{ cat.slug }}</td>
                     <td>{{ cat.games_count ?? 0 }}</td>
                     <td>
-                      <span class="status-badge" :class="cat.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                      <span class="badge" :class="cat.is_active ? 'badge-success' : 'badge'">
                         {{ cat.is_active ? 'Aktiv' : 'Inaktiv' }}
                       </span>
                     </td>
@@ -85,7 +85,7 @@
                     <td class="text-mono text-muted">{{ child.slug }}</td>
                     <td>{{ child.games_count ?? 0 }}</td>
                     <td>
-                      <span class="status-badge" :class="child.is_active ? 'status-badge--active' : 'status-badge--muted'">
+                      <span class="badge" :class="child.is_active ? 'badge-success' : 'badge'">
                         {{ child.is_active ? 'Aktiv' : 'Inaktiv' }}
                       </span>
                     </td>
@@ -326,9 +326,6 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
   &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
   &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; }
-  &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } }
-  &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; }
   &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
@@ -387,9 +384,6 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .text-mono { font-family: monospace; font-size: 0.8rem; }
 .text-muted { color: var(--secondary-text); }
 
-.status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
-.status-badge--active { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.status-badge--muted  { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {

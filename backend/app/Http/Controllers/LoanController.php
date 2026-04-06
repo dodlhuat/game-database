@@ -29,6 +29,23 @@ class LoanController extends Controller
 
     public function store(StoreLoanRequest $request): JsonResponse|LoanResource
     {
+        $user = $request->user();
+
+        if (!$user->isAdmin()) {
+            if (!$user->isMember()) {
+                return response()->json([
+                    'message' => 'Eine aktive Mitgliedschaft ist erforderlich um Spiele auszuleihen.',
+                    'reason'  => 'membership_required',
+                ], 403);
+            }
+            if (!$user->hasEnoughTokens(2)) {
+                return response()->json([
+                    'message' => 'Nicht genug Token. Ausleihen kostet 2 Token.',
+                    'reason'  => 'insufficient_tokens',
+                ], 402);
+            }
+        }
+
         $copy = Copy::findOrFail($request->copy_id);
 
         if ($copy->condition === 'LOCKED') {
@@ -40,7 +57,7 @@ class LoanController extends Controller
             return response()->json(['message' => 'Diese Kopie ist gerade ausgeliehen.'], 422);
         }
 
-        $alreadyBorrowed = $request->user()->loans()
+        $alreadyBorrowed = $user->loans()
             ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
             ->whereHas('copy', fn ($q) => $q->where('game_id', $copy->game_id))
             ->exists();
@@ -55,11 +72,15 @@ class LoanController extends Controller
 
         $loan = Loan::create([
             'copy_id'    => $copy->id,
-            'user_id'    => $request->user()->id,
+            'user_id'    => $user->id,
             'start_date' => $startDate->toDateString(),
             'due_date'   => $dueDate->toDateString(),
             'status'     => 'ACTIVE',
         ]);
+
+        if (!$user->isAdmin()) {
+            $user->decrement('tokens', 2);
+        }
 
         $loan->load(['copy.game', 'extensions']);
 

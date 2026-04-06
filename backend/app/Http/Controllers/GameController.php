@@ -13,7 +13,7 @@ class GameController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $userId = $request->user()?->id;
+        $userId = auth('sanctum')->id();
 
         $games = Game::query()
             ->where('is_active', true)
@@ -65,9 +65,9 @@ class GameController extends Controller
             return response()->json(['message' => 'Spiel nicht gefunden.'], 404);
         }
 
-        $userId = $request->user()?->id;
+        $userId = auth('sanctum')->id();
 
-        $game->load(['category', 'tags', 'reviews.user']);
+        $game->load(['category', 'tags', 'reviews.user', 'images']);
         $game->loadCount('copies');
         $game->loadCount(['copies as available_copies_count' => function ($q) {
             $q->where('condition', '!=', 'LOCKED')
@@ -84,6 +84,11 @@ class GameController extends Controller
         if ($userId) {
             $game->is_favorited = \App\Models\Favorite::where('user_id', $userId)
                 ->where('game_id', $game->id)
+                ->exists();
+
+            $game->already_borrowed = \App\Models\Loan::where('user_id', $userId)
+                ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
+                ->whereHas('copy', fn ($q) => $q->where('game_id', $game->id))
                 ->exists();
         }
 

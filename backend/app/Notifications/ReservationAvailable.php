@@ -26,6 +26,6 @@ class ReservationAvailable extends Notification
         return $this->buildFromTemplate('reservation_available', [
             'name' => $notifiable->name,
             'game' => $this->game->title,
-        ], $catalogUrl);
+        ], $catalogUrl, $notifiable);
     }
 }

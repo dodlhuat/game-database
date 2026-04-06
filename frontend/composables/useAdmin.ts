@@ -48,6 +48,15 @@ export function useAdmin() {
   const deleteGame = (id: number) =>
     api.delete(`/admin/games/${id}`)
 
+  const uploadGameImages = (gameId: number, files: File[]) => {
+    const fd = new FormData()
+    files.forEach(f => fd.append('images[]', f))
+    return api.post<{ images: { id: number; url: string }[] }>(`/admin/games/${gameId}/images`, fd)
+  }
+
+  const deleteGameImage = (gameId: number, imageId: number) =>
+    api.delete(`/admin/games/${gameId}/images/${imageId}`)
+
   // Tags
   const fetchAdminTags = () =>
     api.get<{ data: { id: number; name: string; slug: string }[] }>('/admin/tags')
@@ -140,7 +149,7 @@ export function useAdmin() {
 
   return {
     fetchStats,
-    fetchAdminGames, createGame, updateGame, deleteGame, importGames, exportGames,
+    fetchAdminGames, createGame, updateGame, deleteGame, importGames, exportGames, uploadGameImages, deleteGameImage,
     fetchAdminTags, createTag, deleteTag,
     fetchAdminCategories, createCategory, updateCategory, patchCategory, deleteCategory,
     fetchCopies, createCopy, updateCopy, deleteCopy,

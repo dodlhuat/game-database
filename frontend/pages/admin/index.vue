@@ -135,6 +135,16 @@
               <span class="nav-card__label">Ausleih-Einstellungen</span>
               <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
             </NuxtLink>
+            <NuxtLink to="/admin/email-logs" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-list-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">E-Mail-Protokoll</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
+            <NuxtLink to="/admin/package-loans" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-cube-outline" aria-hidden="true" /></span>
+              <span class="nav-card__label">Paket-Ausleihen</span>
+              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+            </NuxtLink>
             </div>
           </section>
 

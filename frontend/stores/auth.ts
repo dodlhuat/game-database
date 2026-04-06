@@ -4,9 +4,14 @@ interface User {
   id: number
   name: string
   email: string
-  role: 'MEMBER' | 'ADMIN'
+  address: string | null
+  role: 'USER' | 'MEMBER' | 'ADMIN'
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
   newsletter_opt_in: boolean
+  tokens: number
+  membership_expires_at: string | null
+  is_member: boolean
+  email_verified_at: string | null
 }
 
 interface AuthState {
@@ -24,6 +29,12 @@ export const useAuthStore = defineStore('auth', {
     isLoggedIn: (state) => !!state.token,
     isAdmin: (state) => state.user?.role === 'ADMIN',
     isActive: (state) => state.user?.status === 'ACTIVE',
+    isMember: (state) => {
+      if (!state.user || state.user.role !== 'MEMBER') return false
+      if (!state.user.membership_expires_at) return false
+      return new Date(state.user.membership_expires_at) > new Date()
+    },
+    isRegisteredUser: (state) => state.user?.role === 'USER',
   },
 
   actions: {
@@ -31,6 +42,11 @@ export const useAuthStore = defineStore('auth', {
       this.user = user
       this.token = token
       localStorage.setItem('auth_token', token)
+      localStorage.setItem('auth_user', JSON.stringify(user))
+    },
+
+    setUser(user: User) {
+      this.user = user
       localStorage.setItem('auth_user', JSON.stringify(user))
     },
 

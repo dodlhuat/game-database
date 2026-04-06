@@ -29,6 +29,6 @@ class LoanDueSoon extends Notification
             'name'     => $notifiable->name,
             'game'     => $game->title,
             'due_date' => $dueDate,
-        ], $dashboardUrl);
+        ], $dashboardUrl, $notifiable);
     }
 }

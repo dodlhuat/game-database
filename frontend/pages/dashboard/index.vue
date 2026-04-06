@@ -58,6 +58,28 @@
         <div v-else class="stats-grid stats-grid--loading">
           <div v-for="i in 4" :key="i" class="stat-card stat-card--skeleton" />
         </div>
+
+        <!-- Token & Mitgliedschaft ────────────────────────────────── -->
+        <div class="membership-bar">
+          <div v-if="auth.isMember" class="membership-bar__member">
+            <div class="token-bar">
+              <span class="token-bar__icon">◈</span>
+              <span class="token-bar__count">{{ auth.user?.tokens ?? 0 }} Token</span>
+              <NuxtLink to="/tokens" class="token-bar__link">Aufladen</NuxtLink>
+            </div>
+            <div class="membership-expiry" :class="expiryClass">
+              <span class="membership-expiry__label">Mitglied bis</span>
+              <span class="membership-expiry__date">{{ formatDate(auth.user?.membership_expires_at) }}</span>
+              <NuxtLink v-if="canRenew" to="/dashboard" class="membership-expiry__renew" @click.prevent="renew">
+                Verlängern
+              </NuxtLink>
+            </div>
+          </div>
+          <div v-else-if="auth.isRegisteredUser" class="membership-bar__upgrade">
+            <span class="membership-bar__text">Du bist noch kein Mitglied.</span>
+            <NuxtLink to="/upgrade" class="membership-bar__cta">Jetzt Mitglied werden →</NuxtLink>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -101,7 +123,7 @@
                       </NuxtLink>
                     </td>
                     <td>
-                      <span class="status-badge" :class="`status-badge--${loanStatusVariant(loan)}`">
+                      <span class="badge" :class="loanStatusVariant(loan)">
                         {{ loanStatusLabel(loan) }}
                       </span>
                     </td>
@@ -113,7 +135,7 @@
                     <td>
                       <div class="action-row">
                         <template v-if="loan.status !== 'RETURNED'">
-                          <span v-if="pendingExtension(loan)" class="status-badge status-badge--pending">
+                          <span v-if="pendingExtension(loan)" class="badge badge-warning">
                             Verlängerung beantragt
                           </span>
                           <button v-else class="action-btn" @click="openExtension(loan)">
@@ -369,6 +391,7 @@ async function submitExtension() {
   try {
     await requestExtension(extensionLoan.value.id, extensionDate.value)
     data.value = await fetchDashboard()
+    if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 1) })
     extensionLoan.value = null
   } finally {
     extending.value = false
@@ -406,9 +429,9 @@ function pendingExtension(loan: Loan) {
 }
 
 function loanStatusVariant(loan: Loan) {
-  if (loan.status === 'OVERDUE') return 'danger'
-  if (loan.status === 'EXTENDED') return 'pending'
-  return 'active'
+  if (loan.status === 'OVERDUE') return 'badge-error'
+  if (loan.status === 'EXTENDED') return 'badge-warning'
+  return 'badge-success'
 }
 
 function loanStatusLabel(loan: Loan) {
@@ -421,8 +444,42 @@ function loanStatusLabel(loan: Loan) {
   return map[loan.status] ?? loan.status
 }
 
-function formatDate(iso: string) {
+function formatDate(iso: string | null | undefined) {
+  if (!iso) return '—'
   return new Date(iso).toLocaleDateString('de-DE')
+}
+
+// Membership helpers
+const api = useApi()
+const renewLoading = ref(false)
+
+const canRenew = computed(() => {
+  const exp = auth.user?.membership_expires_at
+  if (!exp) return false
+  const months = (new Date(exp).getTime() - Date.now()) / (1000 * 60 * 60 * 24 * 30)
+  return months <= 3
+})
+
+const expiryClass = computed(() => {
+  const exp = auth.user?.membership_expires_at
+  if (!exp) return ''
+  const days = (new Date(exp).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  if (days < 30) return 'membership-expiry--critical'
+  if (days < 90) return 'membership-expiry--warn'
+  return ''
+})
+
+async function renew() {
+  if (renewLoading.value) return
+  renewLoading.value = true
+  try {
+    const data = await api.post<{ user: typeof auth.user }>('/membership/renew')
+    if (data.user) auth.setUser(data.user)
+  } catch {
+    // error handled silently here – could add a toast
+  } finally {
+    renewLoading.value = false
+  }
 }
 </script>
 
@@ -741,33 +798,6 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   }
 }
 
-// ─── Status Badges ────────────────────────────────────────────────
-.status-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border-radius: 999px;
-  white-space: nowrap;
-
-  &--active {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.25);
-  }
-
-  &--pending {
-    background: $amber-08;
-    color: $amber;
-    border: 1px solid $amber-25;
-  }
-
-  &--danger {
-    background: rgba(239, 68, 68, 0.10);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.25);
-  }
-}
 
 .queue-badge {
   display: inline-block;
@@ -1040,5 +1070,78 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     padding-bottom: 0;
     @media (max-width: 640px) { margin-left: 0; width: 100%; }
   }
+}
+
+// ── Membership Bar ────────────────────────────────────────────────────
+.membership-bar {
+  margin-top: 1.5rem;
+
+  &__member {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
+  &__upgrade {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  &__text { color: $hero-muted; }
+
+  &__cta {
+    color: $amber;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.token-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(212, 146, 30, 0.1);
+  border: 1px solid $amber-25;
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+
+  &__icon { color: $amber; font-size: 0.9rem; }
+  &__count { font-size: 0.875rem; font-weight: 700; color: $hero-text; }
+  &__link {
+    font-size: 0.75rem;
+    color: $amber;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.2rem;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.membership-expiry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.825rem;
+  color: $hero-muted;
+
+  &__label { opacity: 0.7; }
+  &__date { font-weight: 600; color: $hero-text; }
+  &__renew {
+    color: $amber;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.25rem;
+    &:hover { text-decoration: underline; }
+  }
+
+  &--warn .membership-expiry__date { color: #e8a838; }
+  &--critical .membership-expiry__date { color: #e06060; }
 }
 </style>

@@ -176,6 +176,24 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'icon-bell-outline',
     vars: ['name', 'game'],
   },
+  email_verification: {
+    label: 'E-Mail-Verifizierung',
+    recipient: 'Neuer User',
+    icon: 'icon-shield-checkmark-outline',
+    vars: ['name', 'verification_link'],
+  },
+  welcome_member: {
+    label: 'Willkommen als Mitglied',
+    recipient: 'Neues Mitglied',
+    icon: 'icon-star-outline',
+    vars: ['name'],
+  },
+  membership_renewal_reminder: {
+    label: 'Ablauf-Erinnerung',
+    recipient: 'Mitglied',
+    icon: 'icon-calendar-outline',
+    vars: ['name', 'expiry_date', 'renewal_link'],
+  },
 }
 
 const form = reactive({
@@ -264,9 +282,6 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
   &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
   &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
   &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; }
-  &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } }
-  &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; }
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
 

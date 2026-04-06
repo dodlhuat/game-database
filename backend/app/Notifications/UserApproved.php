@@ -22,6 +22,6 @@ class UserApproved extends Notification
 
         return $this->buildFromTemplate('user_approved', [
             'name' => $notifiable->name,
-        ], $loginUrl);
+        ], $loginUrl, $notifiable);
     }
 }

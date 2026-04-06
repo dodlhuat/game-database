@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function () {
     Route::post('/register', [\App\Http\Controllers\Auth\RegisterController::class, 'store']);
     Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'store']);
+    Route::get('/verify-email/{id}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])
+        ->name('auth.verify-email');
 });
 
 Route::get('/loan-settings', [\App\Http\Controllers\LoanSettingController::class, 'show']);
@@ -36,6 +38,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Auth
     Route::post('/auth/logout', [\App\Http\Controllers\Auth\LoginController::class, 'destroy']);
     Route::get('/auth/me', [\App\Http\Controllers\Auth\LoginController::class, 'me']);
+    Route::post('/auth/email/resend', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'resend']);
 
     // Ausleihen
     Route::get('/loans', [\App\Http\Controllers\LoanController::class, 'index']);
@@ -67,6 +70,16 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Konto
     Route::patch('/account', [\App\Http\Controllers\AccountController::class, 'update']);
+
+    // Mitgliedschaft & Token
+    Route::post('/membership/upgrade', [\App\Http\Controllers\MembershipController::class, 'upgrade']);
+    Route::post('/membership/renew', [\App\Http\Controllers\MembershipController::class, 'renew']);
+    Route::post('/tokens/add', [\App\Http\Controllers\TokenController::class, 'add']);
+
+    // Paket-Ausleihen
+    Route::get('/package-loans', [\App\Http\Controllers\PackageLoanController::class, 'index']);
+    Route::post('/package-loans', [\App\Http\Controllers\PackageLoanController::class, 'store']);
+    Route::post('/package-loans/{packageLoan}/return', [\App\Http\Controllers\PackageLoanController::class, 'return']);
 });
 
 // ----------------------------------------------------------------
@@ -86,6 +99,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/games/import', [\App\Http\Controllers\Admin\GameImportExportController::class, 'import']);
     Route::get('/games/export', [\App\Http\Controllers\Admin\GameImportExportController::class, 'export']);
     Route::apiResource('games', \App\Http\Controllers\Admin\GameController::class);
+    Route::post('/games/{game}/images', [\App\Http\Controllers\Admin\GameImageController::class, 'store']);
+    Route::delete('/games/{game}/images/{image}', [\App\Http\Controllers\Admin\GameImageController::class, 'destroy']);
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
     Route::apiResource('tags', \App\Http\Controllers\Admin\TagController::class)->only(['index', 'store', 'destroy']);
 
@@ -122,4 +137,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Dashboard-Übersicht
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);
+
+    // E-Mail-Log
+    Route::get('/email-logs', [\App\Http\Controllers\Admin\EmailLogController::class, 'index']);
+
+    // Paket-Ausleihen
+    Route::get('/package-loans', [\App\Http\Controllers\Admin\PackageLoanController::class, 'index']);
 });

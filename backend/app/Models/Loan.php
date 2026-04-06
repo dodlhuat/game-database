@@ -12,6 +12,7 @@ class Loan extends Model
     protected $fillable = [
         'copy_id',
         'user_id',
+        'package_loan_id',
         'start_date',
         'due_date',
         'returned_at',
@@ -31,6 +32,11 @@ class Loan extends Model
     public function copy(): BelongsTo
     {
         return $this->belongsTo(Copy::class);
+    }
+
+    public function packageLoan(): BelongsTo
+    {
+        return $this->belongsTo(PackageLoan::class);
     }
 
     public function user(): BelongsTo

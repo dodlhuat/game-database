@@ -32,7 +32,9 @@
       "Bash(for f:*)",
       "Bash(do echo:*)",
       "Read(//c/Users/dodlh/Github/game-database/game-database/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ls:*)",
+      "Bash(docker-compose exec:*)"
     ]
   }
 }

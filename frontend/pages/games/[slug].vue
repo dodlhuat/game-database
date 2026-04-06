@@ -28,6 +28,7 @@
           <div class="page-hero__meta-row">
             <p v-if="game.category" class="page-hero__eyebrow">{{ game.category.name }}</p>
             <span
+              v-if="auth.isLoggedIn"
               class="page-hero__badge"
               :class="game.available_copies_count > 0 ? 'page-hero__badge--avail' : 'page-hero__badge--out'"
             >
@@ -52,30 +53,52 @@
 
             <!-- Action Buttons -->
             <div class="detail__actions">
-              <template v-if="auth.isLoggedIn && auth.isActive">
+              <!-- Not logged in -->
+              <NuxtLink v-if="!auth.isLoggedIn" to="/login" class="detail__btn detail__btn--primary">
+                Anmelden zum Ausleihen
+              </NuxtLink>
+
+              <!-- Logged in but not a member -->
+              <template v-else-if="auth.isActive && !auth.isMember">
+                <NuxtLink to="/upgrade" class="detail__btn detail__btn--secondary">
+                  Mitgliedschaft erforderlich
+                </NuxtLink>
+              </template>
+
+              <!-- Member: bereits ausgeliehen -->
+              <template v-else-if="auth.isMember && game.already_borrowed">
+                <span class="detail__btn detail__btn--secondary detail__btn--disabled">
+                  Bereits ausgeliehen
+                </span>
+              </template>
+
+              <!-- Member: game available -->
+              <template v-else-if="auth.isMember && game.available_copies_count > 0">
                 <button
-                  v-if="game.available_copies_count > 0"
+                  v-if="(auth.user?.tokens ?? 0) >= 2"
                   class="detail__btn detail__btn--primary"
                   @click="openLoanModal"
                 >
-                  Jetzt ausleihen
+                  Jetzt ausleihen (2 Token)
                 </button>
-                <template v-else>
-                  <button
-                    class="detail__btn detail__btn--secondary"
-                    @click="handleReserve"
-                    :disabled="reserving"
-                  >
-                    {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
-                  </button>
-                  <span v-if="game.earliest_available_at" class="detail__avail-hint">
-                    Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
-                  </span>
-                </template>
+                <NuxtLink v-else to="/tokens" class="detail__btn detail__btn--secondary">
+                  Nicht genug Token — Aufladen
+                </NuxtLink>
               </template>
-              <NuxtLink v-else-if="!auth.isLoggedIn" to="/login" class="detail__btn detail__btn--primary">
-                Anmelden zum Ausleihen
-              </NuxtLink>
+
+              <!-- Member: game unavailable -->
+              <template v-else-if="auth.isMember">
+                <button
+                  class="detail__btn detail__btn--secondary"
+                  @click="handleReserve"
+                  :disabled="reserving"
+                >
+                  {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
+                </button>
+                <span v-if="game.earliest_available_at" class="detail__avail-hint">
+                  Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
+                </span>
+              </template>
             </div>
 
             <p v-if="game.short_description" class="detail__short-desc">
@@ -118,6 +141,18 @@
             </div>
 
             <div v-if="game.description" class="detail__desc prose" v-html="game.description" />
+
+            <!-- Image gallery -->
+            <div v-if="game.images?.length" class="detail__gallery">
+              <img
+                v-for="img in game.images"
+                :key="img.id"
+                :src="img.url"
+                :alt="game.title"
+                class="detail__gallery-img"
+                loading="lazy"
+              />
+            </div>
 
           </div>
         </div>
@@ -232,6 +267,8 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     await createLoan({ copy_id: copy.id, start_date: loanDates.start_date, due_date: loanDates.due_date })
     if (msgEl) { msgEl.style.color = 'var(--success)'; msgEl.textContent = 'Ausleihe erfolgreich! Du findest sie in deinem Dashboard.'; msgEl.style.display = 'block' }
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)
+    game.value.already_borrowed = true
+    if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 2) })
     setTimeout(() => modal.hide(), 2000)
   } catch (e: unknown) {
     const err = e as { message?: string }
@@ -490,7 +527,8 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
       &:hover { background: $amber-08; }
     }
 
-    &:disabled { opacity: 0.6; cursor: not-allowed; }
+    &:disabled,
+    &--disabled { opacity: 0.5; cursor: default; pointer-events: none; }
   }
 
   &__avail-hint {
@@ -570,6 +608,22 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     line-height: 1.75;
     color: var(--secondary-text);
     padding-bottom: 0;
+  }
+
+  // Image gallery
+  &__gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__gallery-img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--divider);
+    display: block;
   }
 }
 

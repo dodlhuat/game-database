@@ -55,6 +55,11 @@ class Game extends Model
         return $this->hasMany(Copy::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(GameImage::class)->orderBy('sort_order');
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);

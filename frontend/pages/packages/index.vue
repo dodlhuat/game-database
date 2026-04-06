@@ -46,6 +46,13 @@
             <div class="package-card__meta">
               <span v-if="pkg.category" class="package-card__cat">{{ pkg.category.name }}</span>
               <span class="package-card__count">{{ pkg.games_count ?? 0 }} Spiele</span>
+              <span
+                v-if="auth.isLoggedIn"
+                class="package-card__avail"
+                :class="pkg.available ? 'package-card__avail--yes' : 'package-card__avail--no'"
+              >
+                {{ pkg.available ? 'Verfügbar' : 'Nicht verfügbar' }}
+              </span>
             </div>
             <span class="package-card__arrow">Details →</span>
           </NuxtLink>
@@ -79,6 +86,7 @@ import { ref, onMounted } from 'vue'
 import type { Package } from '~/composables/useGames'
 
 const { fetchPackages } = useGames()
+const auth = useAuthStore()
 
 const loading = ref(true)
 const packages = ref<Package[]>([])
@@ -269,6 +277,18 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__count {
     font-size: 0.78rem;
     color: var(--secondary-text);
+  }
+
+  &__avail {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+
+    &--yes { background: #166534; color: #bbf7d0; }
+    &--no  { background: #7c2d12; color: #fed7aa; }
   }
 
   &__arrow {

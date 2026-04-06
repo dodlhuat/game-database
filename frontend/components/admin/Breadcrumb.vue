@@ -1,11 +1,13 @@
 <template>
-  <nav class="admin-breadcrumb" aria-label="Breadcrumb">
-    <NuxtLink to="/admin" class="admin-breadcrumb__back">
-      <span class="icon icon-arrow-back-outline" aria-hidden="true" />
-      Admin
-    </NuxtLink>
-    <span class="admin-breadcrumb__sep" aria-hidden="true">›</span>
-    <span class="admin-breadcrumb__label">{{ label }}</span>
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol>
+      <li>
+        <NuxtLink to="/admin">Admin</NuxtLink>
+      </li>
+      <li aria-current="page">
+        <span>{{ label }}</span>
+      </li>
+    </ol>
   </nav>
 </template>
 
@@ -18,44 +20,26 @@ $hero-muted: rgba(238, 232, 223, 0.55);
 $hero-text:  #EEE8DF;
 $amber:      #D4921E;
 
-.admin-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+// Override basix breadcrumb colors for the dark admin hero background
+.breadcrumb {
   margin-bottom: 0.75rem;
-  // basix push-menu.scss resets
-  position: static;
-  transform: none;
-  width: auto;
-  height: auto;
 
-  &__back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: $hero-muted;
-    text-decoration: none;
-    transition: color 0.2s;
-
-    .icon { width: 13px; height: 13px; }
-    &:hover { color: $hero-text; }
+  :deep(li + li::before) {
+    color: rgba(238, 232, 223, 0.2);
   }
 
-  &__sep {
-    font-size: 0.78rem;
+  :deep(a) {
     color: $hero-muted;
-    opacity: 0.4;
-    line-height: 1;
-    user-select: none;
+
+    &:hover {
+      color: $hero-text;
+      background: rgba(255, 255, 255, 0.06);
+    }
   }
 
-  &__label {
-    font-size: 0.78rem;
-    font-weight: 600;
+  :deep(li[aria-current="page"] > span) {
     color: $amber;
-    letter-spacing: 0.02em;
+    font-weight: 600;
   }
 }
 </style>

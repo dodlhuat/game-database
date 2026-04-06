@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('loans:mark-overdue')->dailyAt('01:00');
 Schedule::command('loans:send-due-soon-reminders')->dailyAt('08:00');
+Schedule::command('members:send-renewal-reminders')->dailyAt('09:00');

@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page">
+  <div class="auth-page" data-theme="dark">
     <div class="auth-page__backdrop" aria-hidden="true">
       <div class="auth-page__glow" />
       <div class="auth-page__dots" />
@@ -35,7 +35,15 @@
             autocomplete="current-password"
           />
 
-          <div v-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
+          <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
+            Bitte bestätige zuerst deine E-Mail-Adresse.
+            <button type="button" class="resend-link" :disabled="resendLoading" @click="resendVerification">
+              {{ resendLoading ? 'Wird gesendet…' : 'Link erneut senden' }}
+            </button>
+            <span v-if="resendSuccess" class="resend-success">E-Mail gesendet!</span>
+          </div>
+
+          <div v-else-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
 
           <UiButton type="submit" :loading="loading">Einloggen</UiButton>
         </form>
@@ -54,8 +62,13 @@ import { ref, reactive } from 'vue'
 definePageMeta({ middleware: [] })
 
 const { login } = useAuth()
+const api = useApi()
 const route = useRoute()
 const loading = ref(false)
+const emailNotVerified = ref(false)
+const resendLoading = ref(false)
+const resendSuccess = ref(false)
+const lastEmail = ref('')
 const statusMessage = ref(
   route.query.reason === 'unauthenticated'
     ? 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.'
@@ -69,15 +82,19 @@ async function submit() {
   errors.email = ''
   errors.password = ''
   statusMessage.value = ''
+  emailNotVerified.value = false
   loading.value = true
 
   try {
     await login(form)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
-    const e = err as { status?: number; message?: string; errors?: Record<string, string[]> }
+    const e = err as { status?: number; reason?: string; message?: string; errors?: Record<string, string[]> }
 
-    if (e.errors) {
+    if (e.reason === 'email_not_verified') {
+      emailNotVerified.value = true
+      lastEmail.value = form.email
+    } else if (e.errors) {
       errors.email = e.errors.email?.[0] ?? ''
       errors.password = e.errors.password?.[0] ?? ''
     } else {
@@ -85,6 +102,19 @@ async function submit() {
     }
   } finally {
     loading.value = false
+  }
+}
+
+async function resendVerification() {
+  resendLoading.value = true
+  resendSuccess.value = false
+  try {
+    await api.post('/auth/email/resend')
+    resendSuccess.value = true
+  } catch {
+    // ignore
+  } finally {
+    resendLoading.value = false
   }
 }
 </script>
@@ -210,5 +240,25 @@ $muted: rgba(238, 232, 223, 0.5);
       }
     }
   }
+}
+
+.resend-link {
+  background: none;
+  border: none;
+  color: $amber;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.resend-success {
+  font-size: 0.8rem;
+  color: rgba(238, 232, 223, 0.6);
+  margin-left: 0.4rem;
 }
 </style>

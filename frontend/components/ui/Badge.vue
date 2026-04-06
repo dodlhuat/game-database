@@ -1,22 +1,22 @@
 <template>
-  <span class="chips">
-    <span :class="['chip', `chip-${variant}`]"><slot /></span>
-  </span>
+  <span class="badge" :class="variantClass"><slot /></span>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface Props {
   variant?: 'available' | 'loaned' | 'pending' | 'info' | 'default'
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   variant: 'default',
 })
-</script>
 
-<style scoped>
-.chip-available { background: var(--success); color: #fff; }
-.chip-loaned    { background: var(--error);   color: #fff; }
-.chip-pending   { background: var(--warning); color: #fff; }
-.chip-info      { background: var(--accent-color); color: var(--accent-color-text); }
-</style>
+const variantClass = computed(() => ({
+  'badge-success': props.variant === 'available',
+  'badge-error':   props.variant === 'loaned',
+  'badge-warning': props.variant === 'pending',
+  'badge-info':    props.variant === 'info',
+}))
+</script>

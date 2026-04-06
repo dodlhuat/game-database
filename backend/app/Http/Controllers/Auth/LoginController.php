@@ -22,6 +22,13 @@ class LoginController extends Controller
             ], 401);
         }
 
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Bitte bestätige zuerst deine E-Mail-Adresse.',
+                'reason'  => 'email_not_verified',
+            ], 403);
+        }
+
         if ($user->status === 'PENDING') {
             return response()->json([
                 'message' => 'Dein Konto wartet noch auf Freischaltung.',

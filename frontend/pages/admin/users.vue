@@ -42,6 +42,8 @@
                   <th>E-Mail</th>
                   <th>Rolle</th>
                   <th>Status</th>
+                  <th>Token</th>
+                  <th>Mitgliedschaft</th>
                   <th>Registriert</th>
                   <th>Aktionen</th>
                 </tr>
@@ -50,9 +52,16 @@
                 <tr v-for="user in users" :key="user.id">
                   <td class="dash-table__primary">{{ user.name }}</td>
                   <td class="text-muted">{{ user.email }}</td>
-                  <td class="text-muted">{{ user.role }}</td>
+                  <td class="text-muted">{{ roleLabel(user.role) }}</td>
                   <td>
-                    <span class="status-badge" :class="statusClass(user.status)">{{ statusLabel(user.status) }}</span>
+                    <span class="badge" :class="statusClass(user.status)">{{ statusLabel(user.status) }}</span>
+                  </td>
+                  <td class="text-muted">{{ user.tokens ?? 0 }}</td>
+                  <td class="text-muted">
+                    <span v-if="user.membership_expires_at" :class="membershipClass(user.membership_expires_at)">
+                      {{ formatDate(user.membership_expires_at) }}
+                    </span>
+                    <span v-else class="text-muted">—</span>
                   </td>
                   <td class="text-muted">{{ formatDate(user.created_at) }}</td>
                   <td>
@@ -101,8 +110,9 @@
           <div class="form-field">
             <label class="form-label">Rolle</label>
             <select v-model="createForm.role" class="form-input">
-              <option value="MEMBER">MEMBER</option>
-              <option value="ADMIN">ADMIN</option>
+              <option value="USER">Registriert (USER)</option>
+              <option value="MEMBER">Mitglied (MEMBER)</option>
+              <option value="ADMIN">Admin (ADMIN)</option>
             </select>
           </div>
           <div class="form-field">
@@ -144,8 +154,9 @@
           <div class="form-field">
             <label class="form-label">Rolle</label>
             <select v-model="editForm.role" class="form-input">
-              <option value="MEMBER">MEMBER</option>
-              <option value="ADMIN">ADMIN</option>
+              <option value="USER">Registriert (USER)</option>
+              <option value="MEMBER">Mitglied (MEMBER)</option>
+              <option value="ADMIN">Admin (ADMIN)</option>
             </select>
           </div>
           <div class="form-field">
@@ -177,7 +188,7 @@ import { ref, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-interface User { id: number; name: string; email: string; role: string; status: string; created_at: string }
+interface User { id: number; name: string; email: string; role: string; status: string; created_at: string; tokens?: number; membership_expires_at?: string | null }
 
 const api = useApi()
 const year = new Date().getFullYear()
@@ -188,10 +199,10 @@ const pending = ref(true)
 const showCreate = ref(false)
 const createLoading = ref(false)
 const createError = ref('')
-const createForm = ref({ name: '', email: '', password: '', role: 'MEMBER', status: 'PENDING' })
+const createForm = ref({ name: '', email: '', password: '', role: 'USER', status: 'PENDING' })
 
 function openCreate() {
-  createForm.value = { name: '', email: '', password: '', role: 'MEMBER', status: 'PENDING' }
+  createForm.value = { name: '', email: '', password: '', role: 'USER', status: 'PENDING' }
   createError.value = ''
   showCreate.value = true
 }
@@ -200,8 +211,8 @@ async function submitCreate() {
   createLoading.value = true
   createError.value = ''
   try {
-    const user = await api.post<User>('/admin/users', createForm.value)
-    users.value.unshift(user)
+    const res = await api.post<{ data: User }>('/admin/users', createForm.value)
+    users.value.unshift(res.data)
     showCreate.value = false
   } catch (e: unknown) {
     const err = e as { data?: { message?: string } }
@@ -216,7 +227,7 @@ const showEdit = ref(false)
 const editLoading = ref(false)
 const editError = ref('')
 const editUserId = ref<number | null>(null)
-const editForm = ref({ name: '', email: '', role: 'MEMBER', password: '' })
+const editForm = ref({ name: '', email: '', role: 'USER', password: '' })
 
 function openEdit(user: User) {
   editUserId.value = user.id
@@ -236,9 +247,9 @@ async function submitEdit() {
   }
   if (editForm.value.password) payload.password = editForm.value.password
   try {
-    const updated = await api.put<User>(`/admin/users/${editUserId.value}`, payload)
+    const res = await api.put<{ data: User }>(`/admin/users/${editUserId.value}`, payload)
     const idx = users.value.findIndex(u => u.id === editUserId.value)
-    if (idx !== -1) users.value[idx] = { ...users.value[idx], ...updated }
+    if (idx !== -1) users.value[idx] = { ...users.value[idx], ...res.data }
     showEdit.value = false
   } catch (e: unknown) {
     const err = e as { data?: { message?: string } }
@@ -256,8 +267,15 @@ async function reject(id: number)  { await api.patch(`/admin/users/${id}/reject`
 async function suspend(id: number) { await api.patch(`/admin/users/${id}/suspend`); const u = users.value.find(u => u.id === id); if (u) u.status = 'SUSPENDED' }
 
 function statusLabel(s: string) { const m: Record<string, string> = { ACTIVE: 'Aktiv', PENDING: 'Ausstehend', REJECTED: 'Abgelehnt', SUSPENDED: 'Gesperrt' }; return m[s] ?? s }
-function statusClass(s: string) { const m: Record<string, string> = { ACTIVE: 'status-badge--active', PENDING: 'status-badge--pending', REJECTED: 'status-badge--muted', SUSPENDED: 'status-badge--danger' }; return m[s] ?? '' }
-function formatDate(iso: string) { return new Date(iso).toLocaleDateString('de-DE') }
+function statusClass(s: string) { const m: Record<string, string> = { ACTIVE: 'badge-success', PENDING: 'badge-warning', REJECTED: '', SUSPENDED: 'badge-error' }; return m[s] ?? '' }
+function roleLabel(r: string) { const m: Record<string, string> = { USER: 'Registriert', MEMBER: 'Mitglied', ADMIN: 'Admin' }; return m[r] ?? r }
+function formatDate(iso: string | null | undefined) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('de-DE') }
+function membershipClass(iso: string) {
+  const days = (new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  if (days < 30) return 'text-danger'
+  if (days < 90) return 'text-warn'
+  return 'text-active'
+}
 </script>
 
 <style lang="scss" scoped>
@@ -267,7 +285,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
-.page-hero { position: relative; background: $hero-bg; padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem; overflow: hidden; &__backdrop { position: absolute; inset: 0; pointer-events: none; } &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; } &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); } &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; } &__breadcrumb { display: flex; align-items: center; margin-bottom: 0.75rem; position: static; transform: none; width: auto; height: auto; } &__back { display: inline-flex; align-items: center; gap: 0.25rem; font-size: 0.78rem; font-weight: 500; color: $hero-muted; text-decoration: none; transition: color 0.2s; .icon { width: 13px; height: 13px; } &::after { content: "›"; margin: 0 0.35rem; opacity: 0.4; font-weight: 400; } &:hover { color: $hero-text; } } &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; } &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; } &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; } }
+.page-hero { position: relative; background: $hero-bg; padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem; overflow: hidden; &__backdrop { position: absolute; inset: 0; pointer-events: none; } &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; } &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); } &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; } &__row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; } &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; } }
 
 .hero-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; font-size: 0.85rem; font-weight: 600; font-family: inherit; color: #0F0E0C; background: $amber; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; .icon { width: 16px; height: 16px; } &:hover { background: darken(#D4921E, 8%); } }
 
@@ -284,11 +302,6 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 .table-wrap { overflow-x: auto; }
 .dash-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; th { padding: 0.7rem 1.5rem; text-align: left; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--secondary-text); background: var(--background); border-bottom: 1px solid var(--divider); white-space: nowrap; } td { padding: 0.9rem 1.5rem; color: var(--primary-text); border-bottom: 1px solid var(--divider); vertical-align: middle; } tbody tr:last-child td { border-bottom: none; } tbody tr { transition: background 0.15s; &:hover { background: var(--background); } } &__primary { font-weight: 600; } }
 
-.status-badge { display: inline-block; padding: 0.2rem 0.6rem; font-size: 0.72rem; font-weight: 600; border-radius: 999px; white-space: nowrap; }
-.status-badge--active  { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
-.status-badge--pending { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
-.status-badge--danger  { background: rgba(239,68,68,0.10); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
-.status-badge--muted   { background: var(--background); color: var(--secondary-text); border: 1px solid var(--divider); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit; color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap; &:hover { border-color: var(--accent-color); color: var(--accent-text); } &--success { color: #4ade80; border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.06); &:hover { border-color: rgba(34,197,94,0.5); } } &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } } &:disabled { opacity: 0.5; cursor: not-allowed; } }

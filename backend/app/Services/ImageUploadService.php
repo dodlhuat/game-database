@@ -20,6 +20,14 @@ class ImageUploadService
         return Storage::disk('public')->url($filename);
     }
 
+    public function uploadGameImage(UploadedFile $file): string
+    {
+        $filename = 'game-images/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+
+        return Storage::disk('public')->url($filename);
+    }
+
     public function deleteByUrl(string $url): void
     {
         // Pfad relativ zum public-Disk extrahieren
