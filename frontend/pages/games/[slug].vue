@@ -10,8 +10,8 @@
 
     <!-- ── Not Found ───────────────────────────────────────────── -->
     <div v-else-if="!game" class="detail-state">
-      <p class="detail-state__title">Spiel nicht gefunden</p>
-      <NuxtLink to="/games" class="button button-primary">Zur Spielesammlung</NuxtLink>
+      <p class="detail-state__title">{{ $t('pages.game.not_found') }}</p>
+      <NuxtLink to="/games" class="button button-primary">{{ $t('btn.to_collection') }}</NuxtLink>
     </div>
 
     <!-- ── Content ─────────────────────────────────────────────── -->
@@ -24,7 +24,7 @@
           <div class="page-hero__dots" />
         </div>
         <div class="page-hero__body">
-          <NuxtLink to="/games" class="page-hero__back">← Zur Spielesammlung</NuxtLink>
+          <NuxtLink to="/games" class="page-hero__back">{{ $t('btn.to_collection') }}</NuxtLink>
           <div class="page-hero__meta-row">
             <p v-if="game.category" class="page-hero__eyebrow">{{ game.category.name }}</p>
             <span
@@ -33,8 +33,8 @@
               :class="game.available_copies_count > 0 ? 'page-hero__badge--avail' : 'page-hero__badge--out'"
             >
               {{ game.available_copies_count > 0
-                ? `${game.available_copies_count} Kopie(n) verfügbar`
-                : 'Aktuell ausgeliehen' }}
+                ? `${game.available_copies_count} ${$t('common.badge.available')}`
+                : (game.copies_count === 0 ? $t('pages.game.not_available') : $t('pages.game.currently_loaned')) }}
             </span>
           </div>
           <h1 class="page-hero__title">{{ game.title }}</h1>
@@ -55,20 +55,20 @@
             <div class="detail__actions">
               <!-- Not logged in -->
               <NuxtLink v-if="!auth.isLoggedIn" to="/login" class="detail__btn detail__btn--primary">
-                Anmelden zum Ausleihen
+                {{ $t('pages.game.login_to_borrow') }}
               </NuxtLink>
 
               <!-- Logged in but not a member -->
               <template v-else-if="auth.isActive && !auth.isMember">
                 <NuxtLink to="/upgrade" class="detail__btn detail__btn--secondary">
-                  Mitgliedschaft erforderlich
+                  {{ $t('pages.game.membership_required') }}
                 </NuxtLink>
               </template>
 
               <!-- Member: bereits ausgeliehen -->
               <template v-else-if="auth.isMember && game.already_borrowed">
                 <span class="detail__btn detail__btn--secondary detail__btn--disabled">
-                  Bereits ausgeliehen
+                  {{ $t('pages.game.already_borrowed') }}
                 </span>
               </template>
 
@@ -79,10 +79,10 @@
                   class="detail__btn detail__btn--primary"
                   @click="openLoanModal"
                 >
-                  Jetzt ausleihen (2 Token)
+                  {{ $t('btn.borrow_game') }}
                 </button>
                 <NuxtLink v-else to="/tokens" class="detail__btn detail__btn--secondary">
-                  Nicht genug Token — Aufladen
+                  {{ $t('btn.load_tokens') }}
                 </NuxtLink>
               </template>
 
@@ -93,7 +93,7 @@
                   @click="handleReserve"
                   :disabled="reserving"
                 >
-                  {{ reserving ? 'Wird vorgemerkt…' : 'Vormerken' }}
+                  {{ reserving ? $t('common.loading') : $t('btn.reserve') }}
                 </button>
                 <span v-if="game.earliest_available_at" class="detail__avail-hint">
                   Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
@@ -107,31 +107,31 @@
 
             <div v-if="hasMeta" class="detail__stats">
               <div v-if="game.min_players" class="detail__stat">
-                <span class="detail__stat-label">Spieler</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.players') }}</span>
                 <span class="detail__stat-value">
                   {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}
                 </span>
               </div>
               <div v-if="game.min_age" class="detail__stat">
-                <span class="detail__stat-label">Alter</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.age') }}</span>
                 <span class="detail__stat-value">ab {{ game.min_age }} J.</span>
               </div>
               <div v-if="game.duration_min" class="detail__stat">
-                <span class="detail__stat-label">Spielzeit</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.duration') }}</span>
                 <span class="detail__stat-value">
                   {{ game.duration_min }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.
                 </span>
               </div>
               <div v-if="game.difficulty" class="detail__stat">
-                <span class="detail__stat-label">Schwierigkeit</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.difficulty') }}</span>
                 <span class="detail__stat-value">{{ difficultyLabel(game.difficulty!) }}</span>
               </div>
               <div v-if="game.language" class="detail__stat">
-                <span class="detail__stat-label">Sprache</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.language') }}</span>
                 <span class="detail__stat-value">{{ game.language }}</span>
               </div>
               <div v-if="game.year" class="detail__stat">
-                <span class="detail__stat-label">Jahr</span>
+                <span class="detail__stat-label">{{ $t('pages.game.stats.year') }}</span>
                 <span class="detail__stat-value">{{ game.year }}</span>
               </div>
             </div>
@@ -139,6 +139,20 @@
             <div v-if="game.tags?.length" class="detail__tags">
               <span v-for="tag in game.tags" :key="tag.id" class="detail__tag">{{ tag.name }}</span>
             </div>
+
+            <a
+              v-if="game.instagram_url"
+              :href="game.instagram_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="detail__instagram"
+            >
+              <svg class="detail__instagram-logo" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+              </svg>
+              {{ $t('pages.game.instagram_view') }}
+              <span class="icon detail__instagram-ext" aria-hidden="true">open_in_new</span>
+            </a>
 
             <div v-if="game.description" class="detail__desc prose" v-html="game.description" />
 
@@ -168,12 +182,12 @@
           <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">Nutzungsbedingungen</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
+          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
+          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
+          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
       </div>
     </footer>
 
@@ -190,6 +204,7 @@ const { fetchGame } = useGames()
 const { createLoan, addReservation } = useLoans()
 const auth = useAuthStore()
 const { fetchSettings, getNextAppointment, getDueDate, formatDate, toIsoDate } = useLoanSettings()
+const { t } = useI18n()
 
 const loading = ref(true)
 const game = ref<Game | null>(null)
@@ -223,11 +238,11 @@ async function openLoanModal() {
     <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem">
       <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${game.value.title}</p>
       <div style="display:flex;flex-direction:column;gap:.35rem">
-        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Ausleihbeginn</label>
+        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.start_label')}</label>
         <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${startLabel}</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:.35rem">
-        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">Rückgabe bis</label>
+        <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.due_label')}</label>
         <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
       </div>
       <div id="loan-msg" style="display:none;font-size:.85rem;margin:0"></div>
@@ -235,11 +250,11 @@ async function openLoanModal() {
 
   const footer = `
     <div style="display:flex;gap:.75rem;justify-content:flex-end">
-      <button id="loan-cancel" class="button">Abbrechen</button>
-      <button id="loan-submit" class="button button-primary">Ausleihen bestätigen</button>
+      <button id="loan-cancel" class="button">${t('pages.game.confirm_borrow.cancel_btn')}</button>
+      <button id="loan-submit" class="button button-primary">${t('pages.game.confirm_borrow.confirm_btn')}</button>
     </div>`
 
-  const modal = new Modal({ content, header: 'Spiel ausleihen', footer, closeable: true })
+  const modal = new Modal({ content, header: t('pages.game.confirm_borrow_title'), footer, closeable: true })
   modal.show()
 
   setTimeout(() => {
@@ -256,24 +271,24 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
   const submitBtn = document.getElementById('loan-submit') as HTMLButtonElement | null
 
   if (!copy) {
-    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = 'Keine verfügbare Kopie gefunden.'; msgEl.style.display = 'block' }
+    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = t('pages.game.confirm_borrow.no_copy'); msgEl.style.display = 'block' }
     return
   }
 
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Wird bearbeitet…' }
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = t('pages.game.confirm_borrow.processing') }
   if (msgEl) { msgEl.style.display = 'none' }
 
   try {
     await createLoan({ copy_id: copy.id, start_date: loanDates.start_date, due_date: loanDates.due_date })
-    if (msgEl) { msgEl.style.color = 'var(--success)'; msgEl.textContent = 'Ausleihe erfolgreich! Du findest sie in deinem Dashboard.'; msgEl.style.display = 'block' }
+    if (msgEl) { msgEl.style.color = 'var(--success)'; msgEl.textContent = t('pages.game.confirm_borrow.success'); msgEl.style.display = 'block' }
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)
     game.value.already_borrowed = true
     if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 2) })
     setTimeout(() => modal.hide(), 2000)
   } catch (e: unknown) {
     const err = e as { message?: string }
-    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.message ?? 'Ausleihe fehlgeschlagen. Bitte versuche es erneut.'; msgEl.style.display = 'block' }
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Ausleihen bestätigen' }
+    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.message ?? t('pages.game.confirm_borrow.error'); msgEl.style.display = 'block' }
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t('pages.game.confirm_borrow.confirm_btn') }
   }
 }
 
@@ -282,10 +297,10 @@ async function handleReserve() {
   reserving.value = true
   try {
     await addReservation(game.value.id)
-    alert('Du wurdest auf die Warteliste gesetzt.')
+    alert(t('pages.game.reserve_success'))
   } catch (e: unknown) {
     const err = e as { message?: string }
-    alert(err?.message ?? 'Vormerken fehlgeschlagen.')
+    alert(err?.message ?? t('pages.game.reserve_failed'))
   } finally {
     reserving.value = false
   }
@@ -293,11 +308,14 @@ async function handleReserve() {
 
 // ── Game meta ────────────────────────────────────────────────────
 const DIFFICULTY: Record<string, string> = {
-  EASY: 'Leicht', MEDIUM: 'Mittel', HARD: 'Schwer', EXPERT: 'Experte',
+  EASY: 'admin.form.difficulty_easy',
+  MEDIUM: 'admin.form.difficulty_medium',
+  HARD: 'admin.form.difficulty_hard',
+  EXPERT: 'admin.form.difficulty_expert',
 }
 
 function difficultyLabel(d: string) {
-  return DIFFICULTY[d] ?? d
+  return DIFFICULTY[d] ? t(DIFFICULTY[d]) : d
 }
 
 const hasMeta = computed(() =>
@@ -320,13 +338,12 @@ onMounted(async () => {
 })
 
 useHead(() => ({
-  title: game.value ? `${game.value.title} — Spielesammlung` : 'Spiel nicht gefunden',
+  title: game.value ? `${game.value.title} — ${t('pages.games.title')}` : t('pages.game.not_found'),
 }))
 </script>
 
 <style lang="scss" scoped>
 $hero-bg:       #0F0E0C;
-$amber:         #D4921E;
 $nav-height:    64px;
 
 $amber-08:      rgba(212, 146, 30, 0.08);
@@ -334,8 +351,8 @@ $amber-25:      rgba(212, 146, 30, 0.25);
 $amber-glow:    rgba(212, 146, 30, 0.20);
 
 $hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 // ─── Page shell ───────────────────────────────────────────────────
@@ -517,7 +534,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     &--primary {
       background: $amber;
       color: #0F0E0C;
-      &:hover { background: darken(#D4921E, 8%); }
+      &:hover { background: color.adjust($amber, $lightness: -8%); }
     }
 
     &--secondary {
@@ -600,6 +617,40 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     border: 1px solid var(--divider);
     border-radius: 999px;
     padding: 0.25rem 0.65rem;
+  }
+
+  // Instagram link
+  &__instagram {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary-text);
+    text-decoration: none;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--divider);
+    border-radius: 999px;
+    background: var(--secondary-background);
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    align-self: flex-start;
+
+    &:hover {
+      color: $amber;
+      border-color: rgba($amber, 0.35);
+      background: rgba($amber, 0.06);
+    }
+  }
+
+  &__instagram-logo {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+  }
+
+  &__instagram-ext {
+    font-size: 0.9rem;
+    opacity: 0.6;
   }
 
   // Description

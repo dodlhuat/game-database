@@ -25,6 +25,7 @@ class GameResource extends JsonResource
             'difficulty'        => $this->difficulty,
             'language'          => $this->language,
             'year'              => $this->year,
+            'instagram_url'     => $this->instagram_url,
             'cover_image_url' => $this->cover_image_url,
             'is_active'       => $this->is_active,
             'available_copies_count' => $this->whenCounted('available_copies_count', $this->available_copies_count ?? 0),

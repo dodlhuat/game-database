@@ -23,6 +23,7 @@ class Game extends Model
         'difficulty',
         'language',
         'year',
+        'instagram_url',
         'cover_image_url',
         'is_active',
     ];

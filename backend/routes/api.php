@@ -101,8 +101,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::apiResource('games', \App\Http\Controllers\Admin\GameController::class);
     Route::post('/games/{game}/images', [\App\Http\Controllers\Admin\GameImageController::class, 'store']);
     Route::delete('/games/{game}/images/{image}', [\App\Http\Controllers\Admin\GameImageController::class, 'destroy']);
+    Route::post('/categories/import', [\App\Http\Controllers\Admin\CategoryImportExportController::class, 'import']);
+    Route::get('/categories/export', [\App\Http\Controllers\Admin\CategoryImportExportController::class, 'export']);
     Route::apiResource('categories', \App\Http\Controllers\Admin\CategoryController::class);
-    Route::apiResource('tags', \App\Http\Controllers\Admin\TagController::class)->only(['index', 'store', 'destroy']);
+    Route::apiResource('tags', \App\Http\Controllers\Admin\TagController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Kopienverwaltung
     Route::apiResource('copies', \App\Http\Controllers\Admin\CopyController::class);

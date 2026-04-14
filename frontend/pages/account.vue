@@ -9,8 +9,8 @@
       </div>
       <div class="page-hero__body">
         <NuxtLink to="/dashboard" class="page-hero__back">← Dashboard</NuxtLink>
-        <p class="page-hero__eyebrow">Einstellungen</p>
-        <h1 class="page-hero__title">Mein Konto</h1>
+        <p class="page-hero__eyebrow">{{ $t('account.settings') }}</p>
+        <h1 class="page-hero__title">{{ $t('account.my_account') }}</h1>
       </div>
     </section>
 
@@ -19,48 +19,48 @@
 
         <!-- Profil -->
         <section class="account-section">
-          <h2 class="account-section__title">Profil</h2>
+          <h2 class="account-section__title">{{ $t('account.profile_title') }}</h2>
 
           <div v-if="profileSuccess" class="alert alert-success">{{ profileSuccess }}</div>
           <div v-if="profileError" class="alert alert-error">{{ profileError }}</div>
 
-          <UiInput v-model="profileForm.name" label="Name" :error="profileErrors.name" autocomplete="name" />
-          <UiInput v-model="profileForm.email" type="email" label="E-Mail" :error="profileErrors.email" autocomplete="email" />
+          <UiInput v-model="profileForm.name" :label="$t('auth.name')" :error="profileErrors.name" autocomplete="name" />
+          <UiInput v-model="profileForm.email" type="email" :label="$t('auth.email')" :error="profileErrors.email" autocomplete="email" />
 
           <UiInput
             v-if="auth.isMember"
             v-model="profileForm.address"
-            label="Adresse"
+            :label="$t('account.address')"
             :error="profileErrors.address"
             autocomplete="street-address"
-            placeholder="z. B. Musterstraße 1, 1010 Wien"
+            :placeholder="$t('account.address_placeholder')"
           />
 
-          <UiButton :loading="savingProfile" @click="saveProfile">Profil speichern</UiButton>
+          <UiButton :loading="savingProfile" @click="saveProfile">{{ $t('account.profile_save') }}</UiButton>
         </section>
 
         <!-- Newsletter -->
         <section class="account-section">
-          <h2 class="account-section__title">Newsletter</h2>
+          <h2 class="account-section__title">{{ $t('account.newsletter_title') }}</h2>
           <div class="account-section__toggle">
             <input v-model="newsletterOptIn" type="checkbox" class="styled-checkbox" id="newsletter-switch" @change="saveNewsletter" />
-            <label for="newsletter-switch">Newsletter abonnieren</label>
+            <label for="newsletter-switch">{{ $t('account.newsletter_subscribe') }}</label>
           </div>
           <div v-if="newsletterMsg" class="alert alert-success">{{ newsletterMsg }}</div>
         </section>
 
         <!-- Passwort -->
         <section class="account-section">
-          <h2 class="account-section__title">Passwort ändern</h2>
+          <h2 class="account-section__title">{{ $t('account.password_title') }}</h2>
 
-          <UiInput v-model="pwForm.current_password" type="password" label="Aktuelles Passwort" :error="pwErrors.current_password" autocomplete="current-password" />
-          <UiInput v-model="pwForm.new_password" type="password" label="Neues Passwort" :error="pwErrors.new_password" autocomplete="new-password" />
-          <UiInput v-model="pwForm.new_password_confirmation" type="password" label="Neues Passwort wiederholen" autocomplete="off" />
+          <UiInput v-model="pwForm.current_password" type="password" :label="$t('account.password_current')" :error="pwErrors.current_password" autocomplete="current-password" />
+          <UiInput v-model="pwForm.new_password" type="password" :label="$t('account.password_new')" :error="pwErrors.new_password" autocomplete="new-password" />
+          <UiInput v-model="pwForm.new_password_confirmation" type="password" :label="$t('account.password_confirm_new')" autocomplete="off" />
 
           <div v-if="pwError" class="alert alert-error">{{ pwError }}</div>
           <div v-if="pwSuccess" class="alert alert-success">{{ pwSuccess }}</div>
 
-          <UiButton :loading="savingPw" @click="changePassword">Passwort speichern</UiButton>
+          <UiButton :loading="savingPw" @click="changePassword">{{ $t('account.password_save') }}</UiButton>
         </section>
 
       </div>
@@ -75,6 +75,7 @@ definePageMeta({ middleware: ['auth'] })
 
 const api = useApi()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 // Profile
 const profileForm = reactive({ name: '', email: '', address: '' })
@@ -116,7 +117,7 @@ async function saveProfile() {
 
     const data = await api.patch<{ user: typeof auth.user; message: string }>('/account', payload)
     if (data.user) auth.setUser(data.user)
-    profileSuccess.value = 'Profil gespeichert.'
+    profileSuccess.value = t('account.profile_saved')
   } catch (err: unknown) {
     const e = err as { errors?: Record<string, string[]>; message?: string }
     if (e.errors) {
@@ -124,7 +125,7 @@ async function saveProfile() {
         if (k in profileErrors) (profileErrors as Record<string, string>)[k] = msgs[0] ?? ''
       })
     } else {
-      profileError.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+      profileError.value = e.message ?? t('common.error.generic')
     }
   } finally {
     savingProfile.value = false
@@ -135,7 +136,7 @@ async function saveNewsletter() {
   newsletterMsg.value = ''
   try {
     await api.patch('/account', { newsletter_opt_in: newsletterOptIn.value })
-    newsletterMsg.value = newsletterOptIn.value ? 'Newsletter abonniert.' : 'Newsletter abgemeldet.'
+    newsletterMsg.value = newsletterOptIn.value ? t('account.newsletter_subscribed') : t('account.newsletter_unsubscribed')
   } catch {
     newsletterOptIn.value = !newsletterOptIn.value
   }
@@ -148,7 +149,7 @@ async function changePassword() {
 
   if (!pwForm.value.current_password || !pwForm.value.new_password) return
   if (pwForm.value.new_password !== pwForm.value.new_password_confirmation) {
-    pwErrors.value.new_password = 'Passwörter stimmen nicht überein.'
+    pwErrors.value.new_password = t('account.password_mismatch')
     return
   }
 
@@ -159,7 +160,7 @@ async function changePassword() {
       new_password: pwForm.value.new_password,
       new_password_confirmation: pwForm.value.new_password_confirmation,
     })
-    pwSuccess.value = 'Passwort wurde geändert.'
+    pwSuccess.value = t('account.password_changed')
     pwForm.value = { current_password: '', new_password: '', new_password_confirmation: '' }
   } catch (err: unknown) {
     const e = err as { errors?: Record<string, string[]>; message?: string }
@@ -168,7 +169,7 @@ async function changePassword() {
         if (k in pwErrors.value) (pwErrors.value as Record<string, string>)[k] = msgs[0]
       })
     } else {
-      pwError.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+      pwError.value = e.message ?? t('common.error.generic')
     }
   } finally {
     savingPw.value = false
@@ -179,10 +180,9 @@ async function changePassword() {
 <style lang="scss" scoped>
 $hero-bg: #0F0E0C;
 $nav-height: 3.5rem;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.15);
 $hero-text: #EEE8DF;
-$hero-muted: rgba(238, 232, 223, 0.55);
+$hero-muted: rgba(238, 232, 223, 0.72);
 $surface: rgba(255, 255, 255, 0.04);
 $border: rgba(238, 232, 223, 0.1);
 

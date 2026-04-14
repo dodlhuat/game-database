@@ -16,23 +16,23 @@
       <div class="auth-card">
         <template v-if="route.query.success">
           <div class="auth-card__icon">✓</div>
-          <h1 class="auth-card__title">E-Mail bestätigt!</h1>
-          <p class="auth-card__text">Dein Konto ist jetzt aktiv. Du kannst dich jetzt einloggen.</p>
-          <UiButton @click="navigateTo('/login')">Zum Login</UiButton>
+          <h1 class="auth-card__title">{{ $t('auth.email_verified_title') }}</h1>
+          <p class="auth-card__text">{{ $t('auth.email_verified_desc') }}</p>
+          <UiButton @click="navigateTo('/login')">{{ $t('btn.login') }}</UiButton>
         </template>
 
         <template v-else-if="route.query.already">
           <div class="auth-card__icon auth-card__icon--muted">✓</div>
-          <h1 class="auth-card__title">Bereits bestätigt</h1>
-          <p class="auth-card__text">Deine E-Mail-Adresse wurde bereits bestätigt.</p>
-          <UiButton @click="navigateTo('/login')">Zum Login</UiButton>
+          <h1 class="auth-card__title">{{ $t('auth.email_already_verified_title') }}</h1>
+          <p class="auth-card__text">{{ $t('auth.email_already_verified_desc') }}</p>
+          <UiButton @click="navigateTo('/login')">{{ $t('btn.login') }}</UiButton>
         </template>
 
         <template v-else>
           <div class="auth-card__icon auth-card__icon--error">✕</div>
-          <h1 class="auth-card__title">Link ungültig</h1>
-          <p class="auth-card__text">Dieser Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut oder fordere einen neuen Link an.</p>
-          <UiButton @click="navigateTo('/login')">Zum Login</UiButton>
+          <h1 class="auth-card__title">{{ $t('auth.email_invalid_link_title') }}</h1>
+          <p class="auth-card__text">{{ $t('auth.email_invalid_link_desc') }}</p>
+          <UiButton @click="navigateTo('/login')">{{ $t('btn.login') }}</UiButton>
         </template>
       </div>
     </div>
@@ -46,10 +46,9 @@ const route = useRoute()
 
 <style lang="scss" scoped>
 $bg: #0F0E0C;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.18);
 $text: #EEE8DF;
-$muted: rgba(238, 232, 223, 0.5);
+$muted: rgba(238, 232, 223, 0.65);
 
 .auth-page {
   position: relative;

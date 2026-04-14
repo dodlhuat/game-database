@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Paket-Ausleihen" />
-        <h1 class="page-hero__title">Paket-Ausleihen</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.package_loans')" />
+        <h1 class="page-hero__title">{{ $t('admin.package_loans.title') }}</h1>
       </div>
     </section>
 
@@ -38,18 +38,18 @@
 
           <div v-if="!loans.length" class="dash-empty">
             <span class="icon icon-cube-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Keine Paket-Ausleihen vorhanden.</p>
+            <p class="dash-empty__text">{{ $t('admin.package_loans.empty') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Mitglied</th>
-                  <th>Paket</th>
-                  <th>Ausgeliehen am</th>
-                  <th>Fällig am</th>
-                  <th>Status</th>
+                  <th>{{ $t('admin.loans.member_col') }}</th>
+                  <th>{{ $t('admin.package_loans.package_col') }}</th>
+                  <th>{{ $t('admin.package_loans.loaned_at') }}</th>
+                  <th>{{ $t('admin.package_loans.due_at') }}</th>
+                  <th>{{ $t('admin.table.status') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -79,7 +79,7 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -91,6 +91,7 @@ import { ref, computed, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const api = useApi()
+const { t } = useI18n()
 
 interface PackageLoan {
   id: number
@@ -112,14 +113,14 @@ const meta = ref<Meta | null>(null)
 const page = ref(1)
 const activeTab = ref('')
 
-const tabs = [
-  { label: 'Alle', value: '' },
-  { label: 'Aktiv', value: 'ACTIVE' },
-  { label: 'Überfällig', value: 'OVERDUE' },
-  { label: 'Zurückgegeben', value: 'RETURNED' },
-]
+const tabs = computed(() => [
+  { label: t('admin.package_loans.tab_all'), value: '' },
+  { label: t('admin.package_loans.tab_active'), value: 'ACTIVE' },
+  { label: t('admin.package_loans.tab_overdue'), value: 'OVERDUE' },
+  { label: t('admin.package_loans.tab_returned'), value: 'RETURNED' },
+])
 
-const activeTabLabel = computed(() => tabs.find(t => t.value === activeTab.value)?.label ?? 'Alle')
+const activeTabLabel = computed(() => tabs.value.find(tab => tab.value === activeTab.value)?.label ?? t('admin.package_loans.tab_all'))
 
 async function load() {
   loading.value = true
@@ -148,14 +149,14 @@ function changePage(p: number) {
 onMounted(load)
 
 function formatDate(iso: string | null) { if (!iso) return '—'; return new Date(iso).toLocaleDateString('de-DE', { dateStyle: 'medium' }) }
-function statusLabel(s: string) { const m: Record<string, string> = { ACTIVE: 'Aktiv', RETURNED: 'Zurückgegeben', OVERDUE: 'Überfällig' }; return m[s] ?? s }
+function statusLabel(s: string) { const m: Record<string, string> = { ACTIVE: t('admin.package_loans.tab_active'), RETURNED: t('admin.package_loans.tab_returned'), OVERDUE: t('admin.package_loans.tab_overdue') }; return m[s] ?? s }
 function statusClass(s: string) { const m: Record<string, string> = { ACTIVE: 'badge-success', RETURNED: '', OVERDUE: 'badge-error' }; return m[s] ?? '' }
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 

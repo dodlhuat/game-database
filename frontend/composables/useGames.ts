@@ -14,6 +14,7 @@ export interface Game {
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT' | null
   language: string | null
   year: number | null
+  instagram_url: string | null
   cover_image_url: string | null
   available_copies_count: number
   copies_count: number
@@ -30,6 +31,10 @@ export interface GameFilters {
   category?: string
   tag?: string
   difficulty?: string
+  players?: number | string
+  duration?: 'short' | 'medium' | 'long' | ''
+  language?: string
+  min_age?: number | string
   available?: boolean
   sort?: string
   page?: number
@@ -74,7 +79,15 @@ export function useGames() {
   }
 
   function fetchCategories() {
-    return api.get<{ data: { id: number; name: string; slug: string; games_count: number }[] }>('/categories')
+    return api.get<{
+      data: {
+        id: number
+        name: string
+        slug: string
+        games_count: number
+        children: { id: number; name: string; slug: string; games_count: number }[]
+      }[]
+    }>('/categories')
   }
 
   function fetchPackages() {

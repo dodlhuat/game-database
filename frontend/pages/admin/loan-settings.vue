@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Ausleih-Einstellungen" />
-        <h1 class="page-hero__title">Ausleih-Einstellungen</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.loan_settings')" />
+        <h1 class="page-hero__title">{{ $t('admin.loan_settings.title') }}</h1>
       </div>
     </section>
 
@@ -24,54 +24,54 @@
         <template v-else>
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Konfiguration</h2>
+              <h2 class="dash-section__title">{{ $t('admin.loan_settings.config_title') }}</h2>
             </header>
             <form class="settings-form" @submit.prevent="save">
               <div class="settings-grid">
                 <div class="form-field">
-                  <label class="form-label">Starttermin</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.start_date') }}</label>
                   <input v-model="form.start_date" class="form-input" type="date" required />
-                  <p class="form-hint">Erster Abholtermin, von dem aus das Intervall berechnet wird.</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.start_date_hint') }}</p>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">Intervall (Tage)</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.interval_days') }}</label>
                   <input v-model.number="form.interval_days" class="form-input" type="number" min="1" required />
-                  <p class="form-hint">Abstand zwischen zwei Abholterminen in Tagen.</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.interval_days_hint') }}</p>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">Vorlauf (Tage)</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.grace_days') }}</label>
                   <input v-model.number="form.grace_days" class="form-input" type="number" min="0" required />
-                  <p class="form-hint">Wie viele Tage vor einem Termin dieser noch wählbar ist.</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.grace_days_hint') }}</p>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">Ausleihdauer (Wochen)</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.loan_duration_weeks') }}</label>
                   <input v-model.number="form.loan_duration_weeks" class="form-input" type="number" min="1" required />
-                  <p class="form-hint">Anzahl Wochen bis zum Rückgabedatum.</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.loan_duration_weeks_hint') }}</p>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">Max. Verlängerungen pro Ausleihe</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.max_extensions') }}</label>
                   <input v-model.number="form.max_extensions" class="form-input" type="number" min="0" required />
-                  <p class="form-hint">Wie oft eine Ausleihe maximal verlängert werden darf (0 = keine Verlängerung möglich).</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.max_extensions_hint') }}</p>
                 </div>
               </div>
               <p v-if="saveError" class="form-error">{{ saveError }}</p>
               <div class="settings-actions">
-                <UiButton type="submit" :loading="saving">Einstellungen speichern</UiButton>
-                <span v-if="saved" class="save-success">Gespeichert</span>
+                <UiButton type="submit" :loading="saving">{{ $t('admin.loan_settings.save_btn') }}</UiButton>
+                <span v-if="saved" class="save-success">{{ $t('admin.loan_settings.saved') }}</span>
               </div>
             </form>
           </section>
 
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Vorschau: Nächste Abholtermine</h2>
+              <h2 class="dash-section__title">{{ $t('admin.loan_settings.preview_title') }}</h2>
             </header>
             <div class="preview-list">
               <div v-for="(item, i) in preview" :key="i" class="preview-item">
                 <span class="preview-item__n">{{ i + 1 }}.</span>
                 <span class="preview-item__date">{{ item.appointment }}</span>
                 <span class="preview-item__arrow">→</span>
-                <span class="preview-item__due">Rückgabe {{ item.due }}</span>
+                <span class="preview-item__due">{{ $t('admin.loan_settings.preview_return', { date: item.due }) }}</span>
               </div>
             </div>
           </section>
@@ -83,7 +83,7 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -97,6 +97,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 
 const api = useApi()
 const { getNextAppointment, getDueDate, formatDate } = useLoanSettings()
+const { t } = useI18n()
 const year = new Date().getFullYear()
 
 const loading = ref(true)
@@ -148,7 +149,7 @@ onMounted(async () => {
     }
   } catch (e: unknown) {
     const err = e as { data?: { message?: string }; message?: string }
-    loadError.value = err?.data?.message ?? err?.message ?? 'Einstellungen konnten nicht geladen werden.'
+    loadError.value = err?.data?.message ?? err?.message ?? t('admin.loan_settings.load_error')
   } finally {
     loading.value = false
   }
@@ -171,7 +172,7 @@ async function save() {
     setTimeout(() => { saved.value = false }, 3000)
   } catch (e: unknown) {
     const err = e as { data?: { message?: string } }
-    saveError.value = err?.data?.message ?? 'Fehler beim Speichern.'
+    saveError.value = err?.data?.message ?? t('common.error.save')
   } finally {
     saving.value = false
   }
@@ -179,9 +180,9 @@ async function save() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 

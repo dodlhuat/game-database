@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Ausleihen" />
-        <h1 class="page-hero__title">Ausleihen</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.loans')" />
+        <h1 class="page-hero__title">{{ $t('admin.loans.title') }}</h1>
       </div>
     </section>
 
@@ -17,7 +17,7 @@
 
         <!-- Filter Bar ─────────────────────────────────────────────── -->
         <div class="filter-bar">
-          <label class="filter-label">Status</label>
+          <label class="filter-label">{{ $t('admin.loans.filter_label') }}</label>
           <div class="filter-tabs">
             <button
               v-for="opt in statusOptions" :key="opt.value"
@@ -34,25 +34,25 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Ausleihen</h2>
+            <h2 class="dash-section__title">{{ $t('admin.loans.title') }}</h2>
             <span class="dash-section__count">{{ loans.length }}</span>
           </header>
 
           <div v-if="!loans.length" class="dash-empty">
-            <span class="icon icon-swap-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Keine Ausleihen für diesen Filter.</p>
+            <span class="icon icon-sync dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.loans.empty') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Mitglied</th>
-                  <th>Spiel</th>
-                  <th>Ausgeliehen am</th>
-                  <th>Fällig am</th>
-                  <th>Status</th>
-                  <th>Aktionen</th>
+                  <th>{{ $t('admin.loans.member_col') }}</th>
+                  <th>{{ $t('admin.table.title') }}</th>
+                  <th>{{ $t('admin.loans.loaned_at') }}</th>
+                  <th>{{ $t('admin.loans.due_at') }}</th>
+                  <th>{{ $t('admin.table.status') }}</th>
+                  <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -72,7 +72,7 @@
                       class="action-btn action-btn--danger"
                       @click="setOverdue(loan.id)"
                     >
-                      Als überfällig markieren
+                      {{ $t('admin.loans.mark_overdue') }}
                     </button>
                     <span v-else class="text-muted text-sm">—</span>
                   </td>
@@ -88,31 +88,32 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchAdminLoans, markOverdue } = useAdmin()
+const { t } = useI18n()
 
 const year = new Date().getFullYear()
 const loading = ref(true)
 const statusFilter = ref('')
 const loans = ref<{ id: number; user: { name: string } | null; game: { title: string } | null; start_date: string; due_date: string; status: string }[]>([])
 
-const statusOptions = [
-  { value: '', label: 'Alle' },
-  { value: 'ACTIVE', label: 'Aktiv' },
-  { value: 'EXTENDED', label: 'Verlängert' },
-  { value: 'OVERDUE', label: 'Überfällig' },
-  { value: 'RETURNED', label: 'Zurückgegeben' },
-]
+const statusOptions = computed(() => [
+  { value: '', label: t('admin.loans.filter_all') },
+  { value: 'ACTIVE', label: t('admin.loans.filter_active') },
+  { value: 'EXTENDED', label: t('admin.loans.filter_extended') },
+  { value: 'OVERDUE', label: t('admin.loans.filter_overdue') },
+  { value: 'RETURNED', label: t('admin.loans.filter_returned') },
+])
 
 onMounted(load)
 
@@ -124,15 +125,15 @@ async function load() {
 
 async function setOverdue(id: number) { await markOverdue(id); await load() }
 
-function statusLabel(s: string) { const m: Record<string, string> = { ACTIVE: 'Aktiv', EXTENDED: 'Verlängert', OVERDUE: 'Überfällig', RETURNED: 'Zurückgegeben' }; return m[s] ?? s }
+function statusLabel(s: string) { const m: Record<string, string> = { ACTIVE: t('admin.loans.filter_active'), EXTENDED: t('admin.loans.filter_extended'), OVERDUE: t('admin.loans.filter_overdue'), RETURNED: t('admin.loans.filter_returned') }; return m[s] ?? s }
 function statusClass(s: string) { const m: Record<string, string> = { ACTIVE: 'badge-success', EXTENDED: 'badge-warning', OVERDUE: 'badge-error', RETURNED: '' }; return m[s] ?? '' }
 function formatDate(iso: string) { return new Date(iso).toLocaleDateString('de-DE') }
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 

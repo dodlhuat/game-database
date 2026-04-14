@@ -8,8 +8,8 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">Mein Konto</p>
-        <h1 class="page-hero__title">Token aufladen</h1>
+        <p class="page-hero__eyebrow">{{ $t('pages.tokens.my_account') }}</p>
+        <h1 class="page-hero__title">{{ $t('pages.tokens.title') }}</h1>
         <p class="page-hero__sub">Token werden für Ausleihen verwendet. Aktuelles Guthaben: <strong class="highlight">{{ auth.user?.tokens ?? 0 }} Token</strong></p>
       </div>
     </section>
@@ -18,8 +18,8 @@
       <div class="tokens-content__inner">
 
         <div v-if="!auth.isMember" class="no-member">
-          <p>Nur Mitglieder können Token kaufen.</p>
-          <NuxtLink to="/upgrade">Jetzt Mitglied werden →</NuxtLink>
+          <p>{{ $t('pages.tokens.not_member') }}</p>
+          <NuxtLink to="/upgrade">{{ $t('btn.upgrade') }} →</NuxtLink>
         </div>
 
         <template v-else>
@@ -33,7 +33,7 @@
               class="token-card"
               :class="{ 'token-card--featured': pkg.featured }"
             >
-              <div v-if="pkg.featured" class="token-card__badge">Beliebt</div>
+              <div v-if="pkg.featured" class="token-card__badge">{{ $t('pages.tokens.popular') }}</div>
               <div class="token-card__amount">{{ pkg.amount }}</div>
               <div class="token-card__label">Token</div>
               <UiButton
@@ -41,17 +41,17 @@
                 :disabled="!!loadingAmount"
                 @click="addTokens(pkg.amount)"
               >
-                Hinzufügen
+                {{ $t('btn.add') }}
               </UiButton>
             </div>
           </div>
 
           <div class="token-info">
-            <h3 class="token-info__title">Token-Kosten</h3>
+            <h3 class="token-info__title">{{ $t('pages.tokens.costs_title') }}</h3>
             <ul class="token-info__list">
-              <li><span class="token-info__cost">2 Token</span> Spiel ausleihen</li>
-              <li><span class="token-info__cost">3 Token</span> Paket ausleihen</li>
-              <li><span class="token-info__cost">1 Token</span> Ausleihe verlängern</li>
+              <li>{{ $t('pages.tokens.cost_game') }}</li>
+              <li>{{ $t('pages.tokens.cost_package') }}</li>
+              <li>{{ $t('pages.tokens.cost_extension') }}</li>
             </ul>
           </div>
         </template>
@@ -98,10 +98,9 @@ async function addTokens(amount: number) {
 <style lang="scss" scoped>
 $hero-bg: #0F0E0C;
 $nav-height: 3.5rem;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.15);
 $hero-text: #EEE8DF;
-$hero-muted: rgba(238, 232, 223, 0.55);
+$hero-muted: rgba(238, 232, 223, 0.72);
 $surface: rgba(255, 255, 255, 0.04);
 $surface-hover: rgba(255, 255, 255, 0.07);
 $border: rgba(238, 232, 223, 0.1);

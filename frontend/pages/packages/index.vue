@@ -10,8 +10,8 @@
       </div>
       <div class="page-hero__body">
         <p class="page-hero__eyebrow">AUA</p>
-        <h1 class="page-hero__title">Spielepakete</h1>
-        <p class="page-hero__sub">Kuratierte Zusammenstellungen für jeden Anlass</p>
+        <h1 class="page-hero__title">{{ $t('pages.packages.title') }}</h1>
+        <p class="page-hero__sub">{{ $t('pages.packages.subtitle') }}</p>
       </div>
     </section>
 
@@ -24,8 +24,8 @@
         </div>
 
         <div v-else-if="!packages.length" class="catalog__state">
-          <p class="catalog__empty-title">Keine Pakete vorhanden</p>
-          <p class="catalog__empty-sub">Bald verfügbar.</p>
+          <p class="catalog__empty-title">{{ $t('pages.packages.empty_title') }}</p>
+          <p class="catalog__empty-sub">{{ $t('pages.packages.empty_sub') }}</p>
         </div>
 
         <div v-else class="package-grid">
@@ -37,7 +37,7 @@
           >
             <div class="package-card__top">
               <span class="package-card__type" :class="pkg.type === 'CURATED' ? 'package-card__type--curated' : 'package-card__type--category'">
-                {{ pkg.type === 'CURATED' ? 'Kuratiert' : 'Kategorie' }}
+                {{ pkg.type === 'CURATED' ? $t('pages.packages.curated') : $t('pages.packages.category') }}
               </span>
               <span class="package-card__icon" aria-hidden="true">⬡</span>
             </div>
@@ -45,16 +45,16 @@
             <p v-if="pkg.description" class="package-card__desc">{{ pkg.description }}</p>
             <div class="package-card__meta">
               <span v-if="pkg.category" class="package-card__cat">{{ pkg.category.name }}</span>
-              <span class="package-card__count">{{ pkg.games_count ?? 0 }} Spiele</span>
+              <span class="package-card__count">{{ $t('pages.packages.games_count', { n: pkg.games_count ?? 0 }) }}</span>
               <span
                 v-if="auth.isLoggedIn"
                 class="package-card__avail"
                 :class="pkg.available ? 'package-card__avail--yes' : 'package-card__avail--no'"
               >
-                {{ pkg.available ? 'Verfügbar' : 'Nicht verfügbar' }}
+                {{ pkg.available ? $t('pages.packages.available') : $t('pages.packages.not_available') }}
               </span>
             </div>
-            <span class="package-card__arrow">Details →</span>
+            <span class="package-card__arrow">{{ $t('pages.packages.details') }}</span>
           </NuxtLink>
         </div>
 
@@ -69,13 +69,13 @@
           <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
-          <NuxtLink to="/packages" class="l-footer__link">Pakete</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">Nutzungsbedingungen</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
+          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
+          <NuxtLink to="/packages" class="l-footer__link">{{ $t('nav.packages') }}</NuxtLink>
+          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
+          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -87,6 +87,7 @@ import type { Package } from '~/composables/useGames'
 
 const { fetchPackages } = useGames()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const loading = ref(true)
 const packages = ref<Package[]>([])
@@ -101,12 +102,11 @@ onMounted(async () => {
   }
 })
 
-useHead({ title: 'Spielepakete — AUA' })
+useHead(() => ({ title: `${t('pages.packages.title')} — AUA` }))
 </script>
 
 <style lang="scss" scoped>
 $hero-bg:       #0F0E0C;
-$amber:         #D4921E;
 $nav-height:    64px;
 
 $amber-08:      rgba(212, 146, 30, 0.08);
@@ -115,8 +115,8 @@ $amber-25:      rgba(212, 146, 30, 0.25);
 $amber-glow:    rgba(212, 146, 30, 0.18);
 
 $hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .packages-page {

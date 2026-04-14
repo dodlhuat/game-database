@@ -1,8 +1,7 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.5-fpm-alpine
 
 # System-Abhängigkeiten
 RUN apk add --no-cache \
-    postgresql-dev \
     libpng-dev \
     libwebp-dev \
     libjpeg-turbo-dev \
@@ -17,8 +16,7 @@ RUN apk add --no-cache \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) \
     pdo \
-    pdo_pgsql \
-    pgsql \
+    pdo_mysql \
     gd \
     zip \
     exif \

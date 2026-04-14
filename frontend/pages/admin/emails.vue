@@ -8,8 +8,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="E-Mail-Vorlagen" />
-        <h1 class="page-hero__title">E-Mail-Vorlagen</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.emails')" />
+        <h1 class="page-hero__title">{{ $t('admin.emails.title') }}</h1>
       </div>
     </section>
 
@@ -29,7 +29,7 @@
             >
               <div class="tpl-card__header">
                 <div class="tpl-card__icon">
-                  <span class="icon" :class="meta[tpl.key]?.icon ?? 'icon-email-outline'" aria-hidden="true" />
+                  <span class="icon" :class="meta[tpl.key]?.icon ?? 'icon-mail'" aria-hidden="true" />
                 </div>
                 <div class="tpl-card__meta">
                   <span class="tpl-card__label">{{ meta[tpl.key]?.label ?? tpl.key }}</span>
@@ -57,18 +57,18 @@
         <div class="dialog dialog--wide">
           <div class="dialog__header">
             <div>
-              <div class="dialog__eyebrow">E-Mail-Vorlage bearbeiten</div>
+              <div class="dialog__eyebrow">{{ $t('admin.emails.edit_eyebrow') }}</div>
               <h3 class="dialog__title">{{ meta[form.key]?.label ?? form.key }}</h3>
             </div>
-            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
           <div class="dialog__body">
             <!-- Variables hint -->
             <div v-if="meta[form.key]?.vars?.length" class="vars-hint">
-              <span class="vars-hint__label">Verfügbare Variablen:</span>
+              <span class="vars-hint__label">{{ $t('admin.emails.available_vars') }}</span>
               <span
                 v-for="v in meta[form.key].vars"
                 :key="v"
@@ -76,27 +76,27 @@
               >{{ '{' + v + '}' }}</span>
             </div>
 
-            <UiInput v-model="form.subject" label="Betreff" required />
-            <UiInput v-model="form.greeting" label="Begrüßung" required />
+            <UiInput v-model="form.subject" :label="$t('admin.form.subject')" required />
+            <UiInput v-model="form.greeting" :label="$t('admin.emails.greeting')" required />
 
             <div>
-              <label class="form-label">Inhalt</label>
+              <label class="form-label">{{ $t('admin.form.content') }}</label>
               <UiRichEditor v-model="form.body" />
             </div>
 
             <UiInput
               v-model="form.action_text"
-              label="Button-Text (leer = kein Button)"
+              :label="$t('admin.emails.action_text')"
             />
 
             <div v-if="formError" class="form-error">{{ formError }}</div>
           </div>
 
           <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">Speichern</UiButton>
-            <button class="action-btn" @click="closeForm">Abbrechen</button>
+            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
             <button class="action-btn action-btn--muted" @click="reset" :disabled="saving">
-              Auf Standard zurücksetzen
+              {{ $t('admin.emails.reset') }}
             </button>
           </div>
         </div>
@@ -110,7 +110,7 @@
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
           <span class="l-footer__name">AUA</span>
         </div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -122,6 +122,7 @@ import { ref, reactive, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchEmailTemplates, updateEmailTemplate, resetEmailTemplate } = useAdmin()
+const { t } = useI18n()
 
 interface EmailTemplate {
   id: number
@@ -149,19 +150,19 @@ const meta: Record<string, TemplateMeta> = {
   user_approved: {
     label: 'Konto freigeschaltet',
     recipient: 'Mitglied',
-    icon: 'icon-checkmark-circle-outline',
+    icon: 'icon-check_circle',
     vars: ['name'],
   },
   user_rejected: {
     label: 'Registrierung abgelehnt',
     recipient: 'Mitglied',
-    icon: 'icon-close-circle-outline',
+    icon: 'icon-close',
     vars: ['name'],
   },
   new_user_registered: {
     label: 'Neue Registrierung',
     recipient: 'Admin',
-    icon: 'icon-person-add-outline',
+    icon: 'icon-person',
     vars: ['name', 'email'],
   },
   loan_due_soon: {
@@ -173,25 +174,25 @@ const meta: Record<string, TemplateMeta> = {
   reservation_available: {
     label: 'Spiel wieder verfügbar',
     recipient: 'Mitglied',
-    icon: 'icon-bell-outline',
+    icon: 'icon-notifications_active',
     vars: ['name', 'game'],
   },
   email_verification: {
     label: 'E-Mail-Verifizierung',
     recipient: 'Neuer User',
-    icon: 'icon-shield-checkmark-outline',
+    icon: 'icon-check_circle',
     vars: ['name', 'verification_link'],
   },
   welcome_member: {
     label: 'Willkommen als Mitglied',
     recipient: 'Neues Mitglied',
-    icon: 'icon-star-outline',
+    icon: 'icon-stars',
     vars: ['name'],
   },
   membership_renewal_reminder: {
     label: 'Ablauf-Erinnerung',
     recipient: 'Mitglied',
-    icon: 'icon-calendar-outline',
+    icon: 'icon-calendar_today',
     vars: ['name', 'expiry_date', 'renewal_link'],
   },
 }
@@ -243,7 +244,7 @@ async function save() {
     if (idx !== -1) templates.value[idx] = updated
     closeForm()
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.save')
   } finally {
     saving.value = false
   }
@@ -263,7 +264,7 @@ async function reset() {
       action_text: updated.action_text ?? '',
     })
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.generic')
   } finally {
     saving.value = false
   }
@@ -271,9 +272,9 @@ async function reset() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
@@ -329,7 +330,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
     flex-shrink: 0;
     color: $amber;
 
-    .icon { width: 18px; height: 18px; }
+    .icon { font-size: 1.125rem; }
   }
 
   &__meta {
@@ -385,7 +386,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: $amber; margin-bottom: 0.2rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
-  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
+  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s; .icon { font-size: 1.125rem; } &:hover { background: var(--background); color: var(--primary-text); } }
   &__body { margin-bottom: 1.5rem; max-height: 65vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
   &__actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
 }

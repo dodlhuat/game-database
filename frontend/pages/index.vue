@@ -12,35 +12,32 @@
       </div>
 
       <div class="hero__body">
-        <p class="hero__eyebrow">Brettspiel-Ausleihplattform</p>
+        <p class="hero__eyebrow">{{ $t('pages.home.hero_eyebrow') }}</p>
         <h1 class="hero__title">
-          Alle.<br>
-          Unsere.<br>
-          <em class="hero__title-em">Abenteuer.</em>
+          {{ $t('pages.home.hero_title_1') }}<br>
+          {{ $t('pages.home.hero_title_2') }}<br>
+          <em class="hero__title-em">{{ $t('pages.home.hero_title_3') }}</em>
         </h1>
-        <p class="hero__desc">
-          Greife auf unsere wachsende Sammlung von Brettspielen zu —
-          ausleihen, einfach zurückgeben, gemeinsam genießen.
-        </p>
+        <p class="hero__desc">{{ $t('pages.home.hero_desc') }}</p>
 
         <div class="hero__cta-row">
           <NuxtLink to="/games" class="button button-primary hero__cta-primary">
-            <span class="icon icon-book-open-outline" aria-hidden="true" />
-            Zur Spielesammlung
+            <span class="icon icon-article" aria-hidden="true" />
+            {{ $t('btn.to_collection') }}
           </NuxtLink>
           <NuxtLink v-if="!auth.isLoggedIn" to="/register" class="hero__cta-ghost">
-            Konto erstellen →
+            {{ $t('btn.create_account') }} →
           </NuxtLink>
           <NuxtLink v-else to="/dashboard" class="hero__cta-ghost">
-            Mein Dashboard →
+            {{ $t('btn.to_dashboard') }}
           </NuxtLink>
         </div>
 
         <Transition name="fade">
           <div v-if="auth.isLoggedIn && auth.isAdmin" class="hero__admin-chip">
             <NuxtLink to="/admin">
-              <span class="icon icon-settings-2-outline" aria-hidden="true" />
-              Admin-Bereich öffnen
+              <span class="icon icon-settings" aria-hidden="true" />
+              {{ $t('nav.admin') }}
             </NuxtLink>
           </div>
         </Transition>
@@ -55,33 +52,33 @@
     <section class="features">
       <div class="features__inner">
         <header class="features__header">
-          <h2 class="features__title">Was wir bieten</h2>
-          <p class="features__subtitle">Alles, was du für einen gelungenen Spieleabend brauchst.</p>
+          <h2 class="features__title">{{ $t('pages.home.features_title') }}</h2>
+          <p class="features__subtitle">{{ $t('pages.home.features_sub') }}</p>
         </header>
 
         <div class="features__grid">
           <article class="card card-hover features__card">
             <div class="feat-icon feat-icon--amber">
-              <span class="icon icon-book-open-outline" aria-hidden="true" />
+              <span class="icon icon-article" aria-hidden="true" />
             </div>
-            <h3 class="features__card-title">Große Auswahl</h3>
-            <p class="features__card-text">Von Klassikern bis zu modernen Strategiespielen — für jeden Anlass das passende Spiel.</p>
+            <h3 class="features__card-title">{{ $t('pages.home.feature_variety_title') }}</h3>
+            <p class="features__card-text">{{ $t('pages.home.feature_variety_desc') }}</p>
           </article>
 
           <article class="card card-hover features__card">
             <div class="feat-icon feat-icon--blue">
-              <span class="icon icon-calendar-outline" aria-hidden="true" />
+              <span class="icon icon-calendar_today" aria-hidden="true" />
             </div>
-            <h3 class="features__card-title">Einfach ausleihen</h3>
-            <p class="features__card-text">Spiel aussuchen, Ausleihzeit wählen und abholen — unkompliziert und in wenigen Klicks.</p>
+            <h3 class="features__card-title">{{ $t('pages.home.feature_easy_title') }}</h3>
+            <p class="features__card-text">{{ $t('pages.home.feature_easy_desc') }}</p>
           </article>
 
           <article class="card card-hover features__card">
             <div class="feat-icon feat-icon--green">
-              <span class="icon icon-award-outline" aria-hidden="true" />
+              <span class="icon icon-stars" aria-hidden="true" />
             </div>
-            <h3 class="features__card-title">Für alle</h3>
-            <p class="features__card-text">Familien, Freundesgruppen, erfahrene Taktiker — unsere Plattform ist für jeden zugänglich.</p>
+            <h3 class="features__card-title">{{ $t('pages.home.feature_for_all_title') }}</h3>
+            <p class="features__card-text">{{ $t('pages.home.feature_for_all_desc') }}</p>
           </article>
         </div>
       </div>
@@ -92,12 +89,12 @@
       <section v-if="!auth.isLoggedIn" class="cta-strip">
         <div class="cta-strip__inner">
           <div class="cta-strip__text">
-            <h2 class="cta-strip__title">Bereit für den nächsten Spieleabend?</h2>
-            <p class="cta-strip__sub">Erstelle kostenlos ein Konto und starte noch heute.</p>
+            <h2 class="cta-strip__title">{{ $t('pages.home.cta_title') }}</h2>
+            <p class="cta-strip__sub">{{ $t('pages.home.cta_sub') }}</p>
           </div>
           <div class="cta-strip__actions">
-            <NuxtLink to="/register" class="button button-primary">Jetzt registrieren</NuxtLink>
-            <NuxtLink to="/login" class="button">Bereits registriert?</NuxtLink>
+            <NuxtLink to="/register" class="button button-primary">{{ $t('pages.home.cta_register') }}</NuxtLink>
+            <NuxtLink to="/login" class="button">{{ $t('pages.home.cta_login') }}</NuxtLink>
           </div>
         </div>
       </section>
@@ -111,12 +108,12 @@
           <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">Nutzungsbedingungen</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
+          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
+          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
+          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
       </div>
     </footer>
 
@@ -132,7 +129,6 @@ const year = new Date().getFullYear()
 
 <style lang="scss" scoped>
 $hero-bg:       #0F0E0C;
-$amber:         #D4921E;
 $nav-height:    64px;
 
 $amber-08:      rgba(212, 146, 30, 0.08);
@@ -147,8 +143,8 @@ $hero-bg-85:    rgba(15, 14, 12, 0.85);
 $hero-text:     #EEE8DF;
 $hero-text-08:  rgba(238, 232, 223, 0.08);
 
-$hero-muted:    rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-muted-60: rgba(238, 232, 223, 0.60);
 
 $hero-divider:  rgba(238, 232, 223, 0.10);
@@ -390,7 +386,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
   align-items: center;
   justify-content: center;
 
-  .icon { width: 24px; height: 24px; }
+  .icon { font-size: 1.5rem; }
 
   &--amber { background: var(--accent-color-muted); .icon { color: var(--accent-color); } }
   &--blue  { background: var(--accent-lighten-muted); .icon { color: var(--accent-color-lighten); } }

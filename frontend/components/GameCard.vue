@@ -8,14 +8,14 @@
         class="game-card__img"
       />
       <div v-else class="game-card__placeholder">
-        <span class="icon icon-layers-outline" aria-hidden="true" />
+        <span class="icon icon-layers" aria-hidden="true" />
       </div>
       <span
         v-if="auth.isLoggedIn && game.copies_count > 0"
         class="game-card__badge"
         :class="game.available_copies_count > 0 ? 'game-card__badge--avail' : 'game-card__badge--out'"
       >
-        {{ game.available_copies_count > 0 ? 'Verfügbar' : 'Ausgeliehen' }}
+        {{ game.available_copies_count > 0 ? $t('common.badge.available') : $t('common.badge.loaned') }}
       </span>
     </div>
 
@@ -46,17 +46,18 @@ defineProps<{ game: Game }>()
 
 const auth = useAuthStore()
 
+const { t } = useI18n()
+
 const DIFFICULTY: Record<string, string> = {
-  EASY: 'Leicht', MEDIUM: 'Mittel', HARD: 'Schwer', EXPERT: 'Experte',
+  EASY: 'admin.form.difficulty_easy', MEDIUM: 'admin.form.difficulty_medium', HARD: 'admin.form.difficulty_hard', EXPERT: 'admin.form.difficulty_expert',
 }
 
 function difficultyLabel(d: string) {
-  return DIFFICULTY[d] ?? d
+  return DIFFICULTY[d] ? t(DIFFICULTY[d]) : d
 }
 </script>
 
 <style lang="scss" scoped>
-$amber:        #D4921E;
 $amber-08:     rgba(212, 146, 30, 0.08);
 $amber-30:     rgba(212, 146, 30, 0.30);
 
@@ -107,7 +108,7 @@ $amber-30:     rgba(212, 146, 30, 0.30);
     .icon {
       width: 40px;
       height: 40px;
-      color: var(--disabled);
+      color: var(--secondary-text);
     }
   }
 

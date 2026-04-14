@@ -6,7 +6,7 @@
   <div class="flyout-menu flyout-from-right" id="flyoutMenu">
     <div class="flyout-header">
       <span class="flyout-title">Navigation</span>
-      <button class="close-menu" aria-label="Menü schließen">
+      <button class="close-menu" :aria-label="$t('nav.menu_close')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
         </svg>
@@ -14,25 +14,25 @@
     </div>
 
     <ul>
-      <li><NuxtLink to="/games">Spiele</NuxtLink></li>
-      <li><NuxtLink to="/packages">Pakete</NuxtLink></li>
-      <li v-show="auth.isLoggedIn"><NuxtLink to="/dashboard">Mein Konto</NuxtLink></li>
+      <li><NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink></li>
+      <li><NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink></li>
+      <li v-show="auth.isLoggedIn"><NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink></li>
       <li v-show="auth.isLoggedIn && auth.isAdmin">
-        <NuxtLink to="/admin" class="flyout-admin-link">Admin-Bereich</NuxtLink>
+        <NuxtLink to="/admin" class="flyout-admin-link">{{ $t('nav.admin') }}</NuxtLink>
       </li>
-      <li v-show="!auth.isLoggedIn"><NuxtLink to="/login">Anmelden</NuxtLink></li>
-      <li v-show="!auth.isLoggedIn"><NuxtLink to="/register">Registrieren</NuxtLink></li>
+      <li v-show="!auth.isLoggedIn"><NuxtLink to="/login">{{ $t('nav.login') }}</NuxtLink></li>
+      <li v-show="!auth.isLoggedIn"><NuxtLink to="/register">{{ $t('nav.register') }}</NuxtLink></li>
       <li v-show="auth.isLoggedIn">
-        <button class="flyout-logout-btn" @click="handleLogout">Abmelden</button>
+        <button class="flyout-logout-btn" @click="handleLogout">{{ $t('nav.logout') }}</button>
       </li>
       <li class="flyout-divider" aria-hidden="true" />
-      <li class="flyout-legal-item"><NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink></li>
-      <li class="flyout-legal-item"><NuxtLink to="/privacy">Datenschutz</NuxtLink></li>
-      <li class="flyout-legal-item"><NuxtLink to="/cookies">Cookie-Richtlinien</NuxtLink></li>
+      <li class="flyout-legal-item"><NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></li>
+      <li class="flyout-legal-item"><NuxtLink to="/privacy">{{ $t('nav.privacy') }}</NuxtLink></li>
+      <li class="flyout-legal-item"><NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink></li>
     </ul>
 
     <div class="flyout-footer" style="--delay: 0.6s">
-      <p class="flyout-copy">&copy; {{ year }} AUA</p>
+      <p class="flyout-copy">{{ $t('common.copyright_short', { year }) }}</p>
     </div>
   </div>
 
@@ -46,16 +46,16 @@
 
       <div class="l-nav__actions">
         <template v-if="!auth.isLoggedIn">
-          <NuxtLink to="/login" class="button l-nav__btn">Anmelden</NuxtLink>
-          <NuxtLink to="/register" class="button button-primary l-nav__btn">Registrieren</NuxtLink>
+          <NuxtLink to="/login" class="button l-nav__btn">{{ $t('nav.login') }}</NuxtLink>
+          <NuxtLink to="/register" class="button button-primary l-nav__btn">{{ $t('nav.register') }}</NuxtLink>
         </template>
         <template v-else>
           <span class="l-nav__user">{{ firstName }}</span>
-          <button class="button l-nav__btn" @click="handleLogout">Abmelden</button>
+          <button class="button l-nav__btn" @click="handleLogout">{{ $t('nav.logout') }}</button>
         </template>
       </div>
 
-      <button class="l-nav__theme-btn" aria-label="Theme wechseln" @click="toggleTheme">
+      <button class="l-nav__theme-btn" :aria-label="$t('nav.theme_toggle')" @click="toggleTheme">
         <svg v-if="isDark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M12 6a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v2a1 1 0 0 0 1 1z"/><path d="M21 11h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2z"/><path d="M6 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1z"/><path d="M6.22 5a1 1 0 0 0-1.39 1.47l1.44 1.39a1 1 0 0 0 .73.28 1 1 0 0 0 .72-.31 1 1 0 0 0 0-1.41z"/><path d="M17 8.14a1 1 0 0 0 .69-.28l1.44-1.39A1 1 0 0 0 17.78 5l-1.44 1.42a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.31z"/><path d="M12 18a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/><path d="M17.73 16.14a1 1 0 0 0-1.39 1.44L17.78 19a1 1 0 0 0 .69.28 1 1 0 0 0 .72-.3 1 1 0 0 0 0-1.42z"/><path d="M6.27 16.14l-1.44 1.39a1 1 0 0 0 0 1.42 1 1 0 0 0 .72.3 1 1 0 0 0 .67-.25l1.44-1.39a1 1 0 0 0-1.39-1.44z"/><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4zm0 6a2 2 0 1 1 2-2 2 2 0 0 1-2 2z"/>
         </svg>
@@ -64,7 +64,7 @@
         </svg>
       </button>
 
-      <button class="menu-trigger l-nav__trigger" aria-label="Menü öffnen" aria-expanded="false">
+      <button class="menu-trigger l-nav__trigger" :aria-label="$t('nav.menu_open')" aria-expanded="false">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
         </svg>
@@ -158,7 +158,6 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 $hero-bg:       #0F0E0C;
-$amber:         #D4921E;
 $nav-height:    64px;
 
 $amber-08:      rgba(212, 146, 30, 0.08);
@@ -168,9 +167,9 @@ $hero-bg-94:    rgba(15, 14, 12, 0.94);
 $hero-text:     #EEE8DF;
 $hero-text-08:  rgba(238, 232, 223, 0.08);
 $hero-text-10:  rgba(238, 232, 223, 0.10);
-$hero-muted:    rgba(238, 232, 223, 0.55);
-$hero-muted-35: rgba(238, 232, 223, 0.35);
-$hero-muted-60: rgba(238, 232, 223, 0.60);
+$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted-35: rgba(238, 232, 223, 0.50);
+$hero-muted-60: rgba(238, 232, 223, 0.72);
 $hero-muted-70: rgba(238, 232, 223, 0.70);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 

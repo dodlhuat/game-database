@@ -34,7 +34,11 @@
       "Read(//c/Users/dodlh/Github/game-database/game-database/**)",
       "Bash(done)",
       "Bash(ls:*)",
-      "Bash(docker-compose exec:*)"
+      "Bash(docker-compose exec:*)",
+      "Bash(sed -i '' 's/rgba\\(238, 232, 223, 0\\\\.60\\)/rgba\\(238, 232, 223, 0.72\\)/g' components/AppNav.vue)",
+      "Bash(sed -i '' 's/rgba\\(238, 232, 223, 0\\\\.35\\)/rgba\\(238, 232, 223, 0.50\\)/g' components/AppNav.vue)",
+      "Bash(xargs perl:*)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

@@ -24,19 +24,42 @@ class GameController extends Controller
                   ->whereDoesntHave('activeLoans');
             }])
             ->withCount('reviews')
-            ->when($request->category, fn($q, $slug) =>
-                $q->whereHas('category', fn($q) => $q->where('slug', $slug))
-            )
+            ->when($request->category, function ($q, $value) {
+                $slugs = array_filter(explode(',', $value));
+                $q->whereHas('category', function ($q) use ($slugs) {
+                    $q->whereIn('slug', $slugs)
+                      ->orWhereHas('parent', fn($q) => $q->whereIn('slug', $slugs));
+                });
+            })
             ->when($request->tag, fn($q, $slug) =>
                 $q->whereHas('tags', fn($q) => $q->where('slug', $slug))
             )
             ->when($request->search, fn($q, $search) =>
                 $q->where(function ($q) use ($search) {
-                    $q->where('title', 'ilike', "%{$search}%")
-                      ->orWhere('description', 'ilike', "%{$search}%");
+                    $q->where('title', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
                 })
             )
             ->when($request->difficulty, fn($q, $diff) => $q->where('difficulty', $diff))
+            ->when($request->players, function ($q, $n) {
+                $n = (int) $n;
+                $q->where(function ($q) use ($n) {
+                    $q->whereNull('min_players')->orWhere('min_players', '<=', $n);
+                })->where(function ($q) use ($n) {
+                    $q->whereNull('max_players')->orWhere('max_players', '>=', $n);
+                });
+            })
+            ->when($request->duration, function ($q, $dur) {
+                if ($dur === 'short')  $q->whereNotNull('duration_min')->where('duration_min', '<=', 30);
+                if ($dur === 'medium') $q->whereNotNull('duration_min')->whereBetween('duration_min', [31, 90]);
+                if ($dur === 'long')   $q->whereNotNull('duration_min')->where('duration_min', '>', 90);
+            })
+            ->when($request->language, fn($q, $lang) => $q->where('language', 'like', "%{$lang}%"))
+            ->when($request->min_age, fn($q, $age) =>
+                $q->where(function ($q) use ($age) {
+                    $q->whereNull('min_age')->orWhere('min_age', '<=', (int) $age);
+                })
+            )
             ->when($request->available, fn($q) =>
                 $q->whereHas('copies', fn($q) =>
                     $q->where('condition', '!=', 'LOCKED')->whereDoesntHave('activeLoans')

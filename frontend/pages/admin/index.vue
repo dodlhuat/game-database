@@ -9,8 +9,8 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">Administration</p>
-        <h1 class="page-hero__title">Admin-Dashboard</h1>
+        <p class="page-hero__eyebrow">{{ $t('admin.heading') }}</p>
+        <h1 class="page-hero__title">{{ $t('admin.dashboard') }}</h1>
       </div>
     </section>
 
@@ -28,52 +28,52 @@
           <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-card__icon">
-                <span class="icon icon-people-outline" aria-hidden="true" />
+                <span class="icon icon-person" aria-hidden="true" />
               </span>
               <div class="stat-card__body">
                 <span class="stat-card__value">{{ stats.users.total }}</span>
-                <span class="stat-card__label">Mitglieder gesamt</span>
+                <span class="stat-card__label">{{ $t('admin.stats.users_total') }}</span>
               </div>
               <NuxtLink
                 v-if="stats.users.pending > 0"
                 to="/admin/users?status=PENDING"
                 class="stat-card__alert"
               >
-                {{ stats.users.pending }} ausstehend
+                {{ stats.users.pending }} {{ $t('admin.stats.users_pending') }}
               </NuxtLink>
             </div>
 
             <div class="stat-card" :class="{ 'stat-card--warn': stats.loans.overdue > 0 }">
               <span class="stat-card__icon">
-                <span class="icon icon-book-open-outline" aria-hidden="true" />
+                <span class="icon icon-article" aria-hidden="true" />
               </span>
               <div class="stat-card__body">
                 <span class="stat-card__value">{{ stats.loans.active }}</span>
-                <span class="stat-card__label">Aktive Ausleihen</span>
+                <span class="stat-card__label">{{ $t('admin.stats.loans_active') }}</span>
               </div>
               <NuxtLink
                 v-if="stats.loans.overdue > 0"
                 to="/admin/loans?status=OVERDUE"
                 class="stat-card__alert stat-card__alert--danger"
               >
-                {{ stats.loans.overdue }} überfällig
+                {{ stats.loans.overdue }} {{ $t('admin.stats.loans_overdue') }}
               </NuxtLink>
             </div>
 
             <div class="stat-card" :class="{ 'stat-card--amber': stats.extensions.pending > 0 }">
               <span class="stat-card__icon">
-                <span class="icon icon-calendar-outline" aria-hidden="true" />
+                <span class="icon icon-calendar_today" aria-hidden="true" />
               </span>
               <div class="stat-card__body">
                 <span class="stat-card__value">{{ stats.extensions.pending }}</span>
-                <span class="stat-card__label">Offene Verlängerungsanträge</span>
+                <span class="stat-card__label">{{ $t('admin.stats.extensions_pending') }}</span>
               </div>
               <NuxtLink
                 v-if="stats.extensions.pending > 0"
                 to="/admin/extensions"
                 class="stat-card__alert"
               >
-                Jetzt prüfen →
+                {{ $t('admin.stats.check_now') }}
               </NuxtLink>
             </div>
           </div>
@@ -81,69 +81,74 @@
           <!-- Navigation ─────────────────────────────────────────── -->
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Verwaltung</h2>
+              <h2 class="dash-section__title">{{ $t('admin.management') }}</h2>
             </header>
             <div class="nav-grid">
             <NuxtLink to="/admin/users" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-people-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Mitglieder</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-person" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.users') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/games" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-book-open-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Spiele</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-article" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.games') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/categories" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-pricetags-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Kategorien</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-label" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.categories') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
+            </NuxtLink>
+            <NuxtLink to="/admin/tags" class="nav-card">
+              <span class="nav-card__icon"><span class="icon icon-bookmark" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.tags') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
 
             <NuxtLink to="/admin/loans" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-swap-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Ausleihen</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-sync" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.loans') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/extensions" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-calendar-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Verlängerungsanträge</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-calendar_today" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.extensions') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/newsletters" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-email-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Newsletter</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-mail" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.newsletters') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/packages" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-gift-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Pakete</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__label">{{ $t('admin.packages') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/damage-reports" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-alert-triangle-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Schadensmeldungen</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__label">{{ $t('admin.damage_reports') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/emails" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-email-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">E-Mail-Vorlagen</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-mail" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.emails') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/loan-settings" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-settings-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Ausleih-Einstellungen</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-settings" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.loan_settings') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/email-logs" class="nav-card">
-              <span class="nav-card__icon"><span class="icon icon-list-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">E-Mail-Protokoll</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__icon"><span class="icon icon-format_list_bulleted" aria-hidden="true" /></span>
+              <span class="nav-card__label">{{ $t('admin.email_logs') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/package-loans" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-cube-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">Paket-Ausleihen</span>
-              <span class="nav-card__arrow icon icon-arrow-forward-outline" aria-hidden="true" />
+              <span class="nav-card__label">{{ $t('admin.package_loans') }}</span>
+              <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             </div>
           </section>
@@ -159,7 +164,7 @@
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
           <span class="l-footer__name">AUA</span>
         </div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -187,7 +192,6 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 $hero-bg:     #0F0E0C;
-$amber:       #D4921E;
 $nav-height:  64px;
 
 $amber-08:    rgba(212, 146, 30, 0.08);
@@ -196,8 +200,8 @@ $amber-25:    rgba(212, 146, 30, 0.25);
 $amber-glow:  rgba(212, 146, 30, 0.16);
 
 $hero-text:   #EEE8DF;
-$hero-muted:  rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:  rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
@@ -276,7 +280,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px;
     background: $amber-14; color: $amber;
     display: flex; align-items: center; justify-content: center;
-    .icon { width: 20px; height: 20px; }
+    .icon { font-size: 1.25rem; }
   }
 
   &__body { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; }
@@ -354,7 +358,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     display: flex; align-items: center; justify-content: center;
     color: var(--secondary-text);
     transition: background 0.2s, color 0.2s;
-    .icon { width: 18px; height: 18px; }
+    .icon { font-size: 1.125rem; }
   }
 
   &__label { flex: 1; }

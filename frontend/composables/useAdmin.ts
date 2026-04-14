@@ -64,12 +64,40 @@ export function useAdmin() {
   const createTag = (name: string) =>
     api.post<{ data: { id: number; name: string; slug: string } }>('/admin/tags', { name })
 
+  const updateTag = (id: number, name: string) =>
+    api.put(`/admin/tags/${id}`, { name })
+
   const deleteTag = (id: number) =>
     api.delete(`/admin/tags/${id}`)
 
   // Categories
   const fetchAdminCategories = () =>
     api.get<{ data: unknown[] }>('/admin/categories')
+
+  const importCategories = (file: File) => {
+    const fd = new FormData()
+    fd.append('file', file)
+    return api.post<{ new: number; updated: number; total: number }>('/admin/categories/import', fd)
+  }
+
+  const exportCategories = async (): Promise<void> => {
+    const config = useRuntimeConfig()
+    const token = localStorage.getItem('auth_token')
+    const response = await fetch(`${config.public.apiBase}/admin/categories/export`, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+        Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      },
+    })
+    if (!response.ok) throw new Error('Export fehlgeschlagen')
+    const blob = await response.blob()
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'kategorien.xlsx'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const createCategory = (data: unknown) =>
     api.post('/admin/categories', data)
@@ -150,8 +178,8 @@ export function useAdmin() {
   return {
     fetchStats,
     fetchAdminGames, createGame, updateGame, deleteGame, importGames, exportGames, uploadGameImages, deleteGameImage,
-    fetchAdminTags, createTag, deleteTag,
-    fetchAdminCategories, createCategory, updateCategory, patchCategory, deleteCategory,
+    fetchAdminTags, createTag, updateTag, deleteTag,
+    fetchAdminCategories, importCategories, exportCategories, createCategory, updateCategory, patchCategory, deleteCategory,
     fetchCopies, createCopy, updateCopy, deleteCopy,
     fetchAdminLoans, markOverdue,
     fetchExtensions, approveExtension, rejectExtension,

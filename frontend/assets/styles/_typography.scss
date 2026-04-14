@@ -53,13 +53,13 @@ p {
   color: $color-gray-700;
 }
 
-a {
+a:not(.button):not([class*="button-"]):not([class*="detail__btn"]):not([class*="btn"]) {
   color: $color-primary;
-  transition: color $transition-fast;
+  text-decoration: none;
+  transition: color $transition-base;
 
   &:hover {
     color: $color-primary-hover;
-    text-decoration: underline;
   }
 }
 

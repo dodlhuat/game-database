@@ -9,13 +9,24 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Kategorien" />
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.categories')" />
         <div class="page-hero__row">
-          <h1 class="page-hero__title">Kategorien verwalten</h1>
-          <button class="hero-btn" @click="openCreate">
-            <span class="icon icon-plus-outline" aria-hidden="true" />
-            Kategorie hinzufügen
-          </button>
+          <h1 class="page-hero__title">{{ $t('admin.categories.title') }}</h1>
+          <div class="hero-actions">
+            <button class="hero-btn hero-btn--secondary" :disabled="exporting" @click="doExport">
+              <span class="icon icon-download-outline" aria-hidden="true" />
+              {{ exporting ? $t('btn.exporting') : $t('btn.export') }}
+            </button>
+            <label class="hero-btn hero-btn--secondary" :class="{ 'hero-btn--loading': importing }">
+              <span class="icon icon-cloud" aria-hidden="true" />
+              {{ importing ? $t('btn.importing') : $t('btn.import') }}
+              <input type="file" accept=".xlsx,.xls,.csv" class="hero-file-input" :disabled="importing" @change="doImport" />
+            </label>
+            <button class="hero-btn" @click="openCreate">
+              <span class="icon icon-add" aria-hidden="true" />
+              {{ $t('admin.actions.add_category') }}
+            </button>
+          </div>
         </div>
       </div>
     </section>
@@ -30,24 +41,24 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Kategorien</h2>
+            <h2 class="dash-section__title">{{ $t('admin.categories.all') }}</h2>
             <span class="dash-section__count">{{ totalCount }}</span>
           </header>
 
           <div v-if="!categories.length" class="dash-empty">
-            <span class="icon icon-layers-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Kategorien vorhanden.</p>
+            <span class="icon icon-layers dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.empty.categories') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Slug</th>
-                  <th>Spiele</th>
-                  <th>Status</th>
-                  <th>Aktionen</th>
+                  <th>{{ $t('admin.table.name') }}</th>
+                  <th>{{ $t('admin.table.slug') }}</th>
+                  <th>{{ $t('admin.table.games') }}</th>
+                  <th>{{ $t('admin.table.status') }}</th>
+                  <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -59,20 +70,20 @@
                     <td>{{ cat.games_count ?? 0 }}</td>
                     <td>
                       <span class="badge" :class="cat.is_active ? 'badge-success' : 'badge'">
-                        {{ cat.is_active ? 'Aktiv' : 'Inaktiv' }}
+                        {{ cat.is_active ? $t('common.badge.active') : $t('common.badge.inactive') }}
                       </span>
                     </td>
                     <td>
                       <div class="action-row">
-                        <button class="action-btn" @click="openEdit(cat)">Bearbeiten</button>
+                        <button class="action-btn" @click="openEdit(cat)">{{ $t('admin.actions.edit') }}</button>
                         <button
                           class="action-btn"
                           :class="cat.is_active ? 'action-btn--warn' : 'action-btn--ok'"
                           @click="toggleActive(cat)"
                         >
-                          {{ cat.is_active ? 'Deaktivieren' : 'Aktivieren' }}
+                          {{ cat.is_active ? $t('admin.actions.deactivate') : $t('admin.actions.activate') }}
                         </button>
-                        <button class="action-btn action-btn--danger" @click="remove(cat)">Löschen</button>
+                        <button class="action-btn action-btn--danger" @click="remove(cat)">{{ $t('admin.actions.delete') }}</button>
                       </div>
                     </td>
                   </tr>
@@ -86,20 +97,20 @@
                     <td>{{ child.games_count ?? 0 }}</td>
                     <td>
                       <span class="badge" :class="child.is_active ? 'badge-success' : 'badge'">
-                        {{ child.is_active ? 'Aktiv' : 'Inaktiv' }}
+                        {{ child.is_active ? $t('common.badge.active') : $t('common.badge.inactive') }}
                       </span>
                     </td>
                     <td>
                       <div class="action-row">
-                        <button class="action-btn" @click="openEdit(child)">Bearbeiten</button>
+                        <button class="action-btn" @click="openEdit(child)">{{ $t('admin.actions.edit') }}</button>
                         <button
                           class="action-btn"
                           :class="child.is_active ? 'action-btn--warn' : 'action-btn--ok'"
                           @click="toggleActive(child)"
                         >
-                          {{ child.is_active ? 'Deaktivieren' : 'Aktivieren' }}
+                          {{ child.is_active ? $t('admin.actions.deactivate') : $t('admin.actions.activate') }}
                         </button>
-                        <button class="action-btn action-btn--danger" @click="remove(child)">Löschen</button>
+                        <button class="action-btn action-btn--danger" @click="remove(child)">{{ $t('admin.actions.delete') }}</button>
                       </div>
                     </td>
                   </tr>
@@ -117,25 +128,25 @@
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ form.id ? 'Kategorie bearbeiten' : 'Kategorie hinzufügen' }}</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ form.id ? $t('admin.categories.edit') : $t('admin.categories.add') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
           <div class="dialog__body">
             <div class="form-grid">
               <div class="form-grid__full">
-                <UiInput v-model="form.name" label="Name" required @input="autoSlug" />
+                <UiInput v-model="form.name" :label="$t('admin.form.name')" required @input="autoSlug" />
               </div>
               <div class="form-grid__full">
-                <UiInput v-model="form.slug" label="Slug" required />
+                <UiInput v-model="form.slug" :label="$t('admin.form.slug')" required />
               </div>
 
               <div class="form-grid__full">
-                <label class="form-label">Übergeordnete Kategorie</label>
+                <label class="form-label">{{ $t('admin.form.parent_category') }}</label>
                 <select v-model="form.parent_id" class="form-select">
-                  <option :value="null">Keine (Hauptkategorie)</option>
+                  <option :value="null">{{ $t('admin.form.no_parent') }}</option>
                   <option
                     v-for="cat in parentOptions"
                     :key="cat.id"
@@ -145,17 +156,17 @@
               </div>
 
               <div class="form-grid__full">
-                <UiInput v-model="form.icon_url" label="Icon-URL (optional)" />
+                <UiInput v-model="form.icon_url" :label="$t('admin.form.icon_url')" />
               </div>
 
               <div>
-                <UiInput v-model="form.sort_order" label="Reihenfolge" type="number" />
+                <UiInput v-model="form.sort_order" :label="$t('admin.form.sort_order')" type="number" />
               </div>
 
               <div class="form-grid__full">
                 <label class="form-check">
                   <input v-model="form.is_active" type="checkbox" />
-                  <span>Kategorie aktiv</span>
+                  <span>{{ $t('admin.form.active_category') }}</span>
                 </label>
               </div>
             </div>
@@ -164,8 +175,43 @@
           </div>
 
           <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">Speichern</UiButton>
-            <button class="action-btn" @click="closeForm">Abbrechen</button>
+            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── Import Ergebnis Modal ───────────────────────────────── -->
+    <Transition name="modal">
+      <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="importResult = null">
+              <span class="icon icon-close" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="dialog__body">
+            <div class="import-result">
+              <div class="import-result__row">
+                <span class="import-result__label">{{ $t('admin.import.new_categories') }}</span>
+                <span class="import-result__value import-result__value--new">{{ importResult.new }}</span>
+              </div>
+              <div class="import-result__row">
+                <span class="import-result__label">{{ $t('admin.import.updated_categories') }}</span>
+                <span class="import-result__value import-result__value--updated">{{ importResult.updated }}</span>
+              </div>
+              <div class="import-result__divider" />
+              <div class="import-result__row">
+                <span class="import-result__label">{{ $t('admin.import.total') }}</span>
+                <span class="import-result__value">{{ importResult.total }}</span>
+              </div>
+            </div>
+            <div v-if="importError" class="form-error">{{ importError }}</div>
+          </div>
+          <div class="dialog__actions">
+            <button class="action-btn" @click="importResult = null">{{ $t('admin.form.close') }}</button>
           </div>
         </div>
       </div>
@@ -178,7 +224,7 @@
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
           <span class="l-footer__name">AUA</span>
         </div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -189,7 +235,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminCategories, createCategory, updateCategory, patchCategory, deleteCategory } = useAdmin()
+const { t } = useI18n()
+const { fetchAdminCategories, importCategories, exportCategories, createCategory, updateCategory, patchCategory, deleteCategory } = useAdmin()
 
 interface CategoryItem {
   id: number
@@ -206,7 +253,11 @@ interface CategoryItem {
 const year = new Date().getFullYear()
 const loading = ref(true)
 const saving = ref(false)
+const importing = ref(false)
+const exporting = ref(false)
 const formError = ref('')
+const importError = ref('')
+const importResult = ref<{ new: number; updated: number; total: number } | null>(null)
 const categories = ref<CategoryItem[]>([])
 
 const totalCount = computed(() =>
@@ -287,10 +338,35 @@ async function save() {
     await load()
     closeForm()
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.save')
   } finally {
     saving.value = false
   }
+}
+
+async function doImport(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  importing.value = true
+  importError.value = ''
+  try {
+    const result = await importCategories(file)
+    importResult.value = result
+    await load()
+  } catch (err: unknown) {
+    importError.value = (err as { message?: string }).message ?? t('common.error.import_failed')
+    importResult.value = { new: 0, updated: 0, total: 0 }
+  } finally {
+    importing.value = false
+    ;(e.target as HTMLInputElement).value = ''
+  }
+}
+
+async function doExport() {
+  exporting.value = true
+  try { await exportCategories() }
+  catch (err: unknown) { alert((err as { message?: string }).message ?? t('common.error.export_failed')) }
+  finally { exporting.value = false }
 }
 
 async function toggleActive(cat: CategoryItem) {
@@ -306,15 +382,14 @@ async function remove(cat: CategoryItem) {
 
 <style lang="scss" scoped>
 $hero-bg:     #0F0E0C;
-$amber:       #D4921E;
 $nav-height:  64px;
 $amber-08:    rgba(212, 146, 30, 0.08);
 $amber-14:    rgba(212, 146, 30, 0.14);
 $amber-25:    rgba(212, 146, 30, 0.25);
 $amber-glow:  rgba(212, 146, 30, 0.16);
 $hero-text:   #EEE8DF;
-$hero-muted:  rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:  rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
@@ -330,14 +405,25 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
 
+.hero-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
 .hero-btn {
   display: inline-flex; align-items: center; gap: 0.4rem;
   padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit;
   background: $amber; color: #0F0E0C; border: none; border-radius: 8px; cursor: pointer;
   transition: opacity 0.2s;
-  .icon { width: 16px; height: 16px; }
+  .icon { font-size: 1rem; }
   &:hover { opacity: 0.88; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &--secondary {
+    background: transparent; color: $hero-text;
+    border: 1px solid rgba(238,232,223,0.2);
+    &:hover { background: rgba(238,232,223,0.06); opacity: 1; }
+  }
+  &--loading { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
 }
+
+.hero-file-input { display: none; }
 
 .admin-content { flex: 1; padding: 2rem 1.5rem 4rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem; } }
 .admin-state { display: flex; justify-content: center; align-items: center; min-height: 200px; }
@@ -365,44 +451,40 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 }
 
 .child-indent {
-  display: inline-block;
-  width: 1.1rem;
-  height: 1px;
-  background: var(--divider);
-  margin-right: 0.5rem;
-  vertical-align: middle;
-  position: relative;
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0; top: -8px;
-    width: 1px; height: 8px;
-    background: var(--divider);
-  }
+  display: inline-block; width: 1.1rem; height: 1px;
+  background: var(--divider); margin-right: 0.5rem; vertical-align: middle; position: relative;
+  &::before { content: ''; position: absolute; left: 0; top: -8px; width: 1px; height: 8px; background: var(--divider); }
 }
 
-.text-mono { font-family: monospace; font-size: 0.8rem; }
+.text-mono { font-family: monospace; font-size: 0.8rem; color: var(--secondary-text); }
 .text-muted { color: var(--secondary-text); }
 
+.badge { display: inline-flex; align-items: center; padding: 0.2rem 0.6rem; font-size: 0.75rem; font-weight: 600; border-radius: 999px; background: rgba(255,255,255,0.06); color: var(--secondary-text); border: 1px solid var(--divider); }
+.badge-success { background: rgba(34,197,94,0.08); color: #4ade80; border-color: rgba(34,197,94,0.25); }
 
 .action-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 .action-btn {
   display: inline-flex; align-items: center; gap: 0.35rem;
   padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit;
   color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
+  .icon { font-size: 0.875rem; }
   &:hover { border-color: var(--accent-color); color: var(--accent-text); }
   &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } }
   &--warn   { color: #fb923c; border-color: rgba(251,146,60,0.25); background: rgba(251,146,60,0.05); &:hover { border-color: rgba(251,146,60,0.5); } }
   &--ok     { color: #4ade80; border-color: rgba(34,197,94,0.25); background: rgba(34,197,94,0.05); &:hover { border-color: rgba(34,197,94,0.5); } }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
 }
 
 // ─── Modal ────────────────────────────────────────────────────────
-.modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto;
+}
 .dialog {
   background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 480px; box-shadow: 0 25px 60px rgba(0,0,0,0.4);
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
-  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
+  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { font-size: 1.125rem; } &:hover { background: var(--background); color: var(--primary-text); } }
   &__body { margin-bottom: 1.5rem; }
   &__actions { display: flex; gap: 0.75rem; }
 }
@@ -419,7 +501,18 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
 .form-select { display: block; width: 100%; height: 40px; padding: 0 0.75rem; border: 1px solid var(--divider); border-radius: 8px; background: var(--background); color: var(--primary-text); font-size: 0.875rem; font-family: inherit; cursor: pointer; transition: border-color 0.2s; &:focus { outline: none; border-color: var(--accent-color); } }
 .form-check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--primary-text); cursor: pointer; user-select: none; input { accent-color: var(--accent-color); width: 15px; height: 15px; cursor: pointer; } }
-.form-error { margin-top: 1rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
+.form-error { margin-top: 0.75rem; padding: 0.75rem 1rem; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #f87171; font-size: 0.875rem; }
+
+// ─── Import Result ────────────────────────────────────────────────
+.import-result {
+  display: flex; flex-direction: column; gap: 0; padding: 0.25rem 0;
+  &__row { display: flex; align-items: center; justify-content: space-between; padding: 0.65rem 0; }
+  &__label { font-size: 0.9rem; color: var(--secondary-text); }
+  &__value { font-size: 1rem; font-weight: 700; color: var(--primary-text); }
+  &__value--new { color: #4ade80; }
+  &__value--updated { color: $amber; }
+  &__divider { height: 1px; background: var(--divider); margin: 0.25rem 0; }
+}
 
 // ─── Footer ───────────────────────────────────────────────────────
 .l-footer { background: $hero-bg; border-top: 1px solid $hero-divider; padding: 1.75rem 1.5rem; &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; } &__brand { display: flex; align-items: center; gap: 0.4rem; } &__hex { font-size: 1.1rem; color: $amber; } &__name { font-size: 0.9rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; } &__copy { font-size: 0.8rem; color: $hero-muted-50; padding-bottom: 0; } }

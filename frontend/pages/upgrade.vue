@@ -8,9 +8,9 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">Mitgliedschaft</p>
-        <h1 class="page-hero__title">Mitglied werden</h1>
-        <p class="page-hero__sub">Werde Teil der Gemeinschaft und leih Spiele aus der ganzen Sammlung aus.</p>
+        <p class="page-hero__eyebrow">{{ $t('pages.upgrade.membership') }}</p>
+        <h1 class="page-hero__title">{{ $t('pages.upgrade.title') }}</h1>
+        <p class="page-hero__sub">{{ $t('pages.upgrade.sub') }}</p>
       </div>
     </section>
 
@@ -19,7 +19,7 @@
 
         <div v-if="auth.isMember" class="already-member">
           <div class="already-member__icon">✓</div>
-          <h2 class="already-member__title">Du bist bereits Mitglied</h2>
+          <h2 class="already-member__title">{{ $t('pages.upgrade.already_member') }}</h2>
           <p class="already-member__text">
             Deine Mitgliedschaft ist gültig bis
             <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong>.
@@ -31,68 +31,58 @@
 
           <!-- Benefits -->
           <div class="benefits-panel">
-            <h2 class="benefits-panel__title">Was du als Mitglied bekommst</h2>
+            <h2 class="benefits-panel__title">{{ $t('pages.upgrade.benefits_title') }}</h2>
 
             <ul class="benefit-list">
               <li class="benefit-list__item">
                 <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true">◈</span>
-                <div>
-                  <strong>20 Token</strong> sofort beim Start — dein Startguthaben
-                </div>
+                <div>{{ $t('pages.upgrade.benefit_tokens') }}</div>
               </li>
               <li class="benefit-list__item">
                 <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-book-open-outline" />
+                  <span class="icon icon-article" />
                 </span>
-                <div>
-                  Zugang zur gesamten Spielesammlung — Einzelspiele & Pakete ausleihen
-                </div>
+                <div>{{ $t('pages.upgrade.benefit_access') }}</div>
               </li>
               <li class="benefit-list__item">
                 <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-calendar-outline" />
+                  <span class="icon icon-calendar_today" />
                 </span>
-                <div>
-                  Einladungen zu <strong>Events & Spieleabenden</strong> — exklusiv für Mitglieder
-                </div>
+                <div>{{ $t('pages.upgrade.benefit_events') }}</div>
               </li>
               <li class="benefit-list__item">
                 <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-email-outline" />
+                  <span class="icon icon-mail" />
                 </span>
-                <div>
-                  <strong>Newsletter</strong> mit Neuheiten, Empfehlungen & Vereinsinfos
-                </div>
+                <div>{{ $t('pages.upgrade.benefit_newsletter') }}</div>
               </li>
               <li class="benefit-list__item">
                 <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-refresh-outline" />
+                  <span class="icon icon-refresh" />
                 </span>
-                <div>
-                  Mitgliedschaft läuft <strong>12 Monate</strong> — danach verlängerbar
-                </div>
+                <div>{{ $t('pages.upgrade.benefit_duration') }}</div>
               </li>
             </ul>
 
-            <p class="benefits-panel__note">Zahlungsabwicklung folgt in einer späteren Version.</p>
+            <p class="benefits-panel__note">{{ $t('pages.upgrade.payment_note') }}</p>
           </div>
 
           <!-- Form -->
           <div class="upgrade-form">
-            <h2 class="upgrade-form__title">Anmeldung</h2>
-            <p class="upgrade-form__sub">Für die Mitgliedschaft benötigen wir deine Adresse.</p>
+            <h2 class="upgrade-form__title">{{ $t('pages.upgrade.form_title') }}</h2>
+            <p class="upgrade-form__sub">{{ $t('pages.upgrade.form_sub') }}</p>
 
             <div v-if="error" class="alert alert-error">{{ error }}</div>
 
             <UiInput
               v-model="address"
-              label="Adresse (Straße, PLZ, Ort)"
+              :label="$t('pages.upgrade.address_label')"
               :error="addressError"
-              placeholder="z. B. Musterstraße 1, 1010 Wien"
+              :placeholder="$t('pages.upgrade.address_placeholder')"
               autocomplete="street-address"
             />
 
-            <UiButton :loading="loading" @click="upgrade">Jetzt Mitglied werden</UiButton>
+            <UiButton :loading="loading" @click="upgrade">{{ $t('btn.upgrade') }}</UiButton>
           </div>
 
         </div>
@@ -154,10 +144,9 @@ async function upgrade() {
 <style lang="scss" scoped>
 $hero-bg: #0F0E0C;
 $nav-height: 3.5rem;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.15);
 $hero-text: #EEE8DF;
-$hero-muted: rgba(238, 232, 223, 0.55);
+$hero-muted: rgba(238, 232, 223, 0.72);
 $surface: rgba(255, 255, 255, 0.04);
 $border: rgba(238, 232, 223, 0.1);
 

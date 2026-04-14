@@ -9,12 +9,12 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Pakete" />
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.packages')" />
         <div class="page-hero__row">
-          <h1 class="page-hero__title">Pakete verwalten</h1>
+          <h1 class="page-hero__title">{{ $t('admin.packages_admin.title') }}</h1>
           <button class="hero-btn" @click="openCreate">
-            <span class="icon icon-plus-outline" aria-hidden="true" />
-            Paket hinzufügen
+            <span class="icon icon-add" aria-hidden="true" />
+            {{ $t('admin.packages_admin.add') }}
           </button>
         </div>
       </div>
@@ -30,25 +30,25 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Pakete</h2>
+            <h2 class="dash-section__title">{{ $t('admin.packages_admin.all') }}</h2>
             <span class="dash-section__count">{{ packages.length }}</span>
           </header>
 
           <div v-if="!packages.length" class="dash-empty">
             <span class="icon icon-gift-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Pakete vorhanden.</p>
+            <p class="dash-empty__text">{{ $t('admin.empty.packages') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Typ</th>
-                  <th>Kategorie</th>
-                  <th>Spiele</th>
-                  <th>Status</th>
-                  <th>Aktionen</th>
+                  <th>{{ $t('admin.table.name') }}</th>
+                  <th>{{ $t('pages.package.type') }}</th>
+                  <th>{{ $t('admin.table.category') }}</th>
+                  <th>{{ $t('admin.table.games') }}</th>
+                  <th>{{ $t('admin.table.status') }}</th>
+                  <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -56,20 +56,20 @@
                   <td class="dash-table__primary">{{ pkg.name }}</td>
                   <td>
                     <span class="type-badge" :class="pkg.type === 'CURATED' ? 'type-badge--curated' : 'type-badge--category'">
-                      {{ pkg.type === 'CURATED' ? 'Kuratiert' : 'Kategorie' }}
+                      {{ pkg.type === 'CURATED' ? $t('pages.package.type_curated') : $t('pages.package.type_category') }}
                     </span>
                   </td>
                   <td>{{ pkg.category?.name ?? '—' }}</td>
                   <td>{{ pkg.games_count ?? 0 }}</td>
                   <td>
                     <span class="badge" :class="pkg.is_active ? 'badge-success' : ''">
-                      {{ pkg.is_active ? 'Aktiv' : 'Inaktiv' }}
+                      {{ pkg.is_active ? $t('common.badge.active') : $t('common.badge.inactive') }}
                     </span>
                   </td>
                   <td>
                     <div class="action-row">
-                      <button class="action-btn" @click="openEdit(pkg)">Bearbeiten</button>
-                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">Löschen</button>
+                      <button class="action-btn" @click="openEdit(pkg)">{{ $t('admin.actions.edit') }}</button>
+                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">{{ $t('admin.actions.delete') }}</button>
                     </div>
                   </td>
                 </tr>
@@ -86,30 +86,30 @@
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
         <div class="dialog dialog--wide">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ form.id ? 'Paket bearbeiten' : 'Paket hinzufügen' }}</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ form.id ? $t('admin.packages_admin.edit') : $t('admin.packages_admin.add') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
           <div class="dialog__body">
             <div class="form-grid">
-              <div class="form-grid__full"><UiInput v-model="form.name" label="Name" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" /></div>
-              <div class="form-grid__full"><UiInput v-model="form.description" label="Beschreibung" /></div>
+              <div class="form-grid__full"><UiInput v-model="form.name" :label="$t('admin.form.name')" required /></div>
+              <div class="form-grid__full"><UiInput v-model="form.slug" :label="$t('admin.form.slug')" /></div>
+              <div class="form-grid__full"><UiInput v-model="form.description" :label="$t('admin.form.description')" /></div>
 
               <div>
-                <label class="form-label">Typ</label>
+                <label class="form-label">{{ $t('pages.package.type') }}</label>
                 <select v-model="form.type" class="form-select">
-                  <option value="CURATED">Kuratiert</option>
-                  <option value="CATEGORY">Kategorie</option>
+                  <option value="CURATED">{{ $t('pages.package.type_curated') }}</option>
+                  <option value="CATEGORY">{{ $t('pages.package.type_category') }}</option>
                 </select>
               </div>
 
               <div>
-                <label class="form-label">Kategorie</label>
+                <label class="form-label">{{ $t('admin.table.category') }}</label>
                 <select v-model="form.category_id" class="form-select">
-                  <option :value="null">Keine</option>
+                  <option :value="null">{{ $t('admin.form.no_category') }}</option>
                   <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
               </div>
@@ -117,15 +117,15 @@
               <!-- Spielauswahl -->
               <div class="form-grid__full">
                 <label class="form-label">
-                  Spiele
-                  <span v-if="form.game_ids.length" class="form-label__count">{{ form.game_ids.length }} ausgewählt</span>
+                  {{ $t('admin.table.games') }}
+                  <span v-if="form.game_ids.length" class="form-label__count">{{ $t('admin.packages_admin.games_selected', { n: form.game_ids.length }) }}</span>
                 </label>
                 <div class="game-search">
                   <input
                     v-model="gameSearch"
                     type="text"
                     class="game-search__input"
-                    placeholder="Spiele suchen…"
+                    :placeholder="$t('admin.packages_admin.games_search')"
                   />
                 </div>
                 <div class="game-picker">
@@ -138,14 +138,14 @@
                     <input type="checkbox" :value="game.id" v-model="form.game_ids" class="game-chip__input" />
                     {{ game.title }}
                   </label>
-                  <p v-if="!filteredGames.length" class="game-picker__empty">Keine Spiele gefunden.</p>
+                  <p v-if="!filteredGames.length" class="game-picker__empty">{{ $t('admin.packages_admin.games_none') }}</p>
                 </div>
               </div>
 
               <div class="form-grid__full">
                 <label class="form-check">
                   <input v-model="form.is_active" type="checkbox" />
-                  <span>Paket aktiv schalten</span>
+                  <span>{{ $t('admin.packages_admin.active') }}</span>
                 </label>
               </div>
             </div>
@@ -154,8 +154,8 @@
           </div>
 
           <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">Speichern</UiButton>
-            <button class="action-btn" @click="closeForm">Abbrechen</button>
+            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -168,7 +168,7 @@
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
           <span class="l-footer__name">AUA</span>
         </div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -179,6 +179,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
+const { t } = useI18n()
 const { fetchAdminPackages, createPackage, updatePackage, deletePackage, fetchAdminCategories, fetchAdminGames } = useAdmin()
 
 interface PackageItem {
@@ -291,7 +292,7 @@ async function save() {
     await load()
     closeForm()
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.save')
   } finally {
     saving.value = false
   }
@@ -305,15 +306,14 @@ async function remove(id: number) {
 
 <style lang="scss" scoped>
 $hero-bg:     #0F0E0C;
-$amber:       #D4921E;
 $nav-height:  64px;
 $amber-08:    rgba(212, 146, 30, 0.08);
 $amber-14:    rgba(212, 146, 30, 0.14);
 $amber-25:    rgba(212, 146, 30, 0.25);
 $amber-glow:  rgba(212, 146, 30, 0.16);
 $hero-text:   #EEE8DF;
-$hero-muted:  rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:  rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
@@ -334,7 +334,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit;
   background: $amber; color: #0F0E0C; border: none; border-radius: 8px; cursor: pointer;
   transition: opacity 0.2s;
-  .icon { width: 16px; height: 16px; }
+  .icon { font-size: 1rem; }
   &:hover { opacity: 0.88; }
 }
 
@@ -379,7 +379,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &--wide { max-width: 660px; }
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
-  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
+  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { font-size: 1.125rem; } &:hover { background: var(--background); color: var(--primary-text); } }
   &__body { margin-bottom: 1.5rem; max-height: 65vh; overflow-y: auto; }
   &__actions { display: flex; gap: 0.75rem; }
 }

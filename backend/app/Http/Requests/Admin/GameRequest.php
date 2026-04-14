@@ -29,7 +29,7 @@ class GameRequest extends FormRequest
             'duration_max'      => ['nullable', 'integer', 'min:1', 'gte:duration_min'],
             'difficulty'        => ['nullable', 'in:EASY,MEDIUM,HARD,EXPERT'],
             'language'          => ['nullable', 'string', 'max:100'],
-            'year'              => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'year'              => ['nullable', 'integer', 'min:1900', 'max:2100'],\n            'instagram_url'     => ['nullable', 'url', 'max:255'],
             'is_active'         => ['boolean'],
             'cover_image'       => ['nullable', 'image', 'max:5120'],
             'tag_ids'           => ['nullable', 'array'],

@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Schadensmeldungen" />
-        <h1 class="page-hero__title">Schadensmeldungen</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.damage_reports')" />
+        <h1 class="page-hero__title">{{ $t('admin.damage_reports.title') }}</h1>
       </div>
     </section>
 
@@ -19,24 +19,24 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Meldungen</h2>
+            <h2 class="dash-section__title">{{ $t('admin.damage_reports.all') }}</h2>
             <span class="dash-section__count">{{ reports.length }}</span>
           </header>
 
           <div v-if="!reports.length" class="dash-empty">
             <span class="icon icon-alert-triangle-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Keine Schadensmeldungen vorhanden.</p>
+            <p class="dash-empty__text">{{ $t('admin.empty.damage_reports') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Mitglied</th>
-                  <th>Spiel</th>
-                  <th>Beschreibung</th>
-                  <th>Foto</th>
-                  <th>Gemeldet am</th>
+                  <th>{{ $t('admin.loans.member_col') }}</th>
+                  <th>{{ $t('admin.table.title') }}</th>
+                  <th>{{ $t('admin.damage_reports.description') }}</th>
+                  <th>{{ $t('admin.damage_reports.photo') }}</th>
+                  <th>{{ $t('admin.damage_reports.reported_at') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -46,8 +46,8 @@
                   <td class="cell-desc">{{ report.description }}</td>
                   <td>
                     <a v-if="report.photo_url" :href="report.photo_url" target="_blank" rel="noopener" class="photo-link">
-                      <span class="icon icon-image-outline" aria-hidden="true" />
-                      Ansehen
+                      <span class="icon icon-add_photo_alternate" aria-hidden="true" />
+                      {{ $t('admin.damage_reports.view_photo') }}
                     </a>
                     <span v-else class="text-muted">—</span>
                   </td>
@@ -64,7 +64,7 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -89,9 +89,9 @@ function formatDate(iso: string) { return new Date(iso).toLocaleDateString('de-D
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
@@ -112,7 +112,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 
 .cell-desc { max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.photo-link { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; .icon { width: 14px; height: 14px; } &:hover { opacity: 0.75; } }
+.photo-link { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: var(--accent-color); text-decoration: none; transition: opacity 0.2s; .icon { font-size: 0.875rem; } &:hover { opacity: 0.75; } }
 
 .text-muted { color: var(--secondary-text); }
 

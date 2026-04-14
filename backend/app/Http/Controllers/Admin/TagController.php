@@ -14,7 +14,7 @@ class TagController extends Controller
 {
     public function index(): AnonymousResourceCollection
     {
-        return TagResource::collection(Tag::orderBy('name')->get());
+        return TagResource::collection(Tag::withCount('games')->orderBy('name')->get());
     }
 
     public function store(Request $request): TagResource
@@ -26,6 +26,18 @@ class TagController extends Controller
         $data['slug'] = Str::slug($data['name']);
 
         return new TagResource(Tag::create($data));
+    }
+
+    public function update(Request $request, Tag $tag): TagResource
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:100', 'unique:tags,name,' . $tag->id],
+        ]);
+
+        $data['slug'] = Str::slug($data['name']);
+        $tag->update($data);
+
+        return new TagResource($tag->loadCount('games'));
     }
 
     public function destroy(Tag $tag): JsonResponse

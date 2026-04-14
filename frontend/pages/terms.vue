@@ -1,14 +1,14 @@
 <template>
   <main class="content">
-    <NuxtLink to="/" class="back-link">← Zurück zur Startseite</NuxtLink>
+    <NuxtLink to="/" class="back-link">{{ $t('common.back_to_home') }}</NuxtLink>
     <div class="card">
       <div class="header">
-        <h1>Nutzungsbedingungen</h1>
+        <h1>{{ $t('legal.terms.title') }}</h1>
       </div>
       <div class="body">
         <div v-if="loading" class="spinner"></div>
         <div v-else-if="!terms" class="alert alert-default">
-          <p>Nutzungsbedingungen sind derzeit nicht verfügbar.</p>
+          <p>{{ $t('legal.terms.unavailable') }}</p>
         </div>
         <div v-else class="terms-content">
           <small v-if="terms">Version {{ terms.version }} — veröffentlicht am {{ formatDate(terms.published_at) }}</small>

@@ -9,22 +9,22 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Spiele" />
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.games')" />
         <div class="page-hero__row">
-          <h1 class="page-hero__title">Spiele verwalten</h1>
+          <h1 class="page-hero__title">{{ $t('admin.games.title') }}</h1>
           <div class="hero-actions">
             <button class="hero-btn hero-btn--secondary" :disabled="exporting" @click="doExport">
               <span class="icon icon-download-outline" aria-hidden="true" />
-              {{ exporting ? 'Exportiere…' : 'Excel Export' }}
+              {{ exporting ? $t('btn.exporting') : $t('btn.export') }}
             </button>
             <label class="hero-btn hero-btn--secondary" :class="{ 'hero-btn--loading': importing }">
-              <span class="icon icon-cloud-upload-outline" aria-hidden="true" />
-              {{ importing ? 'Importiere…' : 'Excel Import' }}
+              <span class="icon icon-cloud" aria-hidden="true" />
+              {{ importing ? $t('btn.importing') : $t('btn.import') }}
               <input type="file" accept=".xlsx,.xls,.csv" class="hero-file-input" :disabled="importing" @change="doImport" />
             </label>
             <button class="hero-btn" @click="openCreate">
-              <span class="icon icon-plus-outline" aria-hidden="true" />
-              Spiel hinzufügen
+              <span class="icon icon-add" aria-hidden="true" />
+              {{ $t('admin.actions.add_game') }}
             </button>
           </div>
         </div>
@@ -41,24 +41,24 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Alle Spiele</h2>
+            <h2 class="dash-section__title">{{ $t('admin.games.all') }}</h2>
             <span class="dash-section__count">{{ games.length }}</span>
           </header>
 
           <div v-if="!games.length" class="dash-empty">
-            <span class="icon icon-book-open-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Spiele vorhanden.</p>
+            <span class="icon icon-article dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.empty.games') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Titel</th>
-                  <th>Kategorie</th>
-                  <th>Kopien</th>
-                  <th>Status</th>
-                  <th>Aktionen</th>
+                  <th>{{ $t('admin.table.title') }}</th>
+                  <th>{{ $t('admin.table.category') }}</th>
+                  <th>{{ $t('admin.table.copies') }}</th>
+                  <th>{{ $t('admin.table.status') }}</th>
+                  <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,18 +68,18 @@
                   <td>{{ game.copies_count }}</td>
                   <td>
                     <span class="badge" :class="game.is_active ? 'badge-success' : ''">
-                      {{ game.is_active ? 'Aktiv' : 'Inaktiv' }}
+                      {{ game.is_active ? $t('common.badge.active') : $t('common.badge.inactive') }}
                     </span>
                   </td>
                   <td>
                     <div class="action-row">
-                      <button class="action-btn" @click="openEdit(game)">Bearbeiten</button>
+                      <button class="action-btn" @click="openEdit(game)">{{ $t('admin.actions.edit') }}</button>
                       <button class="action-btn" @click="openCopies(game)">
-                        <span class="icon icon-layers-outline" aria-hidden="true" />
-                        Kopien
+                        <span class="icon icon-layers" aria-hidden="true" />
+                        {{ $t('admin.actions.copies_manage') }}
                         <span class="action-btn__badge">{{ game.copies_count }}</span>
                       </button>
-                      <button class="action-btn action-btn--danger" @click="remove(game.id)">Löschen</button>
+                      <button class="action-btn action-btn--danger" @click="remove(game.id)">{{ $t('admin.actions.delete') }}</button>
                     </div>
                   </td>
                 </tr>
@@ -96,53 +96,62 @@
       <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
         <div class="dialog dialog--wide">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ form.id ? 'Spiel bearbeiten' : 'Spiel hinzufügen' }}</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="closeForm">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ form.id ? $t('admin.games.edit_game') : $t('admin.games.add_game') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
           <div class="dialog__body">
             <div class="form-grid">
-              <div class="form-grid__full"><UiInput v-model="form.title" label="Titel" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.slug" label="Slug" required /></div>
-              <div class="form-grid__full"><UiInput v-model="form.short_description" label="Kurzbeschreibung (max. 500 Zeichen)" /></div>
+              <div class="form-grid__full"><UiInput v-model="form.title" :label="$t('admin.form.title')" required /></div>
+              <div class="form-grid__full"><UiInput v-model="form.slug" :label="$t('admin.form.slug')" required /></div>
+              <div class="form-grid__full"><UiInput v-model="form.short_description" :label="$t('admin.form.short_desc')" /></div>
               <div class="form-grid__full">
-                <label class="form-label">Beschreibung (lang)</label>
+                <label class="form-label">{{ $t('admin.form.description') }}</label>
                 <UiRichEditor v-model="form.description" />
               </div>
 
               <div class="form-grid__full">
-                <label class="form-label">Kategorie</label>
+                <label class="form-label">{{ $t('admin.table.category') }}</label>
                 <select v-model="form.category_id" class="form-select">
-                  <option :value="null">Keine</option>
+                  <option :value="null">{{ $t('admin.form.no_category') }}</option>
                   <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
                 </select>
               </div>
 
-              <div><UiInput v-model="form.min_players" label="Min. Spieler" type="number" /></div>
-              <div><UiInput v-model="form.max_players" label="Max. Spieler" type="number" /></div>
-              <div><UiInput v-model="form.min_age" label="Ab Alter" type="number" /></div>
+              <div><UiInput v-model="form.min_players" :label="$t('admin.form.min_players')" type="number" /></div>
+              <div><UiInput v-model="form.max_players" :label="$t('admin.form.max_players')" type="number" /></div>
+              <div><UiInput v-model="form.min_age" :label="$t('admin.form.min_age')" type="number" /></div>
 
-              <div><UiInput v-model="form.duration_min" label="Spielzeit min. (Min.)" type="number" /></div>
-              <div><UiInput v-model="form.duration_max" label="Spielzeit max. (Min.)" type="number" /></div>
-              <div><UiInput v-model="form.year" label="Erscheinungsjahr" type="number" /></div>
+              <div><UiInput v-model="form.duration_min" :label="$t('admin.form.duration_min')" type="number" /></div>
+              <div><UiInput v-model="form.duration_max" :label="$t('admin.form.duration_max')" type="number" /></div>
+              <div><UiInput v-model="form.year" :label="$t('admin.form.year')" type="number" /></div>
 
               <div>
-                <label class="form-label">Schwierigkeit</label>
+                <label class="form-label">{{ $t('admin.form.difficulty') }}</label>
                 <select v-model="form.difficulty" class="form-select">
-                  <option value="">Keine</option>
-                  <option value="EASY">Leicht</option>
-                  <option value="MEDIUM">Mittel</option>
-                  <option value="HARD">Schwer</option>
-                  <option value="EXPERT">Experte</option>
+                  <option value="">{{ $t('admin.form.no_category') }}</option>
+                  <option value="EASY">{{ $t('admin.form.difficulty_easy') }}</option>
+                  <option value="MEDIUM">{{ $t('admin.form.difficulty_medium') }}</option>
+                  <option value="HARD">{{ $t('admin.form.difficulty_hard') }}</option>
+                  <option value="EXPERT">{{ $t('admin.form.difficulty_expert') }}</option>
                 </select>
               </div>
 
-              <div><UiInput v-model="form.language" label="Sprache" /></div>
+              <div><UiInput v-model="form.language" :label="$t('admin.form.language')" /></div>
 
               <div class="form-grid__full">
-                <label class="form-label">Tags</label>
+                <UiInput
+                  v-model="form.instagram_url"
+                  :label="$t('admin.form.instagram')"
+                  placeholder="https://www.instagram.com/p/…"
+                  type="url"
+                />
+              </div>
+
+              <div class="form-grid__full">
+                <label class="form-label">{{ $t('admin.form.tags') }}</label>
                 <div class="tag-picker">
                   <label
                     v-for="tag in allTags"
@@ -155,14 +164,14 @@
                   </label>
                 </div>
                 <div class="tag-add">
-                  <UiInput v-model="newTagName" placeholder="Neuer Tag…" style="flex:1" />
-                  <button class="action-btn" :disabled="!newTagName.trim()" @click="addTag">Hinzufügen</button>
+                  <UiInput v-model="newTagName" :placeholder="$t('admin.form.new_tag')" style="flex:1" />
+                  <button class="action-btn" :disabled="!newTagName.trim()" @click="addTag">{{ $t('btn.add') }}</button>
                 </div>
               </div>
 
               <div class="form-grid__full">
-                <label class="form-label">Coverbild</label>
-                <div class="uploader-content">
+                <label class="form-label">{{ $t('admin.form.cover_image') }}</label>
+                <div class="file-uploader">
                   <div
                     class="drop-zone"
                     :class="{ 'drag-over': isDragging }"
@@ -180,10 +189,10 @@
                     />
                     <div class="drop-zone-content">
                       <div class="icon-container">
-                        <span class="icon icon-image-outline" />
+                        <span class="icon icon-add_photo_alternate" />
                       </div>
-                      <span class="primary-text">Bild auswählen oder hierher ziehen</span>
-                      <span class="secondary-text">PNG, JPG, WEBP — max. 5 MB</span>
+                      <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
+                      <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
                     </div>
                   </div>
 
@@ -193,16 +202,16 @@
                         <div class="file-info">
                           <img
                             :src="form.coverFile ? coverPreviewUrl! : form.existingCoverUrl!"
-                            alt="Vorschau"
+                            :alt="$t('admin.form.preview')"
                             style="width:40px;height:40px;object-fit:cover;border-radius:4px;flex-shrink:0"
                           />
                           <div class="file-details">
-                            <span class="file-name">{{ form.coverFile ? form.coverFile.name : 'Aktuelles Coverbild' }}</span>
+                            <span class="file-name">{{ form.coverFile ? form.coverFile.name : $t('admin.form.cover_current') }}</span>
                             <span class="file-size">{{ form.coverFile ? formatFileSize(form.coverFile.size) : '' }}</span>
                           </div>
                         </div>
                         <button type="button" class="remove-btn" @click.stop="removeCover">
-                          <span class="icon icon-close-outline" />
+                          <span class="icon icon-close" />
                         </button>
                       </div>
                     </div>
@@ -211,20 +220,20 @@
               </div>
 
               <div v-if="form.id" class="form-grid__full">
-                <label class="form-label">Weitere Bilder</label>
+                <label class="form-label">{{ $t('admin.form.other_images') }}</label>
                 <div class="game-images">
                   <div v-if="form.existingImages.length" class="game-images__grid">
                     <div v-for="img in form.existingImages" :key="img.id" class="game-images__item">
                       <img :src="img.url" alt="Spielbild" class="game-images__thumb" />
                       <button type="button" class="game-images__remove" @click="removeGameImage(img)" title="Bild löschen">
-                        <span class="icon icon-close-outline" />
+                        <span class="icon icon-close" />
                       </button>
                     </div>
                   </div>
                   <label class="game-images__add" :class="{ 'game-images__add--loading': imageUploading }">
                     <input ref="imageInputRef" type="file" accept="image/*" multiple style="display:none" :disabled="imageUploading" @change="onImagesChange" />
-                    <span class="icon icon-image-outline" />
-                    <span>{{ imageUploading ? 'Hochladen…' : 'Bilder hinzufügen' }}</span>
+                    <span class="icon icon-add_photo_alternate" />
+                    <span>{{ imageUploading ? $t('btn.importing') : $t('admin.form.add_images') }}</span>
                   </label>
                 </div>
               </div>
@@ -232,7 +241,7 @@
               <div class="form-grid__full">
                 <label class="form-check">
                   <input v-model="form.is_active" type="checkbox" />
-                  <span>Spiel aktiv schalten</span>
+                  <span>{{ $t('admin.form.active_game') }}</span>
                 </label>
               </div>
             </div>
@@ -241,8 +250,8 @@
           </div>
 
           <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">Speichern</UiButton>
-            <button class="action-btn" @click="closeForm">Abbrechen</button>
+            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -254,11 +263,11 @@
         <div class="dialog dialog--wide">
           <div class="dialog__header">
             <div>
-              <div class="dialog__eyebrow">Kopien verwalten</div>
+              <div class="dialog__eyebrow">{{ $t('admin.games.copies_title') }}</div>
               <h3 class="dialog__title">{{ copiesPanel.gameTitle }}</h3>
             </div>
-            <button class="dialog__close" aria-label="Schließen" @click="closeCopies">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeCopies">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
@@ -271,24 +280,24 @@
               <div class="dialog__toolbar">
                 <span class="dialog__count">{{ copiesPanel.copies.length }} Kopie{{ copiesPanel.copies.length !== 1 ? 'n' : '' }}</span>
                 <button class="action-btn" @click="openCopyCreate">
-                  <span class="icon icon-plus-outline" aria-hidden="true" />
-                  Kopie hinzufügen
+                  <span class="icon icon-add" aria-hidden="true" />
+                  {{ $t('admin.games.add_copy') }}
                 </button>
               </div>
 
               <div v-if="!copiesPanel.copies.length" class="dash-empty">
-                <span class="icon icon-layers-outline dash-empty__icon" aria-hidden="true" />
-                <p class="dash-empty__text">Noch keine Kopien für dieses Spiel.</p>
+                <span class="icon icon-layers dash-empty__icon" aria-hidden="true" />
+                <p class="dash-empty__text">{{ $t('admin.empty.copies') }}</p>
               </div>
 
               <div v-else class="copies-table-wrap">
                 <table class="dash-table">
                   <thead>
                     <tr>
-                      <th>Zustand</th>
-                      <th>QR-Code</th>
-                      <th>Verfügbar</th>
-                      <th>Aktionen</th>
+                      <th>{{ $t('admin.form.condition') }}</th>
+                      <th>{{ $t('admin.form.qr_code') }}</th>
+                      <th>{{ $t('admin.table.status') }}</th>
+                      <th>{{ $t('admin.table.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -301,13 +310,13 @@
                       <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
                       <td>
                         <span class="badge" :class="copy.is_available ? 'badge-success' : 'badge-error'">
-                          {{ copy.is_available ? 'Verfügbar' : 'Ausgeliehen' }}
+                          {{ copy.is_available ? $t('common.badge.available') : $t('common.badge.loaned') }}
                         </span>
                       </td>
                       <td>
                         <div class="action-row">
-                          <button class="action-btn" @click="openCopyEdit(copy)">Bearbeiten</button>
-                          <button class="action-btn action-btn--danger" @click="removeCopy(copy.id)">Löschen</button>
+                          <button class="action-btn" @click="openCopyEdit(copy)">{{ $t('admin.actions.edit') }}</button>
+                          <button class="action-btn action-btn--danger" @click="removeCopy(copy.id)">{{ $t('admin.actions.delete') }}</button>
                         </div>
                       </td>
                     </tr>
@@ -318,7 +327,7 @@
           </div>
 
           <div class="dialog__actions">
-            <button class="action-btn" @click="closeCopies">Schließen</button>
+            <button class="action-btn" @click="closeCopies">{{ $t('admin.form.close') }}</button>
           </div>
         </div>
       </div>
@@ -329,30 +338,30 @@
       <div v-if="copyForm.open" class="modal-overlay modal-overlay--top" @click.self="copyForm.open = false">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ copyForm.id ? 'Kopie bearbeiten' : 'Kopie hinzufügen' }}</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="copyForm.open = false">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ copyForm.id ? $t('admin.games.edit_copy') : $t('admin.games.add_copy') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="copyForm.open = false">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
 
           <div class="dialog__body">
             <div class="form-field">
-              <label class="form-label">Zustand</label>
+              <label class="form-label">{{ $t('admin.form.condition') }}</label>
               <select v-model="copyForm.condition" class="form-select">
-                <option value="GOOD">Gut</option>
-                <option value="WORN">Abgenutzt</option>
-                <option value="DAMAGED">Beschädigt</option>
-                <option value="LOCKED">Gesperrt</option>
+                <option value="GOOD">{{ $t('admin.form.condition_good') }}</option>
+                <option value="WORN">{{ $t('admin.form.condition_worn') }}</option>
+                <option value="DAMAGED">{{ $t('admin.form.condition_damaged') }}</option>
+                <option value="LOCKED">{{ $t('admin.form.condition_locked') }}</option>
               </select>
             </div>
-            <UiInput v-model="copyForm.qr_code" label="QR-Code (optional)" />
-            <UiInput v-model="copyForm.notes" label="Notizen" />
+            <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
+            <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />
             <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
           </div>
 
           <div class="dialog__actions">
-            <UiButton :loading="copyForm.saving" @click="saveCopy">Speichern</UiButton>
-            <button class="action-btn" @click="copyForm.open = false">Abbrechen</button>
+            <UiButton :loading="copyForm.saving" @click="saveCopy">{{ $t('admin.form.save') }}</UiButton>
+            <button class="action-btn" @click="copyForm.open = false">{{ $t('admin.form.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -363,31 +372,31 @@
       <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">Import abgeschlossen</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="importResult = null">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="importResult = null">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <div class="dialog__body">
             <div class="import-result">
               <div class="import-result__row">
-                <span class="import-result__label">Neue Spiele</span>
+                <span class="import-result__label">{{ $t('admin.import.new_games') }}</span>
                 <span class="import-result__value import-result__value--new">{{ importResult.new }}</span>
               </div>
               <div class="import-result__row">
-                <span class="import-result__label">Aktualisierte Spiele</span>
+                <span class="import-result__label">{{ $t('admin.import.updated_games') }}</span>
                 <span class="import-result__value import-result__value--updated">{{ importResult.updated }}</span>
               </div>
               <div class="import-result__divider" />
               <div class="import-result__row">
-                <span class="import-result__label">Gesamt verarbeitet</span>
+                <span class="import-result__label">{{ $t('admin.import.total') }}</span>
                 <span class="import-result__value">{{ importResult.total }}</span>
               </div>
             </div>
             <div v-if="importError" class="form-error">{{ importError }}</div>
           </div>
           <div class="dialog__actions">
-            <button class="action-btn" @click="importResult = null">Schließen</button>
+            <button class="action-btn" @click="importResult = null">{{ $t('admin.form.close') }}</button>
           </div>
         </div>
       </div>
@@ -400,7 +409,7 @@
           <span class="l-footer__hex" aria-hidden="true">⬡</span>
           <span class="l-footer__name">AUA</span>
         </div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -411,6 +420,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
+const { t } = useI18n()
 const { fetchAdminGames, createGame, updateGame, deleteGame, fetchAdminCategories, fetchAdminTags, createTag, importGames, exportGames, fetchCopies, createCopy, updateCopy, deleteCopy, uploadGameImages, deleteGameImage } = useAdmin()
 
 interface Game {
@@ -465,7 +475,7 @@ const form = reactive({
   category_id: null as number | null,
   min_players: '', max_players: '', min_age: '',
   duration_min: '', duration_max: '',
-  difficulty: '', language: '', year: '',
+  difficulty: '', language: '', year: '', instagram_url: '',
   is_active: true, tag_ids: [] as number[],
   coverFile: null as File | null,
   existingCoverUrl: null as string | null,
@@ -506,12 +516,12 @@ async function load() {
 }
 
 function openCreate() {
-  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null, existingImages: [] })
+  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', instagram_url: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null, existingImages: [] })
   formError.value = ''
 }
 
 async function openEdit(game: Game) {
-  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null, existingImages: [] })
+  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', instagram_url: game.instagram_url ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null, existingImages: [] })
   formError.value = ''
   // Load game detail to get images
   try {
@@ -540,7 +550,7 @@ async function save() {
   saving.value = true; formError.value = ''
   try {
     const fd = new FormData()
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'min_players', 'max_players', 'min_age', 'duration_min', 'duration_max', 'difficulty', 'language', 'year'] as const
+    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'min_players', 'max_players', 'min_age', 'duration_min', 'duration_max', 'difficulty', 'language', 'year', 'instagram_url'] as const
     fields.forEach((f) => { if (form[f] !== '' && form[f] !== null) fd.append(f, String(form[f])) })
     fd.append('is_active', form.is_active ? '1' : '0')
     form.tag_ids.forEach(id => fd.append('tag_ids[]', String(id)))
@@ -548,7 +558,7 @@ async function save() {
     form.id ? await updateGame(form.id, fd) : await createGame(fd)
     await load(); closeForm()
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.save')
   } finally { saving.value = false }
 }
 
@@ -589,7 +599,7 @@ async function saveCopy() {
     if (game) game.copies_count = copiesPanel.copies.length
     copyForm.open = false
   } catch (err: unknown) {
-    copyForm.error = (err as { message?: string }).message ?? 'Fehler beim Speichern.'
+    copyForm.error = (err as { message?: string }).message ?? t('common.error.save')
   } finally { copyForm.saving = false }
 }
 
@@ -599,7 +609,7 @@ async function removeCopy(id: number) {
     copiesPanel.copies = copiesPanel.copies.filter(c => c.id !== id)
     const game = games.value.find(g => g.id === copiesPanel.gameId)
     if (game) game.copies_count = copiesPanel.copies.length
-  } catch (err: unknown) { alert((err as { message?: string }).message ?? 'Fehler.') }
+  } catch (err: unknown) { alert((err as { message?: string }).message ?? t('common.error.generic')) }
 }
 
 // ── Bilder ────────────────────────────────────────────────────────
@@ -612,7 +622,7 @@ async function onImagesChange(e: Event) {
     const res = await uploadGameImages(form.id, files)
     form.existingImages.push(...res.images)
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Hochladen.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.save')
   } finally {
     imageUploading.value = false
     if (imageInputRef.value) imageInputRef.value.value = ''
@@ -625,11 +635,11 @@ async function removeGameImage(image: GameImage) {
     await deleteGameImage(form.id, image.id)
     form.existingImages = form.existingImages.filter(i => i.id !== image.id)
   } catch (err: unknown) {
-    formError.value = (err as { message?: string }).message ?? 'Fehler beim Löschen.'
+    formError.value = (err as { message?: string }).message ?? t('common.error.generic')
   }
 }
 
-function conditionLabel(c: string) { const m: Record<string, string> = { GOOD: 'Gut', WORN: 'Abgenutzt', DAMAGED: 'Beschädigt', LOCKED: 'Gesperrt' }; return m[c] ?? c }
+function conditionLabel(c: string) { const m: Record<string, string> = { GOOD: 'common.badge.good', WORN: 'common.badge.worn', DAMAGED: 'common.badge.damaged', LOCKED: 'common.badge.locked' }; return m[c] ? t(m[c]) : c }
 function conditionClass(c: string) { const m: Record<string, string> = { GOOD: 'badge-success', WORN: 'badge-warning', DAMAGED: 'badge-error', LOCKED: '' }; return m[c] ?? '' }
 
 // ── Import / Export ───────────────────────────────────────────────
@@ -643,7 +653,7 @@ async function doImport(e: Event) {
     importResult.value = result
     await load()
   } catch (err: unknown) {
-    importError.value = (err as { message?: string }).message ?? 'Import fehlgeschlagen.'
+    importError.value = (err as { message?: string }).message ?? t('common.error.import_failed')
     importResult.value = { new: 0, updated: 0, total: 0 }
   } finally {
     importing.value = false
@@ -654,22 +664,21 @@ async function doImport(e: Event) {
 async function doExport() {
   exporting.value = true
   try { await exportGames() }
-  catch (err: unknown) { alert((err as { message?: string }).message ?? 'Export fehlgeschlagen.') }
+  catch (err: unknown) { alert((err as { message?: string }).message ?? t('common.error.export_failed')) }
   finally { exporting.value = false }
 }
 </script>
 
 <style lang="scss" scoped>
 $hero-bg:     #0F0E0C;
-$amber:       #D4921E;
 $nav-height:  64px;
 $amber-08:    rgba(212, 146, 30, 0.08);
 $amber-14:    rgba(212, 146, 30, 0.14);
 $amber-25:    rgba(212, 146, 30, 0.25);
 $amber-glow:  rgba(212, 146, 30, 0.16);
 $hero-text:   #EEE8DF;
-$hero-muted:  rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:  rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
@@ -692,7 +701,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   padding: 0.5rem 1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit;
   background: $amber; color: #0F0E0C; border: none; border-radius: 8px; cursor: pointer;
   transition: opacity 0.2s;
-  .icon { width: 16px; height: 16px; }
+  .icon { font-size: 1rem; }
   &:hover { opacity: 0.88; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
   &--secondary {
@@ -735,7 +744,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   display: inline-flex; align-items: center; gap: 0.35rem;
   padding: 0.35rem 0.75rem; font-size: 0.8rem; font-weight: 600; font-family: inherit;
   color: var(--primary-text); background: var(--background); border: 1px solid var(--divider); border-radius: 7px; cursor: pointer; transition: border-color 0.2s, color 0.2s; white-space: nowrap;
-  .icon { width: 14px; height: 14px; }
+  .icon { font-size: 0.875rem; }
   &:hover { border-color: var(--accent-color); color: var(--accent-text); }
   &--danger { color: #f87171; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.05); &:hover { border-color: rgba(239,68,68,0.5); color: #fca5a5; } }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -754,7 +763,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; }
   &__eyebrow { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: $amber; margin-bottom: 0.2rem; }
   &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); }
-  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } }
+  &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s, color 0.15s; .icon { font-size: 1.125rem; } &:hover { background: var(--background); color: var(--primary-text); } }
   &__body { margin-bottom: 1.5rem; max-height: 65vh; overflow-y: auto; }
   &__toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
   &__count { font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); }
@@ -809,7 +818,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--divider);
     background: var(--secondary-background); color: var(--primary-text);
     display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;
-    .icon { width: 12px; height: 12px; }
+    .icon { font-size: 0.75rem; }
     &:hover { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.4); }
   }
   &__add {
@@ -817,7 +826,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     padding: 0.45rem 0.85rem; font-size: 0.8rem; font-weight: 600;
     color: var(--primary-text); background: var(--background); border: 1px solid var(--divider);
     border-radius: 8px; cursor: pointer; transition: border-color 0.2s;
-    .icon { width: 16px; height: 16px; }
+    .icon { font-size: 1rem; }
     &:hover { border-color: var(--accent-color); }
     &--loading { opacity: 0.5; pointer-events: none; }
   }

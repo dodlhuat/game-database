@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Newsletter" />
-        <h1 class="page-hero__title">Newsletter</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.newsletters')" />
+        <h1 class="page-hero__title">{{ $t('admin.newsletters.title') }}</h1>
       </div>
     </section>
 
@@ -18,24 +18,24 @@
         <!-- Compose ─────────────────────────────────────────────── -->
         <section class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Neuen Newsletter verfassen</h2>
+            <h2 class="dash-section__title">{{ $t('admin.newsletters.compose_title') }}</h2>
           </header>
           <div class="compose-body">
-            <UiInput v-model="form.subject" label="Betreff" />
+            <UiInput v-model="form.subject" :label="$t('admin.form.subject')" />
             <div>
-              <label class="form-label">Inhalt</label>
-              <textarea v-model="form.body" rows="8" class="form-textarea" />
+              <label class="form-label">{{ $t('admin.form.content') }}</label>
+              <UiRichEditor v-model="form.body" />
             </div>
             <Transition name="fade">
               <div v-if="successMsg" class="success-banner">
-                <span class="icon icon-checkmark-circle-2-outline" aria-hidden="true" />
+                <span class="icon icon-check_circle" aria-hidden="true" />
                 {{ successMsg }}
               </div>
             </Transition>
             <div>
               <button class="hero-btn" :disabled="sending || !form.subject || !form.body" @click="send">
-                <span class="icon icon-paper-plane-outline" aria-hidden="true" />
-                {{ sending ? 'Wird gesendet…' : 'Newsletter senden' }}
+                <span class="icon icon-send" aria-hidden="true" />
+                {{ sending ? $t('admin.newsletters.sending') : $t('admin.newsletters.send') }}
               </button>
             </div>
           </div>
@@ -44,25 +44,25 @@
         <!-- History ─────────────────────────────────────────────── -->
         <section class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Versandhistorie</h2>
+            <h2 class="dash-section__title">{{ $t('admin.newsletters.history_title') }}</h2>
             <span class="dash-section__count">{{ newsletters.length }}</span>
           </header>
 
           <div v-if="loading" class="admin-state"><div class="spinner" /></div>
 
           <div v-else-if="!newsletters.length" class="dash-empty">
-            <span class="icon icon-email-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Noch keine Newsletter versandt.</p>
+            <span class="icon icon-mail dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.empty.newsletters') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Betreff</th>
-                  <th>Versandt am</th>
-                  <th>Empfänger</th>
-                  <th>Von</th>
+                  <th>{{ $t('admin.form.subject') }}</th>
+                  <th>{{ $t('admin.table.sent_at') }}</th>
+                  <th>{{ $t('admin.table.recipients') }}</th>
+                  <th>{{ $t('admin.table.from') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -83,7 +83,7 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -95,6 +95,7 @@ import { ref, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchNewsletters, sendNewsletter } = useAdmin()
+const { t } = useI18n()
 
 interface Newsletter { id: number; subject: string; sent_at: string; recipient_count: number; sender: { name: string } | null }
 
@@ -111,7 +112,7 @@ async function load() { loading.value = true; try { const data = await fetchNews
 async function send() {
   if (!form.value.subject || !form.value.body) return
   sending.value = true; successMsg.value = ''
-  try { await sendNewsletter(form.value.subject, form.value.body); form.value = { subject: '', body: '' }; successMsg.value = 'Newsletter wurde in die Warteschlange eingereiht.'; await load() }
+  try { await sendNewsletter(form.value.subject, form.value.body); form.value = { subject: '', body: '' }; successMsg.value = t('admin.newsletters.success'); await load() }
   finally { sending.value = false }
 }
 
@@ -119,9 +120,9 @@ function formatDate(iso?: string) { return iso ? new Date(iso).toLocaleDateStrin
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
@@ -139,18 +140,9 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 
 .form-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--secondary-text); margin-bottom: 0.4rem; letter-spacing: 0.03em; }
 
-.form-textarea {
-  display: block; width: 100%; padding: 0.75rem; min-height: 180px; resize: vertical;
-  border: 1px solid var(--divider); border-radius: 8px;
-  background: var(--background); color: var(--primary-text);
-  font-size: 0.875rem; font-family: inherit; line-height: 1.6;
-  transition: border-color 0.2s;
-  &:focus { outline: none; border-color: var(--accent-color); }
-}
+.hero-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit; background: $amber; color: #0F0E0C; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; .icon { font-size: 1rem; } &:hover:not(:disabled) { opacity: 0.88; } &:disabled { opacity: 0.4; cursor: not-allowed; } }
 
-.hero-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; font-size: 0.875rem; font-weight: 600; font-family: inherit; background: $amber; color: #0F0E0C; border: none; border-radius: 8px; cursor: pointer; transition: opacity 0.2s; .icon { width: 16px; height: 16px; } &:hover:not(:disabled) { opacity: 0.88; } &:disabled { opacity: 0.4; cursor: not-allowed; } }
-
-.success-banner { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); border-radius: 8px; color: #4ade80; font-size: 0.875rem; .icon { width: 18px; height: 18px; flex-shrink: 0; } }
+.success-banner { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25); border-radius: 8px; color: #4ade80; font-size: 0.875rem; .icon { font-size: 1.125rem; flex-shrink: 0; } }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }

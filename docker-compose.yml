@@ -1,22 +1,23 @@
 services:
 
   # ----------------------------------------------------------------
-  # PostgreSQL
+  # MariaDB
   # ----------------------------------------------------------------
-  postgres:
-    image: postgres:16-alpine
-    container_name: game-db-postgres
+  mariadb:
+    image: mariadb:11-jammy
+    container_name: game-db-mariadb
     restart: unless-stopped
     environment:
-      POSTGRES_DB: game_database
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secret
+      MARIADB_DATABASE: game_database
+      MARIADB_USER: game_user
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: rootsecret
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mariadb_data:/var/lib/mysql
     ports:
-      - "5432:5432"
+      - "3306:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -39,8 +40,19 @@ services:
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:3000
+      DB_CONNECTION: mysql
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: game_database
+      DB_USERNAME: game_user
+      DB_PASSWORD: secret
+      SESSION_DRIVER: cookie
+      SESSION_DOMAIN: localhost
+      SANCTUM_STATEFUL_DOMAINS: localhost:3000,127.0.0.1:3000
     depends_on:
-      postgres:
+      mariadb:
         condition: service_healthy
 
   # ----------------------------------------------------------------
@@ -83,7 +95,7 @@ services:
       - nginx
 
 volumes:
-  postgres_data:
+  mariadb_data:
   backend_storage_framework:
   backend_storage_logs:
   backend_bootstrap_cache:

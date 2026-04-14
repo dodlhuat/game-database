@@ -7,8 +7,8 @@
         <div class="page-hero__glow" /><div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb label="Verlängerungen" />
-        <h1 class="page-hero__title">Verlängerungsanträge</h1>
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.extensions')" />
+        <h1 class="page-hero__title">{{ $t('admin.extensions.title') }}</h1>
       </div>
     </section>
 
@@ -19,25 +19,25 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">Offene Anträge</h2>
+            <h2 class="dash-section__title">{{ $t('admin.extensions_admin.open_requests') }}</h2>
             <span class="dash-section__count">{{ extensions.length }}</span>
           </header>
 
           <div v-if="!extensions.length" class="dash-empty">
-            <span class="icon icon-calendar-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">Keine offenen Verlängerungsanträge.</p>
+            <span class="icon icon-calendar_today dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.empty.extensions') }}</p>
           </div>
 
           <div v-else class="table-wrap">
             <table class="dash-table">
               <thead>
                 <tr>
-                  <th>Mitglied</th>
-                  <th>Spiel</th>
-                  <th>Aktuell fällig</th>
-                  <th>Beantragt bis</th>
-                  <th>Beantragt am</th>
-                  <th>Aktionen</th>
+                  <th>{{ $t('admin.loans.member_col') }}</th>
+                  <th>{{ $t('admin.table.title') }}</th>
+                  <th>{{ $t('admin.extensions_admin.currently_due') }}</th>
+                  <th>{{ $t('admin.extensions_admin.requested_until') }}</th>
+                  <th>{{ $t('admin.extensions_admin.requested_at') }}</th>
+                  <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -49,8 +49,8 @@
                   <td class="text-muted">{{ formatDate(ext.requested_at) }}</td>
                   <td>
                     <div class="action-row">
-                      <button class="action-btn action-btn--success" @click="approve(ext.id)">Genehmigen</button>
-                      <button class="action-btn action-btn--danger" @click="openReject(ext)">Ablehnen</button>
+                      <button class="action-btn action-btn--success" @click="approve(ext.id)">{{ $t('admin.extensions_admin.approve') }}</button>
+                      <button class="action-btn action-btn--danger" @click="openReject(ext)">{{ $t('admin.extensions_admin.reject') }}</button>
                     </div>
                   </td>
                 </tr>
@@ -67,16 +67,16 @@
       <div v-if="rejectTarget" class="modal-overlay" @click.self="rejectTarget = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">Antrag ablehnen</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="rejectTarget = null">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ $t('admin.extensions_admin.reject_title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="rejectTarget = null">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <p class="dialog__game">{{ rejectTarget.loan?.copy?.game?.title }}</p>
-          <UiInput v-model="rejectNote" label="Begründung (optional)" />
+          <UiInput v-model="rejectNote" :label="$t('admin.extensions_admin.reject_note')" />
           <div class="dialog__actions">
-            <button class="action-btn action-btn--danger" :disabled="processing" @click="submitReject">Ablehnen</button>
-            <button class="action-btn" @click="rejectTarget = null">Abbrechen</button>
+            <button class="action-btn action-btn--danger" :disabled="processing" @click="submitReject">{{ $t('admin.extensions_admin.reject') }}</button>
+            <button class="action-btn" @click="rejectTarget = null">{{ $t('admin.form.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -85,7 +85,7 @@
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
-        <p class="l-footer__copy">&copy; {{ year }} AUA</p>
+        <p class="l-footer__copy">{{ $t('common.copyright_short', { year }) }}</p>
       </div>
     </footer>
   </div>
@@ -125,9 +125,9 @@ function formatDate(iso?: string) { return iso ? new Date(iso).toLocaleDateStrin
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C; $amber: #D4921E; $nav-height: 64px;
+$hero-bg: #0F0E0C; $nav-height: 64px;
 $amber-08: rgba(212,146,30,0.08); $amber-14: rgba(212,146,30,0.14); $amber-25: rgba(212,146,30,0.25); $amber-glow: rgba(212,146,30,0.16);
-$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(238,232,223,0.50); $hero-divider: rgba(238,232,223,0.10);
+$hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(238,232,223,0.65); $hero-divider: rgba(238,232,223,0.10);
 
 .admin-page { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
 
@@ -152,7 +152,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.55); $hero-muted-50: rgba(2
 .text-muted { color: var(--secondary-text); }
 
 .modal-overlay { position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
-.dialog { background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.25rem; } &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); } &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s; .icon { width: 18px; height: 18px; } &:hover { background: var(--background); color: var(--primary-text); } } &__game { font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 1.25rem; padding-bottom: 0; } &__actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; } }
+.dialog { background: var(--secondary-background); border: 1px solid var(--divider); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,0.4); &__header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 0.25rem; } &__title { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--primary-text); } &__close { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: transparent; border: none; border-radius: 6px; color: var(--secondary-text); cursor: pointer; transition: background 0.15s; .icon { font-size: 1.125rem; } &:hover { background: var(--background); color: var(--primary-text); } } &__game { font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 1.25rem; padding-bottom: 0; } &__actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; } }
 .modal-enter-active, .modal-leave-active { transition: opacity 0.2s ease; .dialog { transition: opacity 0.2s ease, transform 0.2s ease; } }
 .modal-enter-from, .modal-leave-to { opacity: 0; .dialog { opacity: 0; transform: translateY(8px) scale(0.98); } }
 

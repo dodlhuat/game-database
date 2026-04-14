@@ -14,18 +14,18 @@
       </div>
 
       <div class="auth-card">
-        <div class="auth-card__eyebrow">Mitgliederbereich</div>
-        <h1 class="auth-card__title">Konto erstellen</h1>
+        <div class="auth-card__eyebrow">{{ $t('auth.member_area') }}</div>
+        <h1 class="auth-card__title">{{ $t('auth.register_title') }}</h1>
 
         <div v-if="success" class="alert alert-success">
           <p>{{ success }}</p>
-          <NuxtLink to="/login">Zum Login</NuxtLink>
+          <NuxtLink to="/login">{{ $t('btn.login') }}</NuxtLink>
         </div>
 
         <form v-else @submit.prevent="submit">
           <UiInput
             v-model="form.name"
-            label="Name"
+            :label="$t('auth.name')"
             :error="errors.name"
             required
             autocomplete="name"
@@ -33,7 +33,7 @@
           <UiInput
             v-model="form.email"
             type="email"
-            label="E-Mail"
+            :label="$t('auth.email')"
             :error="errors.email"
             required
             autocomplete="email"
@@ -41,7 +41,7 @@
           <UiInput
             v-model="form.password"
             type="password"
-            label="Passwort"
+            :label="$t('auth.password')"
             :error="errors.password"
             required
             autocomplete="new-password"
@@ -49,7 +49,7 @@
           <UiInput
             v-model="form.password_confirmation"
             type="password"
-            label="Passwort wiederholen"
+            :label="$t('auth.password_confirm')"
             :error="errors.password_confirmation"
             required
             autocomplete="new-password"
@@ -63,20 +63,20 @@
 
           <div class="auth-card__checkboxes">
             <input v-model="form.newsletter_opt_in" type="checkbox" class="styled-checkbox" id="newsletter-opt-in" />
-            <label for="newsletter-opt-in">Newsletter abonnieren</label>
+            <label for="newsletter-opt-in">{{ $t('auth.newsletter_opt_in') }}</label>
 
             <input v-model="form.terms_accepted" type="checkbox" class="styled-checkbox" id="terms-accepted" required />
-            <label for="terms-accepted" style="white-space: pre;">Ich akzeptiere die <NuxtLink to="/terms">Nutzungsbedingungen</NuxtLink></label>
+            <label for="terms-accepted" style="white-space: pre;">{{ $t('auth.terms_accept') }} <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></label>
             <p v-if="errors.terms_accepted" class="error-text" role="alert">{{ errors.terms_accepted }}</p>
           </div>
 
           <div v-if="serverError" class="alert alert-error" role="alert">{{ serverError }}</div>
 
-          <UiButton type="submit" :loading="loading">Registrieren</UiButton>
+          <UiButton type="submit" :loading="loading">{{ $t('btn.register') }}</UiButton>
         </form>
 
         <p class="auth-card__footer-text">
-          Bereits Mitglied? <NuxtLink to="/login">Einloggen</NuxtLink>
+          {{ $t('auth.already_member') }} <NuxtLink to="/login">{{ $t('btn.login') }}</NuxtLink>
         </p>
       </div>
     </div>
@@ -89,6 +89,7 @@ import { ref, reactive } from 'vue'
 definePageMeta({ middleware: [] })
 
 const { register } = useAuth()
+const { t } = useI18n()
 const loading = ref(false)
 const success = ref('')
 const serverError = ref('')
@@ -130,7 +131,7 @@ async function submit() {
         if (key in errors) (errors as Record<string, string>)[key] = msgs[0] ?? ''
       })
     } else {
-      serverError.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+      serverError.value = e.message ?? t('common.error.generic')
     }
   } finally {
     loading.value = false
@@ -140,10 +141,9 @@ async function submit() {
 
 <style lang="scss" scoped>
 $bg: #0F0E0C;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.18);
 $text: #EEE8DF;
-$muted: rgba(238, 232, 223, 0.5);
+$muted: rgba(238, 232, 223, 0.65);
 
 .auth-page {
   position: relative;

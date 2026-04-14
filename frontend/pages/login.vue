@@ -14,14 +14,14 @@
       </div>
 
       <div class="auth-card">
-        <div class="auth-card__eyebrow">Mitgliederbereich</div>
-        <h1 class="auth-card__title">Anmelden</h1>
+        <div class="auth-card__eyebrow">{{ $t('auth.member_area') }}</div>
+        <h1 class="auth-card__title">{{ $t('auth.login_title') }}</h1>
 
         <form @submit.prevent="submit">
           <UiInput
             v-model="form.email"
             type="email"
-            label="E-Mail"
+            :label="$t('auth.email')"
             :error="errors.email"
             required
             autocomplete="email"
@@ -29,27 +29,27 @@
           <UiInput
             v-model="form.password"
             type="password"
-            label="Passwort"
+            :label="$t('auth.password')"
             :error="errors.password"
             required
             autocomplete="current-password"
           />
 
           <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
-            Bitte bestätige zuerst deine E-Mail-Adresse.
+            {{ $t('auth.email_not_verified') }}
             <button type="button" class="resend-link" :disabled="resendLoading" @click="resendVerification">
-              {{ resendLoading ? 'Wird gesendet…' : 'Link erneut senden' }}
+              {{ resendLoading ? $t('auth.resending') : $t('auth.resend_link') }}
             </button>
-            <span v-if="resendSuccess" class="resend-success">E-Mail gesendet!</span>
+            <span v-if="resendSuccess" class="resend-success">{{ $t('auth.email_sent') }}</span>
           </div>
 
           <div v-else-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
 
-          <UiButton type="submit" :loading="loading">Einloggen</UiButton>
+          <UiButton type="submit" :loading="loading">{{ $t('btn.login') }}</UiButton>
         </form>
 
         <p class="auth-card__footer-text">
-          Noch kein Konto? <NuxtLink to="/register">Jetzt registrieren</NuxtLink>
+          {{ $t('auth.no_account') }} <NuxtLink to="/register">{{ $t('btn.register') }}</NuxtLink>
         </p>
       </div>
     </div>
@@ -62,6 +62,7 @@ import { ref, reactive } from 'vue'
 definePageMeta({ middleware: [] })
 
 const { login } = useAuth()
+const { t } = useI18n()
 const api = useApi()
 const route = useRoute()
 const loading = ref(false)
@@ -71,7 +72,7 @@ const resendSuccess = ref(false)
 const lastEmail = ref('')
 const statusMessage = ref(
   route.query.reason === 'unauthenticated'
-    ? 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.'
+    ? t('common.error.session_expired')
     : ''
 )
 
@@ -98,7 +99,7 @@ async function submit() {
       errors.email = e.errors.email?.[0] ?? ''
       errors.password = e.errors.password?.[0] ?? ''
     } else {
-      statusMessage.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+      statusMessage.value = e.message ?? t('common.error.generic')
     }
   } finally {
     loading.value = false
@@ -121,12 +122,11 @@ async function resendVerification() {
 
 <style lang="scss" scoped>
 $bg: #0F0E0C;
-$amber: #D4921E;
 $amber-glow: rgba(212, 146, 30, 0.18);
 $amber-08: rgba(212, 146, 30, 0.08);
 $amber-20: rgba(212, 146, 30, 0.20);
 $text: #EEE8DF;
-$muted: rgba(238, 232, 223, 0.5);
+$muted: rgba(238, 232, 223, 0.65);
 
 .auth-page {
   position: relative;
@@ -258,7 +258,7 @@ $muted: rgba(238, 232, 223, 0.5);
 
 .resend-success {
   font-size: 0.8rem;
-  color: rgba(238, 232, 223, 0.6);
+  color: rgba(238, 232, 223, 0.72);
   margin-left: 0.4rem;
 }
 </style>

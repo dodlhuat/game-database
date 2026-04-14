@@ -11,19 +11,19 @@
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">Mitglieder-Bereich</p>
-        <h1 class="page-hero__title">Willkommen, {{ auth.user?.name }}</h1>
-        <p class="page-hero__sub">Deine Ausleihen, Reservierungen und Kontoverwaltung auf einen Blick.</p>
+        <p class="page-hero__eyebrow">{{ $t('dashboard.member_area') }}</p>
+        <h1 class="page-hero__title">{{ $t('dashboard.welcome', { name: auth.user?.name }) }}</h1>
+        <p class="page-hero__sub">{{ $t('dashboard.subtitle') }}</p>
 
         <!-- Stats ────────────────────────────────────────────────── -->
         <div v-if="!loading" class="stats-grid">
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-book-open-outline" aria-hidden="true" />
+              <span class="icon icon-article" aria-hidden="true" />
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.active_loans_count ?? 0 }}</span>
-              <span class="stat-card__label">Aktive Ausleihen</span>
+              <span class="stat-card__label">{{ $t('dashboard.stats.active_loans') }}</span>
             </div>
           </div>
           <div class="stat-card stat-card--warn">
@@ -32,25 +32,25 @@
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.overdue_count ?? 0 }}</span>
-              <span class="stat-card__label">Überfällig</span>
+              <span class="stat-card__label">{{ $t('dashboard.stats.overdue') }}</span>
             </div>
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-calendar-outline" aria-hidden="true" />
+              <span class="icon icon-calendar_today" aria-hidden="true" />
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.reservations_count ?? 0 }}</span>
-              <span class="stat-card__label">Reservierungen</span>
+              <span class="stat-card__label">{{ $t('dashboard.stats.reservations') }}</span>
             </div>
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-archive-outline" aria-hidden="true" />
+              <span class="icon icon-cases" aria-hidden="true" />
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.total_loans ?? 0 }}</span>
-              <span class="stat-card__label">Ausleihen gesamt</span>
+              <span class="stat-card__label">{{ $t('dashboard.stats.total_loans') }}</span>
             </div>
           </div>
         </div>
@@ -64,20 +64,20 @@
           <div v-if="auth.isMember" class="membership-bar__member">
             <div class="token-bar">
               <span class="token-bar__icon">◈</span>
-              <span class="token-bar__count">{{ auth.user?.tokens ?? 0 }} Token</span>
-              <NuxtLink to="/tokens" class="token-bar__link">Aufladen</NuxtLink>
+              <span class="token-bar__count">{{ auth.user?.tokens ?? 0 }} {{ $t('dashboard.tokens.label') }}</span>
+              <NuxtLink to="/tokens" class="token-bar__link">{{ $t('dashboard.tokens.charge') }}</NuxtLink>
             </div>
             <div class="membership-expiry" :class="expiryClass">
-              <span class="membership-expiry__label">Mitglied bis</span>
+              <span class="membership-expiry__label">{{ $t('dashboard.membership.label') }}</span>
               <span class="membership-expiry__date">{{ formatDate(auth.user?.membership_expires_at) }}</span>
               <NuxtLink v-if="canRenew" to="/dashboard" class="membership-expiry__renew" @click.prevent="renew">
-                Verlängern
+                {{ $t('btn.renew') }}
               </NuxtLink>
             </div>
           </div>
           <div v-else-if="auth.isRegisteredUser" class="membership-bar__upgrade">
-            <span class="membership-bar__text">Du bist noch kein Mitglied.</span>
-            <NuxtLink to="/upgrade" class="membership-bar__cta">Jetzt Mitglied werden →</NuxtLink>
+            <span class="membership-bar__text">{{ $t('dashboard.membership.not_member') }}</span>
+            <NuxtLink to="/upgrade" class="membership-bar__cta">{{ $t('dashboard.membership.upgrade') }}</NuxtLink>
           </div>
         </div>
       </div>
@@ -96,23 +96,23 @@
           <!-- Aktive Ausleihen ───────────────────────────────────── -->
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Aktive Ausleihen</h2>
+              <h2 class="dash-section__title">{{ $t('dashboard.active_loans_title') }}</h2>
               <span class="dash-section__count">{{ activeLoans.length }}</span>
             </header>
 
             <div v-if="!activeLoans.length" class="dash-empty">
-              <span class="icon icon-inbox-outline dash-empty__icon" aria-hidden="true" />
-              <p class="dash-empty__text">Keine aktiven Ausleihen vorhanden.</p>
+              <span class="icon icon-mail dash-empty__icon" aria-hidden="true" />
+              <p class="dash-empty__text">{{ $t('common.empty.no_active_loans') }}</p>
             </div>
 
             <div v-else class="table-wrap">
               <table class="dash-table">
                 <thead>
                   <tr>
-                    <th>Spiel</th>
-                    <th>Status</th>
-                    <th>Fällig am</th>
-                    <th>Aktionen</th>
+                    <th>{{ $t('dashboard.table.game') }}</th>
+                    <th>{{ $t('dashboard.table.status') }}</th>
+                    <th>{{ $t('dashboard.table.due_date') }}</th>
+                    <th>{{ $t('dashboard.table.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -136,14 +136,14 @@
                       <div class="action-row">
                         <template v-if="loan.status !== 'RETURNED'">
                           <span v-if="pendingExtension(loan)" class="badge badge-warning">
-                            Verlängerung beantragt
+                            {{ $t('common.badge.pending_extension') }}
                           </span>
                           <button v-else class="action-btn" @click="openExtension(loan)">
-                            Verlängern
+                            {{ $t('btn.extend') }}
                           </button>
                         </template>
-                        <button class="action-btn" @click="openReturn(loan)">Zurückgeben</button>
-                        <button class="action-btn action-btn--danger" @click="openDamage(loan)">Schaden</button>
+                        <button class="action-btn" @click="openReturn(loan)">{{ $t('btn.return') }}</button>
+                        <button class="action-btn action-btn--danger" @click="openDamage(loan)">{{ $t('btn.damage') }}</button>
                       </div>
                     </td>
                   </tr>
@@ -155,22 +155,22 @@
           <!-- Reservierungen ─────────────────────────────────────── -->
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Meine Reservierungen</h2>
+              <h2 class="dash-section__title">{{ $t('dashboard.reservations_title') }}</h2>
               <span class="dash-section__count">{{ reservations.length }}</span>
             </header>
 
             <div v-if="!reservations.length" class="dash-empty">
-              <span class="icon icon-bookmark-outline dash-empty__icon" aria-hidden="true" />
-              <p class="dash-empty__text">Keine aktiven Reservierungen.</p>
+              <span class="icon icon-bookmark dash-empty__icon" aria-hidden="true" />
+              <p class="dash-empty__text">{{ $t('common.empty.no_reservations') }}</p>
             </div>
 
             <div v-else class="table-wrap">
               <table class="dash-table">
                 <thead>
                   <tr>
-                    <th>Spiel</th>
-                    <th>Position in Warteschlange</th>
-                    <th>Aktionen</th>
+                    <th>{{ $t('dashboard.table.game') }}</th>
+                    <th>{{ $t('dashboard.table.position') }}</th>
+                    <th>{{ $t('dashboard.table.actions') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -181,7 +181,7 @@
                     </td>
                     <td>
                       <button class="action-btn action-btn--danger" @click="cancelReservation(res.id)">
-                        Stornieren
+                        {{ $t('dashboard.cancel_reservation') }}
                       </button>
                     </td>
                   </tr>
@@ -193,21 +193,21 @@
           <!-- Ausleihhistorie ────────────────────────────────────── -->
           <section class="dash-section">
             <header class="dash-section__header">
-              <h2 class="dash-section__title">Letzte Ausleihen</h2>
+              <h2 class="dash-section__title">{{ $t('dashboard.loan_history_title') }}</h2>
               <span class="dash-section__count">{{ loanHistory.length }}</span>
             </header>
 
             <div v-if="!loanHistory.length" class="dash-empty">
               <span class="icon icon-clock-outline dash-empty__icon" aria-hidden="true" />
-              <p class="dash-empty__text">Noch keine zurückgegebenen Ausleihen.</p>
+              <p class="dash-empty__text">{{ $t('common.empty.no_loan_history') }}</p>
             </div>
 
             <div v-else class="table-wrap">
               <table class="dash-table">
                 <thead>
                   <tr>
-                    <th>Spiel</th>
-                    <th>Zurückgegeben am</th>
+                    <th>{{ $t('dashboard.table.game') }}</th>
+                    <th>{{ $t('dashboard.table.returned_at') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -223,12 +223,12 @@
           <!-- Konto-Link ─────────────────────────────────────────── -->
           <div class="dash-footer-actions">
             <NuxtLink to="/account" class="dash-link">
-              <span class="icon icon-settings-2-outline" aria-hidden="true" />
-              Konto-Einstellungen
+              <span class="icon icon-settings" aria-hidden="true" />
+              {{ $t('dashboard.footer_settings') }}
             </NuxtLink>
             <button class="action-btn action-btn--ghost" @click="handleLogout">
-              <span class="icon icon-log-out-outline" aria-hidden="true" />
-              Abmelden
+              <span class="icon icon-power_settings_new" aria-hidden="true" />
+              {{ $t('dashboard.footer_logout') }}
             </button>
           </div>
 
@@ -241,21 +241,21 @@
       <div v-if="returnLoan" class="modal-overlay" @click.self="returnLoan = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">Spiel zurückgeben</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="returnLoan = null">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ $t('dashboard.return_title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('btn.close')" @click="returnLoan = null">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <p class="dialog__game">{{ returnLoan.game?.title }}</p>
-          <label class="dialog__label">Zustand</label>
+          <label class="dialog__label">{{ $t('dashboard.return_condition') }}</label>
           <select v-model="returnCondition" class="dialog__select">
-            <option value="GOOD">Gut</option>
-            <option value="WORN">Abgenutzt</option>
-            <option value="DAMAGED">Beschädigt</option>
+            <option value="GOOD">{{ $t('common.badge.good') }}</option>
+            <option value="WORN">{{ $t('common.badge.worn') }}</option>
+            <option value="DAMAGED">{{ $t('common.badge.damaged') }}</option>
           </select>
           <div class="dialog__actions">
-            <UiButton :loading="returning" @click="submitReturn">Bestätigen</UiButton>
-            <button class="action-btn" @click="returnLoan = null">Abbrechen</button>
+            <UiButton :loading="returning" @click="submitReturn">{{ $t('btn.confirm') }}</UiButton>
+            <button class="action-btn" @click="returnLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -266,17 +266,17 @@
       <div v-if="damageLoan" class="modal-overlay" @click.self="damageLoan = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">Schaden melden</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="damageLoan = null">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ $t('dashboard.damage_title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('btn.close')" @click="damageLoan = null">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <p class="dialog__game">{{ damageLoan.game?.title }}</p>
-          <UiInput v-model="damageDescription" label="Beschreibung" />
-          <UiInput v-model="damagePhotoUrl" label="Foto-URL (optional)" />
+          <UiInput v-model="damageDescription" :label="$t('dashboard.damage_description')" />
+          <UiInput v-model="damagePhotoUrl" :label="$t('dashboard.damage_photo_url')" />
           <div class="dialog__actions">
-            <UiButton :loading="reporting" @click="submitDamage">Melden</UiButton>
-            <button class="action-btn" @click="damageLoan = null">Abbrechen</button>
+            <UiButton :loading="reporting" @click="submitDamage">{{ $t('dashboard.damage_report') }}</UiButton>
+            <button class="action-btn" @click="damageLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -287,16 +287,16 @@
       <div v-if="extensionLoan" class="modal-overlay" @click.self="extensionLoan = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">Verlängerung beantragen</h3>
-            <button class="dialog__close" aria-label="Schließen" @click="extensionLoan = null">
-              <span class="icon icon-close-outline" aria-hidden="true" />
+            <h3 class="dialog__title">{{ $t('dashboard.extension_title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('btn.close')" @click="extensionLoan = null">
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <p class="dialog__game">{{ extensionLoan.game?.title }}</p>
-          <UiDatePicker v-model="extensionDate" label="Neues Rückgabedatum" :max-date="maxExtensionDate" />
+          <UiDatePicker v-model="extensionDate" :label="$t('dashboard.extension_new_due_date')" :max-date="maxExtensionDate" />
           <div class="dialog__actions">
-            <UiButton :loading="extending" @click="submitExtension">Beantragen</UiButton>
-            <button class="action-btn" @click="extensionLoan = null">Abbrechen</button>
+            <UiButton :loading="extending" @click="submitExtension">{{ $t('btn.apply') }}</UiButton>
+            <button class="action-btn" @click="extensionLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -310,12 +310,12 @@
           <span class="l-footer__name">AUA</span>
         </div>
         <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">Spielesammlung</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">Nutzungsbedingungen</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">Datenschutzerklärung</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">Cookie-Richtlinien</NuxtLink>
+          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
+          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
+          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
+          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
         </nav>
-        <p class="l-footer__copy">&copy; {{ year }} AUA. Alle Rechte vorbehalten.</p>
+        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
       </div>
     </footer>
 
@@ -330,6 +330,7 @@ definePageMeta({ middleware: ['auth'] })
 
 const auth = useAuthStore()
 const { logout } = useAuth()
+const { t } = useI18n()
 const { fetchDashboard, returnLoan: doReturn, requestExtension, removeReservation, reportDamage } = useLoans()
 
 const year = new Date().getFullYear()
@@ -436,10 +437,10 @@ function loanStatusVariant(loan: Loan) {
 
 function loanStatusLabel(loan: Loan) {
   const map: Record<string, string> = {
-    ACTIVE: 'Aktiv',
-    EXTENDED: 'Verlängert',
-    OVERDUE: 'Überfällig',
-    RETURNED: 'Zurückgegeben',
+    ACTIVE: t('common.badge.active'),
+    EXTENDED: t('common.badge.extended'),
+    OVERDUE: t('common.badge.overdue'),
+    RETURNED: t('common.badge.returned'),
   }
   return map[loan.status] ?? loan.status
 }
@@ -485,7 +486,6 @@ async function renew() {
 
 <style lang="scss" scoped>
 $hero-bg:       #0F0E0C;
-$amber:         #D4921E;
 $nav-height:    64px;
 
 $amber-08:      rgba(212, 146, 30, 0.08);
@@ -496,8 +496,8 @@ $amber-glow:    rgba(212, 146, 30, 0.20);
 $warm-glow:     rgba(44, 40, 32, 0.70);
 
 $hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.55);
-$hero-muted-50: rgba(238, 232, 223, 0.50);
+$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted-50: rgba(238, 232, 223, 0.65);
 $hero-muted-20: rgba(238, 232, 223, 0.20);
 $hero-divider:  rgba(238, 232, 223, 0.10);
 $hero-divider-20: rgba(238, 232, 223, 0.20);
@@ -639,7 +639,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     align-items: center;
     justify-content: center;
 
-    .icon { width: 20px; height: 20px; }
+    .icon { font-size: 1.25rem; }
   }
 
   &__body {
@@ -840,7 +840,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   transition: border-color 0.2s, color 0.2s;
   white-space: nowrap;
 
-  .icon { width: 14px; height: 14px; }
+  .icon { font-size: 0.875rem; }
 
   &:hover {
     border-color: var(--accent-color);
@@ -889,7 +889,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   text-decoration: none;
   transition: color 0.2s;
 
-  .icon { width: 16px; height: 16px; }
+  .icon { font-size: 1rem; }
 
   &:hover { color: var(--primary-text); }
 }
@@ -944,7 +944,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     transition: background 0.15s, color 0.15s;
     flex-shrink: 0;
 
-    .icon { width: 18px; height: 18px; }
+    .icon { font-size: 1.125rem; }
 
     &:hover {
       background: var(--background);

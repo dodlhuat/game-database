@@ -16,9 +16,8 @@ defineProps<{ label: string }>()
 </script>
 
 <style lang="scss" scoped>
-$hero-muted: rgba(238, 232, 223, 0.55);
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-text:  #EEE8DF;
-$amber:      #D4921E;
 
 // Override basix breadcrumb colors for the dark admin hero background
 .breadcrumb {
