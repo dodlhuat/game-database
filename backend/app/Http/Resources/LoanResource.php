@@ -13,8 +13,8 @@ class LoanResource extends JsonResource
             'id'               => $this->id,
             'copy'             => new CopyResource($this->whenLoaded('copy')),
             'game'             => $this->when(
-                $this->relationLoaded('copy') && $this->copy->relationLoaded('game'),
-                fn() => new GameResource($this->copy->game)
+                $this->relationLoaded('copy') && $this->copy?->relationLoaded('game'),
+                fn() => $this->copy->game ? new GameResource($this->copy->game) : null
             ),
             'user'             => new UserResource($this->whenLoaded('user')),
             'start_date'       => $this->start_date,
