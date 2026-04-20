@@ -86,68 +86,68 @@
             <div class="nav-grid">
             <NuxtLink to="/admin/users" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-person" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.users') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.users') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/games" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-article" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.games') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.games') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/categories" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-label" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.categories') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.categories') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/tags" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-bookmark" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.tags') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.tags') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
 
             <NuxtLink to="/admin/loans" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-sync" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.loans') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.loans') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/extensions" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-calendar_today" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.extensions') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.extensions') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/newsletters" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-mail" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.newsletters') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.newsletters') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/packages" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-gift-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.packages') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.packages') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/damage-reports" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-alert-triangle-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.damage_reports') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.damage_reports') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/emails" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-mail" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.emails') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.emails') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/loan-settings" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-settings" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.loan_settings') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.loan_settings') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/email-logs" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-format_list_bulleted" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.email_logs') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.email_logs') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             <NuxtLink to="/admin/package-loans" class="nav-card">
               <span class="nav-card__icon"><span class="icon icon-cube-outline" aria-hidden="true" /></span>
-              <span class="nav-card__label">{{ $t('admin.package_loans') }}</span>
+              <span class="nav-card__label">{{ $t('admin.breadcrumb.package_loans') }}</span>
               <span class="nav-card__arrow icon icon-navigate_next" aria-hidden="true" />
             </NuxtLink>
             </div>

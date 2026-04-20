@@ -37,7 +37,7 @@ let picker: unknown = null
 onMounted(async () => {
   if (!inputRef.value) return
 
-  const { DatePicker } = await import('@dodlhuat/basix/js/datepicker.js')
+  const { DatePicker } = await import('@dodlhuat/basix/js/datepicker')
 
   picker = new DatePicker(inputRef.value, {
     mode: 'single',

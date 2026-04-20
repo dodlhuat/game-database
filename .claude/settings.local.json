@@ -38,7 +38,12 @@
       "Bash(sed -i '' 's/rgba\\(238, 232, 223, 0\\\\.60\\)/rgba\\(238, 232, 223, 0.72\\)/g' components/AppNav.vue)",
       "Bash(sed -i '' 's/rgba\\(238, 232, 223, 0\\\\.35\\)/rgba\\(238, 232, 223, 0.50\\)/g' components/AppNav.vue)",
       "Bash(xargs perl:*)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); admin=d.get\\('admin',{}\\); print\\(list\\(admin.keys\\(\\)\\)[:20]\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d['admin']['games'], ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); admin=d['admin']; print\\({k: type\\(v\\).__name__ for k in list\\(admin.keys\\(\\)\\)[:15]}\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); admin=d['admin']; [print\\(k, type\\(admin[k]\\).__name__\\) for k in list\\(admin.keys\\(\\)\\)[:15]]\")",
+      "Bash(python3 *)"
     ]
   }
 }

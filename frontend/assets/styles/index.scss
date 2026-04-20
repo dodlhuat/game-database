@@ -3,23 +3,17 @@
 // Importiert alle Partials in der richtigen Reihenfolge
 // ============================================================
 
-// 1. Design Tokens (müssen zuerst kommen)
-@import 'variables';
-
-// 2. Utilities
-@import 'mixins';
-
 // 3. Browser-Normalisierung
-@import 'reset';
+@use 'reset';
 
 // 4. Basis-Typografie
-@import 'typography';
+@use 'typography';
 
 // 5. Animationen
-@import 'animations';
+@use 'animations';
 
 // 6. Theme overrides — amber accent replaces basix default blue
-@import 'theme';
+@use 'theme';
 
 // 7. Bibliotheks-Overrides
 // basix push-menu.scss wendet position:fixed + transform:translateX(-100%)
