@@ -167,67 +167,6 @@
           </div>
         </div>
 
-        <!-- Lightbox -->
-        <Teleport to="body">
-          <Transition name="lb">
-            <div
-              v-if="lightbox.open"
-              class="gd-lb"
-              role="dialog"
-              aria-modal="true"
-              @touchstart.passive="onTouchStart"
-              @touchend.passive="onTouchEnd"
-            >
-              <div class="gd-lb__backdrop" @click="closeLightbox" />
-
-              <button class="gd-lb__close" @click="closeLightbox" aria-label="Schließen">
-                <span class="icon">close</span>
-              </button>
-
-              <button
-                v-if="game.images && game.images.length > 1"
-                class="gd-lb__nav gd-lb__nav--prev"
-                @click="lightboxStep(-1)"
-                aria-label="Vorheriges Bild"
-              >
-                <span class="icon">chevron_left</span>
-              </button>
-
-              <div class="gd-lb__stage">
-                <Transition :name="lightbox.dir === 1 ? 'lb-next' : 'lb-prev'" mode="out-in">
-                  <img
-                    v-if="game.images"
-                    :key="lightbox.index"
-                    :src="game.images[lightbox.index].url"
-                    :alt="game.title"
-                    class="gd-lb__img"
-                  />
-                </Transition>
-              </div>
-
-              <button
-                v-if="game.images && game.images.length > 1"
-                class="gd-lb__nav gd-lb__nav--next"
-                @click="lightboxStep(1)"
-                aria-label="Nächstes Bild"
-              >
-                <span class="icon">chevron_right</span>
-              </button>
-
-              <div v-if="game.images && game.images.length > 1" class="gd-lb__dots">
-                <button
-                  v-for="(_, i) in game.images"
-                  :key="i"
-                  class="gd-lb__dot"
-                  :class="{ 'gd-lb__dot--active': i === lightbox.index }"
-                  @click="lightboxGoto(i)"
-                  :aria-label="`Bild ${i + 1}`"
-                />
-              </div>
-            </div>
-          </Transition>
-        </Teleport>
-
         <a
           v-if="game.instagram_url"
           :href="game.instagram_url"
@@ -299,9 +238,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Game } from '~/composables/useGames'
 import { Modal } from '@dodlhuat/basix/js/modal'
+import { Lightbox } from '@dodlhuat/basix/js/lightbox'
 
 const route = useRoute()
 const { fetchGame } = useGames()
@@ -315,39 +255,13 @@ const game = ref<Game | null>(null)
 const year = new Date().getFullYear()
 const reserving = ref(false)
 
-const lightbox = reactive({ open: false, index: 0, dir: 1 })
-
 function openLightbox(i: number) {
-  lightbox.index = i
-  lightbox.dir = 1
-  lightbox.open = true
-  document.body.style.overflow = 'hidden'
+  if (!game.value?.images?.length) return
+  new Lightbox({
+    images: game.value.images.map(img => ({ src: img.url, alt: game.value!.title })),
+    startIndex: i,
+  }).show()
 }
-
-function closeLightbox() {
-  lightbox.open = false
-  document.body.style.overflow = ''
-}
-
-function lightboxStep(dir: 1 | -1) {
-  const len = game.value?.images?.length ?? 1
-  lightbox.dir = dir
-  lightbox.index = (lightbox.index + dir + len) % len
-}
-
-function lightboxGoto(i: number) {
-  lightbox.dir = i > lightbox.index ? 1 : -1
-  lightbox.index = i
-}
-
-// Touch swipe support
-let touchStartX = 0
-function onTouchStart(e: TouchEvent) { touchStartX = e.touches[0].clientX }
-function onTouchEnd(e: TouchEvent) {
-  const dx = e.changedTouches[0].clientX - touchStartX
-  if (Math.abs(dx) > 50) lightboxStep(dx < 0 ? 1 : -1)
-}
-
 
 const loanDates = { start_date: '', due_date: '' }
 
@@ -488,13 +402,6 @@ const hasMeta = computed(() =>
 )
 
 onMounted(async () => {
-  window.addEventListener('keydown', (e) => {
-    if (!lightbox.open) return
-    if (e.key === 'Escape') closeLightbox()
-    if (e.key === 'ArrowRight') lightboxStep(1)
-    if (e.key === 'ArrowLeft') lightboxStep(-1)
-  })
-
   try {
     const data = await fetchGame(route.params.slug as string)
     game.value = data.data
@@ -1029,144 +936,6 @@ $bar-h:      72px;
     border-radius: 12px;
   }
 }
-
-// ── Lightbox ──────────────────────────────────────────────────────
-.gd-lb {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: rgba(6, 5, 3, 0.96);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &__backdrop {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    cursor: default;
-  }
-
-  &__close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 10;
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.8);
-    font-size: 1.4rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.18s, color 0.18s;
-
-    &:hover { background: rgba(255,255,255,0.16); color: #fff; }
-  }
-
-  &__stage {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4rem 1rem 4rem;
-    min-height: 0;
-    overflow: hidden;
-    position: relative;
-    z-index: 1;
-  }
-
-  &__img {
-    max-width: 100%;
-    max-height: 85vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    border-radius: 10px;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.7);
-    user-select: none;
-    -webkit-user-drag: none;
-  }
-
-  &__nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.08);
-    color: rgba(255,255,255,0.8);
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.18s, color 0.18s;
-
-    &:hover { background: rgba(255,255,255,0.16); color: #fff; }
-
-    &--prev { left: 0.75rem; }
-    &--next { right: 0.75rem; }
-
-    @media (min-width: 640px) {
-      &--prev { left: 1.5rem; }
-      &--next { right: 1.5rem; }
-    }
-  }
-
-  &__dots {
-    position: absolute;
-    bottom: 1.25rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-    z-index: 10;
-  }
-
-  &__dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(255,255,255,0.3);
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.18s, transform 0.18s;
-
-    &--active {
-      background: $amber;
-      transform: scale(1.4);
-    }
-  }
-}
-
-// Lightbox enter/leave transition
-.lb-enter-active { transition: opacity 0.22s ease; }
-.lb-leave-active { transition: opacity 0.18s ease; }
-.lb-enter-from, .lb-leave-to { opacity: 0; }
-
-// Image slide transitions
-.lb-next-enter-active,
-.lb-next-leave-active,
-.lb-prev-enter-active,
-.lb-prev-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.lb-next-enter-from { opacity: 0; transform: translateX(40px); }
-.lb-next-leave-to   { opacity: 0; transform: translateX(-40px); }
-.lb-prev-enter-from { opacity: 0; transform: translateX(-40px); }
-.lb-prev-leave-to   { opacity: 0; transform: translateX(40px); }
 
 // ── Instagram ─────────────────────────────────────────────────────
 .gd-insta {
