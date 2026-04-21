@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Copy;
 use App\Models\Extension;
 use App\Models\Loan;
 use App\Models\User;
@@ -27,6 +28,9 @@ class DashboardController extends Controller
             ],
             'extensions' => [
                 'pending' => Extension::where('status', 'PENDING')->count(),
+            ],
+            'copies' => [
+                'to_review' => Copy::where('condition', 'REVIEW')->count(),
             ],
         ]);
     }

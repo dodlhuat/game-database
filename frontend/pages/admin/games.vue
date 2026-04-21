@@ -139,7 +139,20 @@
                 </select>
               </div>
 
-              <div><UiInput v-model="form.language" :label="$t('admin.form.language')" /></div>
+              <div class="form-grid__full">
+                <label class="form-label">{{ $t('admin.form.language') }}</label>
+                <div class="tag-picker">
+                  <label
+                    v-for="lang in allLanguages"
+                    :key="lang.id"
+                    class="tag-chip"
+                    :class="{ 'tag-chip--selected': form.language_ids.includes(lang.id) }"
+                  >
+                    <input type="checkbox" :value="lang.id" v-model="form.language_ids" class="tag-chip__input" />
+                    {{ lang.name }}
+                  </label>
+                </div>
+              </div>
 
               <div class="form-grid__full">
                 <UiInput
@@ -147,6 +160,15 @@
                   :label="$t('admin.form.instagram')"
                   placeholder="https://www.instagram.com/p/…"
                   type="url"
+                />
+              </div>
+
+              <div>
+                <UiInput
+                  v-model="form.deposit_tokens"
+                  :label="$t('admin.form.deposit_tokens')"
+                  type="number"
+                  :min="0"
                 />
               </div>
 
@@ -315,8 +337,14 @@
                       </td>
                       <td>
                         <div class="action-row">
-                          <button class="action-btn" @click="openCopyEdit(copy)">{{ $t('admin.actions.edit') }}</button>
-                          <button class="action-btn action-btn--danger" @click="removeCopy(copy.id)">{{ $t('admin.actions.delete') }}</button>
+                          <template v-if="copy.condition === 'REVIEW'">
+                            <button class="action-btn action-btn--success" @click="approveCopy(copy.id)">{{ $t('admin.actions.approve_copy') }}</button>
+                            <button class="action-btn action-btn--danger" @click="openMarkDamaged(copy.id)">{{ $t('admin.actions.mark_damaged') }}</button>
+                          </template>
+                          <template v-else>
+                            <button class="action-btn" @click="openCopyEdit(copy)">{{ $t('admin.actions.edit') }}</button>
+                            <button class="action-btn action-btn--danger" @click="removeCopy(copy.id)">{{ $t('admin.actions.delete') }}</button>
+                          </template>
                         </div>
                       </td>
                     </tr>
@@ -348,8 +376,9 @@
             <div class="form-field">
               <label class="form-label">{{ $t('admin.form.condition') }}</label>
               <select v-model="copyForm.condition" class="form-select">
+                <option value="NEW">{{ $t('admin.form.condition_new') }}</option>
+                <option value="VERY_GOOD">{{ $t('admin.form.condition_very_good') }}</option>
                 <option value="GOOD">{{ $t('admin.form.condition_good') }}</option>
-                <option value="WORN">{{ $t('admin.form.condition_worn') }}</option>
                 <option value="DAMAGED">{{ $t('admin.form.condition_damaged') }}</option>
                 <option value="LOCKED">{{ $t('admin.form.condition_locked') }}</option>
               </select>
@@ -362,6 +391,29 @@
           <div class="dialog__actions">
             <UiButton :loading="copyForm.saving" @click="saveCopy">{{ $t('admin.form.save') }}</UiButton>
             <button class="action-btn" @click="copyForm.open = false">{{ $t('admin.form.cancel') }}</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ── Beschädigt-Markieren Modal ──────────────────────────── -->
+    <Transition name="modal">
+      <div v-if="damagedForm.open" class="modal-overlay modal-overlay--top" @click.self="damagedForm.open = false">
+        <div class="dialog">
+          <div class="dialog__header">
+            <h3 class="dialog__title">{{ $t('admin.games.mark_damaged_title') }}</h3>
+            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="damagedForm.open = false">
+              <span class="icon icon-close" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="dialog__body">
+            <p class="form-hint">{{ $t('admin.games.mark_damaged_hint') }}</p>
+            <UiInput v-model="damagedForm.notes" :label="$t('admin.form.notes')" />
+            <div v-if="damagedForm.error" class="form-error">{{ damagedForm.error }}</div>
+          </div>
+          <div class="dialog__actions">
+            <UiButton variant="danger" :loading="damagedForm.saving" @click="saveMarkDamaged">{{ $t('admin.actions.mark_damaged') }}</UiButton>
+            <button class="action-btn" @click="damagedForm.open = false">{{ $t('admin.form.cancel') }}</button>
           </div>
         </div>
       </div>
@@ -428,15 +480,15 @@ interface Game {
   category: { id: number; name: string } | null; copies_count: number; is_active: boolean
   min_players: number | null; max_players: number | null; min_age: number | null
   duration_min: number | null; duration_max: number | null; difficulty: string | null
-  language: string | null; year: number | null; tags: { id: number; name: string }[]
-  cover_image_url: string | null
+  languages: { id: number; name: string }[]; year: number | null; tags: { id: number; name: string }[]
+  deposit_tokens: number; cover_image_url: string | null
   images: { id: number; url: string }[]
 }
 
 interface GameImage { id: number; url: string }
 
 interface Copy {
-  id: number; condition: string; qr_code: string | null; notes: string | null; is_available: boolean
+  id: number; condition: string; borrow_count: number; qr_code: string | null; notes: string | null; is_available: boolean
 }
 
 const year = new Date().getFullYear()
@@ -466,6 +518,7 @@ const categories = computed(() => {
   return flat
 })
 const allTags = ref<{ id: number; name: string; slug: string }[]>([])
+const allLanguages = ref<{ id: number; name: string }[]>([])
 const newTagName = ref('')
 
 // ── Spiel-Formular ────────────────────────────────────────────────
@@ -475,8 +528,8 @@ const form = reactive({
   category_id: null as number | null,
   min_players: '', max_players: '', min_age: '',
   duration_min: '', duration_max: '',
-  difficulty: '', language: '', year: '', instagram_url: '',
-  is_active: true, tag_ids: [] as number[],
+  difficulty: '', year: '', instagram_url: '', deposit_tokens: '',
+  is_active: true, tag_ids: [] as number[], language_ids: [] as number[],
   coverFile: null as File | null,
   existingCoverUrl: null as string | null,
   existingImages: [] as GameImage[],
@@ -495,8 +548,17 @@ const copiesPanel = reactive({
 const copyForm = reactive({
   open: false,
   id: null as number | null,
-  condition: 'GOOD',
+  condition: 'NEW',
   qr_code: '',
+  notes: '',
+  saving: false,
+  error: '',
+})
+
+// ── Beschädigt-Markieren Dialog ───────────────────────────────────
+const damagedForm = reactive({
+  open: false,
+  copyId: null as number | null,
   notes: '',
   saving: false,
   error: '',
@@ -504,9 +566,11 @@ const copyForm = reactive({
 
 onMounted(async () => {
   await load()
-  const [catData, tagData] = await Promise.all([fetchAdminCategories(), fetchAdminTags()])
+  const { fetchLanguages } = useGames()
+  const [catData, tagData, langData] = await Promise.all([fetchAdminCategories(), fetchAdminTags(), fetchLanguages()])
   rawCategories.value = catData.data as CategoryItem[]
   allTags.value = tagData.data
+  allLanguages.value = langData as { id: number; name: string }[]
 })
 
 async function load() {
@@ -516,12 +580,12 @@ async function load() {
 }
 
 function openCreate() {
-  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', language: '', year: '', instagram_url: '', is_active: true, tag_ids: [], coverFile: null, existingCoverUrl: null, existingImages: [] })
+  Object.assign(form, { open: true, id: null, title: '', slug: '', description: '', short_description: '', category_id: null, min_players: '', max_players: '', min_age: '', duration_min: '', duration_max: '', difficulty: '', year: '', instagram_url: '', deposit_tokens: '', is_active: true, tag_ids: [], language_ids: [], coverFile: null, existingCoverUrl: null, existingImages: [] })
   formError.value = ''
 }
 
 async function openEdit(game: Game) {
-  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', language: game.language ?? '', year: game.year ?? '', instagram_url: game.instagram_url ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null, existingImages: [] })
+  Object.assign(form, { open: true, id: game.id, title: game.title, slug: game.slug, description: game.description ?? '', short_description: game.short_description ?? '', category_id: game.category?.id ?? null, min_players: game.min_players ?? '', max_players: game.max_players ?? '', min_age: game.min_age ?? '', duration_min: game.duration_min ?? '', duration_max: game.duration_max ?? '', difficulty: game.difficulty ?? '', year: game.year ?? '', instagram_url: game.instagram_url ?? '', deposit_tokens: game.deposit_tokens ?? '', is_active: game.is_active, tag_ids: game.tags?.map(t => t.id) ?? [], language_ids: game.languages?.map(l => l.id) ?? [], coverFile: null, existingCoverUrl: game.cover_image_url ?? null, existingImages: [] })
   formError.value = ''
   // Load game detail to get images
   try {
@@ -550,10 +614,11 @@ async function save() {
   saving.value = true; formError.value = ''
   try {
     const fd = new FormData()
-    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'min_players', 'max_players', 'min_age', 'duration_min', 'duration_max', 'difficulty', 'language', 'year', 'instagram_url'] as const
+    const fields = ['title', 'slug', 'description', 'short_description', 'category_id', 'min_players', 'max_players', 'min_age', 'duration_min', 'duration_max', 'difficulty', 'year', 'instagram_url', 'deposit_tokens'] as const
     fields.forEach((f) => { if (form[f] !== '' && form[f] !== null) fd.append(f, String(form[f])) })
     fd.append('is_active', form.is_active ? '1' : '0')
     form.tag_ids.forEach(id => fd.append('tag_ids[]', String(id)))
+    form.language_ids.forEach(id => fd.append('language_ids[]', String(id)))
     if (form.coverFile) fd.append('cover_image', form.coverFile)
     form.id ? await updateGame(form.id, fd) : await createGame(fd)
     await load(); closeForm()
@@ -581,7 +646,7 @@ async function openCopies(game: Game) {
 function closeCopies() { copiesPanel.open = false }
 
 function openCopyCreate() {
-  Object.assign(copyForm, { open: true, id: null, condition: 'GOOD', qr_code: '', notes: '', error: '' })
+  Object.assign(copyForm, { open: true, id: null, condition: 'NEW', qr_code: '', notes: '', error: '' })
 }
 
 function openCopyEdit(copy: Copy) {
@@ -612,6 +677,30 @@ async function removeCopy(id: number) {
   } catch (err: unknown) { alert((err as { message?: string }).message ?? t('common.error.generic')) }
 }
 
+async function approveCopy(id: number) {
+  try {
+    await useApi().post(`/admin/copies/${id}/approve`, {})
+    const data = await fetchCopies({ game_id: copiesPanel.gameId! })
+    copiesPanel.copies = data.data as Copy[]
+  } catch (err: unknown) { alert((err as { message?: string }).message ?? t('common.error.generic')) }
+}
+
+function openMarkDamaged(id: number) {
+  Object.assign(damagedForm, { open: true, copyId: id, notes: '', error: '' })
+}
+
+async function saveMarkDamaged() {
+  damagedForm.saving = true; damagedForm.error = ''
+  try {
+    await useApi().post(`/admin/copies/${damagedForm.copyId}/mark-damaged`, { notes: damagedForm.notes || undefined })
+    damagedForm.open = false
+    const data = await fetchCopies({ game_id: copiesPanel.gameId! })
+    copiesPanel.copies = data.data as Copy[]
+  } catch (err: unknown) {
+    damagedForm.error = (err as { message?: string }).message ?? t('common.error.save')
+  } finally { damagedForm.saving = false }
+}
+
 // ── Bilder ────────────────────────────────────────────────────────
 async function onImagesChange(e: Event) {
   if (!form.id) return
@@ -639,8 +728,21 @@ async function removeGameImage(image: GameImage) {
   }
 }
 
-function conditionLabel(c: string) { const m: Record<string, string> = { GOOD: 'common.badge.good', WORN: 'common.badge.worn', DAMAGED: 'common.badge.damaged', LOCKED: 'common.badge.locked' }; return m[c] ? t(m[c]) : c }
-function conditionClass(c: string) { const m: Record<string, string> = { GOOD: 'badge-success', WORN: 'badge-warning', DAMAGED: 'badge-error', LOCKED: '' }; return m[c] ?? '' }
+function conditionLabel(c: string) {
+  const m: Record<string, string> = {
+    NEW: 'common.badge.condition_new', VERY_GOOD: 'common.badge.condition_very_good',
+    GOOD: 'common.badge.condition_good', REVIEW: 'common.badge.condition_review',
+    DAMAGED: 'common.badge.condition_damaged', LOCKED: 'common.badge.condition_locked',
+  }
+  return m[c] ? t(m[c]) : c
+}
+function conditionClass(c: string) {
+  const m: Record<string, string> = {
+    NEW: 'badge-success', VERY_GOOD: 'badge-success', GOOD: 'badge-warning',
+    REVIEW: 'badge-info', DAMAGED: 'badge-error', LOCKED: '',
+  }
+  return m[c] ?? ''
+}
 
 // ── Import / Export ───────────────────────────────────────────────
 async function doImport(e: Event) {

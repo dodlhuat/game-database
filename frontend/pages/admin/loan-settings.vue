@@ -53,6 +53,35 @@
                   <input v-model.number="form.max_extensions" class="form-input" type="number" min="0" required />
                   <p class="form-hint">{{ $t('admin.loan_settings.max_extensions_hint') }}</p>
                 </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.loan_cost') }}</label>
+                  <input v-model.number="form.loan_cost" class="form-input" type="number" min="0" required />
+                  <p class="form-hint">{{ $t('admin.loan_settings.loan_cost_hint') }}</p>
+                </div>
+              </div>
+
+              <div class="settings-section-title">{{ $t('admin.loan_settings.condition_section') }}</div>
+              <div class="settings-grid">
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.condition_very_good_after') }}</label>
+                  <input v-model.number="form.condition_very_good_after" class="form-input" type="number" min="1" required />
+                  <p class="form-hint">{{ $t('admin.loan_settings.condition_very_good_after_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.condition_good_after') }}</label>
+                  <input v-model.number="form.condition_good_after" class="form-input" type="number" min="1" required />
+                  <p class="form-hint">{{ $t('admin.loan_settings.condition_good_after_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.deposit_pct_very_good') }}</label>
+                  <input v-model.number="form.deposit_pct_very_good" class="form-input" type="number" min="0" max="100" required />
+                  <p class="form-hint">{{ $t('admin.loan_settings.deposit_pct_very_good_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.deposit_pct_good') }}</label>
+                  <input v-model.number="form.deposit_pct_good" class="form-input" type="number" min="0" max="100" required />
+                  <p class="form-hint">{{ $t('admin.loan_settings.deposit_pct_good_hint') }}</p>
+                </div>
               </div>
               <p v-if="saveError" class="form-error">{{ saveError }}</p>
               <div class="settings-actions">
@@ -112,6 +141,11 @@ const form = ref<LoanSettings>({
   grace_days: 3,
   loan_duration_weeks: 4,
   max_extensions: 2,
+  loan_cost: 2,
+  condition_very_good_after: 5,
+  condition_good_after: 50,
+  deposit_pct_very_good: 90,
+  deposit_pct_good: 80,
 })
 
 const preview = computed(() => {
@@ -146,6 +180,11 @@ onMounted(async () => {
       grace_days: data.grace_days,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
+      loan_cost: data.loan_cost ?? 2,
+      condition_very_good_after: data.condition_very_good_after ?? 5,
+      condition_good_after: data.condition_good_after ?? 50,
+      deposit_pct_very_good: data.deposit_pct_very_good ?? 90,
+      deposit_pct_good: data.deposit_pct_good ?? 80,
     }
   } catch (e: unknown) {
     const err = e as { data?: { message?: string }; message?: string }
@@ -167,6 +206,11 @@ async function save() {
       grace_days: data.grace_days,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
+      loan_cost: data.loan_cost ?? 2,
+      condition_very_good_after: data.condition_very_good_after ?? 5,
+      condition_good_after: data.condition_good_after ?? 50,
+      deposit_pct_very_good: data.deposit_pct_very_good ?? 90,
+      deposit_pct_good: data.deposit_pct_good ?? 80,
     }
     saved.value = true
     setTimeout(() => { saved.value = false }, 3000)
@@ -204,6 +248,7 @@ $hero-text: #EEE8DF; $hero-muted: rgba(238,232,223,0.72); $hero-muted-50: rgba(2
 .form-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--secondary-text); }
 .form-input { padding: 0.55rem 0.75rem; background: var(--background); border: 1px solid var(--divider); border-radius: 8px; font-size: 0.9rem; font-family: inherit; color: var(--primary-text); outline: none; transition: border-color 0.2s; &:focus { border-color: $amber; } }
 .form-hint { font-size: 0.78rem; color: var(--secondary-text); margin: 0; padding-bottom: 0; }
+.settings-section-title { font-size: 0.85rem; font-weight: 700; color: var(--secondary-text); text-transform: uppercase; letter-spacing: 0.08em; padding: 1rem 0 0.25rem; }
 .form-error { font-size: 0.85rem; color: #f87171; margin: 0; padding-bottom: 0; }
 
 .save-success { font-size: 0.85rem; font-weight: 600; color: #4ade80; }

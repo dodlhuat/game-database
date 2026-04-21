@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'terms_accepted_at',
         'terms_version',
         'tokens',
+        'tokens_blocked',
         'membership_expires_at',
         'renewal_reminder_sent_at',
         'email_verified_at',
@@ -46,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password'                 => 'hashed',
             'newsletter_opt_in'        => 'boolean',
             'tokens'                   => 'integer',
+            'tokens_blocked'           => 'integer',
         ];
     }
 
@@ -74,6 +76,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasEnoughTokens(int $cost): bool
     {
         return $this->tokens >= $cost;
+    }
+
+    public function freeTokens(): int
+    {
+        return max(0, $this->tokens - $this->tokens_blocked);
+    }
+
+    public function hasEnoughFreeTokens(int $cost): bool
+    {
+        return $this->freeTokens() >= $cost;
     }
 
     // Relations
@@ -105,5 +117,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function damageReports(): HasMany
     {
         return $this->hasMany(DamageReport::class);
+    }
+
+    public function tokenTransactions(): HasMany
+    {
+        return $this->hasMany(TokenTransaction::class);
     }
 }

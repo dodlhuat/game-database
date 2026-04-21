@@ -30,6 +30,7 @@ Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'ind
 Route::get('/packages', [\App\Http\Controllers\PackageController::class, 'index']);
 Route::get('/packages/{package:slug}', [\App\Http\Controllers\PackageController::class, 'show']);
 Route::get('/terms', [\App\Http\Controllers\TermsController::class, 'show']);
+Route::get('/languages', [\App\Http\Controllers\LanguageController::class, 'index']);
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -80,6 +81,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/package-loans', [\App\Http\Controllers\PackageLoanController::class, 'index']);
     Route::post('/package-loans', [\App\Http\Controllers\PackageLoanController::class, 'store']);
     Route::post('/package-loans/{packageLoan}/return', [\App\Http\Controllers\PackageLoanController::class, 'return']);
+
+    // Token-Transaktionen
+    Route::get('/token-transactions', [\App\Http\Controllers\TokenTransactionController::class, 'index']);
 });
 
 // ----------------------------------------------------------------
@@ -108,10 +112,13 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Kopienverwaltung
     Route::apiResource('copies', \App\Http\Controllers\Admin\CopyController::class);
+    Route::post('/copies/{copy}/approve', [\App\Http\Controllers\Admin\CopyController::class, 'approve']);
+    Route::post('/copies/{copy}/mark-damaged', [\App\Http\Controllers\Admin\CopyController::class, 'markDamaged']);
 
     // Ausleihverwaltung
     Route::get('/loans', [\App\Http\Controllers\Admin\LoanController::class, 'index']);
     Route::patch('/loans/{loan}/overdue', [\App\Http\Controllers\Admin\LoanController::class, 'markOverdue']);
+    Route::post('/loans/{loan}/return', [\App\Http\Controllers\Admin\LoanController::class, 'return']);
 
     // Verlängerungsanträge
     Route::get('/extensions', [\App\Http\Controllers\Admin\ExtensionController::class, 'index']);
@@ -145,4 +152,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Paket-Ausleihen
     Route::get('/package-loans', [\App\Http\Controllers\Admin\PackageLoanController::class, 'index']);
+
+    // Token-Transaktionen (Admin: pro User)
+    Route::get('/users/{user}/token-transactions', [\App\Http\Controllers\Admin\TokenTransactionController::class, 'index']);
 });

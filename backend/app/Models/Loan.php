@@ -17,6 +17,7 @@ class Loan extends Model
         'due_date',
         'returned_at',
         'return_condition',
+        'deposit_tokens',
         'status',
     ];
 

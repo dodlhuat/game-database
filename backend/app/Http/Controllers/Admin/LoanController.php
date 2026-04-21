@@ -8,6 +8,7 @@ use App\Models\Loan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class LoanController extends Controller
 {
@@ -32,6 +33,27 @@ class LoanController extends Controller
         }
 
         $loan->update(['status' => 'OVERDUE']);
+
+        return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
+    }
+
+    public function return(Request $request, Loan $loan): JsonResponse|LoanResource
+    {
+        $request->validate([
+            'return_condition' => ['required', Rule::in(['GOOD', 'WORN', 'DAMAGED'])],
+        ]);
+
+        if (!in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
+            return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
+        }
+
+        $loan->update([
+            'status'           => 'RETURNED',
+            'returned_at'      => now(),
+            'return_condition' => $request->return_condition,
+        ]);
+
+        $loan->copy->update(['condition' => 'REVIEW']);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
     }

@@ -21,6 +21,7 @@ class LoanResource extends JsonResource
             'due_date'         => $this->due_date,
             'returned_at'      => $this->returned_at,
             'return_condition' => $this->return_condition,
+            'deposit_tokens'   => $this->deposit_tokens,
             'status'           => $this->status,
             'is_overdue'       => $this->due_date < now() && in_array($this->status, ['ACTIVE', 'EXTENDED']),
             'extensions'       => ExtensionResource::collection($this->whenLoaded('extensions')),

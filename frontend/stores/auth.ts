@@ -9,6 +9,7 @@ interface User {
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
   newsletter_opt_in: boolean
   tokens: number
+  tokens_blocked: number
   membership_expires_at: string | null
   is_member: boolean
   email_verified_at: string | null

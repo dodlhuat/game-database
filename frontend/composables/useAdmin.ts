@@ -2,6 +2,7 @@ export interface AdminStats {
   users: { total: number; pending: number; active: number }
   loans: { active: number; overdue: number; returned_today: number }
   extensions: { pending: number }
+  copies: { to_review: number }
 }
 
 export function useAdmin() {

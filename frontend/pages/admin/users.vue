@@ -67,6 +67,7 @@
                   <td>
                     <div class="action-row">
                       <button class="action-btn" @click="openEdit(user)">{{ $t('admin.actions.edit') }}</button>
+                      <button class="action-btn" @click="openTxPanel(user)">{{ $t('admin.actions.token_history') }}</button>
                       <template v-if="user.status === 'PENDING'">
                         <button class="action-btn action-btn--success" @click="approve(user.id)">{{ $t('admin.users.approve') }}</button>
                         <button class="action-btn action-btn--danger" @click="reject(user.id)">{{ $t('admin.users.reject') }}</button>
@@ -174,6 +175,40 @@
       </div>
     </div>
 
+    <!-- ── Token-Transaktionen Panel ──────────────────────────── -->
+    <div v-if="txPanel.open" class="modal-overlay" @click.self="txPanel.open = false">
+      <div class="modal-box modal-box--wide">
+        <div class="modal-box__header">
+          <h3>{{ $t('admin.users.token_history_title', { name: txPanel.userName }) }}</h3>
+          <button class="modal-box__close" @click="txPanel.open = false" :aria-label="$t('admin.form.close')">
+            <span class="icon icon-close" aria-hidden="true" />
+          </button>
+        </div>
+        <div v-if="txPanel.loading" class="modal-box__body"><div class="spinner" /></div>
+        <div v-else-if="!txPanel.transactions.length" class="modal-box__body">
+          <p class="text-muted">{{ $t('pages.tokens.history_empty') }}</p>
+        </div>
+        <div v-else class="modal-box__body">
+          <table class="dash-table">
+            <tbody>
+              <tr v-for="tx in txPanel.transactions" :key="tx.id">
+                <td class="text-muted" style="white-space:nowrap">{{ formatTxDate(tx.created_at) }}</td>
+                <td>{{ tx.description ?? tx.type }}</td>
+                <td style="text-align:right;font-weight:700" :style="tx.amount >= 0 ? 'color:#4ade80' : 'color:#f87171'">
+                  {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-if="txPanel.lastPage > 1" class="pagination-row">
+            <button class="action-btn" :disabled="txPanel.page === 1" @click="loadTxPanel(txPanel.userId!, txPanel.page - 1)">←</button>
+            <span>{{ txPanel.page }} / {{ txPanel.lastPage }}</span>
+            <button class="action-btn" :disabled="txPanel.page === txPanel.lastPage" @click="loadTxPanel(txPanel.userId!, txPanel.page + 1)">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand"><span class="l-footer__hex" aria-hidden="true">⬡</span><span class="l-footer__name">AUA</span></div>
@@ -188,7 +223,8 @@ import { ref, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-interface User { id: number; name: string; email: string; role: string; status: string; created_at: string; tokens?: number; membership_expires_at?: string | null }
+interface User { id: number; name: string; email: string; role: string; status: string; created_at: string; tokens?: number; tokens_blocked?: number; membership_expires_at?: string | null }
+interface TxItem { id: number; type: string; amount: number; description: string | null; created_at: string }
 
 const api = useApi()
 const { t } = useI18n()
@@ -258,6 +294,35 @@ async function submitEdit() {
   } finally {
     editLoading.value = false
   }
+}
+
+// ── Token-Transaktionen ──────────────────────────────────────────
+const txPanel = ref<{
+  open: boolean; loading: boolean; userId: number | null; userName: string
+  transactions: TxItem[]; page: number; lastPage: number
+}>({ open: false, loading: false, userId: null, userName: '', transactions: [], page: 1, lastPage: 1 })
+
+async function openTxPanel(user: User) {
+  txPanel.value = { open: true, loading: true, userId: user.id, userName: user.name, transactions: [], page: 1, lastPage: 1 }
+  await loadTxPanel(user.id, 1)
+}
+
+async function loadTxPanel(userId: number, page: number) {
+  txPanel.value.loading = true
+  txPanel.value.page = page
+  try {
+    const data = await api.get<{ data: TxItem[]; meta: { last_page: number } }>(
+      `/admin/users/${userId}/token-transactions?page=${page}`
+    )
+    txPanel.value.transactions = data.data
+    txPanel.value.lastPage = data.meta.last_page
+  } finally {
+    txPanel.value.loading = false
+  }
+}
+
+function formatTxDate(iso: string) {
+  return new Date(iso).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 // ── Status actions ──────────────────────────────────────────────

@@ -21,9 +21,9 @@ class Game extends Model
         'duration_min',
         'duration_max',
         'difficulty',
-        'language',
         'year',
         'instagram_url',
+        'deposit_tokens',
         'cover_image_url',
         'is_active',
     ];
@@ -49,6 +49,11 @@ class Game extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'game_tags');
+    }
+
+    public function languages(): BelongsToMany
+    {
+        return $this->belongsToMany(Language::class);
     }
 
     public function copies(): HasMany

@@ -17,10 +17,10 @@ class GameController extends Controller
 
         $games = Game::query()
             ->where('is_active', true)
-            ->with(['category', 'tags'])
+            ->with(['category', 'tags', 'languages'])
             ->withCount('copies')
             ->withCount(['copies as available_copies_count' => function ($q) {
-                $q->where('condition', '!=', 'LOCKED')
+                $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])
                   ->whereDoesntHave('activeLoans');
             }])
             ->withCount('reviews')
@@ -54,7 +54,9 @@ class GameController extends Controller
                 if ($dur === 'medium') $q->whereNotNull('duration_min')->whereBetween('duration_min', [31, 90]);
                 if ($dur === 'long')   $q->whereNotNull('duration_min')->where('duration_min', '>', 90);
             })
-            ->when($request->language, fn($q, $lang) => $q->where('language', 'like', "%{$lang}%"))
+            ->when($request->language, fn($q, $langId) =>
+                $q->whereHas('languages', fn($q) => $q->where('languages.id', (int) $langId))
+            )
             ->when($request->min_age, fn($q, $age) =>
                 $q->where(function ($q) use ($age) {
                     $q->whereNull('min_age')->orWhere('min_age', '<=', (int) $age);
@@ -62,7 +64,7 @@ class GameController extends Controller
             )
             ->when($request->available, fn($q) =>
                 $q->whereHas('copies', fn($q) =>
-                    $q->where('condition', '!=', 'LOCKED')->whereDoesntHave('activeLoans')
+                    $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])->whereDoesntHave('activeLoans')
                 )
             )
             ->orderBy($request->get('sort', 'title'))
@@ -90,7 +92,7 @@ class GameController extends Controller
 
         $userId = auth('sanctum')->id();
 
-        $game->load(['category', 'tags', 'reviews.user', 'images']);
+        $game->load(['category', 'tags', 'languages', 'reviews.user', 'images']);
         $game->loadCount('copies');
         $game->loadCount(['copies as available_copies_count' => function ($q) {
             $q->where('condition', '!=', 'LOCKED')

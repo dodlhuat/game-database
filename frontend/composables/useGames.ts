@@ -12,9 +12,10 @@ export interface Game {
   duration_min: number | null
   duration_max: number | null
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT' | null
-  language: string | null
+  languages: { id: number; name: string }[]
   year: number | null
   instagram_url: string | null
+  deposit_tokens: number
   cover_image_url: string | null
   available_copies_count: number
   copies_count: number
@@ -33,7 +34,7 @@ export interface GameFilters {
   difficulty?: string
   players?: number | string
   duration?: 'short' | 'medium' | 'long' | ''
-  language?: string
+  language?: number | string
   min_age?: number | string
   available?: boolean
   sort?: string
@@ -98,5 +99,9 @@ export function useGames() {
     return api.get<{ data: Package }>(`/packages/${slug}`)
   }
 
-  return { fetchGames, fetchGame, fetchCategories, fetchPackages, fetchPackage }
+  function fetchLanguages() {
+    return api.get<{ id: number; name: string }[]>('/languages')
+  }
+
+  return { fetchGames, fetchGame, fetchCategories, fetchLanguages, fetchPackages, fetchPackage }
 }

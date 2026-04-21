@@ -111,9 +111,7 @@
         <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.language }" style="--i:5">
           <select v-model="filters.language" class="chip-select" @change="resetPage">
             <option value="">{{ $t('pages.games.filter_language') }}</option>
-            <option value="DE">{{ $t('pages.games.filter_language_de') }}</option>
-            <option value="EN">{{ $t('pages.games.filter_language_en') }}</option>
-            <option value="DE/EN">{{ $t('pages.games.filter_language_de_en') }}</option>
+            <option v-for="lang in allLanguages" :key="lang.id" :value="lang.id">{{ lang.name }}</option>
           </select>
           <span class="chip-label">{{ languageLabel }}</span>
           <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
@@ -231,7 +229,7 @@ import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from
 import type { Game } from '~/composables/useGames'
 import { GroupPicker } from '@dodlhuat/basix/js/group-picker'
 
-const { fetchGames, fetchCategories } = useGames()
+const { fetchGames, fetchCategories, fetchLanguages } = useGames()
 const { t } = useI18n()
 
 type CategoryItem = { id: number; slug: string; name: string; games_count: number; children: CategoryItem[] }
@@ -240,6 +238,7 @@ const loading = ref(false)
 const games = ref<Game[]>([])
 const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
 const categories = ref<CategoryItem[]>([])
+const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
 const year = new Date().getFullYear()
 
@@ -386,12 +385,11 @@ const durationMap: Record<string, () => string> = {
 }
 const durationLabel = computed(() => filters.duration ? durationMap[filters.duration]?.() ?? filters.duration : t('pages.games.filter_duration'))
 const ageLabel = computed(() => filters.min_age ? t('pages.games.age_label', { n: filters.min_age }) : t('pages.games.filter_age'))
-const langMap: Record<string, () => string> = {
-  DE: () => t('pages.games.filter_language_de'),
-  EN: () => t('pages.games.filter_language_en'),
-  'DE/EN': () => t('pages.games.filter_language_de_en'),
-}
-const languageLabel = computed(() => filters.language ? langMap[filters.language]?.() ?? filters.language : t('pages.games.filter_language'))
+const languageLabel = computed(() => {
+  if (!filters.language) return t('pages.games.filter_language')
+  const lang = allLanguages.value.find(l => l.id === Number(filters.language))
+  return lang?.name ?? t('pages.games.filter_language')
+})
 const sortLabel = computed(() => filters.sort === 'created_at' ? t('pages.games.sort_newest') : t('pages.games.sort_az'))
 
 // ── Filter state ───────────────────────────────────────────────────
@@ -451,8 +449,9 @@ watch(() => filters.search, () => {
 onMounted(async () => {
   document.addEventListener('pointerdown', onOutsideClick, { capture: true })
   document.addEventListener('keydown', onEscapeKey)
-  const [, cats] = await Promise.all([load(), fetchCategories()])
+  const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
   categories.value = cats.data
+  allLanguages.value = langs
 })
 
 onUnmounted(() => {

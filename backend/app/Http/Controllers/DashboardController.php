@@ -40,6 +40,7 @@ class DashboardController extends Controller
                 'active_loans_count' => $activeLoans->count(),
                 'overdue_count'      => $activeLoans->where('status', 'OVERDUE')->count(),
                 'reservations_count' => $reservations->count(),
+                'tokens_blocked'     => $user->tokens_blocked,
             ],
         ]);
     }

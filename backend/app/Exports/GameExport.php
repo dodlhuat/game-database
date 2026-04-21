@@ -14,7 +14,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
 {
     public function collection(): Collection
     {
-        return Game::with(['category', 'tags'])->orderBy('title')->get();
+        return Game::with(['category', 'tags', 'languages'])->orderBy('title')->get();
     }
 
     public function headings(): array
@@ -54,7 +54,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $game->duration_min,
             $game->duration_max,
             $game->difficulty,
-            $game->language,
+            $game->languages->pluck('name')->join(', '),
             $game->year,
             $game->is_active ? 1 : 0,
             $game->tags->pluck('name')->join(', '),

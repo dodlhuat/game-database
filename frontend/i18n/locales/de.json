@@ -64,7 +64,13 @@
       "good": "Gut",
       "worn": "Abgenutzt",
       "damaged": "Beschädigt",
-      "locked": "Gesperrt"
+      "locked": "Gesperrt",
+      "condition_new": "Neuwertig",
+      "condition_very_good": "Sehr gut",
+      "condition_good": "Gut",
+      "condition_review": "Wird geprüft",
+      "condition_damaged": "Beschädigt",
+      "condition_locked": "Gesperrt"
     },
     "loading": "Wird vorgemerkt…",
     "error": {
@@ -254,7 +260,8 @@
         "processing": "Wird bearbeitet…",
         "success": "Ausleihe erfolgreich! Du findest sie in deinem Dashboard.",
         "error": "Ausleihe fehlgeschlagen. Bitte versuche es erneut.",
-        "no_copy": "Keine verfügbare Kopie gefunden."
+        "no_copy": "Keine verfügbare Kopie gefunden.",
+        "deposit_label": "Kaution ({n} Token wird gesperrt)"
       },
       "reserve_success": "Du wurdest auf die Warteliste gesetzt.",
       "reserve_failed": "Vormerken fehlgeschlagen.",
@@ -310,9 +317,21 @@
       "not_member": "Nur Mitglieder können Token kaufen.",
       "popular": "Beliebt",
       "costs_title": "Token-Kosten",
+      "balance_total": "Gesamt",
+      "balance_blocked": "Blockiert (Kaution)",
+      "balance_free": "Verfügbar",
       "cost_game": "2 Token: Spiel ausleihen",
+      "cost_deposit": "Kaution: Wird bei Ausleihe gesperrt und nach Rückgabe freigegeben",
       "cost_package": "3 Token: Paket ausleihen",
-      "cost_extension": "1 Token: Ausleihe verlängern"
+      "cost_extension": "1 Token: Ausleihe verlängern",
+      "history_title": "Transaktionsverlauf",
+      "history_empty": "Noch keine Transaktionen vorhanden.",
+      "tx_borrow": "Ausleihe",
+      "tx_deposit_block": "Kaution gesperrt",
+      "tx_deposit_release": "Kaution freigegeben",
+      "tx_deposit_forfeit": "Kaution einbehalten",
+      "tx_purchase": "Kauf",
+      "tx_admin": "Admin-Anpassung"
     }
   },
   "admin": {
@@ -338,7 +357,8 @@
       "loans_active": "Aktive Ausleihen",
       "loans_overdue": "überfällig",
       "extensions_pending": "Offene Verlängerungsanträge",
-      "check_now": "Jetzt prüfen →"
+      "check_now": "Jetzt prüfen →",
+      "copies_to_review": "Kopien zu prüfen"
     },
     "breadcrumb": {
       "games": "Spiele",
@@ -383,7 +403,10 @@
       "activate": "Aktivieren",
       "deactivate": "Deaktivieren",
       "rename": "Umbenennen",
-      "copies_manage": "Kopien"
+      "copies_manage": "Kopien",
+      "approve_copy": "Freigeben",
+      "mark_damaged": "Als beschädigt markieren",
+      "token_history": "Token-Verlauf"
     },
     "empty": {
       "games": "Noch keine Spiele vorhanden.",
@@ -435,10 +458,13 @@
       "image_formats": "PNG, JPG, WEBP — max. 5 MB",
       "active_game": "Spiel aktiv schalten",
       "condition": "Zustand",
+      "condition_new": "Neuwertig",
+      "condition_very_good": "Sehr gut",
       "condition_good": "Gut",
       "condition_worn": "Abgenutzt",
       "condition_damaged": "Beschädigt",
       "condition_locked": "Gesperrt",
+      "deposit_tokens": "Kaution (Token)",
       "qr_code": "QR-Code (optional)",
       "notes": "Notizen",
       "subject": "Betreff",
@@ -452,7 +478,9 @@
       "add_copy": "Kopie hinzufügen",
       "edit_copy": "Kopie bearbeiten",
       "add_game": "Spiel hinzufügen",
-      "edit_game": "Spiel bearbeiten"
+      "edit_game": "Spiel bearbeiten",
+      "mark_damaged_title": "Kopie als beschädigt markieren",
+      "mark_damaged_hint": "Die Kaution wird einbehalten. Bitte Begründung angeben."
     },
     "categories": {
       "title": "Kategorien verwalten",
@@ -500,7 +528,8 @@
       "role_label_user": "Registriert",
       "role_label_member": "Mitglied",
       "create_error": "Fehler beim Anlegen.",
-      "edit_error": "Fehler beim Speichern."
+      "edit_error": "Fehler beim Speichern.",
+      "token_history_title": "Token-Transaktionsverlauf"
     },
     "loans": {
       "title": "Ausleihen",
@@ -560,7 +589,18 @@
       "save_btn": "Einstellungen speichern",
       "saved": "Gespeichert",
       "preview_return": "Rückgabe {date}",
-      "load_error": "Einstellungen konnten nicht geladen werden."
+      "load_error": "Einstellungen konnten nicht geladen werden.",
+      "loan_cost": "Ausleihkosten (Token)",
+      "loan_cost_hint": "Anzahl Token, die pro Einzelspiel-Ausleihe abgezogen werden.",
+      "condition_section": "Zustandsschwellen & Kaution",
+      "condition_very_good_after": "Sehr gut ab (Ausleihen)",
+      "condition_very_good_after_hint": "Ab wie vielen Ausleihen gilt eine Kopie als 'Sehr gut'.",
+      "condition_good_after": "Gut ab (Ausleihen)",
+      "condition_good_after_hint": "Ab wie vielen Ausleihen gilt eine Kopie als 'Gut'.",
+      "deposit_pct_very_good": "Kaution 'Sehr gut' (%)",
+      "deposit_pct_very_good_hint": "Prozentsatz der Spielkaution für Kopien im Zustand 'Sehr gut'.",
+      "deposit_pct_good": "Kaution 'Gut' (%)",
+      "deposit_pct_good_hint": "Prozentsatz der Spielkaution für Kopien im Zustand 'Gut'."
     },
     "emails": {
       "title": "E-Mail-Vorlagen",

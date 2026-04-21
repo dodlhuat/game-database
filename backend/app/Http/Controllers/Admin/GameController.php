@@ -18,7 +18,7 @@ class GameController extends Controller
 
     public function index(Request $request): AnonymousResourceCollection
     {
-        $games = Game::with(['category', 'tags'])
+        $games = Game::with(['category', 'tags', 'languages'])
             ->withCount('copies')
             ->when($request->search, fn($q, $s) =>
                 $q->where('title', 'like', "%{$s}%")
@@ -34,7 +34,7 @@ class GameController extends Controller
 
     public function store(GameRequest $request): GameResource
     {
-        $data = $request->except(['cover_image', 'tag_ids']);
+        $data = $request->except(['cover_image', 'tag_ids', 'language_ids']);
         $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
 
         if ($request->hasFile('cover_image')) {
@@ -47,21 +47,23 @@ class GameController extends Controller
             $game->tags()->sync($request->tag_ids);
         }
 
-        $game->load(['category', 'tags']);
+        $game->languages()->sync($request->language_ids ?? []);
+
+        $game->load(['category', 'tags', 'languages']);
 
         return new GameResource($game);
     }
 
     public function show(Game $game): GameResource
     {
-        $game->load(['category', 'tags', 'copies', 'images']);
+        $game->load(['category', 'tags', 'languages', 'copies', 'images']);
 
         return new GameResource($game);
     }
 
     public function update(GameRequest $request, Game $game): GameResource
     {
-        $data = $request->except(['cover_image', 'tag_ids']);
+        $data = $request->except(['cover_image', 'tag_ids', 'language_ids']);
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image_url'] = $this->imageUpload->uploadGameCover(
@@ -76,7 +78,11 @@ class GameController extends Controller
             $game->tags()->sync($request->tag_ids ?? []);
         }
 
-        $game->load(['category', 'tags']);
+        if ($request->has('language_ids')) {
+            $game->languages()->sync($request->language_ids ?? []);
+        }
+
+        $game->load(['category', 'tags', 'languages']);
 
         return new GameResource($game);
     }

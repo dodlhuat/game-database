@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\Category;
 use App\Models\Game;
+use App\Models\Language;
 use App\Models\Tag;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -54,7 +55,6 @@ class GameImport implements ToModel, WithHeadingRow
             'duration_min'      => isset($row['duration_min']) && $row['duration_min'] !== '' ? (int) $row['duration_min'] : null,
             'duration_max'      => isset($row['duration_max']) && $row['duration_max'] !== '' ? (int) $row['duration_max'] : null,
             'difficulty'        => isset($row['difficulty']) && in_array(strtoupper($row['difficulty']), ['EASY', 'MEDIUM', 'HARD', 'EXPERT']) ? strtoupper($row['difficulty']) : null,
-            'language'          => isset($row['language']) && $row['language'] !== '' ? trim($row['language']) : null,
             'year'              => isset($row['year']) && $row['year'] !== '' ? (int) $row['year'] : null,
             'is_active'         => isset($row['is_active']) && $row['is_active'] !== '' ? (bool)(int) $row['is_active'] : true,
         ], fn($v) => $v !== null);
@@ -66,6 +66,17 @@ class GameImport implements ToModel, WithHeadingRow
             $existing->update($data);
             $game = $existing;
             $this->updatedCount++;
+        }
+
+        // Sprachen synchronisieren (kommagetrennt)
+        if (!empty($row['language'])) {
+            $langNames = array_filter(array_map('trim', explode(',', $row['language'])));
+            $langIds = [];
+            foreach ($langNames as $langName) {
+                $lang = Language::firstOrCreate(['name' => $langName]);
+                $langIds[] = $lang->id;
+            }
+            $game->languages()->sync($langIds);
         }
 
         // Tags synchronisieren (kommagetrennt)

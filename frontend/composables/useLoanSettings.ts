@@ -4,6 +4,11 @@ export interface LoanSettings {
   grace_days: number
   loan_duration_weeks: number
   max_extensions: number
+  loan_cost: number
+  condition_very_good_after: number
+  condition_good_after: number
+  deposit_pct_very_good: number
+  deposit_pct_good: number
 }
 
 export function useLoanSettings() {

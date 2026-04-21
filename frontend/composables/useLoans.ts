@@ -3,6 +3,7 @@ export interface Loan {
   copy: {
     id: number
     condition: string
+    borrow_count: number
     qr_code: string | null
   }
   game: {
@@ -10,11 +11,13 @@ export interface Loan {
     title: string
     slug: string
     cover_image_url: string | null
+    deposit_tokens: number
   }
   start_date: string
   due_date: string
   returned_at: string | null
   return_condition: string | null
+  deposit_tokens: number
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED'
   is_overdue: boolean
   extensions: {
@@ -23,6 +26,18 @@ export interface Loan {
     status: 'PENDING' | 'APPROVED' | 'REJECTED'
     admin_note: string | null
   }[]
+}
+
+export interface TokenTransaction {
+  id: number
+  loan_id: number | null
+  type: 'BORROW' | 'DEPOSIT_BLOCK' | 'DEPOSIT_RELEASE' | 'DEPOSIT_FORFEIT' | 'PURCHASE' | 'ADMIN_ADJUSTMENT'
+  amount: number
+  description: string | null
+  created_at: string
+  loan?: {
+    copy?: { game?: { title: string; slug: string } }
+  }
 }
 
 export interface Reservation {
@@ -40,6 +55,7 @@ export interface DashboardData {
     active_loans_count: number
     overdue_count: number
     reservations_count: number
+    tokens_blocked: number
   }
 }
 
@@ -74,6 +90,11 @@ export function useLoans() {
   const reportDamage = (loanId: number, description: string, photoUrl?: string) =>
     api.post('/damage-reports', { loan_id: loanId, description, photo_url: photoUrl || undefined })
 
+  const fetchTokenTransactions = (page = 1) =>
+    api.get<{ data: TokenTransaction[]; meta: { current_page: number; last_page: number; total: number } }>(
+      `/token-transactions?page=${page}`
+    )
+
   return {
     fetchDashboard,
     fetchLoans,
@@ -85,5 +106,6 @@ export function useLoans() {
     addReservation,
     removeReservation,
     reportDamage,
+    fetchTokenTransactions,
   }
 }
