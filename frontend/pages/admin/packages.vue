@@ -100,18 +100,20 @@
 
               <div>
                 <label class="form-label">{{ $t('pages.package.type') }}</label>
-                <select v-model="form.type" class="form-select">
-                  <option value="CURATED">{{ $t('pages.package.type_curated') }}</option>
-                  <option value="CATEGORY">{{ $t('pages.package.type_category') }}</option>
-                </select>
+                <UiVirtualDropdown
+                  v-model="form.type"
+                  class="form-select"
+                  :options="[{ label: $t('pages.package.type_curated'), value: 'CURATED' }, { label: $t('pages.package.type_category'), value: 'CATEGORY' }]"
+                />
               </div>
 
               <div>
                 <label class="form-label">{{ $t('admin.table.category') }}</label>
-                <select v-model="form.category_id" class="form-select">
-                  <option :value="null">{{ $t('admin.form.no_category') }}</option>
-                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                </select>
+                <UiVirtualDropdown
+                  v-model="form.category_id"
+                  class="form-select"
+                  :options="[{ label: $t('admin.form.no_category'), value: null }, ...categories.map(c => ({ label: c.name, value: c.id }))]"
+                />
               </div>
 
               <!-- Spielauswahl -->

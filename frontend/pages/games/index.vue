@@ -56,65 +56,77 @@
           <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
         </div>
 
-        <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.difficulty }" style="--i:1">
-          <select v-model="filters.difficulty" class="chip-select" @change="resetPage">
-            <option value="">{{ $t('pages.games.filter_difficulty') }}</option>
-            <option value="EASY">{{ $t('pages.games.filter_difficulty_easy') }}</option>
-            <option value="MEDIUM">{{ $t('pages.games.filter_difficulty_medium') }}</option>
-            <option value="HARD">{{ $t('pages.games.filter_difficulty_hard') }}</option>
-            <option value="EXPERT">{{ $t('pages.games.filter_difficulty_expert') }}</option>
-          </select>
-          <span class="chip-label">{{ difficultyLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.difficulty }" style="--i:1">
+          <UiVirtualDropdown
+            v-model="filters.difficulty"
+            :options="[
+              { label: $t('pages.games.filter_difficulty'), value: '' },
+              { label: $t('pages.games.filter_difficulty_easy'), value: 'EASY' },
+              { label: $t('pages.games.filter_difficulty_medium'), value: 'MEDIUM' },
+              { label: $t('pages.games.filter_difficulty_hard'), value: 'HARD' },
+              { label: $t('pages.games.filter_difficulty_expert'), value: 'EXPERT' },
+            ]"
+            :placeholder="$t('pages.games.filter_difficulty')"
+            @change="resetPage"
+          />
         </div>
 
-        <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.players }" style="--i:2">
-          <select v-model="filters.players" class="chip-select" @change="resetPage">
-            <option value="">{{ $t('pages.games.filter_players') }}</option>
-            <option value="1">{{ $t('pages.games.filter_players_count', { n: 1 }) }}</option>
-            <option value="2">{{ $t('pages.games.filter_players_count', { n: 2 }) }}</option>
-            <option value="3">{{ $t('pages.games.filter_players_count', { n: 3 }) }}</option>
-            <option value="4">{{ $t('pages.games.filter_players_count', { n: 4 }) }}</option>
-            <option value="5">{{ $t('pages.games.filter_players_count', { n: 5 }) }}</option>
-            <option value="6">{{ $t('pages.games.filter_players_count_plus', { n: 6 }) }}</option>
-          </select>
-          <span class="chip-label">{{ playersLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.players }" style="--i:2">
+          <UiVirtualDropdown
+            v-model="filters.players"
+            :options="[
+              { label: $t('pages.games.filter_players'), value: '' },
+              { label: $t('pages.games.filter_players_count', { n: 1 }), value: '1' },
+              { label: $t('pages.games.filter_players_count', { n: 2 }), value: '2' },
+              { label: $t('pages.games.filter_players_count', { n: 3 }), value: '3' },
+              { label: $t('pages.games.filter_players_count', { n: 4 }), value: '4' },
+              { label: $t('pages.games.filter_players_count', { n: 5 }), value: '5' },
+              { label: $t('pages.games.filter_players_count_plus', { n: 6 }), value: '6' },
+            ]"
+            :placeholder="$t('pages.games.filter_players')"
+            @change="resetPage"
+          />
         </div>
 
-        <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.duration }" style="--i:3">
-          <select v-model="filters.duration" class="chip-select" @change="resetPage">
-            <option value="">{{ $t('pages.games.filter_duration') }}</option>
-            <option value="short">{{ $t('pages.games.filter_duration_short') }}</option>
-            <option value="medium">{{ $t('pages.games.filter_duration_medium') }}</option>
-            <option value="long">{{ $t('pages.games.filter_duration_long') }}</option>
-          </select>
-          <span class="chip-label">{{ durationLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.duration }" style="--i:3">
+          <UiVirtualDropdown
+            v-model="filters.duration"
+            :options="[
+              { label: $t('pages.games.filter_duration'), value: '' },
+              { label: $t('pages.games.filter_duration_short'), value: 'short' },
+              { label: $t('pages.games.filter_duration_medium'), value: 'medium' },
+              { label: $t('pages.games.filter_duration_long'), value: 'long' },
+            ]"
+            :placeholder="$t('pages.games.filter_duration')"
+            @change="resetPage"
+          />
         </div>
 
-        <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.min_age }" style="--i:4">
-          <select v-model="filters.min_age" class="chip-select" @change="resetPage">
-            <option value="">{{ $t('pages.games.filter_age') }}</option>
-            <option value="6">{{ $t('pages.games.filter_age_from', { n: 6 }) }}</option>
-            <option value="8">{{ $t('pages.games.filter_age_from', { n: 8 }) }}</option>
-            <option value="10">{{ $t('pages.games.filter_age_from', { n: 10 }) }}</option>
-            <option value="12">{{ $t('pages.games.filter_age_from', { n: 12 }) }}</option>
-            <option value="14">{{ $t('pages.games.filter_age_from', { n: 14 }) }}</option>
-            <option value="16">{{ $t('pages.games.filter_age_from', { n: 16 }) }}</option>
-            <option value="18">{{ $t('pages.games.filter_age_from', { n: 18 }) }}</option>
-          </select>
-          <span class="chip-label">{{ ageLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.min_age }" style="--i:4">
+          <UiVirtualDropdown
+            v-model="filters.min_age"
+            :options="[
+              { label: $t('pages.games.filter_age'), value: '' },
+              { label: $t('pages.games.filter_age_from', { n: 6 }), value: '6' },
+              { label: $t('pages.games.filter_age_from', { n: 8 }), value: '8' },
+              { label: $t('pages.games.filter_age_from', { n: 10 }), value: '10' },
+              { label: $t('pages.games.filter_age_from', { n: 12 }), value: '12' },
+              { label: $t('pages.games.filter_age_from', { n: 14 }), value: '14' },
+              { label: $t('pages.games.filter_age_from', { n: 16 }), value: '16' },
+              { label: $t('pages.games.filter_age_from', { n: 18 }), value: '18' },
+            ]"
+            :placeholder="$t('pages.games.filter_age')"
+            @change="resetPage"
+          />
         </div>
 
-        <div class="chip-wrap" :class="{ 'chip-wrap--active': !!filters.language }" style="--i:5">
-          <select v-model="filters.language" class="chip-select" @change="resetPage">
-            <option value="">{{ $t('pages.games.filter_language') }}</option>
-            <option v-for="lang in allLanguages" :key="lang.id" :value="lang.id">{{ lang.name }}</option>
-          </select>
-          <span class="chip-label">{{ languageLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.language }" style="--i:5">
+          <UiVirtualDropdown
+            v-model="filters.language"
+            :options="[{ label: $t('pages.games.filter_language'), value: '' }, ...allLanguages.map(l => ({ label: l.name, value: l.id }))]"
+            :placeholder="$t('pages.games.filter_language')"
+            @change="resetPage"
+          />
         </div>
 
         <button
@@ -127,13 +139,13 @@
           {{ $t('pages.games.filter_available') }}
         </button>
 
-        <div class="chip-wrap chip-wrap--sort" style="--i:7">
-          <select v-model="filters.sort" class="chip-select" @change="resetPage">
-            <option value="title">{{ $t('pages.games.sort_az') }}</option>
-            <option value="created_at">{{ $t('pages.games.sort_newest') }}</option>
-          </select>
-          <span class="chip-label">{{ sortLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
+        <div class="chip-wrap chip-wrap--sort chip-wrap--vd" style="--i:7">
+          <UiVirtualDropdown
+            v-model="filters.sort"
+            :options="[{ label: $t('pages.games.sort_az'), value: 'title' }, { label: $t('pages.games.sort_newest'), value: 'created_at' }]"
+            :placeholder="$t('pages.games.sort_az')"
+            @change="resetPage"
+          />
         </div>
 
       </div>
@@ -677,16 +689,6 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   }
 }
 
-.chip-select {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
 .chip-label {
   font-size: 0.8125rem;
   font-weight: 500;
@@ -705,6 +707,54 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
 
   .chip-wrap--active & { color: $amber; }
   .chip-wrap--open & { transform: rotate(180deg); }
+}
+
+// ─── VirtualDropdown chip override ───────────────────────────────
+.chip-wrap--vd {
+  padding: 0;
+
+  :deep(.custom-dropdown) {
+    display: flex;
+    align-items: stretch;
+    width: auto;
+  }
+
+  :deep(.dropdown-trigger) {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    min-height: unset;
+    border-radius: 999px;
+    padding: 0.375rem 0.625rem 0.375rem 0.75rem;
+    gap: 0.25rem;
+
+    &:hover { border: none; box-shadow: none; background: transparent; }
+    &:focus { border: none; box-shadow: none; outline: none; }
+  }
+
+  :deep(.custom-dropdown.open) .dropdown-trigger,
+  :deep(.custom-dropdown.open .dropdown-trigger) {
+    border: none;
+    box-shadow: none;
+  }
+
+  :deep(.trigger-text) {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--secondary-text);
+    opacity: 1;
+  }
+
+  :deep(.trigger-arrow) {
+    font-size: 0.875rem;
+    color: var(--secondary-text);
+    margin-left: 0;
+  }
+
+  &.chip-wrap--active {
+    :deep(.trigger-text) { color: $amber; font-weight: 600; }
+    :deep(.trigger-arrow) { color: $amber; }
+  }
 }
 
 // ─── Availability toggle chip ─────────────────────────────────────

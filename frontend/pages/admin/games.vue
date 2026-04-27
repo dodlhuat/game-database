@@ -114,10 +114,11 @@
 
               <div class="form-grid__full">
                 <label class="form-label">{{ $t('admin.table.category') }}</label>
-                <select v-model="form.category_id" class="form-select">
-                  <option :value="null">{{ $t('admin.form.no_category') }}</option>
-                  <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                </select>
+                <UiVirtualDropdown
+                  v-model="form.category_id"
+                  class="form-select"
+                  :options="[{ label: $t('admin.form.no_category'), value: null }, ...categories.map(c => ({ label: c.name, value: c.id }))]"
+                />
               </div>
 
               <div><UiInput v-model="form.min_players" :label="$t('admin.form.min_players')" type="number" /></div>
@@ -130,13 +131,17 @@
 
               <div>
                 <label class="form-label">{{ $t('admin.form.difficulty') }}</label>
-                <select v-model="form.difficulty" class="form-select">
-                  <option value="">{{ $t('admin.form.no_category') }}</option>
-                  <option value="EASY">{{ $t('admin.form.difficulty_easy') }}</option>
-                  <option value="MEDIUM">{{ $t('admin.form.difficulty_medium') }}</option>
-                  <option value="HARD">{{ $t('admin.form.difficulty_hard') }}</option>
-                  <option value="EXPERT">{{ $t('admin.form.difficulty_expert') }}</option>
-                </select>
+                <UiVirtualDropdown
+                  v-model="form.difficulty"
+                  class="form-select"
+                  :options="[
+                    { label: $t('admin.form.no_category'), value: '' },
+                    { label: $t('admin.form.difficulty_easy'), value: 'EASY' },
+                    { label: $t('admin.form.difficulty_medium'), value: 'MEDIUM' },
+                    { label: $t('admin.form.difficulty_hard'), value: 'HARD' },
+                    { label: $t('admin.form.difficulty_expert'), value: 'EXPERT' },
+                  ]"
+                />
               </div>
 
               <div class="form-grid__full">
@@ -375,13 +380,17 @@
           <div class="dialog__body">
             <div class="form-field">
               <label class="form-label">{{ $t('admin.form.condition') }}</label>
-              <select v-model="copyForm.condition" class="form-select">
-                <option value="NEW">{{ $t('admin.form.condition_new') }}</option>
-                <option value="VERY_GOOD">{{ $t('admin.form.condition_very_good') }}</option>
-                <option value="GOOD">{{ $t('admin.form.condition_good') }}</option>
-                <option value="DAMAGED">{{ $t('admin.form.condition_damaged') }}</option>
-                <option value="LOCKED">{{ $t('admin.form.condition_locked') }}</option>
-              </select>
+              <UiVirtualDropdown
+                v-model="copyForm.condition"
+                class="form-select"
+                :options="[
+                  { label: $t('admin.form.condition_new'), value: 'NEW' },
+                  { label: $t('admin.form.condition_very_good'), value: 'VERY_GOOD' },
+                  { label: $t('admin.form.condition_good'), value: 'GOOD' },
+                  { label: $t('admin.form.condition_damaged'), value: 'DAMAGED' },
+                  { label: $t('admin.form.condition_locked'), value: 'LOCKED' },
+                ]"
+              />
             </div>
             <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
             <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />

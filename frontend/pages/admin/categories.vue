@@ -145,14 +145,11 @@
 
               <div class="form-grid__full">
                 <label class="form-label">{{ $t('admin.form.parent_category') }}</label>
-                <select v-model="form.parent_id" class="form-select">
-                  <option :value="null">{{ $t('admin.form.no_parent') }}</option>
-                  <option
-                    v-for="cat in parentOptions"
-                    :key="cat.id"
-                    :value="cat.id"
-                  >{{ cat.name }}</option>
-                </select>
+                <UiVirtualDropdown
+                  v-model="form.parent_id"
+                  class="form-select"
+                  :options="[{ label: $t('admin.form.no_parent'), value: null }, ...parentOptions.map(c => ({ label: c.name, value: c.id }))]"
+                />
               </div>
 
               <div class="form-grid__full">

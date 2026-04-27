@@ -17,10 +17,12 @@
 
         <!-- Filters -->
         <div class="filter-row">
-          <select v-model="filterTemplate" class="form-input filter-row__select" @change="load">
-            <option value="">{{ $t('admin.email_logs.all_templates') }}</option>
-            <option v-for="key in templateKeys" :key="key" :value="key">{{ key }}</option>
-          </select>
+          <UiVirtualDropdown
+            v-model="filterTemplate"
+            class="form-input filter-row__select"
+            :options="[{ label: $t('admin.email_logs.all_templates'), value: '' }, ...templateKeys.map(k => ({ label: k, value: k }))]"
+            @change="load"
+          />
           <input v-model="filterDateFrom" type="date" class="form-input filter-row__date" @change="load" />
           <input v-model="filterDateTo" type="date" class="form-input filter-row__date" @change="load" />
         </div>

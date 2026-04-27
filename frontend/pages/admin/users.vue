@@ -110,18 +110,19 @@
           </div>
           <div class="form-field">
             <label class="form-label">{{ $t('admin.table.role') }}</label>
-            <select v-model="createForm.role" class="form-input">
-              <option value="USER">{{ $t('admin.users.role_user') }}</option>
-              <option value="MEMBER">{{ $t('admin.users.role_member') }}</option>
-              <option value="ADMIN">{{ $t('admin.users.role_admin') }}</option>
-            </select>
+            <UiVirtualDropdown
+              v-model="createForm.role"
+              class="form-input"
+              :options="[{ label: $t('admin.users.role_user'), value: 'USER' }, { label: $t('admin.users.role_member'), value: 'MEMBER' }, { label: $t('admin.users.role_admin'), value: 'ADMIN' }]"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ $t('admin.table.status') }}</label>
-            <select v-model="createForm.status" class="form-input">
-              <option value="PENDING">PENDING</option>
-              <option value="ACTIVE">ACTIVE</option>
-            </select>
+            <UiVirtualDropdown
+              v-model="createForm.status"
+              class="form-input"
+              :options="[{ label: 'PENDING', value: 'PENDING' }, { label: 'ACTIVE', value: 'ACTIVE' }]"
+            />
           </div>
           <p v-if="createError" class="form-error">{{ createError }}</p>
           <div class="modal-box__footer">
@@ -154,11 +155,11 @@
           </div>
           <div class="form-field">
             <label class="form-label">{{ $t('admin.table.role') }}</label>
-            <select v-model="editForm.role" class="form-input">
-              <option value="USER">{{ $t('admin.users.role_user') }}</option>
-              <option value="MEMBER">{{ $t('admin.users.role_member') }}</option>
-              <option value="ADMIN">{{ $t('admin.users.role_admin') }}</option>
-            </select>
+            <UiVirtualDropdown
+              v-model="editForm.role"
+              class="form-input"
+              :options="[{ label: $t('admin.users.role_user'), value: 'USER' }, { label: $t('admin.users.role_member'), value: 'MEMBER' }, { label: $t('admin.users.role_admin'), value: 'ADMIN' }]"
+            />
           </div>
           <div class="form-field">
             <label class="form-label">{{ $t('auth.password') }} <span class="text-muted">{{ $t('admin.users.password_edit_hint') }}</span></label>

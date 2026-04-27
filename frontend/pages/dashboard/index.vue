@@ -248,11 +248,15 @@
           </div>
           <p class="dialog__game">{{ returnLoan.game?.title }}</p>
           <label class="dialog__label">{{ $t('dashboard.return_condition') }}</label>
-          <select v-model="returnCondition" class="dialog__select">
-            <option value="GOOD">{{ $t('common.badge.good') }}</option>
-            <option value="WORN">{{ $t('common.badge.worn') }}</option>
-            <option value="DAMAGED">{{ $t('common.badge.damaged') }}</option>
-          </select>
+          <UiVirtualDropdown
+            v-model="returnCondition"
+            class="dialog__select"
+            :options="[
+              { label: $t('common.badge.good'), value: 'GOOD' },
+              { label: $t('common.badge.worn'), value: 'WORN' },
+              { label: $t('common.badge.damaged'), value: 'DAMAGED' },
+            ]"
+          />
           <div class="dialog__actions">
             <UiButton :loading="returning" @click="submitReturn">{{ $t('btn.confirm') }}</UiButton>
             <button class="action-btn" @click="returnLoan = null">{{ $t('btn.cancel') }}</button>
