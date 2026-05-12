@@ -246,7 +246,7 @@ const { t } = useI18n()
 
 type CategoryItem = { id: number; slug: string; name: string; games_count: number; children: CategoryItem[] }
 
-const loading = ref(false)
+const loading = ref(true)
 const games = ref<Game[]>([])
 const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
 const categories = ref<CategoryItem[]>([])
@@ -816,7 +816,7 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   flex: 1;
   padding: 2.5rem 1.5rem 4rem;
 
-  &__inner { max-width: 1100px; margin: 0 auto; }
+  &__inner { max-width: 1100px; margin: 0 auto; min-height: 400px; }
 
   &__state {
     display: flex;

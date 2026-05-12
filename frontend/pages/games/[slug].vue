@@ -269,7 +269,7 @@ useHead({
   link: [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,700&display=swap' },
+    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap' },
   ]
 })
 
@@ -461,6 +461,7 @@ $bar-h:      72px;
 // ── Loading / 404 ─────────────────────────────────────────────────
 .gd-state {
   flex: 1;
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -685,12 +686,11 @@ $bar-h:      72px;
 
 // ── Game title ────────────────────────────────────────────────────
 .gd-title {
-  font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
-  font-size: clamp(2.1rem, 7.5vw, 3.6rem);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: clamp(1.75rem, 6.5vw, 3.2rem);
   font-weight: 700;
-  font-style: italic;
-  letter-spacing: -0.04em;
-  line-height: 1.04;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
   color: $cream;
   margin: 0;
   text-shadow: 0 2px 30px rgba(0,0,0,0.55);
