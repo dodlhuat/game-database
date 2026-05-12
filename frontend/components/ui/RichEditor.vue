@@ -103,6 +103,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 let observer: MutationObserver | null = null
 let ignoreNext = false
+let editor: InstanceType<typeof Editor> | null = null
 
 onMounted(() => {
   const editableEl = document.getElementById('editable') as HTMLElement | null
@@ -112,7 +113,7 @@ onMounted(() => {
     editableEl.innerHTML = props.modelValue
   }
 
-  new Editor()
+  editor = new Editor()
 
   observer = new MutationObserver(() => {
     if (ignoreNext) { ignoreNext = false; return }
@@ -130,5 +131,7 @@ watch(() => props.modelValue, (val) => {
 
 onUnmounted(() => {
   observer?.disconnect()
+  editor?.destroy()
+  editor = null
 })
 </script>

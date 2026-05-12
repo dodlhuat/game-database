@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import type { VirtualDropdown as VirtualDropdownClass } from '@dodlhuat/basix/js/virtual-dropdown'
 
 interface Option {
   label: string
@@ -25,10 +26,8 @@ const emit = defineEmits<{
 const NULL_SENTINEL = '__null__'
 
 const containerRef = ref<HTMLElement | null>(null)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let dropdown: any = null
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let VDClass: any = null
+let dropdown: InstanceType<typeof VirtualDropdownClass> | null = null
+let VDClass: typeof VirtualDropdownClass | null = null
 let initId = 0
 
 function encode(val: string | number | null): string | number {

@@ -378,31 +378,6 @@ const categoryLabel = computed(() => {
   }
   return t('pages.games.filter_category')
 })
-const difficultyMap: Record<string, () => string> = {
-  EASY: () => t('pages.games.filter_difficulty_easy'),
-  MEDIUM: () => t('pages.games.filter_difficulty_medium'),
-  HARD: () => t('pages.games.filter_difficulty_hard'),
-  EXPERT: () => t('pages.games.filter_difficulty_expert'),
-}
-const difficultyLabel = computed(() => filters.difficulty ? difficultyMap[filters.difficulty]?.() ?? filters.difficulty : t('pages.games.filter_difficulty'))
-const playersLabel = computed(() => filters.players
-  ? (filters.players === '6'
-    ? t('pages.games.players_label_plus', { n: filters.players })
-    : t('pages.games.players_label', { n: filters.players }))
-  : t('pages.games.filter_players'))
-const durationMap: Record<string, () => string> = {
-  short: () => t('pages.games.filter_duration_short'),
-  medium: () => t('pages.games.filter_duration_medium'),
-  long: () => t('pages.games.filter_duration_long'),
-}
-const durationLabel = computed(() => filters.duration ? durationMap[filters.duration]?.() ?? filters.duration : t('pages.games.filter_duration'))
-const ageLabel = computed(() => filters.min_age ? t('pages.games.age_label', { n: filters.min_age }) : t('pages.games.filter_age'))
-const languageLabel = computed(() => {
-  if (!filters.language) return t('pages.games.filter_language')
-  const lang = allLanguages.value.find(l => l.id === Number(filters.language))
-  return lang?.name ?? t('pages.games.filter_language')
-})
-const sortLabel = computed(() => filters.sort === 'created_at' ? t('pages.games.sort_newest') : t('pages.games.sort_az'))
 
 // ── Filter state ───────────────────────────────────────────────────
 const hasActiveFilters = computed(() =>

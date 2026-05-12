@@ -122,9 +122,7 @@ function onScroll() {
 }
 
 function closeFlyout() {
-  document.getElementById('flyoutMenu')?.classList.remove('is-open')
-  document.getElementById('flyoutOverlay')?.classList.remove('is-visible')
-  document.body.style.overflow = ''
+  flyoutInstance?.close()
 }
 
 async function handleLogout() {
@@ -133,7 +131,6 @@ async function handleLogout() {
 }
 
 onMounted(() => {
-  auth.loadFromStorage()
   initTheme()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)

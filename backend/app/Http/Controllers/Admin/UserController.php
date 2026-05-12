@@ -90,6 +90,8 @@ class UserController extends Controller
 
     public function reject(Request $request, User $user): JsonResponse
     {
+        $request->validate(['reason' => ['nullable', 'string', 'max:500']]);
+
         $user->update(['status' => 'REJECTED']);
         $user->notify(new UserRejected($request->reason));
 

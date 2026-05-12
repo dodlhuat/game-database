@@ -51,9 +51,15 @@ services:
       SESSION_DRIVER: cookie
       SESSION_DOMAIN: localhost
       SANCTUM_STATEFUL_DOMAINS: localhost:3000,127.0.0.1:3000
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      MAIL_ENCRYPTION: "null"
     depends_on:
       mariadb:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   # ----------------------------------------------------------------
   # Nginx (Reverse Proxy für Laravel)
@@ -71,28 +77,16 @@ services:
       - backend
 
   # ----------------------------------------------------------------
-  # Nuxt.js Frontend (Dev Server mit Hot Reload)
+  # Mailpit (Mail-Catching für lokale Entwicklung)
   # ----------------------------------------------------------------
-  frontend:
-    image: node:22-alpine
-    container_name: game-db-frontend
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: game-db-mailpit
     restart: unless-stopped
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules   # node_modules nicht überschreiben
     ports:
-      - "3000:3000"
-    environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:8000/api
-      NUXT_HOST: 0.0.0.0
-      NUXT_PORT: 3000
-      # Polling statt native file-watching (nötig für Windows bind-mounts)
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
-    command: sh -c "npm install && npm run dev"
-    depends_on:
-      - nginx
+      - "8026:8025"   # Web UI (8025 already used by another project)
+      - "1025:1025"   # SMTP
+
 
 volumes:
   mariadb_data:

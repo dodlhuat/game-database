@@ -15,6 +15,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
+import type { DatePicker as DatePickerClass } from '@dodlhuat/basix/js/datepicker'
 
 interface Props {
   modelValue?: string   // ISO date string YYYY-MM-DD
@@ -32,7 +33,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const inputRef = ref<HTMLInputElement | null>(null)
 const inputId = computed(() => props.id || `dp-${Math.random().toString(36).slice(2, 9)}`)
 
-let picker: unknown = null
+let picker: InstanceType<typeof DatePickerClass> | null = null
 
 onMounted(async () => {
   if (!inputRef.value) return
@@ -77,6 +78,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  picker?.destroy()
   picker = null
 })
 

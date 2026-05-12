@@ -4,6 +4,10 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
+  experimental: {
+    viteEnvironmentApi: true,
+  },
+
   // Nuxt 4 setzt srcDir standardmäßig auf 'app/' — wir nutzen die Projektroot-Struktur
   srcDir: '.',
   dir: {
@@ -45,12 +49,6 @@ export default defineNuxtConfig({
               ? source
               : `@use 'sass:color';\n@use '@/assets/styles/variables' as *;\n${source}`,
         },
-      },
-    },
-    server: {
-      watch: {
-        usePolling: true,
-        interval: 300,
       },
     },
   },
