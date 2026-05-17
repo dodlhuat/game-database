@@ -1,5 +1,5 @@
 <template>
-  <div class="account-page" data-theme="dark">
+  <div class="account-page">
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />
@@ -196,14 +196,19 @@ async function changePassword() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C;
-$nav-height: 3.5rem;
+$hero-bg:    #0F0E0C;
+$nav-height: 64px;
 $amber-glow: rgba(212, 146, 30, 0.15);
-$hero-text: #EEE8DF;
+$hero-text:  #EEE8DF;
 $hero-muted: rgba(238, 232, 223, 0.72);
-$surface: rgba(255, 255, 255, 0.04);
-$border: rgba(238, 232, 223, 0.1);
 
+// ─── Page shell ───────────────────────────────────────────────────
+.account-page {
+  min-height: 100vh;
+  background: var(--background);
+}
+
+// ─── Hero (always dark) ───────────────────────────────────────────
 .page-hero {
   position: relative;
   background: $hero-bg;
@@ -211,24 +216,27 @@ $border: rgba(238, 232, 223, 0.1);
   overflow: hidden;
 
   &__backdrop { position: absolute; inset: 0; pointer-events: none; }
-  &__glow { position: absolute; width: 400px; height: 400px; top: -120px; left: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
-  &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 30% 50%, black 20%, transparent 100%); }
+  &__glow {
+    position: absolute; width: 400px; height: 400px;
+    top: -120px; left: -60px; border-radius: 50%;
+    filter: blur(90px); background: $amber-glow;
+  }
+  &__dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(ellipse 80% 100% at 30% 50%, black 20%, transparent 100%);
+  }
 
   &__body {
-    position: relative;
-    z-index: 1;
-    max-width: 1100px;
-    margin: 0 auto;
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto;
   }
 
   &__back {
-    display: inline-block;
-    font-size: 0.8rem;
-    color: $hero-muted;
-    text-decoration: none;
-    margin-bottom: 0.75rem;
-    transition: color 0.15s;
-
+    display: inline-block; font-size: 0.8rem;
+    color: $hero-muted; text-decoration: none;
+    margin-bottom: 0.75rem; transition: color 0.15s;
     &:hover { color: $hero-text; }
   }
 
@@ -236,8 +244,8 @@ $border: rgba(238, 232, 223, 0.1);
   &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
 }
 
+// ─── Content (theme-aware) ────────────────────────────────────────
 .account-content {
-  background: $hero-bg;
   min-height: calc(100vh - 10rem);
   padding: 2.5rem 1.5rem 4rem;
 
@@ -251,15 +259,15 @@ $border: rgba(238, 232, 223, 0.1);
 }
 
 .account-section {
-  background: $surface;
-  border: 1px solid $border;
+  background: var(--secondary-background);
+  border: 1px solid var(--divider);
   border-radius: 16px;
   padding: 1.75rem 2rem;
 
   &__title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: $hero-text;
+    color: var(--primary-text);
     margin-bottom: 1.25rem;
     letter-spacing: -0.02em;
   }
