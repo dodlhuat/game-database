@@ -1,7 +1,5 @@
 <template>
   <div class="gd">
-    <AppNav />
-
     <div v-if="loading" class="gd-state">
       <div class="gd-spin" />
     </div>

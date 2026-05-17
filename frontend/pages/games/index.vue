@@ -1,8 +1,5 @@
 <template>
   <div class="games-page">
-
-    <AppNav />
-
     <!-- ── Page Header ─────────────────────────────────────────── -->
     <section class="page-hero" data-theme="dark">
       <div class="page-hero__backdrop" aria-hidden="true">

@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 
-definePageMeta({ middleware: [] })
+definePageMeta({ layout: 'auth', middleware: [] })
 
 const { login } = useAuth()
 const { t } = useI18n()

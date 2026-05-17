@@ -20,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
 import { ref, onMounted } from 'vue'
 
 const api = useApi()

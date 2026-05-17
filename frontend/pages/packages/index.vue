@@ -1,7 +1,5 @@
 <template>
   <div class="packages-page">
-    <AppNav />
-
     <!-- ── Page Header ─────────────────────────────────────────── -->
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">

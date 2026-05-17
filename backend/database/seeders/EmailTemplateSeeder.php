@@ -11,6 +11,13 @@ class EmailTemplateSeeder extends Seeder
     {
         $templates = [
             [
+                'key'         => 'email_verification',
+                'subject'     => 'Bitte bestätige deine E-Mail-Adresse',
+                'greeting'    => 'Hallo {name},',
+                'body'        => '<p>Danke für deine Registrierung! Bitte klicke auf den Button, um deine E-Mail-Adresse zu bestätigen.</p>',
+                'action_text' => 'E-Mail-Adresse bestätigen',
+            ],
+            [
                 'key'         => 'user_approved',
                 'subject'     => 'Dein Konto wurde freigeschaltet!',
                 'greeting'    => 'Willkommen, {name}!',

@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 
-definePageMeta({ middleware: [] })
+definePageMeta({ layout: 'auth', middleware: [] })
 
 const api = useApi()
 const route = useRoute()

@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: [] })
+definePageMeta({ layout: 'auth', middleware: [] })
 const route = useRoute()
 </script>
 

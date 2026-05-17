@@ -1,8 +1,5 @@
 <template>
   <div class="dashboard-page">
-
-    <AppNav />
-
     <!-- ── Page Hero ────────────────────────────────────────────── -->
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">

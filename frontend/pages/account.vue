@@ -1,7 +1,5 @@
 <template>
   <div class="account-page" data-theme="dark">
-    <AppNav />
-
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />

@@ -1,8 +1,5 @@
 <template>
   <div class="landing">
-
-    <AppNav />
-
     <!-- ── Hero ───────────────────────────────────────────────── -->
     <section class="hero">
       <div class="hero__backdrop" aria-hidden="true">

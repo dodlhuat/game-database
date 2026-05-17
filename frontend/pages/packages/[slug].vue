@@ -1,7 +1,5 @@
 <template>
   <div class="package-detail">
-    <AppNav />
-
     <div v-if="loading" class="detail-state">
       <div class="spinner" />
     </div>

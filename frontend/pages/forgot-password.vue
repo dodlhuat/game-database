@@ -48,7 +48,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-definePageMeta({ middleware: [] })
+definePageMeta({ layout: 'auth', middleware: [] })
 
 const api = useApi()
 const email = ref('')

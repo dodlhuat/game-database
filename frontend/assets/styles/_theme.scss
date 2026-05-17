@@ -26,6 +26,9 @@
   --accent-color-muted:   rgba(247, 150, 61, 0.10);
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
   --success-muted:        rgba(92, 198, 137, 0.10);
+
+  // Push-menu sidebar background matches the app's dark chrome
+  --primary-dark:         #0F0E0C;
 }
 
 // ─── Icon font + font-size override ──────────────────────────────

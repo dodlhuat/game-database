@@ -1,7 +1,5 @@
 <template>
   <div class="admin-page">
-    <AppNav />
-
     <!-- ── Hero ───────────────────────────────────────────────────── -->
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
