@@ -52,6 +52,41 @@ class EmailTemplateSeeder extends Seeder
                 'body'        => '<p>Das Spiel <strong>{game}</strong> ist jetzt wieder verfügbar.</p><p>Bitte leihe es aus, bevor jemand anderes zugreift.</p>',
                 'action_text' => 'Jetzt ausleihen',
             ],
+            [
+                'key'         => 'welcome_member',
+                'subject'     => 'Willkommen bei AUA Spieleausleihe!',
+                'greeting'    => 'Willkommen, {name}!',
+                'body'        => '<p>Deine Mitgliedschaft ist jetzt aktiv. Du kannst ab sofort Spiele ausleihen und alle Funktionen der Plattform nutzen.</p><p>Viel Spaß beim Entdecken unserer Spielesammlung!</p>',
+                'action_text' => 'Jetzt Spiele entdecken',
+            ],
+            [
+                'key'         => 'password_reset',
+                'subject'     => 'Passwort zurücksetzen',
+                'greeting'    => 'Hallo {name},',
+                'body'        => '<p>Du hast eine Anfrage zum Zurücksetzen deines Passworts gestellt. Klicke auf den Button, um ein neues Passwort festzulegen.</p><p>Der Link ist 60 Minuten gültig. Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>',
+                'action_text' => 'Passwort zurücksetzen',
+            ],
+            [
+                'key'         => 'deposit_forfeited',
+                'subject'     => 'Deine Kaution wurde einbehalten – {game}',
+                'greeting'    => 'Hallo {name},',
+                'body'        => '<p>Leider musste deine Kaution von <strong>{deposit} Token(s)</strong> für das Spiel <strong>{game}</strong> einbehalten werden.</p><p>{notes}</p>',
+                'action_text' => 'Zum Dashboard',
+            ],
+            [
+                'key'         => 'deposit_released',
+                'subject'     => 'Deine Kaution wurde freigegeben – {game}',
+                'greeting'    => 'Hallo {name},',
+                'body'        => '<p>Deine Kaution von <strong>{deposit} Token(s)</strong> für das Spiel <strong>{game}</strong> wurde freigegeben und deinem Konto gutgeschrieben.</p>',
+                'action_text' => 'Zum Dashboard',
+            ],
+            [
+                'key'         => 'membership_renewal_reminder',
+                'subject'     => 'Deine Mitgliedschaft läuft bald ab',
+                'greeting'    => 'Hallo {name},',
+                'body'        => '<p>Deine Mitgliedschaft läuft am <strong>{expiry_date}</strong> ab. Bitte erneuere sie rechtzeitig, damit du weiterhin Spiele ausleihen kannst.</p>',
+                'action_text' => 'Mitgliedschaft erneuern',
+            ],
         ];
 
         foreach ($templates as $template) {

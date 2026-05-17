@@ -18,11 +18,8 @@
       </div>
 
       <button class="l-nav__theme-btn" :aria-label="$t('nav.theme_toggle')" @click="toggleTheme">
-        <svg v-if="isDark" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 6a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v2a1 1 0 0 0 1 1z"/><path d="M21 11h-2a1 1 0 0 0 0 2h2a1 1 0 0 0 0-2z"/><path d="M6 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h2a1 1 0 0 0 1-1z"/><path d="M6.22 5a1 1 0 0 0-1.39 1.47l1.44 1.39a1 1 0 0 0 .73.28 1 1 0 0 0 .72-.31 1 1 0 0 0 0-1.41z"/><path d="M17 8.14a1 1 0 0 0 .69-.28l1.44-1.39A1 1 0 0 0 17.78 5l-1.44 1.42a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.31z"/><path d="M12 18a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z"/><path d="M17.73 16.14a1 1 0 0 0-1.39 1.44L17.78 19a1 1 0 0 0 .69.28 1 1 0 0 0 .72-.3 1 1 0 0 0 0-1.42z"/><path d="M6.27 16.14l-1.44 1.39a1 1 0 0 0 0 1.42 1 1 0 0 0 .72.3 1 1 0 0 0 .67-.25l1.44-1.39a1 1 0 0 0-1.39-1.44z"/><path d="M12 8a4 4 0 1 0 4 4 4 4 0 0 0-4-4zm0 6a2 2 0 1 1 2-2 2 2 0 0 1-2 2z"/>
-        </svg>
-        <svg v-else viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12.3 22h-.1a10.31 10.31 0 0 1-7.34-3.15 10.46 10.46 0 0 1-.26-14 10.13 10.13 0 0 1 4-2.74 1 1 0 0 1 1.06.22 1 1 0 0 1 .24 1 8.4 8.4 0 0 0 1.94 8.81 8.47 8.47 0 0 0 8.83 1.94 1 1 0 0 1 1.27 1.29A10.16 10.16 0 0 1 19.6 19a10.28 10.28 0 0 1-7.3 3zM7.46 4.92a7.93 7.93 0 0 0-1.37 1.22 8.44 8.44 0 0 0 .2 11.32A8.29 8.29 0 0 0 12.22 20h.08a8.34 8.34 0 0 0 6.78-3.49A10.37 10.37 0 0 1 7.46 4.92z"/>
+        <svg class="icon-svg" aria-hidden="true">
+          <use :href="`/svg-icons/icons.svg#${isDark ? 'light' : 'dark_mode'}`" />
         </svg>
       </button>
 
@@ -33,10 +30,8 @@
         :aria-label="$t('nav.menu_open')"
       >
         <input id="push-nav-toggle" type="checkbox" />
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
+        <svg class="icon-svg" aria-hidden="true">
+          <use href="/svg-icons/icons.svg#menu" />
         </svg>
       </label>
     </div>
@@ -159,7 +154,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     background: $hero-divider; border: 1px solid $hero-text-08;
     border-radius: 8px; color: $hero-muted; cursor: pointer; flex-shrink: 0;
     transition: background 0.2s, color 0.2s, transform 0.2s;
-    svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .icon-svg { width: 18px; height: 18px; flex-shrink: 0; }
     &:hover { background: $hero-text-10; color: $hero-text; transform: rotate(12deg); }
   }
 
@@ -173,7 +168,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     &:hover { background: $hero-text-10; color: $hero-text; }
 
     input { display: none; }
-    svg { display: block; flex-shrink: 0; }
+    .icon-svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
   }
 }
 </style>
