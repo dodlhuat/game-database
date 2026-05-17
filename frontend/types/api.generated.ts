@@ -1610,6 +1610,8 @@ export interface components {
             name: string;
             email: string;
             address: string | null;
+            phone: string | null;
+            date_of_birth: string;
             role: string;
             status: string;
             newsletter_opt_in: boolean;
@@ -1690,6 +1692,9 @@ export interface operations {
                     /** Format: email */
                     email?: string;
                     address?: string | null;
+                    phone?: string | null;
+                    /** Format: date-time */
+                    date_of_birth?: string | null;
                     newsletter_opt_in?: boolean;
                     current_password?: string;
                     new_password?: string | null;

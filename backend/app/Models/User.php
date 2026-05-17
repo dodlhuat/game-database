@@ -20,6 +20,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'address',
+        'phone',
+        'date_of_birth',
         'password',
         'role',
         'status',
@@ -41,6 +43,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
+            'date_of_birth'            => 'date:Y-m-d',
             'email_verified_at'        => 'datetime',
             'terms_accepted_at'        => 'datetime',
             'membership_expires_at'    => 'datetime',

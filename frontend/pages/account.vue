@@ -22,17 +22,32 @@
           <div v-if="profileSuccess" class="alert alert-success">{{ profileSuccess }}</div>
           <div v-if="profileError" class="alert alert-error">{{ profileError }}</div>
 
-          <UiInput v-model="profileForm.name" :label="$t('auth.name')" :error="profileErrors.name" autocomplete="name" />
-          <UiInput v-model="profileForm.email" type="email" :label="$t('auth.email')" :error="profileErrors.email" autocomplete="email" />
-
-          <UiInput
-            v-if="auth.isMember"
-            v-model="profileForm.address"
-            :label="$t('account.address')"
-            :error="profileErrors.address"
-            autocomplete="street-address"
-            :placeholder="$t('account.address_placeholder')"
-          />
+          <div class="account-section__fields">
+            <UiInput v-model="profileForm.name" :label="$t('auth.name')" :error="profileErrors.name" autocomplete="name" />
+            <UiInput v-model="profileForm.email" type="email" :label="$t('auth.email')" :error="profileErrors.email" autocomplete="email" />
+            <UiInput
+              v-if="auth.isMember"
+              v-model="profileForm.address"
+              :label="$t('account.address')"
+              :error="profileErrors.address"
+              autocomplete="street-address"
+              :placeholder="$t('account.address_placeholder')"
+            />
+            <UiInput
+              v-if="auth.isMember"
+              v-model="profileForm.phone"
+              type="tel"
+              :label="$t('account.phone')"
+              autocomplete="tel"
+              :placeholder="$t('account.phone_placeholder')"
+            />
+            <UiDatePicker
+              v-if="auth.isMember"
+              v-model="profileForm.date_of_birth"
+              :label="$t('account.date_of_birth')"
+              :max-date="new Date()"
+            />
+          </div>
 
           <UiButton :loading="savingProfile" @click="saveProfile">{{ $t('account.profile_save') }}</UiButton>
         </section>
@@ -40,20 +55,19 @@
         <!-- Newsletter -->
         <section class="account-section">
           <h2 class="account-section__title">{{ $t('account.newsletter_title') }}</h2>
-          <div class="account-section__toggle">
-            <input v-model="newsletterOptIn" type="checkbox" class="styled-checkbox" id="newsletter-switch" @change="saveNewsletter" />
-            <label for="newsletter-switch">{{ $t('account.newsletter_subscribe') }}</label>
-          </div>
-          <div v-if="newsletterMsg" class="alert alert-success">{{ newsletterMsg }}</div>
+          <UiSwitch v-model="newsletterOptIn" :label="$t('account.newsletter_subscribe')" @change="saveNewsletter" />
+          <div v-if="newsletterMsg" class="alert alert-success" style="margin-top: 0.75rem;">{{ newsletterMsg }}</div>
         </section>
 
         <!-- Passwort -->
         <section class="account-section">
           <h2 class="account-section__title">{{ $t('account.password_title') }}</h2>
 
-          <UiInput v-model="pwForm.current_password" type="password" :label="$t('account.password_current')" :error="pwErrors.current_password" autocomplete="current-password" />
-          <UiInput v-model="pwForm.new_password" type="password" :label="$t('account.password_new')" :error="pwErrors.new_password" autocomplete="new-password" />
-          <UiInput v-model="pwForm.new_password_confirmation" type="password" :label="$t('account.password_confirm_new')" autocomplete="off" />
+          <div class="account-section__fields">
+            <UiInput v-model="pwForm.current_password" type="password" :label="$t('account.password_current')" :error="pwErrors.current_password" autocomplete="current-password" />
+            <UiInput v-model="pwForm.new_password" type="password" :label="$t('account.password_new')" :error="pwErrors.new_password" autocomplete="new-password" />
+            <UiInput v-model="pwForm.new_password_confirmation" type="password" :label="$t('account.password_confirm_new')" autocomplete="off" />
+          </div>
 
           <div v-if="pwError" class="alert alert-error">{{ pwError }}</div>
           <div v-if="pwSuccess" class="alert alert-success">{{ pwSuccess }}</div>
@@ -76,8 +90,8 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 // Profile
-const profileForm = reactive({ name: '', email: '', address: '' })
-const profileErrors = reactive({ name: '', email: '', address: '' })
+const profileForm = reactive({ name: '', email: '', address: '', phone: '', date_of_birth: '' })
+const profileErrors = reactive({ name: '', email: '', address: '', phone: '', date_of_birth: '' })
 const profileSuccess = ref('')
 const profileError = ref('')
 const savingProfile = ref(false)
@@ -97,6 +111,8 @@ onMounted(() => {
   profileForm.name = auth.user?.name ?? ''
   profileForm.email = auth.user?.email ?? ''
   profileForm.address = auth.user?.address ?? ''
+  profileForm.phone = auth.user?.phone ?? ''
+  profileForm.date_of_birth = auth.user?.date_of_birth ?? ''
   newsletterOptIn.value = auth.user?.newsletter_opt_in ?? false
 })
 
@@ -111,7 +127,11 @@ async function saveProfile() {
       name: profileForm.name,
       email: profileForm.email,
     }
-    if (auth.isMember) payload.address = profileForm.address
+    if (auth.isMember) {
+      payload.address = profileForm.address
+      payload.phone = profileForm.phone
+      payload.date_of_birth = profileForm.date_of_birth
+    }
 
     const data = await api.patch<{ user: typeof auth.user; message: string }>('/account', payload)
     if (data.user) auth.setUser(data.user)
@@ -244,16 +264,15 @@ $border: rgba(238, 232, 223, 0.1);
     letter-spacing: -0.02em;
   }
 
-  &__toggle {
+  &__fields {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
 
-    :deep(.styled-checkbox + label) {
-      color: $hero-muted;
-      font-size: 0.9rem;
-    }
+  :deep(.button) {
+    margin-top: 0.25rem;
   }
 }
 </style>

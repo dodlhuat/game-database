@@ -18,6 +18,8 @@ class AccountController extends Controller
             'name'              => ['sometimes', 'string', 'max:255'],
             'email'             => ['sometimes', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'address'           => ['sometimes', 'nullable', 'string', 'max:255'],
+            'phone'             => ['sometimes', 'nullable', 'string', 'max:30'],
+            'date_of_birth'     => ['sometimes', 'nullable', 'date', 'before:today'],
             'newsletter_opt_in' => ['sometimes', 'boolean'],
             'current_password'  => ['required_with:new_password', 'string'],
             'new_password'      => ['nullable', 'string', Password::min(8)->letters()->numbers(), 'confirmed'],
@@ -44,6 +46,14 @@ class AccountController extends Controller
 
         if (array_key_exists('address', $validated)) {
             $user->address = $validated['address'];
+        }
+
+        if (array_key_exists('phone', $validated)) {
+            $user->phone = $validated['phone'];
+        }
+
+        if (array_key_exists('date_of_birth', $validated)) {
+            $user->date_of_birth = $validated['date_of_birth'];
         }
 
         $user->save();

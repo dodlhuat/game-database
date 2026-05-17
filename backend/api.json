@@ -38,6 +38,20 @@
                                         ],
                                         "maxLength": 255
                                     },
+                                    "phone": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 30
+                                    },
+                                    "date_of_birth": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "format": "date-time"
+                                    },
                                     "newsletter_opt_in": {
                                         "type": "boolean"
                                     },
@@ -8609,6 +8623,15 @@
                             "null"
                         ]
                     },
+                    "phone": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "date_of_birth": {
+                        "type": "string"
+                    },
                     "role": {
                         "type": "string"
                     },
@@ -8667,6 +8690,8 @@
                     "name",
                     "email",
                     "address",
+                    "phone",
+                    "date_of_birth",
                     "role",
                     "status",
                     "newsletter_opt_in",
