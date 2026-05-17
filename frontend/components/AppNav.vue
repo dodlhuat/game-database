@@ -16,6 +16,7 @@
     <ul>
       <li><NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink></li>
       <li><NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink></li>
+      <li v-show="auth.isLoggedIn"><NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink></li>
       <li v-show="auth.isLoggedIn"><NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink></li>
       <li v-show="auth.isLoggedIn && auth.isAdmin">
         <NuxtLink to="/admin" class="flyout-admin-link">{{ $t('nav.admin') }}</NuxtLink>

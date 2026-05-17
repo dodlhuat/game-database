@@ -20,6 +20,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'store']);
     Route::get('/verify-email/{id}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])
         ->name('auth.verify-email');
+    Route::post('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'store']);
+    Route::post('/reset-password', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'store']);
 });
 
 Route::get('/loan-settings', [\App\Http\Controllers\LoanSettingController::class, 'show']);
@@ -31,6 +33,7 @@ Route::get('/packages', [\App\Http\Controllers\PackageController::class, 'index'
 Route::get('/packages/{package:slug}', [\App\Http\Controllers\PackageController::class, 'show']);
 Route::get('/terms', [\App\Http\Controllers\TermsController::class, 'show']);
 Route::get('/languages', [\App\Http\Controllers\LanguageController::class, 'index']);
+Route::get('/events', [\App\Http\Controllers\EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -155,4 +158,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Token-Transaktionen (Admin: pro User)
     Route::get('/users/{user}/token-transactions', [\App\Http\Controllers\Admin\TokenTransactionController::class, 'index']);
+
+    // Events
+    Route::apiResource('events', \App\Http\Controllers\Admin\EventController::class)->except(['show']);
 });

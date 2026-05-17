@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "api:generate": "openapi-typescript ../backend/api.json -o types/api.generated.ts"
   },
   "dependencies": {
     "@dodlhuat/basix": "^1.2.0",
@@ -19,7 +20,8 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "openapi-typescript": "^7.13.0",
     "sass": "^1.85.0",
-    "typescript": "^5.7.3"
+    "typescript": "^6.0.3"
   }
 }

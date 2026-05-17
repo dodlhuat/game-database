@@ -13,13 +13,13 @@ class NewsletterMail extends Mailable
     use Queueable, SerializesModels;
 
     public function __construct(
-        public readonly string $subject,
+        private readonly string $subjectText,
         public readonly string $body,
     ) {}
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->subject);
+        return new Envelope(subject: $this->subjectText);
     }
 
     public function content(): Content

@@ -2,7 +2,7 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps
+.PHONY: up down setup artisan migrate logs ps api-generate
 
 ## Erster Start (einmalig)
 setup:
@@ -51,3 +51,8 @@ shell-frontend:
 ## PostgreSQL-Shell öffnen
 db:
 	docker compose exec postgres psql -U postgres -d game_database
+
+## OpenAPI-Spec exportieren und TypeScript-Typen generieren
+api-generate:
+	docker compose exec backend php artisan scramble:export
+	cd frontend && npm run api:generate

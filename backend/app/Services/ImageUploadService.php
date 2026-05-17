@@ -28,6 +28,18 @@ class ImageUploadService
         return Storage::disk('public')->url($filename);
     }
 
+    public function uploadEventImage(UploadedFile $file, ?string $oldUrl = null): string
+    {
+        if ($oldUrl) {
+            $this->deleteByUrl($oldUrl);
+        }
+
+        $filename = 'events/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+
+        return Storage::disk('public')->url($filename);
+    }
+
     public function deleteByUrl(string $url): void
     {
         // Pfad relativ zum public-Disk extrahieren

@@ -34,6 +34,7 @@
             required
             autocomplete="current-password"
           />
+          <NuxtLink to="/forgot-password" class="forgot-link">{{ $t('auth.forgot_password') }}</NuxtLink>
 
           <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
             {{ $t('auth.email_not_verified') }}
@@ -254,6 +255,23 @@ $muted: rgba(238, 232, 223, 0.65);
   text-decoration: underline;
 
   &:disabled { opacity: 0.5; cursor: default; }
+}
+
+:deep(.input-wrapper) {
+  margin-bottom: 1.25rem;
+}
+
+.forgot-link {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(212, 146, 30, 0.75);
+  text-decoration: none;
+  text-align: right;
+  margin-top: -0.75rem;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s;
+
+  &:hover { color: $amber; }
 }
 
 .resend-success {

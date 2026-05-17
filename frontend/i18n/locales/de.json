@@ -2,6 +2,7 @@
   "nav": {
     "games": "Spiele",
     "packages": "Pakete",
+    "events": "Events",
     "dashboard": "Mein Konto",
     "admin": "Admin-Bereich",
     "login": "Anmelden",
@@ -105,6 +106,18 @@
     "newsletter_opt_in": "Newsletter abonnieren",
     "terms_accept": "Ich akzeptiere die Nutzungsbedingungen",
     "already_member": "Bereits Mitglied?",
+    "forgot_password": "Passwort vergessen?",
+    "forgot_title": "Passwort zurücksetzen",
+    "forgot_subtitle": "Gib deine E-Mail-Adresse ein. Falls ein Konto existiert, schicken wir dir einen Link.",
+    "forgot_submit": "Link anfordern",
+    "forgot_sent": "Falls ein Konto mit dieser E-Mail-Adresse existiert, haben wir dir einen Link geschickt. Bitte überprüfe auch deinen Spam-Ordner.",
+    "back_to_login": "Zurück zum Login",
+    "reset_title": "Neues Passwort vergeben",
+    "reset_submit": "Passwort speichern",
+    "reset_success": "Dein Passwort wurde erfolgreich geändert. Du kannst dich jetzt einloggen.",
+    "reset_to_login": "Zum Login →",
+    "reset_invalid_link": "Dieser Link ist ungültig oder bereits abgelaufen.",
+    "reset_request_new": "Neuen Link anfordern →",
     "email_verified_title": "E-Mail bestätigt!",
     "email_verified_desc": "Dein Konto ist jetzt aktiv. Du kannst dich jetzt einloggen.",
     "email_already_verified_title": "Bereits bestätigt",
@@ -641,7 +654,30 @@
       "loaned_at": "Ausgeliehen am",
       "due_at": "Fällig am",
       "empty": "Keine Paket-Ausleihen vorhanden."
+    },
+    "events": {
+      "title": "Events verwalten",
+      "breadcrumb": "Events",
+      "all": "Alle Events",
+      "add": "Event hinzufügen",
+      "edit": "Event bearbeiten",
+      "empty": "Noch keine Events vorhanden.",
+      "date_col": "Datum",
+      "time_col": "Uhrzeit",
+      "form": {
+        "title": "Titel",
+        "date": "Datum",
+        "time": "Uhrzeit",
+        "description": "Beschreibung (optional)",
+        "image": "Bild (optional)",
+        "image_current": "Aktuelles Bild"
+      }
     }
+  },
+  "events": {
+    "eyebrow": "Mitgliederbereich",
+    "title": "Events & Veranstaltungen",
+    "all_day": "Ganztägig"
   },
   "legal": {
     "terms": {

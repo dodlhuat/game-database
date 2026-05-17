@@ -193,6 +193,10 @@
                 <span class="nav-tile__icon"><span class="icon icon-gift-outline" aria-hidden="true" /></span>
                 <span class="nav-tile__label">Pakete</span>
               </NuxtLink>
+              <NuxtLink to="/admin/events" class="nav-tile">
+                <span class="nav-tile__icon"><span class="icon icon-calendar_today" aria-hidden="true" /></span>
+                <span class="nav-tile__label">Events</span>
+              </NuxtLink>
             </div>
           </section>
 
