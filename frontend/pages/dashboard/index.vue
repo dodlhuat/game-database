@@ -309,7 +309,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { Loan, Reservation, DashboardData } from '~/composables/useLoans'
 
 definePageMeta({ middleware: ['auth'] })
@@ -342,13 +342,13 @@ const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
 const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
 const reservations = computed<Reservation[]>(() => data.value?.reservations ?? [])
 
-onMounted(async () => {
+useAsyncData('dashboard', async () => {
   try {
     data.value = await fetchDashboard()
   } finally {
     loading.value = false
   }
-})
+}, { server: false })
 
 function openReturn(loan: Loan) {
   returnLoan.value = loan

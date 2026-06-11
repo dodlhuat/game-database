@@ -109,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import type { Package } from '~/composables/useGames'
 
 const route = useRoute()
@@ -118,21 +118,20 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 const api = useApi()
-const loading = ref(true)
+
+const slug = route.params.slug as string
+
+const { data: pkg } = await useAsyncData<Package | null>(
+  `package-${slug}`,
+  async () => {
+    try { return (await fetchPackage(slug)).data }
+    catch { return null }
+  },
+)
+
+const loading = ref(false)
 const loaning = ref(false)
 const loanError = ref('')
-const pkg = ref<Package | null>(null)
-
-onMounted(async () => {
-  try {
-    const data = await fetchPackage(route.params.slug as string)
-    pkg.value = data.data
-  } catch {
-    pkg.value = null
-  } finally {
-    loading.value = false
-  }
-})
 
 async function borrowPackage() {
   if (!pkg.value) return

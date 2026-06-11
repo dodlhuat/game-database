@@ -414,12 +414,15 @@ watch(() => filters.search, () => {
   searchTimer = setTimeout(resetPage, 300)
 })
 
-onMounted(async () => {
-  document.addEventListener('pointerdown', onOutsideClick, { capture: true })
-  document.addEventListener('keydown', onEscapeKey)
+useAsyncData('games-init', async () => {
   const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
   categories.value = cats.data
   allLanguages.value = langs
+}, { server: false })
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onOutsideClick, { capture: true })
+  document.addEventListener('keydown', onEscapeKey)
 })
 
 onUnmounted(() => {

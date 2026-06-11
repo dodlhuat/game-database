@@ -90,12 +90,15 @@
   border-radius: 6px;
 }
 
-// Nuxt page transitions
+// Nuxt page transitions (parallel crossfade — mode:'out-in' conflicts with async setup)
 .page-enter-active {
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 .page-leave-active {
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
 }
 .page-enter-from {
   opacity: 0;

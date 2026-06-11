@@ -46,37 +46,56 @@
     </section>
 
     <!-- ── Features ────────────────────────────────────────────── -->
-    <section class="features">
+    <section class="features" ref="featuresRef">
       <div class="features__inner">
         <header class="features__header">
           <h2 class="features__title">{{ $t('pages.home.features_title') }}</h2>
           <p class="features__subtitle">{{ $t('pages.home.features_sub') }}</p>
         </header>
 
-        <div class="features__grid">
-          <article class="card card-hover features__card">
-            <div class="feat-icon feat-icon--amber">
+        <div class="features__grid" :class="{ 'features__grid--visible': featVisible }">
+
+          <!-- Primary feature: hero card spanning the full left column -->
+          <article class="feat-card feat-card--hero" style="--idx: 0">
+            <div class="feat-card__glow" aria-hidden="true" />
+            <span class="feat-card__ghost-num" aria-hidden="true">01</span>
+            <div class="feat-card__icon-wrap">
               <span class="icon icon-article" aria-hidden="true" />
             </div>
-            <h3 class="features__card-title">{{ $t('pages.home.feature_variety_title') }}</h3>
-            <p class="features__card-text">{{ $t('pages.home.feature_variety_desc') }}</p>
+            <div class="feat-card__body">
+              <h3 class="feat-card__title">{{ $t('pages.home.feature_variety_title') }}</h3>
+              <p class="feat-card__text">{{ $t('pages.home.feature_variety_desc') }}</p>
+            </div>
           </article>
 
-          <article class="card card-hover features__card">
-            <div class="feat-icon feat-icon--blue">
-              <span class="icon icon-calendar_today" aria-hidden="true" />
+          <!-- Satellite feature 02 -->
+          <article class="feat-card feat-card--sat" style="--idx: 1">
+            <div class="feat-card__sat-inner">
+              <div class="feat-icon feat-icon--blue" aria-hidden="true">
+                <span class="icon icon-calendar_today" />
+              </div>
+              <div class="feat-card__sat-content">
+                <span class="feat-card__sat-num" aria-hidden="true">02</span>
+                <h3 class="feat-card__title">{{ $t('pages.home.feature_easy_title') }}</h3>
+                <p class="feat-card__text">{{ $t('pages.home.feature_easy_desc') }}</p>
+              </div>
             </div>
-            <h3 class="features__card-title">{{ $t('pages.home.feature_easy_title') }}</h3>
-            <p class="features__card-text">{{ $t('pages.home.feature_easy_desc') }}</p>
           </article>
 
-          <article class="card card-hover features__card">
-            <div class="feat-icon feat-icon--green">
-              <span class="icon icon-stars" aria-hidden="true" />
+          <!-- Satellite feature 03 -->
+          <article class="feat-card feat-card--sat" style="--idx: 2">
+            <div class="feat-card__sat-inner">
+              <div class="feat-icon feat-icon--green" aria-hidden="true">
+                <span class="icon icon-stars" />
+              </div>
+              <div class="feat-card__sat-content">
+                <span class="feat-card__sat-num" aria-hidden="true">03</span>
+                <h3 class="feat-card__title">{{ $t('pages.home.feature_for_all_title') }}</h3>
+                <p class="feat-card__text">{{ $t('pages.home.feature_for_all_desc') }}</p>
+              </div>
             </div>
-            <h3 class="features__card-title">{{ $t('pages.home.feature_for_all_title') }}</h3>
-            <p class="features__card-text">{{ $t('pages.home.feature_for_all_desc') }}</p>
           </article>
+
         </div>
       </div>
     </section>
@@ -103,9 +122,29 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
+
+// Feature section: scroll-triggered entrance via IntersectionObserver
+const featuresRef = ref<HTMLElement | null>(null)
+const featVisible  = ref(false)
+
+onMounted(() => {
+  const el = featuresRef.value
+  if (!el) return
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      if (entry.isIntersecting) {
+        featVisible.value = true
+        observer.disconnect()
+      }
+    },
+    { threshold: 0.1 },
+  )
+  observer.observe(el)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -317,16 +356,21 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
 }
 
 // ─── Features ─────────────────────────────────────────────────────
+@keyframes featIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .features {
   background: var(--background);
-  padding: 5rem 1.5rem;
+  padding: 6rem 1.5rem 5rem;
 
   &__inner { max-width: 1100px; margin: 0 auto; }
 
-  &__header { text-align: center; margin-bottom: 3.5rem; }
+  &__header { margin-bottom: 3.5rem; }
 
   &__title {
-    font-size: 2rem;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 800;
     letter-spacing: -0.03em;
     color: var(--primary-text);
@@ -337,75 +381,225 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     font-size: 1rem;
     color: var(--secondary-text);
     padding-bottom: 0;
+    max-width: 480px;
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: 3fr 2fr;
-    grid-template-rows: auto auto;
-    gap: 1.5rem;
-    align-items: start;
+    grid-template-columns: 1fr;
+    gap: 1rem;
 
-    @media (max-width: 900px) {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto;
+    @media (min-width: 700px) {
+      grid-template-columns: 1.4fr 1fr;
+      grid-template-rows: 1fr 1fr;
     }
-  }
-
-  &__card {
-    padding: 2rem;
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-
-    &:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
-
-    // First card: full-height left column, more prominent
-    &:first-child {
-      grid-row: 1 / 3;
-      padding: 2.5rem;
-
-      @media (max-width: 900px) {
-        grid-row: auto;
-        padding: 2rem;
-      }
-
-      .features__card-title { font-size: 1.4rem; }
-      .features__card-text  { font-size: 1rem; }
-      .feat-icon            { width: 56px; height: 56px; .icon { font-size: 1.75rem; } }
-    }
-  }
-
-  &__card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 1rem 0 0.5rem;
-    color: var(--primary-text);
-    letter-spacing: -0.02em;
-  }
-
-  &__card-text {
-    font-size: 0.925rem;
-    color: var(--secondary-text);
-    line-height: 1.65;
-    padding-bottom: 0;
   }
 }
 
+// ─── Feature card ─────────────────────────────────────────────────
+.feat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid var(--divider);
+  background: var(--secondary-background);
+
+  // Pre-animation hidden state; cleared by the animation fill once --visible fires
+  opacity: 0;
+  transform: translateY(24px);
+
+  .features__grid--visible & {
+    animation: featIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) calc(var(--idx, 0) * 0.12s) both;
+  }
+
+  // ── Hero variant ──────────────────────────────────────────────
+  &--hero {
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+
+    @media (min-width: 700px) {
+      grid-row: 1 / 3;
+      min-height: 340px;
+    }
+
+    // Amber accent stripe at top: partial at rest, full-width on hover
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 2.5rem;
+      right: 2.5rem;
+      height: 2px;
+      background: $amber;
+      border-radius: 0 0 2px 2px;
+      transform-origin: left;
+      transform: scaleX(0.28);
+      opacity: 0.6;
+      transition:
+        transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.3s ease;
+    }
+
+    &:hover::before {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+
+    &:hover .feat-card__glow {
+      opacity: 1;
+      transform: scale(1.25);
+    }
+
+    &:hover .feat-card__icon-wrap .icon {
+      filter: drop-shadow(0 0 40px rgba($amber, 0.6));
+    }
+  }
+
+  // ── Satellite variant ─────────────────────────────────────────
+  &--sat {
+    padding: 1.75rem;
+    transition: border-color 0.25s ease;
+
+    // Left accent bar: invisible at rest, amber and taller on hover
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 25%;
+      bottom: 25%;
+      width: 2px;
+      border-radius: 0 2px 2px 0;
+      background: transparent;
+      transition:
+        background 0.3s ease,
+        top 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &:hover {
+      border-color: rgba($amber, 0.25);
+
+      &::before {
+        background: $amber;
+        top: 15%;
+        bottom: 15%;
+      }
+    }
+  }
+
+  // Ambient radial glow blob (hero)
+  &__glow {
+    position: absolute;
+    top: 12%;
+    right: -18%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba($amber, 0.10) 0%, transparent 65%);
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.55;
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  // Giant ghost number watermark behind body text (hero)
+  &__ghost-num {
+    position: absolute;
+    bottom: 3.25rem;
+    right: 1.75rem;
+    font-size: 7rem;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+    line-height: 1;
+    color: var(--primary-text);
+    opacity: 0.04;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  // Large floating icon zone (hero)
+  &__icon-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0;
+
+    .icon {
+      font-size: 4.5rem;
+      color: $amber;
+      filter: drop-shadow(0 0 28px rgba($amber, 0.38));
+      transition: filter 0.4s ease;
+    }
+  }
+
+  // Text zone beneath divider (hero)
+  &__body {
+    border-top: 1px solid var(--divider);
+    padding-top: 1.5rem;
+  }
+
+  // Horizontal row layout (sat cards)
+  &__sat-inner {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  &__sat-content { min-width: 0; }
+
+  // Small numbered counter label (sat cards)
+  &__sat-num {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+    opacity: 0.55;
+    margin-bottom: 0.4rem;
+  }
+
+  // Shared title
+  &__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary-text);
+    margin: 0 0 0.5rem;
+  }
+
+  // Shared description
+  &__text {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    line-height: 1.65;
+    padding-bottom: 0;
+    margin: 0;
+  }
+
+  // Hero size overrides
+  &--hero &__title { font-size: 1.3rem; margin-bottom: 0.6rem; }
+  &--hero &__text  { font-size: 0.95rem; }
+}
+
 .feat-icon {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  .icon { font-size: 1.5rem; }
+  .icon { font-size: 1.4rem; }
 
-  &--amber { background: var(--accent-color-muted); .icon { color: var(--accent-color); } }
+  &--amber { background: var(--accent-color-muted);   .icon { color: var(--accent-color); } }
   &--blue  { background: var(--accent-lighten-muted); .icon { color: var(--accent-color-lighten); } }
-  &--green { background: var(--success-muted); .icon { color: var(--success); } }
+  &--green { background: var(--success-muted);        .icon { color: var(--success); } }
 }
 
 // ─── CTA Strip ────────────────────────────────────────────────────

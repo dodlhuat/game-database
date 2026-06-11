@@ -64,24 +64,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import type { Package } from '~/composables/useGames'
 
 const { fetchPackages } = useGames()
 const auth = useAuthStore()
 const { t } = useI18n()
 
-const loading = ref(true)
-const packages = ref<Package[]>([])
+const { data: packagesData, status: packagesStatus } = useAsyncData(
+  'packages',
+  async () => {
+    const result = await fetchPackages()
+    return result.data
+  },
+  { server: false },
+)
 
-onMounted(async () => {
-  try {
-    const data = await fetchPackages()
-    packages.value = data.data
-  } finally {
-    loading.value = false
-  }
-})
+const packages = computed(() => packagesData.value ?? [])
+const loading = computed(() => packagesStatus.value === 'idle' || packagesStatus.value === 'pending')
 
 useHead(() => ({ title: `${t('pages.packages.title')} — AUA` }))
 </script>

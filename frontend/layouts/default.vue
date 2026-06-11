@@ -105,6 +105,8 @@ async function handleLogout() {
 </script>
 
 <style>
+.push-content { position: relative; }
+
 nav.push-menu a,
 nav.push-menu .push-menu-item {
   color: rgba(238, 232, 223, 0.85) !important;

@@ -247,7 +247,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { Game } from '~/composables/useGames'
 import { Modal } from '@dodlhuat/basix/js/modal'
 import { Lightbox } from '@dodlhuat/basix/js/lightbox'
@@ -259,8 +259,25 @@ const auth = useAuthStore()
 const { fetchSettings, getNextAppointment, getDueDate, formatDate, toIsoDate } = useLoanSettings()
 const { t } = useI18n()
 
-const loading = ref(true)
-const game = ref<Game | null>(null)
+const slug = route.params.slug as string
+
+const { data: game } = await useAsyncData<Game | null>(
+  `game-${slug}`,
+  async () => {
+    try {
+      return (await fetchGame(slug)).data
+    } catch (e: unknown) {
+      const errStatus = (e as { status?: number })?.status
+      if (errStatus !== 404) {
+        await new Promise(r => setTimeout(r, 800))
+        try { return (await fetchGame(slug)).data } catch { return null }
+      }
+      return null
+    }
+  },
+)
+
+const loading = ref(false)
 const reserving = ref(false)
 const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 
@@ -415,28 +432,6 @@ const hasMeta = computed(() =>
   )
 )
 
-onMounted(async () => {
-  const slug = route.params.slug as string
-  try {
-    game.value = (await fetchGame(slug)).data
-  } catch (e: unknown) {
-    const status = (e as { status?: number })?.status
-    if (status === 404) {
-      // Definitive 404 — Spiel existiert nicht
-      game.value = null
-    } else {
-      // Transienter Fehler (Coldstart, Netzwerk) — einmal retry
-      await new Promise(r => setTimeout(r, 900))
-      try {
-        game.value = (await fetchGame(slug)).data
-      } catch {
-        game.value = null
-      }
-    }
-  } finally {
-    loading.value = false
-  }
-})
 
 useHead(() => ({
   title: game.value ? `${game.value.title} — ${t('pages.games.title')}` : t('pages.game.not_found'),
