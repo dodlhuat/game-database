@@ -4,10 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
-  experimental: {
-    viteEnvironmentApi: true,
-  },
-
   // Nuxt 4 setzt srcDir standardmäßig auf 'app/' — wir nutzen die Projektroot-Struktur
   srcDir: '.',
   dir: {
@@ -27,7 +23,16 @@ export default defineNuxtConfig({
   },
 
   app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
     head: {
+      htmlAttrs: { 'data-theme': 'dark' },
+      script: [
+        {
+          // Reads saved theme from localStorage before first paint — prevents flash
+          innerHTML: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':t==='dark'?'dark':window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');}catch(e){}})();`,
+          tagPosition: 'head',
+        },
+      ],
       link: [
         {
           rel: 'stylesheet',

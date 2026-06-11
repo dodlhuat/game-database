@@ -1,5 +1,5 @@
 <template>
-  <div class="editor">
+  <div ref="editorRoot" class="editor">
     <div class="editor-toolbar" role="toolbar" aria-label="Editor tools">
       <div class="toolbar-group">
         <button type="button" data-cmd="bold" title="Bold (Ctrl+B)">
@@ -40,20 +40,20 @@
       <div class="toolbar-separator" />
 
       <div class="toolbar-group">
-        <button id="linkBtn" type="button" title="Insert link (Ctrl+K)">
+        <button type="button" data-editor-action="link" title="Insert link (Ctrl+K)">
           <span class="icon icon-add" aria-hidden="true" />
         </button>
-        <button id="imageBtn" type="button" title="Insert image" style="display: none;">
+        <button type="button" data-editor-action="image" title="Insert image" style="display: none;">
           <span class="icon icon-add_photo_alternate" aria-hidden="true" />
         </button>
-        <input type="file" id="imageFile" accept="image/*" hidden />
+        <input type="file" data-editor="image-file" accept="image/*" hidden />
       </div>
     </div>
 
     <div class="editor-body">
       <div class="editor-main">
         <div
-          id="editable"
+          data-editor="editable"
           class="editable"
           contenteditable="true"
           spellcheck="true"
@@ -62,29 +62,29 @@
       </div>
 
       <!-- Side panel required by Editor class (hidden by default) -->
-      <div id="sidePanel" class="editor-side">
+      <div data-editor="side-panel" class="editor-side">
         <div class="side-tabs">
-          <button class="side-tab active" type="button" data-tab="codePanel">HTML</button>
-          <button class="side-tab" type="button" data-tab="previewPanel">Vorschau</button>
+          <button class="side-tab active" type="button" data-tab="code-panel">HTML</button>
+          <button class="side-tab" type="button" data-tab="preview-panel">Vorschau</button>
         </div>
         <div class="side-panels">
-          <div id="codePanel" class="side-panel active">
-            <textarea id="code" />
+          <div data-editor="code-panel" class="side-panel active">
+            <textarea data-editor="code" />
             <div class="code-actions">
-              <button type="button">Übernehmen</button>
-              <button type="button">Bereinigen</button>
-              <button type="button">Minify</button>
+              <button type="button" data-editor-action="apply-code">Übernehmen</button>
+              <button type="button" data-editor-action="sanitize-code">Bereinigen</button>
+              <button type="button" data-editor-action="minify-code">Minify</button>
             </div>
           </div>
-          <div id="previewPanel" class="side-panel">
-            <div id="preview" class="preview-content" />
+          <div data-editor="preview-panel" class="side-panel">
+            <div data-editor="preview" class="preview-content" />
           </div>
         </div>
       </div>
     </div>
 
     <div class="editor-footer">
-      <span id="wordCount" class="editor-wordcount">0 words</span>
+      <span data-editor="wordcount" class="editor-wordcount">0 words</span>
       <span class="editor-shortcuts">
         <kbd>Ctrl+B</kbd> Bold
         <kbd>Ctrl+K</kbd> Link
@@ -95,25 +95,27 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { Editor } from '@dodlhuat/basix/js/editor'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
+const editorRoot = ref<HTMLElement | null>(null)
 let observer: MutationObserver | null = null
 let ignoreNext = false
 let editor: InstanceType<typeof Editor> | null = null
 
 onMounted(() => {
-  const editableEl = document.getElementById('editable') as HTMLElement | null
+  if (!editorRoot.value) return
+  const editableEl = editorRoot.value.querySelector<HTMLElement>('[data-editor="editable"]')
   if (!editableEl) return
 
   if (props.modelValue) {
     editableEl.innerHTML = props.modelValue
   }
 
-  editor = new Editor()
+  editor = new Editor({ root: editorRoot.value })
 
   observer = new MutationObserver(() => {
     if (ignoreNext) { ignoreNext = false; return }
@@ -123,7 +125,7 @@ onMounted(() => {
 })
 
 watch(() => props.modelValue, (val) => {
-  const editableEl = document.getElementById('editable') as HTMLElement | null
+  const editableEl = editorRoot.value?.querySelector<HTMLElement>('[data-editor="editable"]')
   if (!editableEl || editableEl.innerHTML === val) return
   ignoreNext = true
   editableEl.innerHTML = val ?? ''

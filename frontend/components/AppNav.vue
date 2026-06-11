@@ -18,9 +18,7 @@
       </div>
 
       <button class="l-nav__theme-btn" :aria-label="$t('nav.theme_toggle')" @click="toggleTheme">
-        <svg class="icon-svg" aria-hidden="true">
-          <use :href="`/svg-icons/icons.svg#${isDark ? 'light' : 'dark_mode'}`" />
-        </svg>
+        <span class="icon" :class="isDark ? 'icon-light' : 'icon-dark'" aria-hidden="true" />
       </button>
 
       <!-- Push-menu toggle: label IS .navigation so navigation.click() toggles the checkbox -->
@@ -30,9 +28,7 @@
         :aria-label="$t('nav.menu_open')"
       >
         <input id="push-nav-toggle" type="checkbox" />
-        <svg class="icon-svg" aria-hidden="true">
-          <use href="/svg-icons/icons.svg#menu" />
-        </svg>
+        <span class="icon icon-menu" aria-hidden="true" />
       </label>
     </div>
   </header>
@@ -154,7 +150,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     background: $hero-divider; border: 1px solid $hero-text-08;
     border-radius: 8px; color: $hero-muted; cursor: pointer; flex-shrink: 0;
     transition: background 0.2s, color 0.2s, transform 0.2s;
-    .icon-svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .icon { font-size: 1.125rem; }
     &:hover { background: $hero-text-10; color: $hero-text; transform: rotate(12deg); }
   }
 
@@ -168,7 +164,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     &:hover { background: $hero-text-10; color: $hero-text; }
 
     input { display: none; }
-    .icon-svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
+    .icon { font-size: 1.25rem; }
   }
 }
 </style>

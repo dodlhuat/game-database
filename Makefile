@@ -2,7 +2,7 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate
+.PHONY: up down setup artisan migrate logs ps api-generate demo
 
 ## Erster Start (einmalig)
 setup:
@@ -39,6 +39,10 @@ migrate:
 ## Migrationen zurücksetzen und neu ausführen
 migrate-fresh:
 	docker compose exec backend php artisan migrate:fresh --seed
+
+## Datenbank zurücksetzen und Demo-Daten laden
+demo:
+	docker compose exec backend php artisan db:demo
 
 ## Shell im Backend-Container öffnen
 shell-backend:

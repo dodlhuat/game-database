@@ -23,8 +23,8 @@ body {
   font-family: $font-family-base;
   font-size: $font-size-base;
   line-height: $line-height-base;
-  color: $color-gray-900;
-  background-color: $color-gray-50;
+  background-color: var(--background);
+  color: var(--primary-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

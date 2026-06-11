@@ -27,18 +27,22 @@
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
   --success-muted:        rgba(92, 198, 137, 0.10);
 
+  // Body background overrides Basix default (#111113) with our exact dark tone
+  --background:           #0F0E0C;
+  --primary-bg:           #0F0E0C;
   // Push-menu sidebar background matches the app's dark chrome
   --primary-dark:         #0F0E0C;
 }
 
 // ─── Icon font + font-size override ──────────────────────────────
-// Basix ships a ~5.5 KB subset of Material Symbols Outlined (hardcoded 24px).
-// We load the full font from Google Fonts CDN (nuxt.config app.head) and
-// switch to it so all glyphs are available. Setting font-size: 1em makes
-// icons inherit their context instead of always being 24px.
+// Prefer the Basix-bundled local subset ("Material Symbols Outlined 24pt")
+// so icons render immediately without FOIT. The full Google Fonts variable
+// font ('Material Symbols Outlined') is the fallback for glyphs not in
+// the local subset (our custom aliases: arrow_back, extension, etc.).
+// font-size: 1em lets icons inherit their context size instead of 24px.
 
 .icon {
-  font-family: 'Material Symbols Outlined', serif;
+  font-family: "Material Symbols Outlined 24pt", 'Material Symbols Outlined', serif;
   font-size: 1em;
   line-height: 1;
 }
@@ -50,6 +54,13 @@
 .icon-download-outline::before       { content: "\f090"; } // download
 .icon-gift-outline::before           { content: "\e8f6"; } // card_giftcard
 .icon-strikethrough::before          { content: "\e257"; } // strikethrough_s
+.icon-arrow_back::before             { content: "\e5c4"; } // arrow_back
+.icon-extension::before              { content: "\e87b"; } // extension
+.icon-login::before                  { content: "\ea77"; } // login
+.icon-toll::before                   { content: "\e197"; } // toll
+.icon-bookmark_add::before           { content: "\e598"; } // bookmark_add
+.icon-zoom_in::before                { content: "\e8ff"; } // zoom_in
+.icon-open_in_new::before            { content: "\e89e"; } // open_in_new
 
 // Restore intentionally large display icons (empty states).
 .dash-empty__icon { font-size: 2.5rem; }

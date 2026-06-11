@@ -1,7 +1,22 @@
 <template>
   <div class="gd">
-    <div v-if="loading" class="gd-state">
-      <div class="gd-spin" />
+    <!-- Skeleton hero -->
+    <div v-if="loading" class="gd-skeleton" aria-hidden="true">
+      <div class="gd-skeleton__hero">
+        <div class="gd-skeleton__bg" />
+        <div class="gd-skeleton__back skeleton" />
+        <div class="gd-skeleton__stage">
+          <div class="gd-skeleton__poster skeleton" />
+        </div>
+        <div class="gd-skeleton__caption">
+          <div class="gd-skeleton__pill skeleton" />
+          <div class="gd-skeleton__title skeleton" />
+          <div class="gd-skeleton__title gd-skeleton__title--short skeleton" />
+        </div>
+      </div>
+      <div class="gd-skeleton__stats">
+        <div v-for="i in 4" :key="i" class="gd-skeleton__stat skeleton" />
+      </div>
     </div>
 
     <div v-else-if="!game" class="gd-state">
@@ -21,14 +36,14 @@
         </div>
 
         <NuxtLink to="/games" class="gd-back">
-          <span class="icon">arrow_back</span>{{ $t('btn.to_collection') }}
+          <span class="icon icon-arrow_back" aria-hidden="true" />{{ $t('btn.to_collection') }}
         </NuxtLink>
 
         <div class="gd-hero__stage">
           <div class="gd-hero__poster-wrap">
             <div class="gd-hero__poster-halo" aria-hidden="true" />
             <img v-if="game.cover_image_url" :src="game.cover_image_url" :alt="game.title" class="gd-hero__poster" />
-            <div v-else class="gd-hero__poster-empty"><span class="icon">extension</span></div>
+            <div v-else class="gd-hero__poster-empty"><span class="icon icon-extension" aria-hidden="true" /></div>
           </div>
         </div>
 
@@ -49,7 +64,7 @@
         </div>
 
         <div class="gd-hero__cue" aria-hidden="true">
-          <span class="icon">expand_more</span>
+          <span class="icon icon-expand_more" />
         </div>
       </section>
 
@@ -113,7 +128,7 @@
         <div class="gd-actions">
           <template v-if="!auth.isLoggedIn">
             <NuxtLink to="/login" class="gd-btn gd-btn--primary">
-              <span class="icon">login</span>{{ $t('pages.game.login_to_borrow') }}
+              <span class="icon icon-login" aria-hidden="true" />{{ $t('pages.game.login_to_borrow') }}
             </NuxtLink>
           </template>
           <template v-else-if="auth.isActive && !auth.isMember">
@@ -121,20 +136,20 @@
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
             <span class="gd-btn gd-btn--done">
-              <span class="icon">check_circle</span>{{ $t('pages.game.already_borrowed') }}
+              <span class="icon icon-check_circle" aria-hidden="true" />{{ $t('pages.game.already_borrowed') }}
             </span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
             <button v-if="(auth.user?.tokens ?? 0) >= 2" class="gd-btn gd-btn--primary" @click="openLoanModal">
-              <span class="icon">send</span>{{ $t('btn.borrow_game') }}
+              <span class="icon icon-send" aria-hidden="true" />{{ $t('btn.borrow_game') }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
-              <span class="icon">toll</span>{{ $t('btn.load_tokens') }}
+              <span class="icon icon-toll" aria-hidden="true" />{{ $t('btn.load_tokens') }}
             </NuxtLink>
           </template>
           <template v-else-if="auth.isMember">
             <button class="gd-btn gd-btn--secondary" @click="handleReserve" :disabled="reserving">
-              <span class="icon">bookmark_add</span>{{ reserving ? $t('common.loading') : $t('btn.reserve') }}
+              <span class="icon icon-bookmark_add" aria-hidden="true" />{{ reserving ? $t('common.loading') : $t('btn.reserve') }}
             </button>
             <span v-if="game.earliest_available_at" class="gd-avail-note">
               Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
@@ -160,7 +175,7 @@
               :aria-label="`Bild ${i + 1} vergrößern`"
             >
               <img :src="img.url" :alt="game.title" class="gd-gallery__img" loading="lazy" />
-              <span class="gd-gallery__zoom" aria-hidden="true"><span class="icon">zoom_in</span></span>
+              <span class="gd-gallery__zoom" aria-hidden="true"><span class="icon icon-zoom_in" /></span>
             </button>
           </div>
         </div>
@@ -176,7 +191,7 @@
             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
           </svg>
           {{ $t('pages.game.instagram_view') }}
-          <span class="icon" style="font-size:0.8rem;opacity:0.5">open_in_new</span>
+          <span class="icon icon-open_in_new" style="font-size:0.8rem;opacity:0.5" aria-hidden="true" />
         </a>
 
       </main>
@@ -197,7 +212,7 @@
             <NuxtLink to="/upgrade" class="gd-bar__btn gd-bar__btn--sec">{{ $t('pages.game.membership_required') }}</NuxtLink>
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
-            <span class="gd-bar__btn gd-bar__btn--done"><span class="icon">check_circle</span></span>
+            <span class="gd-bar__btn gd-bar__btn--done"><span class="icon icon-check_circle" aria-hidden="true" /></span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
             <button v-if="(auth.user?.tokens ?? 0) >= 2" class="gd-bar__btn" @click="openLoanModal">
@@ -400,11 +415,23 @@ const hasMeta = computed(() =>
 )
 
 onMounted(async () => {
+  const slug = route.params.slug as string
   try {
-    const data = await fetchGame(route.params.slug as string)
-    game.value = data.data
-  } catch {
-    game.value = null
+    game.value = (await fetchGame(slug)).data
+  } catch (e: unknown) {
+    const status = (e as { status?: number })?.status
+    if (status === 404) {
+      // Definitive 404 — Spiel existiert nicht
+      game.value = null
+    } else {
+      // Transienter Fehler (Coldstart, Netzwerk) — einmal retry
+      await new Promise(r => setTimeout(r, 900))
+      try {
+        game.value = (await fetchGame(slug)).data
+      } catch {
+        game.value = null
+      }
+    }
   } finally {
     loading.value = false
   }
@@ -444,10 +471,6 @@ $bar-h:      72px;
   0%, 100% { transform: translateY(0); opacity: 0.4; }
   50%       { transform: translateY(8px); opacity: 0.9; }
 }
-@keyframes gd-spin {
-  to { transform: rotate(360deg); }
-}
-
 // ── Page shell ────────────────────────────────────────────────────
 .gd {
   min-height: 100vh;
@@ -474,13 +497,94 @@ $bar-h:      72px;
   }
 }
 
-.gd-spin {
-  width: 36px;
-  height: 36px;
-  border: 3px solid $amber-dim;
-  border-top-color: $amber;
-  border-radius: 50%;
-  animation: gd-spin 0.8s linear infinite;
+// ── Skeleton ──────────────────────────────────────────────────────
+.gd-skeleton {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: $ink;
+
+  &__hero {
+    position: relative;
+    min-height: 100svh;
+    background: $ink;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(247,150,61,0.06) 0%, transparent 65%);
+  }
+
+  &__back {
+    position: absolute;
+    top: calc(#{$nav-h} + 0.875rem);
+    left: 1.25rem;
+    width: 110px;
+    height: 30px;
+    border-radius: 999px;
+  }
+
+  &__stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(#{$nav-h} + 2.5rem) 2rem 3rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  &__poster {
+    width: min(200px, 58vw);
+    aspect-ratio: 3/4;
+    border-radius: 10px;
+    transform: rotate(-2deg);
+  }
+
+  &__caption {
+    position: relative;
+    z-index: 3;
+    padding: 0 1.5rem 2.5rem;
+    max-width: 680px;
+    margin: 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  &__pill {
+    width: 80px;
+    height: 22px;
+    border-radius: 999px;
+  }
+
+  &__title {
+    height: 2.6rem;
+    border-radius: 8px;
+    width: 75%;
+
+    &--short { width: 45%; height: 2.1rem; }
+  }
+
+  &__stats {
+    display: flex;
+    gap: 0;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  &__stat {
+    flex: 1;
+    height: 72px;
+    border-radius: 0;
+    border-right: 1px solid rgba(255,255,255,0.04);
+
+    &:last-child { border-right: none; }
+  }
 }
 
 // ── Hero ──────────────────────────────────────────────────────────

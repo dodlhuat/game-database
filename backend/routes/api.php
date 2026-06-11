@@ -32,6 +32,8 @@ Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'ind
 Route::get('/packages', [\App\Http\Controllers\PackageController::class, 'index']);
 Route::get('/packages/{package:slug}', [\App\Http\Controllers\PackageController::class, 'show']);
 Route::get('/terms', [\App\Http\Controllers\TermsController::class, 'show']);
+Route::get('/privacy', [\App\Http\Controllers\PrivacyController::class, 'show']);
+Route::get('/cookies', [\App\Http\Controllers\CookieController::class, 'show']);
 Route::get('/languages', [\App\Http\Controllers\LanguageController::class, 'index']);
 Route::get('/events', [\App\Http\Controllers\EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
 
