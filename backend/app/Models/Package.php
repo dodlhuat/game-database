@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Package extends Model
 {
+    /** @use HasFactory<\Database\Factories\PackageFactory> */
     use HasFactory;
     protected $fillable = [
         'name',
@@ -26,6 +27,7 @@ class Package extends Model
         ];
     }
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Copy extends Model
 {
+    /** @use HasFactory<\Database\Factories\CopyFactory> */
     use HasFactory;
     protected $fillable = [
         'game_id',

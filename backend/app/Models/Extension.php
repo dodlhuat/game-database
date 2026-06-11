@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Extension extends Model
 {
+    /** @use HasFactory<\Database\Factories\ExtensionFactory> */
     use HasFactory;
     protected $fillable = [
         'loan_id',
@@ -25,6 +26,7 @@ class Extension extends Model
         ];
     }
 
+    /** @return BelongsTo<Loan, $this> */
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);

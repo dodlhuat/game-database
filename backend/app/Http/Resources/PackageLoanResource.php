@@ -8,15 +8,20 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin \App\Models\PackageLoan */
 class PackageLoanResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
             'id'          => $this->id,
-            'package'     => $this->when($this->relationLoaded('package'), fn() => [
-                'id'   => $this->package->id,
-                'name' => $this->package->name,
-                'slug' => $this->package->slug,
-            ]),
+            'package'     => $this->when($this->relationLoaded('package'), function () {
+                /** @var \App\Models\Package $package */
+                $package = $this->package;
+                return [
+                    'id'   => $package->id,
+                    'name' => $package->name,
+                    'slug' => $package->slug,
+                ];
+            }),
             'user'        => new UserResource($this->whenLoaded('user')),
             'start_date'  => $this->start_date,
             'due_date'    => $this->due_date,

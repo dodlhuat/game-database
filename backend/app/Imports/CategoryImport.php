@@ -12,6 +12,7 @@ class CategoryImport implements ToModel, WithHeadingRow
     public int $newCount = 0;
     public int $updatedCount = 0;
 
+    /** @param array<string, mixed> $row */
     public function model(array $row): ?Category
     {
         $name = trim($row['name'] ?? '');

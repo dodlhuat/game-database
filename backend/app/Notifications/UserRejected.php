@@ -13,12 +13,13 @@ class UserRejected extends Notification
 
     public function __construct(private ?string $reason = null) {}
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
         $message = $this->buildFromTemplate('user_rejected', [
             'name' => $notifiable->name,

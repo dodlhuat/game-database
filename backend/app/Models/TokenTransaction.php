@@ -15,11 +15,13 @@ class TokenTransaction extends Model
         'description',
     ];
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Loan, $this> */
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);

@@ -23,6 +23,7 @@ class Newsletter extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function sender(): BelongsTo
     {
         return $this->belongsTo(User::class, 'sent_by');

@@ -38,12 +38,14 @@ class NewsletterController extends Controller
             );
         }
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         $newsletter = Newsletter::create([
             'subject'         => $validated['subject'],
             'body'            => $validated['body'],
             'sent_at'         => now(),
             'recipient_count' => $recipients->count(),
-            'sent_by'         => $request->user()->id,
+            'sent_by'         => $user->id,
         ]);
 
         return response()->json($newsletter->load('sender'), 201);

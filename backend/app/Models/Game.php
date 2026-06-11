@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Game extends Model
 {
+    /** @use HasFactory<\Database\Factories\GameFactory> */
     use HasFactory;
     protected $fillable = [
         'title',
@@ -48,11 +49,13 @@ class Game extends Model
         ];
     }
 
+    /** @return BelongsTo<Category, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
+    /** @return BelongsToMany<Tag, $this> */
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'game_tags');
@@ -64,6 +67,7 @@ class Game extends Model
         return $this->belongsToMany(Language::class);
     }
 
+    /** @return HasMany<Copy, $this> */
     public function copies(): HasMany
     {
         return $this->hasMany(Copy::class);
@@ -75,16 +79,19 @@ class Game extends Model
         return $this->hasMany(GameImage::class)->orderBy('sort_order');
     }
 
+    /** @return HasMany<Review, $this> */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
+    /** @return HasMany<Reservation, $this> */
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
     }
 
+    /** @return HasMany<Favorite, $this> */
     public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);

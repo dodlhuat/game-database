@@ -14,12 +14,13 @@ class ReservationAvailable extends Notification
 
     public function __construct(private Game $game) {}
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
         $catalogUrl = config('frontend.url') . '/games/' . $this->game->slug;
 

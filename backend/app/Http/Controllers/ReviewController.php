@@ -12,8 +12,11 @@ class ReviewController extends Controller
 {
     public function store(StoreReviewRequest $request): JsonResponse|ReviewResource
     {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
         $already = Review::where('game_id', $request->game_id)
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->exists();
 
         if ($already) {
@@ -23,7 +26,7 @@ class ReviewController extends Controller
         $review = Review::create([
             'game_id' => $request->game_id,
             'loan_id' => $request->loan_id,
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'rating'  => $request->rating,
             'comment' => $request->comment,
         ]);
@@ -35,7 +38,9 @@ class ReviewController extends Controller
 
     public function update(Request $request, Review $review): JsonResponse|ReviewResource
     {
-        if ($review->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($review->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
@@ -52,7 +57,9 @@ class ReviewController extends Controller
 
     public function destroy(Request $request, Review $review): JsonResponse
     {
-        if ($review->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($review->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 

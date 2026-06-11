@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reservation extends Model
 {
+    /** @use HasFactory<\Database\Factories\ReservationFactory> */
     use HasFactory;
     protected $fillable = [
         'game_id',

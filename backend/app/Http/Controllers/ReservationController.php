@@ -13,7 +13,9 @@ class ReservationController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $reservations = $request->user()->reservations()
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $reservations = $user->reservations()
             ->with('game')
             ->orderBy('position')
             ->get();
@@ -25,10 +27,14 @@ class ReservationController extends Controller
     {
         $request->validate(['game_id' => ['required', 'integer', 'exists:games,id']]);
 
+        /** @var \App\Models\Game $game */
         $game = Game::findOrFail($request->game_id);
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
         $already = Reservation::where('game_id', $game->id)
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->exists();
 
         if ($already) {
@@ -39,7 +45,7 @@ class ReservationController extends Controller
 
         $reservation = Reservation::create([
             'game_id' => $game->id,
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'position' => $position,
         ]);
 
@@ -50,7 +56,9 @@ class ReservationController extends Controller
 
     public function destroy(Request $request, Reservation $reservation): JsonResponse
     {
-        if ($reservation->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($reservation->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 

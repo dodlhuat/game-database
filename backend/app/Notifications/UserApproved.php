@@ -11,12 +11,13 @@ class UserApproved extends Notification
 {
     use Queueable, UsesEmailTemplate;
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
         $loginUrl = config('frontend.url') . '/login';
 

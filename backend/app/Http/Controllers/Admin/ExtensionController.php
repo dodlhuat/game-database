@@ -32,7 +32,9 @@ class ExtensionController extends Controller
             'admin_note' => $request->admin_note,
         ]);
 
-        $extension->loan->update([
+        /** @var \App\Models\Loan $loan */
+        $loan = $extension->loan;
+        $loan->update([
             'due_date' => $extension->requested_due_date,
             'status'   => 'EXTENDED',
         ]);

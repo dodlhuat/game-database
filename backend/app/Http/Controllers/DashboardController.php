@@ -11,6 +11,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         $activeLoans = $user->loans()

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,9 +13,11 @@ class CategoryRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
-        $categoryId = $this->route('category')?->id;
+        $route = $this->route('category');
+        $categoryId = $route instanceof Category ? $route->id : null;
 
         $isPatch = $this->isMethod('PATCH');
 

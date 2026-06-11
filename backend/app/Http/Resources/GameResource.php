@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin \App\Models\Game */
 class GameResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
@@ -44,7 +45,7 @@ class GameResource extends JsonResource
             'earliest_available_at' => $this->when(
                 $this->relationLoaded('copies'),
                 fn() => $this->copies
-                    ->flatMap(fn($copy) => $copy->activeLoans ?? collect())
+                    ->flatMap(fn(\App\Models\Copy $copy): \Illuminate\Support\Collection => $copy->activeLoans ?? collect())
                     ->whereIn('status', ['ACTIVE', 'EXTENDED'])
                     ->min('due_date')
             ),

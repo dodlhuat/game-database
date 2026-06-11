@@ -13,12 +13,13 @@ class ResetPasswordNotification extends Notification
 
     public function __construct(private string $token) {}
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
         $url = config('frontend.url')
             . '/reset-password?token=' . $this->token

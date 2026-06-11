@@ -60,7 +60,9 @@ class LoginController extends Controller
 
     public function destroy(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $user->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Erfolgreich abgemeldet.']);
     }

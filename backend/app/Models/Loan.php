@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Loan extends Model
 {
+    /** @use HasFactory<\Database\Factories\LoanFactory> */
     use HasFactory;
     protected $fillable = [
         'copy_id',
@@ -54,16 +55,19 @@ class Loan extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<Extension, $this> */
     public function extensions(): HasMany
     {
         return $this->hasMany(Extension::class);
     }
 
+    /** @return HasOne<Review, $this> */
     public function review(): HasOne
     {
         return $this->hasOne(Review::class);
     }
 
+    /** @return HasMany<DamageReport, $this> */
     public function damageReports(): HasMany
     {
         return $this->hasMany(DamageReport::class);

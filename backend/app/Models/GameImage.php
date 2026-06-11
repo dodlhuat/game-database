@@ -9,6 +9,7 @@ class GameImage extends Model
 {
     protected $fillable = ['game_id', 'url', 'sort_order'];
 
+    /** @return BelongsTo<Game, $this> */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);

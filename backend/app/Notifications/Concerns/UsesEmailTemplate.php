@@ -9,6 +9,9 @@ use Illuminate\Support\HtmlString;
 
 trait UsesEmailTemplate
 {
+    /**
+     * @param array<string, mixed> $vars
+     */
     protected function buildFromTemplate(string $key, array $vars, string $actionUrl, ?object $notifiable = null): MailMessage
     {
         /** @var EmailTemplate|null $tpl */

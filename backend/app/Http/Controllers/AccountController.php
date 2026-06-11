@@ -12,6 +12,7 @@ class AccountController extends Controller
 {
     public function update(Request $request): JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         $validated = $request->validate([

@@ -11,6 +11,7 @@ class MembershipController extends Controller
 {
     public function upgrade(Request $request): JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         if ($user->role !== 'USER') {
@@ -37,6 +38,7 @@ class MembershipController extends Controller
 
     public function renew(Request $request): JsonResponse
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         if ($user->role !== 'MEMBER') {

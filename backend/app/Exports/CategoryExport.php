@@ -10,8 +10,10 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
+/** @implements WithMapping<\App\Models\Category> */
 class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
+    /** @return Collection<int, \App\Models\Category> */
     public function collection(): Collection
     {
         // Flat list: parents first, then children, ordered by sort_order / name
@@ -37,6 +39,7 @@ class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithS
         return $rows;
     }
 
+    /** @return array<int, string> */
     public function headings(): array
     {
         return [
@@ -50,6 +53,7 @@ class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithS
         ];
     }
 
+    /** @return array<int, mixed> */
     public function map($category): array
     {
         return [
@@ -63,6 +67,7 @@ class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithS
         ];
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function styles(Worksheet $sheet): array
     {
         return [

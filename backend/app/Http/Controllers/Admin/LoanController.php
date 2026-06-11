@@ -53,7 +53,9 @@ class LoanController extends Controller
             'return_condition' => $request->return_condition,
         ]);
 
-        $loan->copy->update(['condition' => 'REVIEW']);
+        /** @var \App\Models\Copy $loanCopy */
+        $loanCopy = $loan->copy;
+        $loanCopy->update(['condition' => 'REVIEW']);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
     }

@@ -14,14 +14,18 @@ class DepositForfeited extends Notification
 
     public function __construct(private Loan $loan, private ?string $notes = null) {}
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
-        $game         = $this->loan->copy->game;
+        /** @var \App\Models\Copy $loanCopy */
+        $loanCopy     = $this->loan->copy;
+        /** @var \App\Models\Game $game */
+        $game         = $loanCopy->game;
         $dashboardUrl = config('frontend.url') . '/dashboard';
 
         return $this->buildFromTemplate('deposit_forfeited', [

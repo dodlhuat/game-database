@@ -103,36 +103,43 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // Relations
+    /** @return HasMany<Loan, $this> */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
+    /** @return HasMany<PackageLoan, $this> */
     public function packageLoans(): HasMany
     {
         return $this->hasMany(PackageLoan::class);
     }
 
+    /** @return HasMany<Reservation, $this> */
     public function reservations(): HasMany
     {
         return $this->hasMany(Reservation::class);
     }
 
+    /** @return HasMany<Review, $this> */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
+    /** @return HasMany<Favorite, $this> */
     public function favorites(): HasMany
     {
         return $this->hasMany(Favorite::class);
     }
 
+    /** @return HasMany<DamageReport, $this> */
     public function damageReports(): HasMany
     {
         return $this->hasMany(DamageReport::class);
     }
 
+    /** @return HasMany<TokenTransaction, $this> */
     public function tokenTransactions(): HasMany
     {
         return $this->hasMany(TokenTransaction::class);

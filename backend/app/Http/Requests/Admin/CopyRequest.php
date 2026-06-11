@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Copy;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,9 +13,11 @@ class CopyRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
-        $copyId = $this->route('copy')?->id;
+        $route = $this->route('copy');
+        $copyId = $route instanceof Copy ? $route->id : null;
 
         return [
             'game_id'   => ['required', 'integer', 'exists:games,id'],

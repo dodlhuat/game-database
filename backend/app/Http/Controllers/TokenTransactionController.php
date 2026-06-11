@@ -9,7 +9,9 @@ class TokenTransactionController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $transactions = $request->user()
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $transactions = $user
             ->tokenTransactions()
             ->with('loan.copy.game')
             ->orderByDesc('created_at')

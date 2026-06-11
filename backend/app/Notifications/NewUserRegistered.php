@@ -14,12 +14,13 @@ class NewUserRegistered extends Notification
 
     public function __construct(private User $newUser) {}
 
+    /** @return array<int, string> */
     public function via(): array
     {
         return ['mail'];
     }
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail(\App\Models\User $notifiable): MailMessage
     {
         $approveUrl = config('frontend.url') . '/admin/users';
 

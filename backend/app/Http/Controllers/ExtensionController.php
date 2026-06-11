@@ -12,6 +12,7 @@ class ExtensionController extends Controller
 {
     public function store(StoreExtensionRequest $request, Loan $loan): JsonResponse|ExtensionResource
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         if ($loan->user_id !== $user->id) {

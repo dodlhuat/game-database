@@ -10,13 +10,16 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use Illuminate\Support\Collection;
 
+/** @implements WithMapping<\App\Models\Game> */
 class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
+    /** @return Collection<int, \App\Models\Game> */
     public function collection(): Collection
     {
         return Game::with(['category', 'tags', 'languages'])->orderBy('title')->get();
     }
 
+    /** @return array<int, string> */
     public function headings(): array
     {
         return [
@@ -39,6 +42,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         ];
     }
 
+    /** @return array<int, mixed> */
     public function map($game): array
     {
         return [
@@ -61,6 +65,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
         ];
     }
 
+    /** @return array<int, array<string, mixed>> */
     public function styles(Worksheet $sheet): array
     {
         return [

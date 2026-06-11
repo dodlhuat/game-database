@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 
 class EmailTemplateController extends Controller
 {
+    /** @var array<string, array<string, mixed>> */
     private array $defaults = [
         'user_approved' => [
             'key'         => 'user_approved',

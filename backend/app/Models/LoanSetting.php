@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class LoanSetting extends Model
 {
+    /** @use HasFactory<\Database\Factories\LoanSettingFactory> */
     use HasFactory;
     protected $fillable = [
         'start_date',

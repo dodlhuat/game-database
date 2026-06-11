@@ -19,7 +19,9 @@ class LoanController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $loans = $request->user()->loans()
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $loans = $user->loans()
             ->with(['copy.game', 'extensions'])
             ->orderByDesc('created_at')
             ->paginate(20);
@@ -29,6 +31,7 @@ class LoanController extends Controller
 
     public function store(StoreLoanRequest $request): JsonResponse|LoanResource
     {
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         if (!$user->isAdmin()) {
@@ -40,6 +43,7 @@ class LoanController extends Controller
             }
         }
 
+        /** @var \App\Models\Copy $copy */
         $copy    = Copy::with('game')->findOrFail($request->copy_id);
         $setting = LoanSetting::instance();
 
@@ -142,7 +146,9 @@ class LoanController extends Controller
 
     public function show(Request $request, Loan $loan): JsonResponse|LoanResource
     {
-        if ($loan->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
@@ -153,7 +159,9 @@ class LoanController extends Controller
 
     public function return(ReturnLoanRequest $request, Loan $loan): JsonResponse|LoanResource
     {
-        if ($loan->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
@@ -168,7 +176,9 @@ class LoanController extends Controller
         ]);
 
         // Copy goes to REVIEW — admin must approve before it becomes available again
-        $loan->copy->update(['condition' => 'REVIEW']);
+        /** @var \App\Models\Copy $loanCopy */
+        $loanCopy = $loan->copy;
+        $loanCopy->update(['condition' => 'REVIEW']);
 
         // Reservation notify happens only after admin approves the copy
 

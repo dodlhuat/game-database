@@ -17,7 +17,9 @@ class PackageLoanController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $loans = $request->user()->packageLoans()
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $loans = $user->packageLoans()
             ->with(['package', 'loans.copy.game'])
             ->orderByDesc('created_at')
             ->paginate(20);
@@ -31,7 +33,9 @@ class PackageLoanController extends Controller
             'package_id' => ['required', 'integer', 'exists:packages,id'],
         ]);
 
+        /** @var \App\Models\User $user */
         $user    = $request->user();
+        /** @var \App\Models\Package $package */
         $package = Package::with('games')->findOrFail($request->package_id);
         $setting = LoanSetting::instance();
 
@@ -150,7 +154,9 @@ class PackageLoanController extends Controller
 
     public function return(Request $request, PackageLoan $packageLoan): JsonResponse|PackageLoanResource
     {
-        if ($packageLoan->user_id !== $request->user()->id && !$request->user()->isAdmin()) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        if ($packageLoan->user_id !== $user->id && !$user->isAdmin()) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
@@ -165,7 +171,9 @@ class PackageLoanController extends Controller
             ->get()
             ->each(function (\App\Models\Loan $loan) {
                 $loan->update(['status' => 'RETURNED', 'returned_at' => now()]);
-                $loan->copy->update(['condition' => 'REVIEW']);
+                /** @var \App\Models\Copy $loanCopy */
+                $loanCopy = $loan->copy;
+                $loanCopy->update(['condition' => 'REVIEW']);
             });
 
         $packageLoan->update(['status' => 'RETURNED', 'returned_at' => now()]);

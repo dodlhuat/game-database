@@ -17,9 +17,13 @@ class DamageReportController extends Controller
             'photo_url'   => ['nullable', 'url'],
         ]);
 
+        /** @var \App\Models\Loan $loan */
         $loan = Loan::findOrFail($validated['loan_id']);
 
-        if ($loan->user_id !== $request->user()->id) {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Nicht autorisiert.'], 403);
         }
 
@@ -29,7 +33,7 @@ class DamageReportController extends Controller
 
         $report = DamageReport::create([
             'loan_id'     => $loan->id,
-            'user_id'     => $request->user()->id,
+            'user_id'     => $user->id,
             'description' => $validated['description'],
             'photo_url'   => $validated['photo_url'] ?? null,
         ]);

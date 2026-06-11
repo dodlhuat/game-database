@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PackageLoan extends Model
 {
+    /** @use HasFactory<\Database\Factories\PackageLoanFactory> */
     use HasFactory;
     protected $fillable = [
         'package_id',

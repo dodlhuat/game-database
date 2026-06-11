@@ -8,6 +8,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /** @mixin \App\Models\Loan */
 class LoanResource extends JsonResource
 {
+    /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
@@ -15,7 +16,11 @@ class LoanResource extends JsonResource
             'copy'             => new CopyResource($this->whenLoaded('copy')),
             'game'             => $this->when(
                 $this->relationLoaded('copy') && $this->copy?->relationLoaded('game'),
-                fn() => $this->copy->game ? new GameResource($this->copy->game) : null
+                function () {
+                    /** @var \App\Models\Copy $copy */
+                    $copy = $this->copy;
+                    return $copy->game !== null ? new GameResource($copy->game) : null;
+                }
             ),
             'user'             => new UserResource($this->whenLoaded('user')),
             'start_date'       => $this->start_date,

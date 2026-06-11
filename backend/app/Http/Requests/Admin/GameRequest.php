@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Game;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -12,9 +13,11 @@ class GameRequest extends FormRequest
         return true;
     }
 
+    /** @return array<string, mixed> */
     public function rules(): array
     {
-        $gameId = $this->route('game')?->id;
+        $route = $this->route('game');
+        $gameId = $route instanceof Game ? $route->id : null;
 
         return [
             'title'             => ['required', 'string', 'max:255'],

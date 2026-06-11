@@ -16,6 +16,7 @@ class GameImport implements ToModel, WithHeadingRow
     public int $newCount = 0;
     public int $updatedCount = 0;
 
+    /** @param array<string, mixed> $row */
     public function model(array $row): ?Game
     {
         $title = trim($row['title'] ?? '');

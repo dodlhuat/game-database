@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tag extends Model
 {
+    /** @use HasFactory<\Database\Factories\TagFactory> */
     use HasFactory;
     protected $fillable = [
         'name',
         'slug',
     ];
 
+    /** @return BelongsToMany<Game, $this> */
     public function games(): BelongsToMany
     {
         return $this->belongsToMany(Game::class, 'game_tags');

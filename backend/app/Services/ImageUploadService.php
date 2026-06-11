@@ -15,7 +15,11 @@ class ImageUploadService
         }
 
         $filename = 'covers/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+        $contents = file_get_contents((string) $file->getRealPath());
+        if ($contents === false) {
+            throw new \RuntimeException('Could not read uploaded file.');
+        }
+        Storage::disk('public')->put($filename, $contents);
 
         return Storage::disk('public')->url($filename);
     }
@@ -23,7 +27,11 @@ class ImageUploadService
     public function uploadGameImage(UploadedFile $file): string
     {
         $filename = 'game-images/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+        $contents = file_get_contents((string) $file->getRealPath());
+        if ($contents === false) {
+            throw new \RuntimeException('Could not read uploaded file.');
+        }
+        Storage::disk('public')->put($filename, $contents);
 
         return Storage::disk('public')->url($filename);
     }
@@ -35,7 +43,11 @@ class ImageUploadService
         }
 
         $filename = 'events/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
-        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+        $contents = file_get_contents((string) $file->getRealPath());
+        if ($contents === false) {
+            throw new \RuntimeException('Could not read uploaded file.');
+        }
+        Storage::disk('public')->put($filename, $contents);
 
         return Storage::disk('public')->url($filename);
     }

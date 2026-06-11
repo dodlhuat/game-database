@@ -16,6 +16,7 @@ class TokenController extends Controller
             'amount' => ['required', 'integer', 'in:' . implode(',', self::ALLOWED_AMOUNTS)],
         ]);
 
+        /** @var \App\Models\User $user */
         $user = $request->user();
 
         if (!$user->isMember() && !$user->isAdmin()) {

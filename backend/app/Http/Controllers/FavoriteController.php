@@ -13,7 +13,9 @@ class FavoriteController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $games = Game::whereHas('favorites', fn($q) => $q->where('user_id', $request->user()->id))
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $games = Game::whereHas('favorites', fn($q) => $q->where('user_id', $user->id))
             ->with(['category', 'tags'])
             ->withCount('copies')
             ->withCount(['copies as available_copies_count' => fn($q) =>
@@ -29,9 +31,11 @@ class FavoriteController extends Controller
     {
         $request->validate(['game_id' => ['required', 'integer', 'exists:games,id']]);
 
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         Favorite::firstOrCreate([
             'game_id' => $request->game_id,
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
         ]);
 
         return response()->json(['message' => 'Zu Favoriten hinzugefügt.']);
@@ -39,8 +43,10 @@ class FavoriteController extends Controller
 
     public function destroy(Request $request, Game $game): JsonResponse
     {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
         Favorite::where('game_id', $game->id)
-            ->where('user_id', $request->user()->id)
+            ->where('user_id', $user->id)
             ->delete();
 
         return response()->json(['message' => 'Aus Favoriten entfernt.']);
