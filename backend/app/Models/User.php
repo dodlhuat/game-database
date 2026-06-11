@@ -11,6 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * @property 'USER'|'MEMBER'|'ADMIN' $role
+ * @property \Illuminate\Support\Carbon|null $membership_expires_at
+ * @property \Illuminate\Support\Carbon|null $date_of_birth
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */

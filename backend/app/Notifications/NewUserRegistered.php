@@ -21,7 +21,7 @@ class NewUserRegistered extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $approveUrl = config('frontend.url', env('FRONTEND_URL', 'http://localhost:3000')) . '/admin/users';
+        $approveUrl = config('frontend.url') . '/admin/users';
 
         return $this->buildFromTemplate('new_user_registered', [
             'name'  => $this->newUser->name,

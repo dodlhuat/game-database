@@ -9,15 +9,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Extend the role ENUM to include USER and change the default
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('USER', 'MEMBER', 'ADMIN') NOT NULL DEFAULT 'USER'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('USER', 'MEMBER', 'ADMIN') NOT NULL DEFAULT 'USER'");
+        }
 
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('tokens')->default(0)->after('role');
-            $table->timestamp('membership_expires_at')->nullable()->after('tokens');
+            if (!Schema::hasColumn('users', 'tokens')) {
+                $table->unsignedInteger('tokens')->default(0)->after('role');
+            }
+            if (!Schema::hasColumn('users', 'membership_expires_at')) {
+                $table->timestamp('membership_expires_at')->nullable()->after('tokens');
+            }
         });
 
-        // Existing MEMBER users (old default "registered" users) become USER
         DB::statement("UPDATE users SET role = 'USER' WHERE role = 'MEMBER'");
     }
 
@@ -29,6 +33,8 @@ return new class extends Migration
             $table->dropColumn(['tokens', 'membership_expires_at']);
         });
 
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('MEMBER', 'ADMIN') NOT NULL DEFAULT 'MEMBER'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('MEMBER', 'ADMIN') NOT NULL DEFAULT 'MEMBER'");
+        }
     }
 };

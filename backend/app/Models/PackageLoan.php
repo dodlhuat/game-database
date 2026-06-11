@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PackageLoan extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'package_id',
         'user_id',
@@ -26,16 +28,19 @@ class PackageLoan extends Model
         ];
     }
 
+    /** @return BelongsTo<Package, $this> */
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<Loan, $this> */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);

@@ -3,11 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property 'NEW'|'VERY_GOOD'|'GOOD'|'WORN'|'DAMAGED'|'LOCKED'|'REVIEW' $condition
+ */
 class Copy extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'game_id',
         'condition',
@@ -16,16 +21,19 @@ class Copy extends Model
         'notes',
     ];
 
+    /** @return BelongsTo<Game, $this> */
     public function game(): BelongsTo
     {
         return $this->belongsTo(Game::class);
     }
 
+    /** @return HasMany<Loan, $this> */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
+    /** @return HasMany<Loan, $this> */
     public function activeLoans(): HasMany
     {
         return $this->hasMany(Loan::class)->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE']);

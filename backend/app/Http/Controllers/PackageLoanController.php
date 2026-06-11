@@ -75,7 +75,9 @@ class PackageLoanController extends Controller
             $loanCost    = $setting->loan_cost;
             $totalDeposit = 0;
             foreach ($selectedCopies as $copy) {
-                $totalDeposit += $copy->calculateDeposit($copy->game, $setting);
+                /** @var \App\Models\Game $copyGame */
+                $copyGame = $copy->game;
+                $totalDeposit += $copy->calculateDeposit($copyGame, $setting);
             }
             $totalCost = $loanCost + $totalDeposit;
 
@@ -103,7 +105,9 @@ class PackageLoanController extends Controller
         ]);
 
         foreach ($selectedCopies as $copy) {
-            $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($copy->game, $setting);
+            /** @var \App\Models\Game $copyGame */
+            $copyGame = $copy->game;
+            $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($copyGame, $setting);
             $packageLoan->loans()->create([
                 'copy_id'        => $copy->id,
                 'user_id'        => $user->id,
@@ -159,7 +163,7 @@ class PackageLoanController extends Controller
             ->with('copy')
             ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
             ->get()
-            ->each(function ($loan) {
+            ->each(function (\App\Models\Loan $loan) {
                 $loan->update(['status' => 'RETURNED', 'returned_at' => now()]);
                 $loan->copy->update(['condition' => 'REVIEW']);
             });

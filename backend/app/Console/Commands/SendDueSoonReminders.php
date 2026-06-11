@@ -24,7 +24,9 @@ class SendDueSoonReminders extends Command
             ->get();
 
         foreach ($loans as $loan) {
-            Mail::to($loan->user->email)->queue(new DueSoonReminderMail($loan));
+            /** @var \App\Models\User $user */
+            $user = $loan->user;
+            Mail::to($user->email)->queue(new DueSoonReminderMail($loan));
         }
 
         $this->info("Sent {$loans->count()} due-soon reminder(s).");

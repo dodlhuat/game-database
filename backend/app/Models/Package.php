@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Package extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'name',
         'slug',
@@ -29,6 +31,7 @@ class Package extends Model
         return $this->belongsTo(Category::class);
     }
 
+    /** @return BelongsToMany<Game, $this> */
     public function games(): BelongsToMany
     {
         return $this->belongsToMany(Game::class, 'package_game');

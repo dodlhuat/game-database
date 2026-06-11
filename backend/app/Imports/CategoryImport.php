@@ -37,7 +37,7 @@ class CategoryImport implements ToModel, WithHeadingRow
         }
 
         $parentId = null;
-        if (isset($row['parent_id']) && $row['parent_id'] !== '' && $row['parent_id'] !== null) {
+        if (isset($row['parent_id']) && $row['parent_id'] !== '') {
             $parentIdValue = (int) $row['parent_id'];
             if ($parentIdValue > 0 && Category::find($parentIdValue)) {
                 $parentId = $parentIdValue;

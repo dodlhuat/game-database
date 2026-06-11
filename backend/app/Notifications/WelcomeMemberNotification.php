@@ -18,7 +18,7 @@ class WelcomeMemberNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $dashboardUrl = config('frontend.url', env('FRONTEND_URL', 'http://localhost:3000')) . '/dashboard';
+        $dashboardUrl = config('frontend.url') . '/dashboard';
 
         return $this->buildFromTemplate('welcome_member', [
             'name' => $notifiable->name,

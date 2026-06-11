@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('copies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('game_id')->constrained()->cascadeOnDelete();
-            $table->enum('condition', ['GOOD', 'WORN', 'DAMAGED', 'LOCKED'])->default('GOOD');
+            $table->enum('condition', ['NEW', 'VERY_GOOD', 'GOOD', 'WORN', 'DAMAGED', 'LOCKED', 'REVIEW'])->default('NEW');
             $table->string('qr_code')->unique()->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();

@@ -1,0 +1,12 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+
+    level: 5
+
+    ignoreErrors:
+        - identifier: nullsafe.neverNull
+          path: app/Notifications/Concerns/UsesEmailTemplate.php

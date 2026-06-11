@@ -3,12 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property bool|null $is_favorited
+ * @property bool|null $already_borrowed
+ * @property int|null $available_copies_count
+ */
 class Game extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'title',
         'slug',
@@ -51,6 +58,7 @@ class Game extends Model
         return $this->belongsToMany(Tag::class, 'game_tags');
     }
 
+    /** @return BelongsToMany<Language, $this> */
     public function languages(): BelongsToMany
     {
         return $this->belongsToMany(Language::class);
@@ -61,6 +69,7 @@ class Game extends Model
         return $this->hasMany(Copy::class);
     }
 
+    /** @return HasMany<GameImage, $this> */
     public function images(): HasMany
     {
         return $this->hasMany(GameImage::class)->orderBy('sort_order');

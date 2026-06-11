@@ -22,7 +22,7 @@ class DepositReleased extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $game         = $this->loan->copy->game;
-        $dashboardUrl = env('FRONTEND_URL', 'http://localhost:3000') . '/dashboard';
+        $dashboardUrl = config('frontend.url') . '/dashboard';
 
         return $this->buildFromTemplate('deposit_released', [
             'name'    => $notifiable->name,

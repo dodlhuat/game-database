@@ -61,9 +61,12 @@ class LoanController extends Controller
             return response()->json(['message' => 'Du hast dieses Spiel bereits ausgeliehen.'], 422);
         }
 
+        /** @var \App\Models\Game $game */
+        $game = $copy->game;
+
         if (!$user->isAdmin()) {
             $loanCost = $setting->loan_cost;
-            $deposit  = $copy->calculateDeposit($copy->game, $setting);
+            $deposit  = $copy->calculateDeposit($game, $setting);
             $totalCost = $loanCost + $deposit;
 
             if (!$user->hasEnoughFreeTokens($totalCost)) {
@@ -99,7 +102,7 @@ class LoanController extends Controller
                 'loan_id'     => $loan->id,
                 'type'        => 'BORROW',
                 'amount'      => -$loanCost,
-                'description' => "Leihgebühr: {$copy->game->title}",
+                'description' => "Leihgebühr: {$game->title}",
             ]);
 
             if ($deposit > 0) {
@@ -109,7 +112,7 @@ class LoanController extends Controller
                     'loan_id'     => $loan->id,
                     'type'        => 'DEPOSIT_BLOCK',
                     'amount'      => -$deposit,
-                    'description' => "Kaution blockiert: {$copy->game->title}",
+                    'description' => "Kaution blockiert: {$game->title}",
                 ]);
             }
         }

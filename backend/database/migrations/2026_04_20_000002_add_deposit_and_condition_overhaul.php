@@ -23,7 +23,9 @@ return new class extends Migration
         });
 
         DB::statement("UPDATE copies SET `condition` = 'GOOD' WHERE `condition` = 'WORN'");
-        DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('NEW','VERY_GOOD','GOOD','REVIEW','DAMAGED','LOCKED') NOT NULL DEFAULT 'NEW'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('NEW','VERY_GOOD','GOOD','REVIEW','DAMAGED','LOCKED') NOT NULL DEFAULT 'NEW'");
+        }
 
         Schema::table('loans', function (Blueprint $table) {
             if (!Schema::hasColumn('loans', 'deposit_tokens')) {
@@ -48,7 +50,9 @@ return new class extends Migration
             $table->dropColumn('borrow_count');
         });
 
-        DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('GOOD','WORN','DAMAGED','LOCKED') NOT NULL DEFAULT 'GOOD'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('GOOD','WORN','DAMAGED','LOCKED') NOT NULL DEFAULT 'GOOD'");
+        }
 
         Schema::table('loans', function (Blueprint $table) {
             $table->dropColumn('deposit_tokens');

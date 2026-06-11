@@ -11,6 +11,7 @@ trait UsesEmailTemplate
 {
     protected function buildFromTemplate(string $key, array $vars, string $actionUrl, ?object $notifiable = null): MailMessage
     {
+        /** @var EmailTemplate|null $tpl */
         $tpl = EmailTemplate::where('key', $key)->first();
 
         $subject    = $tpl?->subject    ?? '';

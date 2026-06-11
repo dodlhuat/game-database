@@ -21,6 +21,7 @@ class GameImageController extends Controller
         ]);
 
         $nextOrder = $game->images()->max('sort_order') + 1;
+        /** @var \App\Models\GameImage[] $created */
         $created = [];
 
         foreach ($request->file('images') as $file) {
@@ -32,7 +33,7 @@ class GameImageController extends Controller
         }
 
         return response()->json([
-            'images' => array_map(fn ($img) => ['id' => $img->id, 'url' => $img->url], $created),
+            'images' => array_map(fn (\App\Models\GameImage $img) => ['id' => $img->id, 'url' => $img->url], $created),
         ]);
     }
 

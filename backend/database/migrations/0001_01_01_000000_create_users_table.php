@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['MEMBER', 'ADMIN'])->default('MEMBER');
+            $table->enum('role', ['USER', 'MEMBER', 'ADMIN'])->default('USER');
             $table->enum('status', ['PENDING', 'ACTIVE', 'REJECTED', 'SUSPENDED'])->default('PENDING');
             $table->boolean('newsletter_opt_in')->default(false);
             $table->timestamp('terms_accepted_at')->nullable();
