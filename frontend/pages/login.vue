@@ -1,59 +1,44 @@
 <template>
-  <div class="auth-page" data-theme="dark">
-    <div class="auth-page__backdrop" aria-hidden="true">
-      <div class="auth-page__glow" />
-      <div class="auth-page__dots" />
-    </div>
+  <div class="auth-card">
+    <div class="auth-card__eyebrow">{{ $t('auth.member_area') }}</div>
+    <h1 class="auth-card__title">{{ $t('auth.login_title') }}</h1>
 
-    <div class="auth-page__body">
-      <div class="auth-page__brand">
-        <NuxtLink to="/" class="auth-page__brand-link">
-          <span class="auth-page__hex" aria-hidden="true">⬡</span>
-          <span class="auth-page__name">AUA</span>
-        </NuxtLink>
+    <form @submit.prevent="submit">
+      <UiInput
+        v-model="form.email"
+        type="email"
+        :label="$t('auth.email')"
+        :error="errors.email"
+        required
+        autocomplete="email"
+      />
+      <UiInput
+        v-model="form.password"
+        type="password"
+        :label="$t('auth.password')"
+        :error="errors.password"
+        required
+        autocomplete="current-password"
+      />
+      <NuxtLink to="/forgot-password" class="forgot-link">{{ $t('auth.forgot_password') }}</NuxtLink>
+
+      <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
+        {{ $t('auth.email_not_verified') }}
+        <button type="button" class="resend-link" :disabled="resendLoading" @click="resendVerification">
+          {{ resendLoading ? $t('auth.resending') : $t('auth.resend_link') }}
+        </button>
+        <span v-if="resendSuccess" class="resend-success">{{ $t('auth.email_sent') }}</span>
+        <span v-if="resendError" class="resend-error">{{ $t('common.error.generic') }}</span>
       </div>
 
-      <div class="auth-card">
-        <div class="auth-card__eyebrow">{{ $t('auth.member_area') }}</div>
-        <h1 class="auth-card__title">{{ $t('auth.login_title') }}</h1>
+      <div v-else-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
 
-        <form @submit.prevent="submit">
-          <UiInput
-            v-model="form.email"
-            type="email"
-            :label="$t('auth.email')"
-            :error="errors.email"
-            required
-            autocomplete="email"
-          />
-          <UiInput
-            v-model="form.password"
-            type="password"
-            :label="$t('auth.password')"
-            :error="errors.password"
-            required
-            autocomplete="current-password"
-          />
-          <NuxtLink to="/forgot-password" class="forgot-link">{{ $t('auth.forgot_password') }}</NuxtLink>
+      <UiButton type="submit" :loading="loading">{{ $t('btn.login') }}</UiButton>
+    </form>
 
-          <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
-            {{ $t('auth.email_not_verified') }}
-            <button type="button" class="resend-link" :disabled="resendLoading" @click="resendVerification">
-              {{ resendLoading ? $t('auth.resending') : $t('auth.resend_link') }}
-            </button>
-            <span v-if="resendSuccess" class="resend-success">{{ $t('auth.email_sent') }}</span>
-          </div>
-
-          <div v-else-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
-
-          <UiButton type="submit" :loading="loading">{{ $t('btn.login') }}</UiButton>
-        </form>
-
-        <p class="auth-card__footer-text">
-          {{ $t('auth.no_account') }} <NuxtLink to="/register">{{ $t('btn.register') }}</NuxtLink>
-        </p>
-      </div>
-    </div>
+    <p class="auth-card__footer-text">
+      {{ $t('auth.no_account') }} <NuxtLink to="/register">{{ $t('btn.register') }}</NuxtLink>
+    </p>
   </div>
 </template>
 
@@ -70,6 +55,7 @@ const loading = ref(false)
 const emailNotVerified = ref(false)
 const resendLoading = ref(false)
 const resendSuccess = ref(false)
+const resendError = ref(false)
 const lastEmail = ref('')
 const statusMessage = ref(
   route.query.reason === 'unauthenticated'
@@ -110,11 +96,12 @@ async function submit() {
 async function resendVerification() {
   resendLoading.value = true
   resendSuccess.value = false
+  resendError.value = false
   try {
-    await api.post('/auth/email/resend')
+    await api.post('/auth/email/resend', { email: form.email })
     resendSuccess.value = true
   } catch {
-    // ignore
+    resendError.value = true
   } finally {
     resendLoading.value = false
   }
@@ -122,141 +109,6 @@ async function resendVerification() {
 </script>
 
 <style lang="scss" scoped>
-$bg: #0F0E0C;
-$amber-glow: rgba(212, 146, 30, 0.18);
-$amber-08: rgba(212, 146, 30, 0.08);
-$amber-20: rgba(212, 146, 30, 0.20);
-$text: #EEE8DF;
-$muted: rgba(238, 232, 223, 0.65);
-
-.auth-page {
-  position: relative;
-  min-height: 100vh;
-  background: $bg;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1.25rem;
-
-  &__backdrop {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-
-  &__glow {
-    position: absolute;
-    width: 560px;
-    height: 560px;
-    top: -160px;
-    right: -100px;
-    border-radius: 50%;
-    filter: blur(110px);
-    background: $amber-glow;
-  }
-
-  &__dots {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 24px 24px;
-    mask-image: radial-gradient(ellipse 80% 80% at 70% 30%, black 20%, transparent 100%);
-  }
-
-  &__body {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 420px;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  &__brand {
-    display: flex;
-    justify-content: center;
-  }
-
-  &__brand-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    text-decoration: none;
-  }
-
-  &__hex {
-    font-size: 1.2rem;
-    color: $amber;
-  }
-
-  &__name {
-    font-size: 1rem;
-    font-weight: 800;
-    color: $text;
-    letter-spacing: -0.03em;
-  }
-}
-
-.auth-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(238, 232, 223, 0.1);
-  border-radius: 16px;
-  padding: 2rem;
-  backdrop-filter: blur(8px);
-
-  &__eyebrow {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: $amber;
-    margin-bottom: 0.4rem;
-  }
-
-  &__title {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: $text;
-    margin-bottom: 1.75rem;
-  }
-
-  &__footer-text {
-    font-size: 0.875rem;
-    color: $muted;
-    text-align: center;
-    margin-top: 1.25rem;
-    padding-bottom: 0;
-
-    a {
-      color: $amber;
-      text-decoration: none;
-      font-weight: 600;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-}
-
-.resend-link {
-  background: none;
-  border: none;
-  color: $amber;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 0.5rem;
-  text-decoration: underline;
-
-  &:disabled { opacity: 0.5; cursor: default; }
-}
-
 :deep(.input-wrapper) {
   margin-bottom: 1.25rem;
 }
@@ -274,9 +126,29 @@ $muted: rgba(238, 232, 223, 0.65);
   &:hover { color: $amber; }
 }
 
+.resend-link {
+  background: none;
+  border: none;
+  color: $amber;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  text-decoration: underline;
+
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
 .resend-success {
   font-size: 0.8rem;
   color: rgba(238, 232, 223, 0.72);
+  margin-left: 0.4rem;
+}
+
+.resend-error {
+  font-size: 0.8rem;
+  color: #e06c6c;
   margin-left: 0.4rem;
 }
 </style>

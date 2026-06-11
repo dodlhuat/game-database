@@ -19,7 +19,8 @@ export function useAuth() {
   const auth = useAuthStore()
 
   async function register(payload: RegisterPayload) {
-    const data = await api.post<{ message: string; user: unknown }>('/auth/register', payload)
+    const data = await api.post<{ message: string; token: string; user: Parameters<typeof auth.setAuth>[0] }>('/auth/register', payload)
+    auth.setAuth(data.user, data.token)
     return data
   }
 

@@ -170,7 +170,7 @@
 
         <template v-else>
           <div class="game-grid">
-            <GameCard v-for="game in games" :key="game.id" :game="game" />
+            <GameCard v-for="(game, index) in games" :key="game.id" :game="game" :style="{ '--i': index }" />
           </div>
 
           <div v-if="meta.last_page > 1" class="pagination">
@@ -197,23 +197,7 @@
       </div>
     </section>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
-    <footer class="l-footer">
-      <div class="l-footer__inner">
-        <div class="l-footer__brand">
-          <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">AUA</span>
-        </div>
-        <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
-          <NuxtLink to="/packages" class="l-footer__link">{{ $t('nav.packages') }}</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
-        </nav>
-        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
-      </div>
-    </footer>
+    <AppFooter />
 
   </div>
 
@@ -249,7 +233,7 @@ const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
 const categories = ref<CategoryItem[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
-const year = new Date().getFullYear()
+
 
 // ── Category popover ───────────────────────────────────────────────
 const catChipRef = ref<HTMLElement | null>(null)
@@ -882,50 +866,6 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   }
 }
 
-// ─── Footer ───────────────────────────────────────────────────────
-.l-footer {
-  background: $hero-bg;
-  border-top: 1px solid $hero-divider;
-  padding: 2.5rem 1.5rem;
-
-  &__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-  &__hex { font-size: 1.2rem; color: $amber; }
-  &__name { font-size: 0.95rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; }
-
-  &__nav {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    flex: 1;
-    justify-content: center;
-    @media (max-width: 640px) { justify-content: flex-start; }
-  }
-
-  &__link {
-    font-size: 0.85rem;
-    color: $hero-muted;
-    text-decoration: none;
-    transition: color 0.2s;
-    &:hover { color: $hero-text; }
-  }
-
-  &__copy {
-    font-size: 0.8rem;
-    color: $hero-muted-50;
-    margin-left: auto;
-    padding-bottom: 0;
-    @media (max-width: 640px) { margin-left: 0; width: 100%; }
-  }
-}
 </style>
 
 <!-- Global (non-scoped) styles for the teleported category popover -->

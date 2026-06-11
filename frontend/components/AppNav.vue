@@ -6,6 +6,15 @@
         <span class="l-nav__brand-name">AUA</span>
       </NuxtLink>
 
+      <nav class="l-nav__links" aria-label="Hauptnavigation">
+        <NuxtLink to="/games" class="l-nav__link">{{ $t('nav.games') }}</NuxtLink>
+        <NuxtLink to="/packages" class="l-nav__link">{{ $t('nav.packages') }}</NuxtLink>
+        <template v-if="auth.isLoggedIn">
+          <NuxtLink to="/events" class="l-nav__link">{{ $t('nav.events') }}</NuxtLink>
+          <NuxtLink to="/dashboard" class="l-nav__link">{{ $t('nav.dashboard') }}</NuxtLink>
+        </template>
+      </nav>
+
       <div class="l-nav__actions">
         <template v-if="!auth.isLoggedIn">
           <NuxtLink to="/login" class="button l-nav__btn">{{ $t('nav.login') }}</NuxtLink>
@@ -121,7 +130,7 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
   &__inner {
     max-width: 1200px; margin: 0 auto; height: 100%;
-    padding: 0 1.5rem; display: flex; align-items: center; gap: 1.5rem;
+    padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem;
   }
 
   &__brand {
@@ -135,6 +144,37 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     font-size: 1.1rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em;
   }
 
+  // ── Desktop inline nav links ────────────────────────────────
+  &__links {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 1rem;
+
+    @media (max-width: 900px) { display: none; }
+  }
+
+  &__link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: $hero-muted;
+    text-decoration: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: color 0.2s, background 0.2s;
+
+    &:hover {
+      color: $hero-text;
+      background: $hero-text-08;
+    }
+
+    &.router-link-active {
+      color: $amber;
+    }
+  }
+
+  // ── Auth actions ────────────────────────────────────────────
   &__actions {
     display: flex; align-items: center; gap: 0.5rem; margin-left: auto;
     @media (max-width: 640px) { display: none; }
@@ -144,21 +184,22 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
   &__user { font-size: 0.9rem; font-weight: 500; color: $hero-muted; }
 
+  // ── Theme toggle ────────────────────────────────────────────
   &__theme-btn {
     display: flex; align-items: center; justify-content: center;
-    width: 38px; height: 38px; padding: 0;
-    background: $hero-divider; border: 1px solid $hero-text-08;
+    width: 32px; height: 32px; padding: 0;
+    background: transparent; border: none;
     border-radius: 8px; color: $hero-muted; cursor: pointer; flex-shrink: 0;
     transition: background 0.2s, color 0.2s, transform 0.2s;
     .icon { font-size: 1.125rem; }
     &:hover { background: $hero-text-10; color: $hero-text; transform: rotate(12deg); }
   }
 
-  // Push-menu trigger — the label itself is .navigation so .click() toggles checkbox
+  // Push-menu trigger
   &__trigger {
     display: flex; align-items: center; justify-content: center;
     width: 38px; height: 38px; flex-shrink: 0;
-    background: $hero-divider; border: 1px solid $hero-text-08;
+    background: $hero-text-08; border: 1px solid $hero-text-08;
     border-radius: 8px; color: $hero-muted; cursor: pointer;
     transition: background 0.2s, color 0.2s;
     &:hover { background: $hero-text-10; color: $hero-text; }

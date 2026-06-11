@@ -97,22 +97,7 @@
       </section>
     </Transition>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
-    <footer class="l-footer">
-      <div class="l-footer__inner">
-        <div class="l-footer__brand">
-          <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">AUA</span>
-        </div>
-        <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
-        </nav>
-        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
-      </div>
-    </footer>
+    <AppFooter />
 
   </div>
 </template>
@@ -121,7 +106,6 @@
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
-const year = new Date().getFullYear()
 </script>
 
 <style lang="scss" scoped>
@@ -226,6 +210,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     border: 1px solid $amber-35;
     border-radius: 999px;
     background: $amber-08;
+    animation: heroIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
   }
 
   &__title {
@@ -235,6 +220,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     letter-spacing: -0.04em;
     color: $hero-text;
     margin: 0 0 1.5rem;
+    animation: heroIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
   }
 
   &__title-em {
@@ -249,6 +235,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     max-width: 520px;
     margin-bottom: 2.5rem;
     padding-bottom: 0;
+    animation: heroIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
   }
 
   &__cta-row {
@@ -256,6 +243,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     align-items: center;
     gap: 1.25rem;
     flex-wrap: wrap;
+    animation: heroIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both;
   }
 
   &__cta-primary {
@@ -323,6 +311,11 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
   50%       { opacity: 0.8; transform: scaleY(1.3); }
 }
 
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 // ─── Features ─────────────────────────────────────────────────────
 .features {
   background: var(--background);
@@ -348,19 +341,44 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: auto auto;
     gap: 1.5rem;
-    @media (max-width: 900px) { grid-template-columns: 1fr; }
+    align-items: start;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
   }
 
   &__card {
     padding: 2rem;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    &:hover { transform: translateY(-4px); }
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    // First card: full-height left column, more prominent
+    &:first-child {
+      grid-row: 1 / 3;
+      padding: 2.5rem;
+
+      @media (max-width: 900px) {
+        grid-row: auto;
+        padding: 2rem;
+      }
+
+      .features__card-title { font-size: 1.4rem; }
+      .features__card-text  { font-size: 1rem; }
+      .feat-icon            { width: 56px; height: 56px; .icon { font-size: 1.75rem; } }
+    }
   }
 
   &__card-title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
     margin: 1rem 0 0.5rem;
     color: var(--primary-text);
@@ -424,60 +442,4 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
   &__actions { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
 }
 
-// ─── Footer ───────────────────────────────────────────────────────
-.l-footer {
-  margin-top: auto;
-  background: $hero-bg;
-  border-top: 1px solid $hero-divider;
-  padding: 2.5rem 1.5rem;
-
-  &__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-
-  &__hex { font-size: 1.2rem; color: $amber; }
-
-  &__name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: $hero-text;
-    letter-spacing: -0.02em;
-  }
-
-  &__nav {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    flex: 1;
-    position: static;
-    transform: none;
-    width: auto;
-    height: auto;
-    justify-content: center;
-    @media (max-width: 640px) { justify-content: flex-start; }
-  }
-
-  &__link {
-    font-size: 0.85rem;
-    color: $hero-muted;
-    text-decoration: none;
-    transition: color 0.2s;
-    &:hover { color: $hero-text; }
-  }
-
-  &__copy {
-    font-size: 0.8rem;
-    color: $hero-muted-50;
-    margin-left: auto;
-    padding-bottom: 0;
-    @media (max-width: 640px) { margin-left: 0; width: 100%; }
-  }
-}
 </style>

@@ -6,6 +6,7 @@
         :src="game.cover_image_url"
         :alt="game.title"
         class="game-card__img"
+        loading="lazy"
       />
       <div v-else class="game-card__placeholder">
         <span class="icon icon-layers" aria-hidden="true" />
@@ -58,8 +59,13 @@ function difficultyLabel(d: string) {
 </script>
 
 <style lang="scss" scoped>
-$amber-08:     rgba(212, 146, 30, 0.08);
-$amber-30:     rgba(212, 146, 30, 0.30);
+$amber-08: rgba(212, 146, 30, 0.08);
+$amber-30: rgba(212, 146, 30, 0.30);
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 .game-card {
   display: flex;
@@ -71,20 +77,26 @@ $amber-30:     rgba(212, 146, 30, 0.30);
   text-decoration: none;
   color: inherit;
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) calc(min(var(--i, 0), 10) * 30ms) both;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.30), 0 0 0 1px rgba(212, 146, 30, 0.18);
     border-color: $amber-30;
   }
 
   // ── Media ──────────────────────────────────────────────────────
   &__media {
     position: relative;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 4;
     overflow: hidden;
     background: var(--background);
     flex-shrink: 0;
+
+    @media (max-width: 480px) {
+      aspect-ratio: unset;
+      max-height: 200px;
+    }
   }
 
   &__img {
@@ -124,19 +136,19 @@ $amber-30:     rgba(212, 146, 30, 0.30);
     border-radius: 999px;
 
     &--avail {
-      background: #166534;
-      color: #bbf7d0;
+      background: var(--success-surface, #166534);
+      color: var(--success-text, #bbf7d0);
     }
 
     &--out {
-      background: #7c2d12;
-      color: #fed7aa;
+      background: var(--warning-surface, #7c2d12);
+      color: var(--warning-text, #fed7aa);
     }
   }
 
   // ── Body ───────────────────────────────────────────────────────
   &__body {
-    padding: 1rem 1.1rem 1.2rem;
+    padding: 1rem 1.125rem;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
@@ -153,8 +165,8 @@ $amber-30:     rgba(212, 146, 30, 0.30);
   }
 
   &__title {
-    font-size: 1rem;
-    font-weight: 700;
+    font-size: 1.05rem;
+    font-weight: 800;
     letter-spacing: -0.02em;
     color: var(--primary-text);
     line-height: 1.3;

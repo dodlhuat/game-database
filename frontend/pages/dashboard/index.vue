@@ -114,22 +114,22 @@
                 </thead>
                 <tbody>
                   <tr v-for="loan in activeLoans" :key="loan.id">
-                    <td>
+                    <td :data-label="$t('dashboard.table.game')">
                       <NuxtLink :to="`/games/${loan.game?.slug}`" class="dash-table__link">
                         {{ loan.game?.title }}
                       </NuxtLink>
                     </td>
-                    <td>
+                    <td :data-label="$t('dashboard.table.status')">
                       <span class="badge" :class="loanStatusVariant(loan)">
                         {{ loanStatusLabel(loan) }}
                       </span>
                     </td>
-                    <td>
+                    <td :data-label="$t('dashboard.table.due_date')">
                       <span :class="{ 'text-warn': loan.status === 'OVERDUE' }">
                         {{ formatDate(loan.due_date) }}
                       </span>
                     </td>
-                    <td>
+                    <td :data-label="$t('dashboard.table.actions')">
                       <div class="action-row">
                         <template v-if="loan.status !== 'RETURNED'">
                           <span v-if="pendingExtension(loan)" class="badge badge-warning">
@@ -172,11 +172,11 @@
                 </thead>
                 <tbody>
                   <tr v-for="res in reservations" :key="res.id">
-                    <td>{{ res.game?.title }}</td>
-                    <td>
+                    <td :data-label="$t('dashboard.table.game')">{{ res.game?.title }}</td>
+                    <td :data-label="$t('dashboard.table.position')">
                       <span class="queue-badge"># {{ res.position }}</span>
                     </td>
-                    <td>
+                    <td :data-label="$t('dashboard.table.actions')">
                       <button class="action-btn action-btn--danger" @click="cancelReservation(res.id)">
                         {{ $t('dashboard.cancel_reservation') }}
                       </button>
@@ -209,8 +209,8 @@
                 </thead>
                 <tbody>
                   <tr v-for="loan in loanHistory" :key="loan.id">
-                    <td>{{ loan.game?.title }}</td>
-                    <td>{{ formatDate(loan.returned_at!) }}</td>
+                    <td :data-label="$t('dashboard.table.game')">{{ loan.game?.title }}</td>
+                    <td :data-label="$t('dashboard.table.returned_at')">{{ formatDate(loan.returned_at!) }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -303,22 +303,7 @@
       </div>
     </Transition>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
-    <footer class="l-footer">
-      <div class="l-footer__inner">
-        <div class="l-footer__brand">
-          <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">AUA</span>
-        </div>
-        <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
-        </nav>
-        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
-      </div>
-    </footer>
+    <AppFooter />
 
   </div>
 </template>
@@ -334,7 +319,7 @@ const { logout } = useAuth()
 const { t } = useI18n()
 const { fetchDashboard, returnLoan: doReturn, requestExtension, removeReservation, reportDamage } = useLoans()
 
-const year = new Date().getFullYear()
+
 const loading = ref(true)
 const data = ref<DashboardData | null>(null)
 
@@ -754,6 +739,10 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
 // ─── Tables ───────────────────────────────────────────────────────
 .table-wrap {
   overflow-x: auto;
+
+  @media (max-width: 680px) {
+    overflow-x: unset;
+  }
 }
 
 .dash-table {
@@ -796,6 +785,52 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     font-weight: 500;
     transition: color 0.2s;
     &:hover { color: var(--accent-color); }
+  }
+
+  // ── Mobile: table → card list ──────────────────────────────
+  @media (max-width: 680px) {
+    thead { display: none; }
+
+    tbody tr {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--divider);
+      &:last-child { border-bottom: none; }
+      &:hover { background: transparent; }
+    }
+
+    td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border: none;
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--secondary-text);
+        flex-shrink: 0;
+        margin-right: 0.75rem;
+      }
+
+      &:last-child {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding-top: 0.75rem;
+        margin-top: 0.25rem;
+        border-top: 1px solid var(--divider);
+
+        &::before { margin-bottom: 0; }
+
+        .action-row { flex-wrap: wrap; }
+      }
+    }
   }
 }
 
@@ -1017,62 +1052,6 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   }
 }
 
-// ─── Footer ───────────────────────────────────────────────────────
-.l-footer {
-  background: $hero-bg;
-  border-top: 1px solid $hero-divider;
-  padding: 2.5rem 1.5rem;
-
-  &__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-
-  &__hex { font-size: 1.2rem; color: $amber; }
-
-  &__name {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: $hero-text;
-    letter-spacing: -0.02em;
-  }
-
-  &__nav {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    flex: 1;
-    justify-content: center;
-    position: static;
-    transform: none;
-    width: auto;
-    height: auto;
-    @media (max-width: 640px) { justify-content: flex-start; }
-  }
-
-  &__link {
-    font-size: 0.85rem;
-    color: $hero-muted;
-    text-decoration: none;
-    transition: color 0.2s;
-    &:hover { color: $hero-text; }
-  }
-
-  &__copy {
-    font-size: 0.8rem;
-    color: $hero-muted-50;
-    margin-left: auto;
-    padding-bottom: 0;
-    @media (max-width: 640px) { margin-left: 0; width: 100%; }
-  }
-}
-
 // ── Membership Bar ────────────────────────────────────────────────────
 .membership-bar {
   margin-top: 1.5rem;
@@ -1087,19 +1066,33 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   &__upgrade {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: rgba(212, 146, 30, 0.06);
+    border: 1px solid rgba(212, 146, 30, 0.25);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
     font-size: 0.875rem;
   }
 
-  &__text { color: $hero-muted; }
+  &__text { color: $hero-muted; flex: 1; }
 
   &__cta {
-    color: $amber;
-    font-weight: 600;
-    font-size: 0.875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #1a0d00;
+    background: $amber;
+    font-weight: 700;
+    font-size: 0.8rem;
     text-decoration: none;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    transition: filter 0.18s;
 
-    &:hover { text-decoration: underline; }
+    &:hover { filter: brightness(1.09); }
   }
 }
 

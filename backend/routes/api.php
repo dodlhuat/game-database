@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [\App\Http\Controllers\Auth\LoginController::class, 'store']);
     Route::get('/verify-email/{id}', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])
         ->name('auth.verify-email');
+    Route::post('/email/resend', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'resend']);
     Route::post('/forgot-password', [\App\Http\Controllers\Auth\ForgotPasswordController::class, 'store']);
     Route::post('/reset-password', [\App\Http\Controllers\Auth\ResetPasswordController::class, 'store']);
 });
@@ -44,7 +45,6 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Auth
     Route::post('/auth/logout', [\App\Http\Controllers\Auth\LoginController::class, 'destroy']);
     Route::get('/auth/me', [\App\Http\Controllers\Auth\LoginController::class, 'me']);
-    Route::post('/auth/email/resend', [\App\Http\Controllers\Auth\EmailVerificationController::class, 'resend']);
 
     // Ausleihen
     Route::get('/loans', [\App\Http\Controllers\LoanController::class, 'index']);

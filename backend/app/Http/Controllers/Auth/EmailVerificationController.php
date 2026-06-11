@@ -38,10 +38,13 @@ class EmailVerificationController extends Controller
 
     public function resend(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $request->validate(['email' => ['required', 'email']]);
 
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'E-Mail-Adresse bereits bestätigt.'], 422);
+        $user = User::where('email', $request->email)->first();
+
+        // Keine Information preisgeben ob die E-Mail existiert
+        if (!$user || $user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Bestätigungs-E-Mail wurde erneut gesendet.']);
         }
 
         $user->notify(new VerifyEmailNotification());

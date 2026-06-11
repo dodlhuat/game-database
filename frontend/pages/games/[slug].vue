@@ -157,6 +157,12 @@
           </template>
         </div>
 
+        <Transition name="gd-status-fade">
+          <div v-if="reserveStatus" class="gd-reserve-status" :class="`gd-reserve-status--${reserveStatus.type}`" role="status">
+            {{ reserveStatus.text }}
+          </div>
+        </Transition>
+
         <p v-if="game.short_description" class="gd-summary">{{ game.short_description }}</p>
 
         <div v-if="game.tags?.length" class="gd-tags">
@@ -226,26 +232,16 @@
             </button>
           </template>
         </div>
+        <Transition name="gd-status-fade">
+          <div v-if="reserveStatus" class="gd-bar__status" :class="`gd-bar__status--${reserveStatus.type}`" role="status">
+            {{ reserveStatus.text }}
+          </div>
+        </Transition>
       </div>
 
     </template>
 
-    <!-- Footer -->
-    <footer class="l-footer">
-      <div class="l-footer__inner">
-        <div class="l-footer__brand">
-          <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">AUA</span>
-        </div>
-        <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
-        </nav>
-        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
-      </div>
-    </footer>
+    <AppFooter />
 
   </div>
 </template>
@@ -265,8 +261,13 @@ const { t } = useI18n()
 
 const loading = ref(true)
 const game = ref<Game | null>(null)
-const year = new Date().getFullYear()
 const reserving = ref(false)
+const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(null)
+
+function showReserveStatus(text: string, type: 'success' | 'error') {
+  reserveStatus.value = { text, type }
+  setTimeout(() => { reserveStatus.value = null }, 4000)
+}
 
 function openLightbox(i: number) {
   if (!game.value?.images?.length) return
@@ -386,10 +387,10 @@ async function handleReserve() {
   reserving.value = true
   try {
     await addReservation(game.value.id)
-    alert(t('pages.game.reserve_success'))
+    showReserveStatus(t('pages.game.reserve_success'), 'success')
   } catch (e: unknown) {
     const err = e as { message?: string }
-    alert(err?.message ?? t('pages.game.reserve_failed'))
+    showReserveStatus(err?.message ?? t('pages.game.reserve_failed'), 'error')
   } finally {
     reserving.value = false
   }
@@ -1058,6 +1059,37 @@ $bar-h:      72px;
   &:hover { color: $amber; border-color: $amber-ring; background: $amber-dim; }
 }
 
+// ── Reserve status (desktop) ──────────────────────────────────────
+.gd-reserve-status {
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &--success {
+    background: rgba(22, 101, 52, 0.15);
+    color: #86efac;
+    border: 1px solid rgba(22, 101, 52, 0.3);
+  }
+
+  &--error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+}
+
+.gd-status-fade-enter-active,
+.gd-status-fade-leave-active { transition: opacity 0.25s ease, transform 0.25s ease; }
+.gd-status-fade-enter-from,
+.gd-status-fade-leave-to { opacity: 0; transform: translateY(-4px); }
+
+@keyframes barSlideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
 // ── Mobile float CTA bar ──────────────────────────────────────────
 .gd-bar {
   position: fixed;
@@ -1065,6 +1097,7 @@ $bar-h:      72px;
   left: 0;
   right: 0;
   z-index: 200;
+  animation: barSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
   border-top: 1px solid var(--divider);
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px) saturate(1.6);
@@ -1151,50 +1184,16 @@ $bar-h:      72px;
 
     &:disabled { opacity: 0.45; cursor: default; }
   }
-}
 
-// ── Footer ────────────────────────────────────────────────────────
-.l-footer {
-  background: $ink;
-  border-top: 1px solid rgba(242, 234, 217, 0.1);
-  padding: 2.5rem 1.5rem;
+  &__status {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
 
-  &__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
-
-  &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-  &__hex   { font-size: 1.2rem; color: $amber; }
-  &__name  { font-size: 0.95rem; font-weight: 700; color: $cream; letter-spacing: -0.02em; }
-
-  &__nav {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    flex: 1;
-    justify-content: center;
-    @media (max-width: 640px) { justify-content: flex-start; }
-  }
-
-  &__link {
-    font-size: 0.85rem;
-    color: $cream-60;
-    text-decoration: none;
-    transition: color 0.2s;
-    &:hover { color: $cream; }
-  }
-
-  &__copy {
-    font-size: 0.78rem;
-    color: rgba(242, 234, 217, 0.38);
-    margin-left: auto;
-    padding-bottom: 0;
-    @media (max-width: 640px) { margin-left: 0; width: 100%; }
+    &--success { color: #86efac; background: rgba(22, 101, 52, 0.15); }
+    &--error   { color: #fca5a5; background: rgba(239, 68, 68, 0.1); }
   }
 }
+
 </style>

@@ -29,8 +29,11 @@ class RegisterController extends Controller
 
         $user->notify(new VerifyEmailNotification());
 
+        $token = $user->createToken('auth')->plainTextToken;
+
         return response()->json([
             'message' => 'Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.',
+            'token'   => $token,
             'user'    => new UserResource($user),
         ], 201);
     }

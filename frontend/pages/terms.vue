@@ -96,7 +96,7 @@ $hero-muted:  rgba(238, 232, 223, 0.50);
 // ─── Page ─────────────────────────────────────────────────────────
 .legal-page {
   min-height: 100vh;
-  background: $hero-bg;
+  background: var(--background);
   display: flex;
   flex-direction: column;
 }
@@ -176,8 +176,8 @@ $hero-muted:  rgba(238, 232, 223, 0.50);
 
   &__version {
     padding: 0.14rem 0.5rem;
-    background: rgba(255,255,255,0.055);
-    border: 1px solid rgba(255,255,255,0.09);
+    background: var(--secondary-background);
+    border: 1px solid var(--divider);
     border-radius: 4px;
     font-weight: 600;
     font-family: $font-family-mono;
@@ -218,7 +218,8 @@ $hero-muted:  rgba(238, 232, 223, 0.50);
 
   &__icon {
     font-size: 2.5rem;
-    color: rgba(255,255,255,0.12);
+    color: var(--secondary-text);
+    opacity: 0.3;
     margin-bottom: 0.75rem;
   }
 

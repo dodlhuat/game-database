@@ -104,23 +104,7 @@
       </section>
     </template>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
-    <footer class="l-footer">
-      <div class="l-footer__inner">
-        <div class="l-footer__brand">
-          <span class="l-footer__hex" aria-hidden="true">⬡</span>
-          <span class="l-footer__name">AUA</span>
-        </div>
-        <nav class="l-footer__nav" aria-label="Footer-Navigation">
-          <NuxtLink to="/games" class="l-footer__link">{{ $t('nav.collection') }}</NuxtLink>
-          <NuxtLink to="/packages" class="l-footer__link">{{ $t('nav.packages') }}</NuxtLink>
-          <NuxtLink to="/terms" class="l-footer__link">{{ $t('nav.terms') }}</NuxtLink>
-          <NuxtLink to="/privacy" class="l-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
-          <NuxtLink to="/cookies" class="l-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
-        </nav>
-        <p class="l-footer__copy">{{ $t('common.copyright', { year }) }}</p>
-      </div>
-    </footer>
+    <AppFooter />
   </div>
 </template>
 
@@ -138,7 +122,6 @@ const loading = ref(true)
 const loaning = ref(false)
 const loanError = ref('')
 const pkg = ref<Package | null>(null)
-const year = new Date().getFullYear()
 
 onMounted(async () => {
   try {
@@ -380,15 +363,4 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 }
 
-// ─── Footer ───────────────────────────────────────────────────────
-.l-footer {
-  background: $hero-bg; border-top: 1px solid $hero-divider; padding: 2.5rem 1.5rem;
-  &__inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
-  &__brand { display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0; }
-  &__hex { font-size: 1.2rem; color: $amber; }
-  &__name { font-size: 0.95rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em; }
-  &__nav { display: flex; gap: 1.5rem; flex-wrap: wrap; flex: 1; justify-content: center; position: static; transform: none; width: auto; height: auto; @media (max-width: 640px) { justify-content: flex-start; } }
-  &__link { font-size: 0.85rem; color: $hero-muted; text-decoration: none; transition: color 0.2s; &:hover { color: $hero-text; } }
-  &__copy { font-size: 0.8rem; color: $hero-muted-50; margin-left: auto; padding-bottom: 0; @media (max-width: 640px) { margin-left: 0; width: 100%; } }
-}
 </style>
