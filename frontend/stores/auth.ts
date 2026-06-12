@@ -5,6 +5,8 @@ interface User {
   name: string
   email: string
   address: string | null
+  phone: string | null
+  date_of_birth: string | null
   role: 'USER' | 'MEMBER' | 'ADMIN'
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
   newsletter_opt_in: boolean

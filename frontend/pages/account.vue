@@ -222,7 +222,7 @@ async function changePassword() {
     const e = err as { errors?: Record<string, string[]>; message?: string }
     if (e.errors) {
       Object.entries(e.errors).forEach(([k, msgs]) => {
-        if (k in pwErrors.value) (pwErrors.value as Record<string, string>)[k] = msgs[0]
+        if (k in pwErrors.value) (pwErrors.value as Record<string, string>)[k] = msgs[0] ?? ''
       })
     } else {
       pwError.value = e.message ?? t('common.error.generic')

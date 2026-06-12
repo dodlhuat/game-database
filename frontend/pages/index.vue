@@ -135,7 +135,7 @@ onMounted(() => {
   if (!el) return
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry?.isIntersecting) {
         featVisible.value = true
         observer.disconnect()
       }

@@ -98,523 +98,543 @@
     </div>
 
     <!-- ── Spiel-Formular Modal ──────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog dialog--wide">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ form.id ? $t('admin.games.edit_game') : $t('admin.games.add_game') }}
-            </h3>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog dialog--wide">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ form.id ? $t('admin.games.edit_game') : $t('admin.games.add_game') }}
+              </h3>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
+            </div>
 
-          <div class="dialog__body">
-            <div class="form-grid">
-              <div class="form-grid__full">
-                <UiInput v-model="form.title" :label="$t('admin.form.title')" required />
-              </div>
-              <div class="form-grid__full">
-                <UiInput v-model="form.slug" :label="$t('admin.form.slug')" required />
-              </div>
-              <div class="form-grid__full">
-                <UiInput v-model="form.short_description" :label="$t('admin.form.short_desc')" />
-              </div>
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.description') }}</label>
-                <UiRichEditor v-model="form.description" />
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.table.category') }}</label>
-                <UiVirtualDropdown
-                  v-model="form.category_id"
-                  class="form-select"
-                  :options="[
-                    { label: $t('admin.form.no_category'), value: null },
-                    ...categories.map((c) => ({ label: c.name, value: c.id })),
-                  ]"
-                />
-              </div>
-
-              <div>
-                <UiInput
-                  v-model="form.min_players"
-                  :label="$t('admin.form.min_players')"
-                  type="number"
-                />
-              </div>
-              <div>
-                <UiInput
-                  v-model="form.max_players"
-                  :label="$t('admin.form.max_players')"
-                  type="number"
-                />
-              </div>
-              <div>
-                <UiInput v-model="form.min_age" :label="$t('admin.form.min_age')" type="number" />
-              </div>
-
-              <div>
-                <UiInput
-                  v-model="form.duration_min"
-                  :label="$t('admin.form.duration_min')"
-                  type="number"
-                />
-              </div>
-              <div>
-                <UiInput
-                  v-model="form.duration_max"
-                  :label="$t('admin.form.duration_max')"
-                  type="number"
-                />
-              </div>
-              <div>
-                <UiInput v-model="form.year" :label="$t('admin.form.year')" type="number" />
-              </div>
-
-              <div>
-                <label class="form-label">{{ $t('admin.form.difficulty') }}</label>
-                <UiVirtualDropdown
-                  v-model="form.difficulty"
-                  class="form-select"
-                  :options="[
-                    { label: $t('admin.form.no_category'), value: '' },
-                    { label: $t('admin.form.difficulty_easy'), value: 'EASY' },
-                    { label: $t('admin.form.difficulty_medium'), value: 'MEDIUM' },
-                    { label: $t('admin.form.difficulty_hard'), value: 'HARD' },
-                    { label: $t('admin.form.difficulty_expert'), value: 'EXPERT' },
-                  ]"
-                />
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.language') }}</label>
-                <div class="tag-picker">
-                  <label
-                    v-for="lang in allLanguages"
-                    :key="lang.id"
-                    class="tag-chip"
-                    :class="{ 'tag-chip--selected': form.language_ids.includes(lang.id) }"
-                  >
-                    <input
-                      v-model="form.language_ids"
-                      type="checkbox"
-                      :value="lang.id"
-                      class="tag-chip__input"
-                    />
-                    {{ lang.name }}
-                  </label>
+            <div class="dialog__body">
+              <div class="form-grid">
+                <div class="form-grid__full">
+                  <UiInput v-model="form.title" :label="$t('admin.form.title')" required />
                 </div>
-              </div>
-
-              <div class="form-grid__full">
-                <UiInput
-                  v-model="form.instagram_url"
-                  :label="$t('admin.form.instagram')"
-                  placeholder="https://www.instagram.com/p/…"
-                  type="url"
-                />
-              </div>
-
-              <div>
-                <UiInput
-                  v-model="form.deposit_tokens"
-                  :label="$t('admin.form.deposit_tokens')"
-                  type="number"
-                  :min="0"
-                />
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.tags') }}</label>
-                <div class="tag-picker">
-                  <label
-                    v-for="tag in allTags"
-                    :key="tag.id"
-                    class="tag-chip"
-                    :class="{ 'tag-chip--selected': form.tag_ids.includes(tag.id) }"
-                  >
-                    <input
-                      v-model="form.tag_ids"
-                      type="checkbox"
-                      :value="tag.id"
-                      class="tag-chip__input"
-                    />
-                    {{ tag.name }}
-                  </label>
+                <div class="form-grid__full">
+                  <UiInput v-model="form.slug" :label="$t('admin.form.slug')" required />
                 </div>
-                <div class="tag-add">
-                  <UiInput
-                    v-model="newTagName"
-                    :placeholder="$t('admin.form.new_tag')"
-                    style="flex: 1"
+                <div class="form-grid__full">
+                  <UiInput v-model="form.short_description" :label="$t('admin.form.short_desc')" />
+                </div>
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.description') }}</label>
+                  <UiRichEditor v-model="form.description" />
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.table.category') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.category_id"
+                    class="form-select"
+                    :options="[
+                      { label: $t('admin.form.no_category'), value: null },
+                      ...categories.map((c) => ({ label: c.name, value: c.id })),
+                    ]"
                   />
-                  <button class="action-btn" :disabled="!newTagName.trim()" @click="addTag">
-                    {{ $t('btn.add') }}
-                  </button>
                 </div>
-              </div>
 
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.cover_image') }}</label>
-                <div class="file-uploader">
-                  <div
-                    class="drop-zone"
-                    :class="{ 'drag-over': isDragging }"
-                    @dragover.prevent="isDragging = true"
-                    @dragleave.prevent="isDragging = false"
-                    @drop.prevent="onDrop"
-                    @click="coverInputRef?.click()"
-                  >
-                    <input
-                      ref="coverInputRef"
-                      type="file"
-                      accept="image/*"
-                      style="display: none"
-                      @change="onFileChange"
+                <div>
+                  <UiInput
+                    v-model="form.min_players"
+                    :label="$t('admin.form.min_players')"
+                    type="number"
+                  />
+                </div>
+                <div>
+                  <UiInput
+                    v-model="form.max_players"
+                    :label="$t('admin.form.max_players')"
+                    type="number"
+                  />
+                </div>
+                <div>
+                  <UiInput v-model="form.min_age" :label="$t('admin.form.min_age')" type="number" />
+                </div>
+
+                <div>
+                  <UiInput
+                    v-model="form.duration_min"
+                    :label="$t('admin.form.duration_min')"
+                    type="number"
+                  />
+                </div>
+                <div>
+                  <UiInput
+                    v-model="form.duration_max"
+                    :label="$t('admin.form.duration_max')"
+                    type="number"
+                  />
+                </div>
+                <div>
+                  <UiInput v-model="form.year" :label="$t('admin.form.year')" type="number" />
+                </div>
+
+                <div>
+                  <label class="form-label">{{ $t('admin.form.difficulty') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.difficulty"
+                    class="form-select"
+                    :options="[
+                      { label: $t('admin.form.no_category'), value: '' },
+                      { label: $t('admin.form.difficulty_easy'), value: 'EASY' },
+                      { label: $t('admin.form.difficulty_medium'), value: 'MEDIUM' },
+                      { label: $t('admin.form.difficulty_hard'), value: 'HARD' },
+                      { label: $t('admin.form.difficulty_expert'), value: 'EXPERT' },
+                    ]"
+                  />
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.language') }}</label>
+                  <div class="tag-picker">
+                    <label
+                      v-for="lang in allLanguages"
+                      :key="lang.id"
+                      class="tag-chip"
+                      :class="{ 'tag-chip--selected': form.language_ids.includes(lang.id) }"
+                    >
+                      <input
+                        v-model="form.language_ids"
+                        type="checkbox"
+                        :value="lang.id"
+                        class="tag-chip__input"
+                      />
+                      {{ lang.name }}
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-grid__full">
+                  <UiInput
+                    v-model="form.instagram_url"
+                    :label="$t('admin.form.instagram')"
+                    placeholder="https://www.instagram.com/p/…"
+                    type="url"
+                  />
+                </div>
+
+                <div>
+                  <UiInput
+                    v-model="form.deposit_tokens"
+                    :label="$t('admin.form.deposit_tokens')"
+                    type="number"
+                    :min="0"
+                  />
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.tags') }}</label>
+                  <div class="tag-picker">
+                    <label
+                      v-for="tag in allTags"
+                      :key="tag.id"
+                      class="tag-chip"
+                      :class="{ 'tag-chip--selected': form.tag_ids.includes(tag.id) }"
+                    >
+                      <input
+                        v-model="form.tag_ids"
+                        type="checkbox"
+                        :value="tag.id"
+                        class="tag-chip__input"
+                      />
+                      {{ tag.name }}
+                    </label>
+                  </div>
+                  <div class="tag-add">
+                    <UiInput
+                      v-model="newTagName"
+                      :placeholder="$t('admin.form.new_tag')"
+                      style="flex: 1"
                     />
-                    <div class="drop-zone-content">
-                      <div class="icon-container">
-                        <span class="icon icon-add_photo_alternate" />
+                    <button class="action-btn" :disabled="!newTagName.trim()" @click="addTag">
+                      {{ $t('btn.add') }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.cover_image') }}</label>
+                  <div class="file-uploader">
+                    <div
+                      class="drop-zone"
+                      :class="{ 'drag-over': isDragging }"
+                      @dragover.prevent="isDragging = true"
+                      @dragleave.prevent="isDragging = false"
+                      @drop.prevent="onDrop"
+                      @click="coverInputRef?.click()"
+                    >
+                      <input
+                        ref="coverInputRef"
+                        type="file"
+                        accept="image/*"
+                        style="display: none"
+                        @change="onFileChange"
+                      />
+                      <div class="drop-zone-content">
+                        <div class="icon-container">
+                          <span class="icon icon-add_photo_alternate" />
+                        </div>
+                        <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
+                        <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
                       </div>
-                      <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
-                      <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
+                    </div>
+
+                    <div v-if="form.coverFile || form.existingCoverUrl" class="file-list">
+                      <div class="file-item">
+                        <div class="file-item-header">
+                          <div class="file-info">
+                            <img
+                              :src="form.coverFile ? coverPreviewUrl! : form.existingCoverUrl!"
+                              :alt="$t('admin.form.preview')"
+                              style="
+                                width: 40px;
+                                height: 40px;
+                                object-fit: cover;
+                                border-radius: 4px;
+                                flex-shrink: 0;
+                              "
+                            />
+                            <div class="file-details">
+                              <span class="file-name">{{
+                                form.coverFile
+                                  ? form.coverFile.name
+                                  : $t('admin.form.cover_current')
+                              }}</span>
+                              <span class="file-size">{{
+                                form.coverFile ? formatFileSize(form.coverFile.size) : ''
+                              }}</span>
+                            </div>
+                          </div>
+                          <button type="button" class="remove-btn" @click.stop="removeCover">
+                            <span class="icon icon-close" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <div v-if="form.coverFile || form.existingCoverUrl" class="file-list">
-                    <div class="file-item">
-                      <div class="file-item-header">
-                        <div class="file-info">
-                          <img
-                            :src="form.coverFile ? coverPreviewUrl! : form.existingCoverUrl!"
-                            :alt="$t('admin.form.preview')"
-                            style="
-                              width: 40px;
-                              height: 40px;
-                              object-fit: cover;
-                              border-radius: 4px;
-                              flex-shrink: 0;
-                            "
-                          />
-                          <div class="file-details">
-                            <span class="file-name">{{
-                              form.coverFile ? form.coverFile.name : $t('admin.form.cover_current')
-                            }}</span>
-                            <span class="file-size">{{
-                              form.coverFile ? formatFileSize(form.coverFile.size) : ''
-                            }}</span>
-                          </div>
-                        </div>
-                        <button type="button" class="remove-btn" @click.stop="removeCover">
+                <div v-if="form.id" class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.other_images') }}</label>
+                  <div class="game-images">
+                    <div v-if="form.existingImages.length" class="game-images__grid">
+                      <div
+                        v-for="img in form.existingImages"
+                        :key="img.id"
+                        class="game-images__item"
+                      >
+                        <img :src="img.url" alt="Spielbild" class="game-images__thumb" />
+                        <button
+                          type="button"
+                          class="game-images__remove"
+                          title="Bild löschen"
+                          @click="removeGameImage(img)"
+                        >
                           <span class="icon icon-close" />
                         </button>
                       </div>
                     </div>
+                    <label
+                      class="game-images__add"
+                      :class="{ 'game-images__add--loading': imageUploading }"
+                    >
+                      <input
+                        ref="imageInputRef"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style="display: none"
+                        :disabled="imageUploading"
+                        @change="onImagesChange"
+                      />
+                      <span class="icon icon-add_photo_alternate" />
+                      <span>{{
+                        imageUploading ? $t('btn.importing') : $t('admin.form.add_images')
+                      }}</span>
+                    </label>
                   </div>
                 </div>
-              </div>
 
-              <div v-if="form.id" class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.other_images') }}</label>
-                <div class="game-images">
-                  <div v-if="form.existingImages.length" class="game-images__grid">
-                    <div v-for="img in form.existingImages" :key="img.id" class="game-images__item">
-                      <img :src="img.url" alt="Spielbild" class="game-images__thumb" />
-                      <button
-                        type="button"
-                        class="game-images__remove"
-                        title="Bild löschen"
-                        @click="removeGameImage(img)"
-                      >
-                        <span class="icon icon-close" />
-                      </button>
-                    </div>
-                  </div>
-                  <label
-                    class="game-images__add"
-                    :class="{ 'game-images__add--loading': imageUploading }"
-                  >
-                    <input
-                      ref="imageInputRef"
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      style="display: none"
-                      :disabled="imageUploading"
-                      @change="onImagesChange"
-                    />
-                    <span class="icon icon-add_photo_alternate" />
-                    <span>{{
-                      imageUploading ? $t('btn.importing') : $t('admin.form.add_images')
-                    }}</span>
+                <div class="form-grid__full">
+                  <label class="form-check">
+                    <input v-model="form.is_active" type="checkbox" />
+                    <span>{{ $t('admin.form.active_game') }}</span>
                   </label>
                 </div>
               </div>
 
-              <div class="form-grid__full">
-                <label class="form-check">
-                  <input v-model="form.is_active" type="checkbox" />
-                  <span>{{ $t('admin.form.active_game') }}</span>
-                </label>
-              </div>
+              <div v-if="formError" class="form-error">{{ formError }}</div>
             </div>
 
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
-
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Kopien Modal ──────────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="copiesPanel.open" class="modal-overlay" @click.self="closeCopies">
-        <div class="dialog dialog--wide">
-          <div class="dialog__header">
-            <div>
-              <div class="dialog__eyebrow">{{ $t('admin.games.copies_title') }}</div>
-              <h3 class="dialog__title">{{ copiesPanel.gameTitle }}</h3>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="copiesPanel.open" class="modal-overlay" @click.self="closeCopies">
+          <div class="dialog dialog--wide">
+            <div class="dialog__header">
+              <div>
+                <div class="dialog__eyebrow">{{ $t('admin.games.copies_title') }}</div>
+                <h3 class="dialog__title">{{ copiesPanel.gameTitle }}</h3>
+              </div>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="closeCopies"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeCopies">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
 
-          <div class="dialog__body">
-            <div v-if="copiesPanel.loading" class="modal-loading">
-              <div class="spinner" />
+            <div class="dialog__body">
+              <div v-if="copiesPanel.loading" class="modal-loading">
+                <div class="spinner" />
+              </div>
+
+              <template v-else>
+                <div class="dialog__toolbar">
+                  <span class="dialog__count"
+                    >{{ copiesPanel.copies.length }} Kopie{{
+                      copiesPanel.copies.length !== 1 ? 'n' : ''
+                    }}</span
+                  >
+                  <button class="action-btn" @click="openCopyCreate">
+                    <span class="icon icon-add" aria-hidden="true" />
+                    {{ $t('admin.games.add_copy') }}
+                  </button>
+                </div>
+
+                <div v-if="!copiesPanel.copies.length" class="dash-empty">
+                  <span class="icon icon-layers dash-empty__icon" aria-hidden="true" />
+                  <p class="dash-empty__text">{{ $t('admin.empty.copies') }}</p>
+                </div>
+
+                <div v-else class="copies-table-wrap">
+                  <table class="dash-table">
+                    <thead>
+                      <tr>
+                        <th>{{ $t('admin.form.condition') }}</th>
+                        <th>{{ $t('admin.form.qr_code') }}</th>
+                        <th>{{ $t('admin.table.status') }}</th>
+                        <th>{{ $t('admin.table.actions') }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="copy in copiesPanel.copies" :key="copy.id">
+                        <td>
+                          <span class="badge" :class="conditionClass(copy.condition)">
+                            {{ conditionLabel(copy.condition) }}
+                          </span>
+                        </td>
+                        <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
+                        <td>
+                          <span
+                            class="badge"
+                            :class="copy.is_available ? 'badge-success' : 'badge-error'"
+                          >
+                            {{
+                              copy.is_available
+                                ? $t('common.badge.available')
+                                : $t('common.badge.loaned')
+                            }}
+                          </span>
+                        </td>
+                        <td>
+                          <div class="action-row">
+                            <template v-if="copy.condition === 'REVIEW'">
+                              <button
+                                class="action-btn action-btn--success"
+                                @click="approveCopy(copy.id)"
+                              >
+                                {{ $t('admin.actions.approve_copy') }}
+                              </button>
+                              <button
+                                class="action-btn action-btn--danger"
+                                @click="openMarkDamaged(copy.id)"
+                              >
+                                {{ $t('admin.actions.mark_damaged') }}
+                              </button>
+                            </template>
+                            <template v-else>
+                              <button class="action-btn" @click="openCopyEdit(copy)">
+                                {{ $t('admin.actions.edit') }}
+                              </button>
+                              <button
+                                class="action-btn action-btn--danger"
+                                @click="removeCopy(copy.id)"
+                              >
+                                {{ $t('admin.actions.delete') }}
+                              </button>
+                            </template>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </template>
             </div>
 
-            <template v-else>
-              <div class="dialog__toolbar">
-                <span class="dialog__count"
-                  >{{ copiesPanel.copies.length }} Kopie{{
-                    copiesPanel.copies.length !== 1 ? 'n' : ''
-                  }}</span
-                >
-                <button class="action-btn" @click="openCopyCreate">
-                  <span class="icon icon-add" aria-hidden="true" />
-                  {{ $t('admin.games.add_copy') }}
-                </button>
-              </div>
-
-              <div v-if="!copiesPanel.copies.length" class="dash-empty">
-                <span class="icon icon-layers dash-empty__icon" aria-hidden="true" />
-                <p class="dash-empty__text">{{ $t('admin.empty.copies') }}</p>
-              </div>
-
-              <div v-else class="copies-table-wrap">
-                <table class="dash-table">
-                  <thead>
-                    <tr>
-                      <th>{{ $t('admin.form.condition') }}</th>
-                      <th>{{ $t('admin.form.qr_code') }}</th>
-                      <th>{{ $t('admin.table.status') }}</th>
-                      <th>{{ $t('admin.table.actions') }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="copy in copiesPanel.copies" :key="copy.id">
-                      <td>
-                        <span class="badge" :class="conditionClass(copy.condition)">
-                          {{ conditionLabel(copy.condition) }}
-                        </span>
-                      </td>
-                      <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
-                      <td>
-                        <span
-                          class="badge"
-                          :class="copy.is_available ? 'badge-success' : 'badge-error'"
-                        >
-                          {{
-                            copy.is_available
-                              ? $t('common.badge.available')
-                              : $t('common.badge.loaned')
-                          }}
-                        </span>
-                      </td>
-                      <td>
-                        <div class="action-row">
-                          <template v-if="copy.condition === 'REVIEW'">
-                            <button
-                              class="action-btn action-btn--success"
-                              @click="approveCopy(copy.id)"
-                            >
-                              {{ $t('admin.actions.approve_copy') }}
-                            </button>
-                            <button
-                              class="action-btn action-btn--danger"
-                              @click="openMarkDamaged(copy.id)"
-                            >
-                              {{ $t('admin.actions.mark_damaged') }}
-                            </button>
-                          </template>
-                          <template v-else>
-                            <button class="action-btn" @click="openCopyEdit(copy)">
-                              {{ $t('admin.actions.edit') }}
-                            </button>
-                            <button
-                              class="action-btn action-btn--danger"
-                              @click="removeCopy(copy.id)"
-                            >
-                              {{ $t('admin.actions.delete') }}
-                            </button>
-                          </template>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </template>
-          </div>
-
-          <div class="dialog__actions">
-            <button class="action-btn" @click="closeCopies">{{ $t('admin.form.close') }}</button>
+            <div class="dialog__actions">
+              <button class="action-btn" @click="closeCopies">{{ $t('admin.form.close') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Kopie-Formular Modal ──────────────────────────────────── -->
-    <Transition name="modal">
-      <div
-        v-if="copyForm.open"
-        class="modal-overlay modal-overlay--top"
-        @click.self="copyForm.open = false"
-      >
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ copyForm.id ? $t('admin.games.edit_copy') : $t('admin.games.add_copy') }}
-            </h3>
-            <button
-              class="dialog__close"
-              :aria-label="$t('admin.form.close')"
-              @click="copyForm.open = false"
-            >
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div class="dialog__body">
-            <div class="form-field">
-              <label class="form-label">{{ $t('admin.form.condition') }}</label>
-              <UiVirtualDropdown
-                v-model="copyForm.condition"
-                class="form-select"
-                :options="[
-                  { label: $t('admin.form.condition_new'), value: 'NEW' },
-                  { label: $t('admin.form.condition_very_good'), value: 'VERY_GOOD' },
-                  { label: $t('admin.form.condition_good'), value: 'GOOD' },
-                  { label: $t('admin.form.condition_damaged'), value: 'DAMAGED' },
-                  { label: $t('admin.form.condition_locked'), value: 'LOCKED' },
-                ]"
-              />
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="copyForm.open"
+          class="modal-overlay modal-overlay--top"
+          @click.self="copyForm.open = false"
+        >
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ copyForm.id ? $t('admin.games.edit_copy') : $t('admin.games.add_copy') }}
+              </h3>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="copyForm.open = false"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
-            <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
-            <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />
-            <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
-          </div>
 
-          <div class="dialog__actions">
-            <UiButton :loading="copyForm.saving" @click="saveCopy">{{
-              $t('admin.form.save')
-            }}</UiButton>
-            <button class="action-btn" @click="copyForm.open = false">
-              {{ $t('admin.form.cancel') }}
-            </button>
+            <div class="dialog__body">
+              <div class="form-field">
+                <label class="form-label">{{ $t('admin.form.condition') }}</label>
+                <UiVirtualDropdown
+                  v-model="copyForm.condition"
+                  class="form-select"
+                  :options="[
+                    { label: $t('admin.form.condition_new'), value: 'NEW' },
+                    { label: $t('admin.form.condition_very_good'), value: 'VERY_GOOD' },
+                    { label: $t('admin.form.condition_good'), value: 'GOOD' },
+                    { label: $t('admin.form.condition_damaged'), value: 'DAMAGED' },
+                    { label: $t('admin.form.condition_locked'), value: 'LOCKED' },
+                  ]"
+                />
+              </div>
+              <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
+              <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />
+              <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
+            </div>
+
+            <div class="dialog__actions">
+              <UiButton :loading="copyForm.saving" @click="saveCopy">{{
+                $t('admin.form.save')
+              }}</UiButton>
+              <button class="action-btn" @click="copyForm.open = false">
+                {{ $t('admin.form.cancel') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Beschädigt-Markieren Modal ──────────────────────────── -->
-    <Transition name="modal">
-      <div
-        v-if="damagedForm.open"
-        class="modal-overlay modal-overlay--top"
-        @click.self="damagedForm.open = false"
-      >
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">{{ $t('admin.games.mark_damaged_title') }}</h3>
-            <button
-              class="dialog__close"
-              :aria-label="$t('admin.form.close')"
-              @click="damagedForm.open = false"
-            >
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-          <div class="dialog__body">
-            <p class="form-hint">{{ $t('admin.games.mark_damaged_hint') }}</p>
-            <UiInput v-model="damagedForm.notes" :label="$t('admin.form.notes')" />
-            <div v-if="damagedForm.error" class="form-error">{{ damagedForm.error }}</div>
-          </div>
-          <div class="dialog__actions">
-            <UiButton variant="danger" :loading="damagedForm.saving" @click="saveMarkDamaged">{{
-              $t('admin.actions.mark_damaged')
-            }}</UiButton>
-            <button class="action-btn" @click="damagedForm.open = false">
-              {{ $t('admin.form.cancel') }}
-            </button>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div
+          v-if="damagedForm.open"
+          class="modal-overlay modal-overlay--top"
+          @click.self="damagedForm.open = false"
+        >
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">{{ $t('admin.games.mark_damaged_title') }}</h3>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="damagedForm.open = false"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
+            </div>
+            <div class="dialog__body">
+              <p class="form-hint">{{ $t('admin.games.mark_damaged_hint') }}</p>
+              <UiInput v-model="damagedForm.notes" :label="$t('admin.form.notes')" />
+              <div v-if="damagedForm.error" class="form-error">{{ damagedForm.error }}</div>
+            </div>
+            <div class="dialog__actions">
+              <UiButton variant="danger" :loading="damagedForm.saving" @click="saveMarkDamaged">{{
+                $t('admin.actions.mark_damaged')
+              }}</UiButton>
+              <button class="action-btn" @click="damagedForm.open = false">
+                {{ $t('admin.form.cancel') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Import Ergebnis Modal ────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
-            <button
-              class="dialog__close"
-              :aria-label="$t('admin.form.close')"
-              @click="importResult = null"
-            >
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-          <div class="dialog__body">
-            <div class="import-result">
-              <div class="import-result__row">
-                <span class="import-result__label">{{ $t('admin.import.new_games') }}</span>
-                <span class="import-result__value import-result__value--new">{{
-                  importResult.new
-                }}</span>
-              </div>
-              <div class="import-result__row">
-                <span class="import-result__label">{{ $t('admin.import.updated_games') }}</span>
-                <span class="import-result__value import-result__value--updated">{{
-                  importResult.updated
-                }}</span>
-              </div>
-              <div class="import-result__divider" />
-              <div class="import-result__row">
-                <span class="import-result__label">{{ $t('admin.import.total') }}</span>
-                <span class="import-result__value">{{ importResult.total }}</span>
-              </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="importResult = null"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
-            <div v-if="importError" class="form-error">{{ importError }}</div>
-          </div>
-          <div class="dialog__actions">
-            <button class="action-btn" @click="importResult = null">
-              {{ $t('admin.form.close') }}
-            </button>
+            <div class="dialog__body">
+              <div class="import-result">
+                <div class="import-result__row">
+                  <span class="import-result__label">{{ $t('admin.import.new_games') }}</span>
+                  <span class="import-result__value import-result__value--new">{{
+                    importResult.new
+                  }}</span>
+                </div>
+                <div class="import-result__row">
+                  <span class="import-result__label">{{ $t('admin.import.updated_games') }}</span>
+                  <span class="import-result__value import-result__value--updated">{{
+                    importResult.updated
+                  }}</span>
+                </div>
+                <div class="import-result__divider" />
+                <div class="import-result__row">
+                  <span class="import-result__label">{{ $t('admin.import.total') }}</span>
+                  <span class="import-result__value">{{ importResult.total }}</span>
+                </div>
+              </div>
+              <div v-if="importError" class="form-error">{{ importError }}</div>
+            </div>
+            <div class="dialog__actions">
+              <button class="action-btn" @click="importResult = null">
+                {{ $t('admin.form.close') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
@@ -672,6 +692,7 @@ interface Game {
   year: number | null
   tags: { id: number; name: string }[]
   deposit_tokens: number
+  instagram_url: string | null
   cover_image_url: string | null
   images: { id: number; url: string }[]
 }
@@ -1447,7 +1468,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
   &--top {
     z-index: 210;
     background: rgba(0, 0, 0, 0.4);
@@ -1585,20 +1605,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
 .form-select {
   display: block;
   width: 100%;
-  height: 40px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  background: var(--background);
-  color: var(--primary-text);
-  font-size: 0.875rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  &:focus {
-    outline: none;
-    border-color: var(--accent-color);
-  }
 }
 
 .form-check {

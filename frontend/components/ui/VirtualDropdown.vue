@@ -59,7 +59,7 @@ async function init() {
     options: props.options.map((o) => ({ label: o.label, value: encode(o.value) })),
     placeholder: props.placeholder ?? 'Auswählen...',
     onSelect: (vals: Array<string | number>) => {
-      const val = vals.length > 0 ? decode(vals[0]) : null
+      const val = vals.length > 0 ? decode(vals[0]!) : null
       emit('update:modelValue', val)
       emit('change')
     },
@@ -72,9 +72,9 @@ function syncValue(val: string | number | null | undefined) {
   if (!dropdown) return
   if (val === undefined) {
     dropdown.clearSelection()
-  } else {
-    dropdown.setValue([encode(val)])
+    return
   }
+  dropdown.setValue([encode(val)])
 }
 
 onMounted(init)

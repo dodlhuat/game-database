@@ -26,7 +26,7 @@ import { computed } from 'vue'
 interface Props {
   modelValue?: string
   label?: string
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date'
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date' | 'time'
   placeholder?: string
   error?: string
   hint?: string

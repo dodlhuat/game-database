@@ -68,33 +68,35 @@
     </div>
 
     <!-- ── Formular Modal ─────────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ form.id ? $t('admin.tags.rename') : $t('admin.tags.add') }}
-            </h3>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-          <div class="dialog__body">
-            <UiInput
-              v-model="form.name"
-              :label="$t('admin.form.name')"
-              required
-              @keydown.enter="save"
-            />
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ form.id ? $t('admin.tags.rename') : $t('admin.tags.add') }}
+              </h3>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
+            </div>
+            <div class="dialog__body">
+              <UiInput
+                v-model="form.name"
+                :label="$t('admin.form.name')"
+                required
+                @keydown.enter="save"
+              />
+              <div v-if="formError" class="form-error">{{ formError }}</div>
+            </div>
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <footer class="l-footer">
       <div class="l-footer__inner">
@@ -445,7 +447,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 .dialog {
   background: var(--secondary-background);

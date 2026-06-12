@@ -51,51 +51,53 @@
     </div>
 
     <!-- ── Edit Modal ────────────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog dialog--wide">
-          <div class="dialog__header">
-            <div>
-              <div class="dialog__eyebrow">{{ $t('admin.emails.edit_eyebrow') }}</div>
-              <h3 class="dialog__title">{{ meta[form.key]?.label ?? form.key }}</h3>
-            </div>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div class="dialog__body">
-            <!-- Variables hint -->
-            <div v-if="meta[form.key]?.vars?.length" class="vars-hint">
-              <span class="vars-hint__label">{{ $t('admin.emails.available_vars') }}</span>
-              <span v-for="v in meta[form.key].vars" :key="v" class="vars-hint__chip">{{
-                '{' + v + '}'
-              }}</span>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog dialog--wide">
+            <div class="dialog__header">
+              <div>
+                <div class="dialog__eyebrow">{{ $t('admin.emails.edit_eyebrow') }}</div>
+                <h3 class="dialog__title">{{ meta[form.key]?.label ?? form.key }}</h3>
+              </div>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
 
-            <UiInput v-model="form.subject" :label="$t('admin.form.subject')" required />
-            <UiInput v-model="form.greeting" :label="$t('admin.emails.greeting')" required />
+            <div class="dialog__body">
+              <!-- Variables hint -->
+              <div v-if="meta[form.key]?.vars?.length" class="vars-hint">
+                <span class="vars-hint__label">{{ $t('admin.emails.available_vars') }}</span>
+                <span v-for="v in meta[form.key]?.vars" :key="v" class="vars-hint__chip">{{
+                  '{' + v + '}'
+                }}</span>
+              </div>
 
-            <div>
-              <label class="form-label">{{ $t('admin.form.content') }}</label>
-              <UiRichEditor v-model="form.body" />
+              <UiInput v-model="form.subject" :label="$t('admin.form.subject')" required />
+              <UiInput v-model="form.greeting" :label="$t('admin.emails.greeting')" required />
+
+              <div>
+                <label class="form-label">{{ $t('admin.form.content') }}</label>
+                <UiRichEditor v-model="form.body" />
+              </div>
+
+              <UiInput v-model="form.action_text" :label="$t('admin.emails.action_text')" />
+
+              <div v-if="formError" class="form-error">{{ formError }}</div>
             </div>
 
-            <UiInput v-model="form.action_text" :label="$t('admin.emails.action_text')" />
-
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
-
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
-            <button class="action-btn action-btn--muted" :disabled="saving" @click="reset">
-              {{ $t('admin.emails.reset') }}
-            </button>
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+              <button class="action-btn action-btn--muted" :disabled="saving" @click="reset">
+                {{ $t('admin.emails.reset') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
@@ -449,7 +451,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 .dialog {
   background: var(--secondary-background);

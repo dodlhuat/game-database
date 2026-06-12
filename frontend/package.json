@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "@dodlhuat/basix": "^1.2.0",
@@ -25,11 +26,13 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.16.0",
+    "@types/node": "^25.9.3",
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.4",
     "sass": "^1.85.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.4"
   }
 }

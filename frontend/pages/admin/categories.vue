@@ -146,121 +146,125 @@
     </div>
 
     <!-- ── Formular Modal ───────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ form.id ? $t('admin.categories.edit') : $t('admin.categories.add') }}
-            </h3>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div class="dialog__body">
-            <div class="form-grid">
-              <div class="form-grid__full">
-                <UiInput
-                  v-model="form.name"
-                  :label="$t('admin.form.name')"
-                  required
-                  @input="autoSlug"
-                />
-              </div>
-              <div class="form-grid__full">
-                <UiInput v-model="form.slug" :label="$t('admin.form.slug')" required />
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.form.parent_category') }}</label>
-                <UiVirtualDropdown
-                  v-model="form.parent_id"
-                  class="form-select"
-                  :options="[
-                    { label: $t('admin.form.no_parent'), value: null },
-                    ...parentOptions.map((c) => ({ label: c.name, value: c.id })),
-                  ]"
-                />
-              </div>
-
-              <div class="form-grid__full">
-                <UiInput v-model="form.icon_url" :label="$t('admin.form.icon_url')" />
-              </div>
-
-              <div>
-                <UiInput
-                  v-model="form.sort_order"
-                  :label="$t('admin.form.sort_order')"
-                  type="number"
-                />
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-check">
-                  <input v-model="form.is_active" type="checkbox" />
-                  <span>{{ $t('admin.form.active_category') }}</span>
-                </label>
-              </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ form.id ? $t('admin.categories.edit') : $t('admin.categories.add') }}
+              </h3>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
 
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
+            <div class="dialog__body">
+              <div class="form-grid">
+                <div class="form-grid__full">
+                  <UiInput
+                    v-model="form.name"
+                    :label="$t('admin.form.name')"
+                    required
+                    @input="autoSlug"
+                  />
+                </div>
+                <div class="form-grid__full">
+                  <UiInput v-model="form.slug" :label="$t('admin.form.slug')" required />
+                </div>
 
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.form.parent_category') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.parent_id"
+                    class="form-select"
+                    :options="[
+                      { label: $t('admin.form.no_parent'), value: null },
+                      ...parentOptions.map((c) => ({ label: c.name, value: c.id })),
+                    ]"
+                  />
+                </div>
+
+                <div class="form-grid__full">
+                  <UiInput v-model="form.icon_url" :label="$t('admin.form.icon_url')" />
+                </div>
+
+                <div>
+                  <UiInput
+                    v-model="form.sort_order"
+                    :label="$t('admin.form.sort_order')"
+                    type="number"
+                  />
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-check">
+                    <input v-model="form.is_active" type="checkbox" />
+                    <span>{{ $t('admin.form.active_category') }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div v-if="formError" class="form-error">{{ formError }}</div>
+            </div>
+
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Import Ergebnis Modal ───────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
-            <button
-              class="dialog__close"
-              :aria-label="$t('admin.form.close')"
-              @click="importResult = null"
-            >
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-          <div class="dialog__body">
-            <div class="import-result">
-              <div class="import-result__row">
-                <span class="import-result__label">{{ $t('admin.import.new_categories') }}</span>
-                <span class="import-result__value import-result__value--new">{{
-                  importResult.new
-                }}</span>
-              </div>
-              <div class="import-result__row">
-                <span class="import-result__label">{{
-                  $t('admin.import.updated_categories')
-                }}</span>
-                <span class="import-result__value import-result__value--updated">{{
-                  importResult.updated
-                }}</span>
-              </div>
-              <div class="import-result__divider" />
-              <div class="import-result__row">
-                <span class="import-result__label">{{ $t('admin.import.total') }}</span>
-                <span class="import-result__value">{{ importResult.total }}</span>
-              </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="importResult" class="modal-overlay" @click.self="importResult = null">
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">{{ $t('admin.import.title') }}</h3>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="importResult = null"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
-            <div v-if="importError" class="form-error">{{ importError }}</div>
-          </div>
-          <div class="dialog__actions">
-            <button class="action-btn" @click="importResult = null">
-              {{ $t('admin.form.close') }}
-            </button>
+            <div class="dialog__body">
+              <div class="import-result">
+                <div class="import-result__row">
+                  <span class="import-result__label">{{ $t('admin.import.new_categories') }}</span>
+                  <span class="import-result__value import-result__value--new">{{
+                    importResult.new
+                  }}</span>
+                </div>
+                <div class="import-result__row">
+                  <span class="import-result__label">{{
+                    $t('admin.import.updated_categories')
+                  }}</span>
+                  <span class="import-result__value import-result__value--updated">{{
+                    importResult.updated
+                  }}</span>
+                </div>
+                <div class="import-result__divider" />
+                <div class="import-result__row">
+                  <span class="import-result__label">{{ $t('admin.import.total') }}</span>
+                  <span class="import-result__value">{{ importResult.total }}</span>
+                </div>
+              </div>
+              <div v-if="importError" class="form-error">{{ importError }}</div>
+            </div>
+            <div class="dialog__actions">
+              <button class="action-btn" @click="importResult = null">
+                {{ $t('admin.form.close') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
@@ -326,7 +330,7 @@ const form = reactive({
   name: '',
   slug: '',
   icon_url: '',
-  sort_order: '0' as string | number,
+  sort_order: '0',
   parent_id: null as number | null,
   is_active: true,
 })
@@ -804,7 +808,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 .dialog {
   background: var(--secondary-background);
@@ -898,20 +901,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
 .form-select {
   display: block;
   width: 100%;
-  height: 40px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  background: var(--background);
-  color: var(--primary-text);
-  font-size: 0.875rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  &:focus {
-    outline: none;
-    border-color: var(--accent-color);
-  }
 }
 .form-check {
   display: flex;

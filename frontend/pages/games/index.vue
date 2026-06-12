@@ -35,11 +35,36 @@
             </button>
           </Transition>
         </div>
+
+        <!-- ── Smart-Search Intent Badge ── -->
+        <Transition name="intent-slide">
+          <div v-if="smartMeta && smartMeta.intent !== 'FULLTEXT'" class="intent-badge">
+            <template v-if="smartMeta.intent === 'SIMILARITY'">
+              <span class="icon icon-sync_alt intent-badge__icon" aria-hidden="true" />
+              {{ $t('pages.games.intent_similar_to') }}
+              <NuxtLink :to="`/games/${smartMeta.reference_slug}`" class="intent-badge__link">
+                {{ smartMeta.reference_title }}
+              </NuxtLink>
+            </template>
+            <template v-else-if="smartMeta.intent === 'CATEGORY'">
+              <span class="icon icon-category intent-badge__icon" aria-hidden="true" />
+              {{ $t('pages.games.intent_category') }}
+            </template>
+            <template v-else-if="smartMeta.intent === 'TAG'">
+              <span class="icon icon-label intent-badge__icon" aria-hidden="true" />
+              {{ $t('pages.games.intent_tag') }}
+            </template>
+          </div>
+        </Transition>
       </div>
     </section>
 
     <!-- ── Filter Strip ────────────────────────────────────────── -->
-    <div class="filter-strip" :class="{ 'filter-strip--filtered': hasActiveFilters }">
+    <div
+      v-show="!isSmartSearch"
+      class="filter-strip"
+      :class="{ 'filter-strip--filtered': hasActiveFilters }"
+    >
       <div class="filter-strip__scroll">
         <div
           ref="catChipRef"
@@ -152,10 +177,7 @@
           class="chip-btn"
           :class="{ 'chip-btn--active': filters.available }"
           style="--i: 6"
-          @click="
-            filters.available = !filters.available
-            resetPage()
-          "
+          @click="toggleAvailable"
         >
           <span class="icon icon-check_circle chip-btn__icon" aria-hidden="true" />
           {{ $t('pages.games.filter_available') }}
@@ -209,7 +231,7 @@
             />
           </div>
 
-          <div v-if="meta.last_page > 1" class="pagination">
+          <div v-if="!isSmartSearch && meta.last_page > 1" class="pagination">
             <button
               class="pagination__btn"
               :disabled="filters.page === 1"
@@ -247,10 +269,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import type { Game } from '~/composables/useGames'
+import type { Game, SmartSearchMeta } from '~/composables/useGames'
 import { GroupPicker } from '@dodlhuat/basix/js/group-picker'
 
-const { fetchGames, fetchCategories, fetchLanguages } = useGames()
+const { fetchGames, fetchCategories, fetchLanguages, smartSearch } = useGames()
 const { t } = useI18n()
 
 type CategoryItem = {
@@ -264,9 +286,12 @@ type CategoryItem = {
 const loading = ref(true)
 const games = ref<Game[]>([])
 const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
+const smartMeta = ref<SmartSearchMeta | null>(null)
 const categories = ref<CategoryItem[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
+
+const isSmartSearch = computed(() => !!filters.search)
 
 // ── Category popover ───────────────────────────────────────────────
 const catChipRef = ref<HTMLElement | null>(null)
@@ -422,6 +447,11 @@ const activeFilterCount = computed(
     ].filter(Boolean).length
 )
 
+function toggleAvailable() {
+  filters.available = !filters.available
+  resetPage()
+}
+
 function clearFilters() {
   filters.search = ''
   filters.category = ''
@@ -438,9 +468,22 @@ function clearFilters() {
 async function load() {
   loading.value = true
   try {
-    const data = await fetchGames(filters)
-    games.value = data.data
-    meta.value = data.meta
+    if (filters.search) {
+      const data = await smartSearch(filters.search)
+      games.value = data.data
+      smartMeta.value = data.meta
+      meta.value = {
+        current_page: 1,
+        last_page: 1,
+        per_page: data.data.length,
+        total: data.data.length,
+      }
+    } else {
+      smartMeta.value = null
+      const data = await fetchGames(filters)
+      games.value = data.data
+      meta.value = data.meta
+    }
   } finally {
     loading.value = false
   }
@@ -470,7 +513,7 @@ useAsyncData(
   'games-init',
   async () => {
     const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
-    categories.value = cats.data
+    categories.value = cats.data as CategoryItem[]
     allLanguages.value = langs
   },
   { server: false }
@@ -679,6 +722,52 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
       color: $hero-text;
     }
   }
+}
+
+// ─── Intent Badge ─────────────────────────────────────────────────
+.intent-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.35rem 0.8rem;
+  background: rgba($amber, 0.12);
+  border: 1px solid rgba($amber, 0.3);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba($hero-text, 0.85);
+
+  &__icon {
+    font-size: 0.9em;
+    color: $amber;
+    opacity: 0.85;
+  }
+
+  &__link {
+    font-weight: 700;
+    color: $amber;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: rgba($amber, 0.4);
+    transition: text-decoration-color 0.15s;
+
+    &:hover {
+      text-decoration-color: $amber;
+    }
+  }
+}
+
+.intent-slide-enter-active,
+.intent-slide-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.intent-slide-enter-from,
+.intent-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 // ─── Filter Strip ─────────────────────────────────────────────────

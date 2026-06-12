@@ -216,7 +216,7 @@
     },
     "games": {
       "title": "Spielesammlung",
-      "search_placeholder": "Titel oder Beschreibung…",
+      "search_placeholder": "Suchen, z.B. „Spiele wie Everdell“ oder „Kartenspiele“…",
       "search_clear": "Suche leeren",
       "filter_category": "Kategorie",
       "filter_difficulty": "Schwierigkeit",
@@ -253,7 +253,10 @@
       "pagination_info": "Seite {page} von {total}",
       "players_label": "{n} Spieler",
       "players_label_plus": "{n}+ Spieler",
-      "age_label": "Ab {n} J."
+      "age_label": "Ab {n} J.",
+      "intent_similar_to": "Ähnlich wie",
+      "intent_category": "Kategorie erkannt",
+      "intent_tag": "Tag erkannt"
     },
     "game": {
       "not_found": "Spiel nicht gefunden",

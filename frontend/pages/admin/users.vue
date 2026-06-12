@@ -99,181 +99,191 @@
     </div>
 
     <!-- ── Create Modal ──────────────────────────────────────────── -->
-    <div v-if="showCreate" class="modal-overlay" @click.self="showCreate = false">
-      <div class="modal-box">
-        <header class="modal-box__header">
-          <h2 class="modal-box__title">{{ $t('admin.users.create_title') }}</h2>
-          <button
-            class="modal-box__close"
-            :aria-label="$t('admin.form.close')"
-            @click="showCreate = false"
-          >
-            <span class="icon icon-close" />
-          </button>
-        </header>
-        <form class="modal-box__body" @submit.prevent="submitCreate">
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.form.name') }}</label>
-            <input v-model="createForm.name" class="form-input" type="text" required />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.table.email') }}</label>
-            <input v-model="createForm.email" class="form-input" type="email" required />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('auth.password') }}</label>
-            <input
-              v-model="createForm.password"
-              class="form-input"
-              type="password"
-              required
-              minlength="8"
-            />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.table.role') }}</label>
-            <UiVirtualDropdown
-              v-model="createForm.role"
-              class="form-input"
-              :options="[
-                { label: $t('admin.users.role_user'), value: 'USER' },
-                { label: $t('admin.users.role_member'), value: 'MEMBER' },
-                { label: $t('admin.users.role_admin'), value: 'ADMIN' },
-              ]"
-            />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.table.status') }}</label>
-            <UiVirtualDropdown
-              v-model="createForm.status"
-              class="form-input"
-              :options="[
-                { label: 'PENDING', value: 'PENDING' },
-                { label: 'ACTIVE', value: 'ACTIVE' },
-              ]"
-            />
-          </div>
-          <p v-if="createError" class="form-error">{{ createError }}</p>
-          <div class="modal-box__footer">
-            <button type="button" class="action-btn" @click="showCreate = false">
-              {{ $t('admin.form.cancel') }}
+    <Teleport to="body">
+      <div v-if="showCreate" class="modal-overlay" @click.self="showCreate = false">
+        <div class="modal-box">
+          <header class="modal-box__header">
+            <h2 class="modal-box__title">{{ $t('admin.users.create_title') }}</h2>
+            <button
+              class="modal-box__close"
+              :aria-label="$t('admin.form.close')"
+              @click="showCreate = false"
+            >
+              <span class="icon icon-close" />
             </button>
-            <button type="submit" class="action-btn action-btn--success" :disabled="createLoading">
-              {{ createLoading ? $t('admin.users.creating') : $t('admin.users.create_btn') }}
-            </button>
-          </div>
-        </form>
+          </header>
+          <form class="modal-box__body" @submit.prevent="submitCreate">
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.form.name') }}</label>
+              <input v-model="createForm.name" class="form-input" type="text" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.table.email') }}</label>
+              <input v-model="createForm.email" class="form-input" type="email" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('auth.password') }}</label>
+              <input
+                v-model="createForm.password"
+                class="form-input"
+                type="password"
+                required
+                minlength="8"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.table.role') }}</label>
+              <UiVirtualDropdown
+                v-model="createForm.role"
+                class="form-input"
+                :options="[
+                  { label: $t('admin.users.role_user'), value: 'USER' },
+                  { label: $t('admin.users.role_member'), value: 'MEMBER' },
+                  { label: $t('admin.users.role_admin'), value: 'ADMIN' },
+                ]"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.table.status') }}</label>
+              <UiVirtualDropdown
+                v-model="createForm.status"
+                class="form-input"
+                :options="[
+                  { label: 'PENDING', value: 'PENDING' },
+                  { label: 'ACTIVE', value: 'ACTIVE' },
+                ]"
+              />
+            </div>
+            <p v-if="createError" class="form-error">{{ createError }}</p>
+            <div class="modal-box__footer">
+              <button type="button" class="action-btn" @click="showCreate = false">
+                {{ $t('admin.form.cancel') }}
+              </button>
+              <button
+                type="submit"
+                class="action-btn action-btn--success"
+                :disabled="createLoading"
+              >
+                {{ createLoading ? $t('admin.users.creating') : $t('admin.users.create_btn') }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- ── Edit Modal ────────────────────────────────────────────── -->
-    <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
-      <div class="modal-box">
-        <header class="modal-box__header">
-          <h2 class="modal-box__title">{{ $t('admin.users.edit_title') }}</h2>
-          <button
-            class="modal-box__close"
-            :aria-label="$t('admin.form.close')"
-            @click="showEdit = false"
-          >
-            <span class="icon icon-close" />
-          </button>
-        </header>
-        <form class="modal-box__body" @submit.prevent="submitEdit">
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.form.name') }}</label>
-            <input v-model="editForm.name" class="form-input" type="text" required />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.table.email') }}</label>
-            <input v-model="editForm.email" class="form-input" type="email" required />
-          </div>
-          <div class="form-field">
-            <label class="form-label">{{ $t('admin.table.role') }}</label>
-            <UiVirtualDropdown
-              v-model="editForm.role"
-              class="form-input"
-              :options="[
-                { label: $t('admin.users.role_user'), value: 'USER' },
-                { label: $t('admin.users.role_member'), value: 'MEMBER' },
-                { label: $t('admin.users.role_admin'), value: 'ADMIN' },
-              ]"
-            />
-          </div>
-          <div class="form-field">
-            <label class="form-label"
-              >{{ $t('auth.password') }}
-              <span class="text-muted">{{ $t('admin.users.password_edit_hint') }}</span></label
+    <Teleport to="body">
+      <div v-if="showEdit" class="modal-overlay" @click.self="showEdit = false">
+        <div class="modal-box">
+          <header class="modal-box__header">
+            <h2 class="modal-box__title">{{ $t('admin.users.edit_title') }}</h2>
+            <button
+              class="modal-box__close"
+              :aria-label="$t('admin.form.close')"
+              @click="showEdit = false"
             >
-            <input v-model="editForm.password" class="form-input" type="password" minlength="8" />
-          </div>
-          <p v-if="editError" class="form-error">{{ editError }}</p>
-          <div class="modal-box__footer">
-            <button type="button" class="action-btn" @click="showEdit = false">
-              {{ $t('admin.form.cancel') }}
+              <span class="icon icon-close" />
             </button>
-            <button type="submit" class="action-btn action-btn--success" :disabled="editLoading">
-              {{ editLoading ? $t('admin.users.saving') : $t('admin.form.save') }}
-            </button>
-          </div>
-        </form>
+          </header>
+          <form class="modal-box__body" @submit.prevent="submitEdit">
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.form.name') }}</label>
+              <input v-model="editForm.name" class="form-input" type="text" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.table.email') }}</label>
+              <input v-model="editForm.email" class="form-input" type="email" required />
+            </div>
+            <div class="form-field">
+              <label class="form-label">{{ $t('admin.table.role') }}</label>
+              <UiVirtualDropdown
+                v-model="editForm.role"
+                class="form-input"
+                :options="[
+                  { label: $t('admin.users.role_user'), value: 'USER' },
+                  { label: $t('admin.users.role_member'), value: 'MEMBER' },
+                  { label: $t('admin.users.role_admin'), value: 'ADMIN' },
+                ]"
+              />
+            </div>
+            <div class="form-field">
+              <label class="form-label"
+                >{{ $t('auth.password') }}
+                <span class="text-muted">{{ $t('admin.users.password_edit_hint') }}</span></label
+              >
+              <input v-model="editForm.password" class="form-input" type="password" minlength="8" />
+            </div>
+            <p v-if="editError" class="form-error">{{ editError }}</p>
+            <div class="modal-box__footer">
+              <button type="button" class="action-btn" @click="showEdit = false">
+                {{ $t('admin.form.cancel') }}
+              </button>
+              <button type="submit" class="action-btn action-btn--success" :disabled="editLoading">
+                {{ editLoading ? $t('admin.users.saving') : $t('admin.form.save') }}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
+    </Teleport>
 
     <!-- ── Token-Transaktionen Panel ──────────────────────────── -->
-    <div v-if="txPanel.open" class="modal-overlay" @click.self="txPanel.open = false">
-      <div class="modal-box modal-box--wide">
-        <div class="modal-box__header">
-          <h3>{{ $t('admin.users.token_history_title', { name: txPanel.userName }) }}</h3>
-          <button
-            class="modal-box__close"
-            :aria-label="$t('admin.form.close')"
-            @click="txPanel.open = false"
-          >
-            <span class="icon icon-close" aria-hidden="true" />
-          </button>
-        </div>
-        <div v-if="txPanel.loading" class="modal-box__body"><div class="spinner" /></div>
-        <div v-else-if="!txPanel.transactions.length" class="modal-box__body">
-          <p class="text-muted">{{ $t('pages.tokens.history_empty') }}</p>
-        </div>
-        <div v-else class="modal-box__body">
-          <table class="dash-table">
-            <tbody>
-              <tr v-for="tx in txPanel.transactions" :key="tx.id">
-                <td class="text-muted" style="white-space: nowrap">
-                  {{ formatTxDate(tx.created_at) }}
-                </td>
-                <td>{{ tx.description ?? tx.type }}</td>
-                <td
-                  style="text-align: right; font-weight: 700"
-                  :style="tx.amount >= 0 ? 'color:#4ade80' : 'color:#f87171'"
-                >
-                  {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div v-if="txPanel.lastPage > 1" class="pagination-row">
+    <Teleport to="body">
+      <div v-if="txPanel.open" class="modal-overlay" @click.self="txPanel.open = false">
+        <div class="modal-box modal-box--wide">
+          <div class="modal-box__header">
+            <h3>{{ $t('admin.users.token_history_title', { name: txPanel.userName }) }}</h3>
             <button
-              class="action-btn"
-              :disabled="txPanel.page === 1"
-              @click="loadTxPanel(txPanel.userId!, txPanel.page - 1)"
+              class="modal-box__close"
+              :aria-label="$t('admin.form.close')"
+              @click="txPanel.open = false"
             >
-              ←
+              <span class="icon icon-close" aria-hidden="true" />
             </button>
-            <span>{{ txPanel.page }} / {{ txPanel.lastPage }}</span>
-            <button
-              class="action-btn"
-              :disabled="txPanel.page === txPanel.lastPage"
-              @click="loadTxPanel(txPanel.userId!, txPanel.page + 1)"
-            >
-              →
-            </button>
+          </div>
+          <div v-if="txPanel.loading" class="modal-box__body"><div class="spinner" /></div>
+          <div v-else-if="!txPanel.transactions.length" class="modal-box__body">
+            <p class="text-muted">{{ $t('pages.tokens.history_empty') }}</p>
+          </div>
+          <div v-else class="modal-box__body">
+            <table class="dash-table">
+              <tbody>
+                <tr v-for="tx in txPanel.transactions" :key="tx.id">
+                  <td class="text-muted" style="white-space: nowrap">
+                    {{ formatTxDate(tx.created_at) }}
+                  </td>
+                  <td>{{ tx.description ?? tx.type }}</td>
+                  <td
+                    style="text-align: right; font-weight: 700"
+                    :style="tx.amount >= 0 ? 'color:#4ade80' : 'color:#f87171'"
+                  >
+                    {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div v-if="txPanel.lastPage > 1" class="pagination-row">
+              <button
+                class="action-btn"
+                :disabled="txPanel.page === 1"
+                @click="loadTxPanel(txPanel.userId!, txPanel.page - 1)"
+              >
+                ←
+              </button>
+              <span>{{ txPanel.page }} / {{ txPanel.lastPage }}</span>
+              <button
+                class="action-btn"
+                :disabled="txPanel.page === txPanel.lastPage"
+                @click="loadTxPanel(txPanel.userId!, txPanel.page + 1)"
+              >
+                →
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
     <footer class="l-footer">
       <div class="l-footer__inner">

@@ -58,3 +58,5 @@ yarn-error.log*
 
 DEPLOYMENT.md
 CLAUDE.md
+
+.githooks/

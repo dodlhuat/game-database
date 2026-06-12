@@ -134,7 +134,7 @@ async function upgrade() {
   } catch (err: unknown) {
     const e = err as { errors?: Record<string, string[]>; message?: string }
     if (e.errors?.address) {
-      addressError.value = e.errors.address[0]
+      addressError.value = e.errors.address[0] ?? ''
     } else {
       error.value = e.message ?? 'Ein Fehler ist aufgetreten.'
     }

@@ -96,7 +96,7 @@ async function submit() {
   } catch (err: unknown) {
     const e = err as { errors?: Record<string, string[]>; message?: string }
     if (e.errors?.password) {
-      errors.password = e.errors.password[0]
+      errors.password = e.errors.password[0] ?? ''
     } else {
       generalError.value = e.message ?? 'Fehler beim Zurücksetzen.'
     }

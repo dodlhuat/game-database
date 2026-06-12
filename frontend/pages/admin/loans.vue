@@ -22,10 +22,7 @@
               :key="opt.value"
               class="filter-tab"
               :class="{ 'filter-tab--active': statusFilter === opt.value }"
-              @click="
-                statusFilter = opt.value
-                load()
-              "
+              @click="setStatusFilter(opt.value)"
             >
               {{ opt.label }}
             </button>
@@ -133,6 +130,11 @@ const statusOptions = computed(() => [
 ])
 
 onMounted(load)
+
+function setStatusFilter(value: string) {
+  statusFilter.value = value
+  load()
+}
 
 async function load() {
   loading.value = true

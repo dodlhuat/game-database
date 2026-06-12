@@ -91,109 +91,111 @@
     </div>
 
     <!-- ── Formular Modal ───────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog dialog--wide">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ form.id ? $t('admin.packages_admin.edit') : $t('admin.packages_admin.add') }}
-            </h3>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-
-          <div class="dialog__body">
-            <div class="form-grid">
-              <div class="form-grid__full">
-                <UiInput v-model="form.name" :label="$t('admin.form.name')" required />
-              </div>
-              <div class="form-grid__full">
-                <UiInput v-model="form.slug" :label="$t('admin.form.slug')" />
-              </div>
-              <div class="form-grid__full">
-                <UiInput v-model="form.description" :label="$t('admin.form.description')" />
-              </div>
-
-              <div>
-                <label class="form-label">{{ $t('pages.package.type') }}</label>
-                <UiVirtualDropdown
-                  v-model="form.type"
-                  class="form-select"
-                  :options="[
-                    { label: $t('pages.package.type_curated'), value: 'CURATED' },
-                    { label: $t('pages.package.type_category'), value: 'CATEGORY' },
-                  ]"
-                />
-              </div>
-
-              <div>
-                <label class="form-label">{{ $t('admin.table.category') }}</label>
-                <UiVirtualDropdown
-                  v-model="form.category_id"
-                  class="form-select"
-                  :options="[
-                    { label: $t('admin.form.no_category'), value: null },
-                    ...categories.map((c) => ({ label: c.name, value: c.id })),
-                  ]"
-                />
-              </div>
-
-              <!-- Spielauswahl -->
-              <div class="form-grid__full">
-                <label class="form-label">
-                  {{ $t('admin.table.games') }}
-                  <span v-if="form.game_ids.length" class="form-label__count">{{
-                    $t('admin.packages_admin.games_selected', { n: form.game_ids.length })
-                  }}</span>
-                </label>
-                <div class="game-search">
-                  <input
-                    v-model="gameSearch"
-                    type="text"
-                    class="game-search__input"
-                    :placeholder="$t('admin.packages_admin.games_search')"
-                  />
-                </div>
-                <div class="game-picker">
-                  <label
-                    v-for="game in filteredGames"
-                    :key="game.id"
-                    class="game-chip"
-                    :class="{ 'game-chip--selected': form.game_ids.includes(game.id) }"
-                  >
-                    <input
-                      v-model="form.game_ids"
-                      type="checkbox"
-                      :value="game.id"
-                      class="game-chip__input"
-                    />
-                    {{ game.title }}
-                  </label>
-                  <p v-if="!filteredGames.length" class="game-picker__empty">
-                    {{ $t('admin.packages_admin.games_none') }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="form-grid__full">
-                <label class="form-check">
-                  <input v-model="form.is_active" type="checkbox" />
-                  <span>{{ $t('admin.packages_admin.active') }}</span>
-                </label>
-              </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog dialog--wide">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ form.id ? $t('admin.packages_admin.edit') : $t('admin.packages_admin.add') }}
+              </h3>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
             </div>
 
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
+            <div class="dialog__body">
+              <div class="form-grid">
+                <div class="form-grid__full">
+                  <UiInput v-model="form.name" :label="$t('admin.form.name')" required />
+                </div>
+                <div class="form-grid__full">
+                  <UiInput v-model="form.slug" :label="$t('admin.form.slug')" />
+                </div>
+                <div class="form-grid__full">
+                  <UiInput v-model="form.description" :label="$t('admin.form.description')" />
+                </div>
 
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+                <div>
+                  <label class="form-label">{{ $t('pages.package.type') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.type"
+                    class="form-select"
+                    :options="[
+                      { label: $t('pages.package.type_curated'), value: 'CURATED' },
+                      { label: $t('pages.package.type_category'), value: 'CATEGORY' },
+                    ]"
+                  />
+                </div>
+
+                <div>
+                  <label class="form-label">{{ $t('admin.table.category') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.category_id"
+                    class="form-select"
+                    :options="[
+                      { label: $t('admin.form.no_category'), value: null },
+                      ...categories.map((c) => ({ label: c.name, value: c.id })),
+                    ]"
+                  />
+                </div>
+
+                <!-- Spielauswahl -->
+                <div class="form-grid__full">
+                  <label class="form-label">
+                    {{ $t('admin.table.games') }}
+                    <span v-if="form.game_ids.length" class="form-label__count">{{
+                      $t('admin.packages_admin.games_selected', { n: form.game_ids.length })
+                    }}</span>
+                  </label>
+                  <div class="game-search">
+                    <input
+                      v-model="gameSearch"
+                      type="text"
+                      class="game-search__input"
+                      :placeholder="$t('admin.packages_admin.games_search')"
+                    />
+                  </div>
+                  <div class="game-picker">
+                    <label
+                      v-for="game in filteredGames"
+                      :key="game.id"
+                      class="game-chip"
+                      :class="{ 'game-chip--selected': form.game_ids.includes(game.id) }"
+                    >
+                      <input
+                        v-model="form.game_ids"
+                        type="checkbox"
+                        :value="game.id"
+                        class="game-chip__input"
+                      />
+                      {{ game.title }}
+                    </label>
+                    <p v-if="!filteredGames.length" class="game-picker__empty">
+                      {{ $t('admin.packages_admin.games_none') }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="form-grid__full">
+                  <label class="form-check">
+                    <input v-model="form.is_active" type="checkbox" />
+                    <span>{{ $t('admin.packages_admin.active') }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <div v-if="formError" class="form-error">{{ formError }}</div>
+            </div>
+
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
@@ -635,7 +637,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 .dialog {
   background: var(--secondary-background);
@@ -748,20 +749,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
 .form-select {
   display: block;
   width: 100%;
-  height: 40px;
-  padding: 0 0.75rem;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  background: var(--background);
-  color: var(--primary-text);
-  font-size: 0.875rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.2s;
-  &:focus {
-    outline: none;
-    border-color: var(--accent-color);
-  }
 }
 
 .form-check {

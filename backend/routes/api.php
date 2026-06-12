@@ -23,6 +23,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\GameSearchController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanSettingController;
@@ -63,6 +64,7 @@ Route::prefix('auth')->group(function () {
 Route::get('/loan-settings', [LoanSettingController::class, 'show']);
 
 Route::get('/games', [GameController::class, 'index']);
+Route::get('/games/smart-search', [GameSearchController::class, 'index']);
 Route::get('/games/{game:slug}', [GameController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/packages', [PackageController::class, 'index']);

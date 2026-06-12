@@ -64,36 +64,38 @@
     </div>
 
     <!-- ── Ablehnungs-Modal ──────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="rejectTarget" class="modal-overlay" @click.self="rejectTarget = null">
-        <div class="dialog">
-          <div class="dialog__header">
-            <h3 class="dialog__title">{{ $t('admin.extensions_admin.reject_title') }}</h3>
-            <button
-              class="dialog__close"
-              :aria-label="$t('admin.form.close')"
-              @click="rejectTarget = null"
-            >
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
-          <p class="dialog__game">{{ rejectTarget.loan?.copy?.game?.title }}</p>
-          <UiInput v-model="rejectNote" :label="$t('admin.extensions_admin.reject_note')" />
-          <div class="dialog__actions">
-            <button
-              class="action-btn action-btn--danger"
-              :disabled="processing"
-              @click="submitReject"
-            >
-              {{ $t('admin.extensions_admin.reject') }}
-            </button>
-            <button class="action-btn" @click="rejectTarget = null">
-              {{ $t('admin.form.cancel') }}
-            </button>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="rejectTarget" class="modal-overlay" @click.self="rejectTarget = null">
+          <div class="dialog">
+            <div class="dialog__header">
+              <h3 class="dialog__title">{{ $t('admin.extensions_admin.reject_title') }}</h3>
+              <button
+                class="dialog__close"
+                :aria-label="$t('admin.form.close')"
+                @click="rejectTarget = null"
+              >
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
+            </div>
+            <p class="dialog__game">{{ rejectTarget.loan?.copy?.game?.title }}</p>
+            <UiInput v-model="rejectNote" :label="$t('admin.extensions_admin.reject_note')" />
+            <div class="dialog__actions">
+              <button
+                class="action-btn action-btn--danger"
+                :disabled="processing"
+                @click="submitReject"
+              >
+                {{ $t('admin.extensions_admin.reject') }}
+              </button>
+              <button class="action-btn" @click="rejectTarget = null">
+                {{ $t('admin.form.cancel') }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
 
     <footer class="l-footer">
       <div class="l-footer__inner">

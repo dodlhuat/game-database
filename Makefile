@@ -2,11 +2,12 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test
 
 ## Erster Start (einmalig)
 setup:
 	sh docker/setup.sh
+	git config core.hooksPath .githooks
 
 ## Container starten
 up:
@@ -61,6 +62,11 @@ api-generate:
 	docker compose exec backend php artisan scramble:export
 	cd frontend && npm run api:generate
 
+## Backend-Tests ausführen
+test:
+	docker compose exec backend php artisan config:clear --ansi
+	docker compose exec backend php artisan test
+
 ## Linter für Frontend (ESLint) und Backend (Pint) ausführen
 lint:
 	cd frontend && npm run lint
@@ -70,4 +76,4 @@ lint:
 lint-fix:
 	cd frontend && npm run lint:fix
 	cd frontend && npm run format
-	docker compose exec backend ./vendor/bin/pint
+	docker compose exec backend ./vendor/bin/pint 2>/dev/null || echo "⚠ Backend-Container nicht aktiv, Pint übersprungen"

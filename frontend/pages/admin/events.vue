@@ -72,114 +72,120 @@
     </div>
 
     <!-- ── Event Form Modal ───────────────────────────────────────── -->
-    <Transition name="modal">
-      <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-        <div class="dialog dialog--wide">
-          <div class="dialog__header">
-            <h3 class="dialog__title">
-              {{ form.id ? $t('admin.events.edit') : $t('admin.events.add') }}
-            </h3>
-            <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-              <span class="icon icon-close" aria-hidden="true" />
-            </button>
-          </div>
+    <Teleport to="body">
+      <Transition name="modal">
+        <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
+          <div class="dialog dialog--wide">
+            <div class="dialog__header">
+              <h3 class="dialog__title">
+                {{ form.id ? $t('admin.events.edit') : $t('admin.events.add') }}
+              </h3>
+              <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
+                <span class="icon icon-close" aria-hidden="true" />
+              </button>
+            </div>
 
-          <div class="dialog__body">
-            <div class="form-grid">
-              <div class="form-grid__full">
-                <UiInput v-model="form.title" :label="$t('admin.events.form.title')" required />
-              </div>
+            <div class="dialog__body">
+              <div class="form-grid">
+                <div class="form-grid__full">
+                  <UiInput v-model="form.title" :label="$t('admin.events.form.title')" required />
+                </div>
 
-              <div>
-                <UiDatePicker v-model="form.date" :label="$t('admin.events.form.date')" required />
-              </div>
+                <div>
+                  <UiDatePicker
+                    v-model="form.date"
+                    :label="$t('admin.events.form.date')"
+                    required
+                  />
+                </div>
 
-              <div class="form-grid__center">
-                <UiSwitch v-model="form.is_all_day" :label="$t('events.all_day')" />
-              </div>
+                <div class="form-grid__center">
+                  <UiSwitch v-model="form.is_all_day" :label="$t('events.all_day')" />
+                </div>
 
-              <div v-if="!form.is_all_day">
-                <UiInput v-model="form.time" :label="$t('admin.events.form.time')" type="time" />
-              </div>
+                <div v-if="!form.is_all_day">
+                  <UiInput v-model="form.time" :label="$t('admin.events.form.time')" type="time" />
+                </div>
 
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.events.form.description') }}</label>
-                <UiRichEditor v-model="form.description" />
-              </div>
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.events.form.description') }}</label>
+                  <UiRichEditor v-model="form.description" />
+                </div>
 
-              <div class="form-grid__full">
-                <label class="form-label">{{ $t('admin.events.form.image') }}</label>
-                <div class="file-uploader">
-                  <div
-                    class="drop-zone"
-                    :class="{ 'drag-over': isDragging }"
-                    @dragover.prevent="isDragging = true"
-                    @dragleave.prevent="isDragging = false"
-                    @drop.prevent="onDrop"
-                    @click="imageInputRef?.click()"
-                  >
-                    <input
-                      ref="imageInputRef"
-                      type="file"
-                      accept="image/*"
-                      style="display: none"
-                      @change="onFileChange"
-                    />
-                    <div class="drop-zone-content">
-                      <div class="icon-container">
-                        <span class="icon icon-add_photo_alternate" />
-                      </div>
-                      <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
-                      <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
-                    </div>
-                  </div>
-
-                  <div v-if="form.imageFile || form.existingImageUrl" class="file-list">
-                    <div class="file-item">
-                      <div class="file-item-header">
-                        <div class="file-info">
-                          <img
-                            :src="form.imageFile ? imagePreviewUrl! : form.existingImageUrl!"
-                            :alt="$t('admin.form.preview')"
-                            style="
-                              width: 40px;
-                              height: 40px;
-                              object-fit: cover;
-                              border-radius: 4px;
-                              flex-shrink: 0;
-                            "
-                          />
-                          <div class="file-details">
-                            <span class="file-name">{{
-                              form.imageFile
-                                ? form.imageFile.name
-                                : $t('admin.events.form.image_current')
-                            }}</span>
-                            <span class="file-size">{{
-                              form.imageFile ? formatFileSize(form.imageFile.size) : ''
-                            }}</span>
-                          </div>
+                <div class="form-grid__full">
+                  <label class="form-label">{{ $t('admin.events.form.image') }}</label>
+                  <div class="file-uploader">
+                    <div
+                      class="drop-zone"
+                      :class="{ 'drag-over': isDragging }"
+                      @dragover.prevent="isDragging = true"
+                      @dragleave.prevent="isDragging = false"
+                      @drop.prevent="onDrop"
+                      @click="imageInputRef?.click()"
+                    >
+                      <input
+                        ref="imageInputRef"
+                        type="file"
+                        accept="image/*"
+                        style="display: none"
+                        @change="onFileChange"
+                      />
+                      <div class="drop-zone-content">
+                        <div class="icon-container">
+                          <span class="icon icon-add_photo_alternate" />
                         </div>
-                        <button type="button" class="remove-btn" @click.stop="removeImage">
-                          <span class="icon icon-close" />
-                        </button>
+                        <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
+                        <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
+                      </div>
+                    </div>
+
+                    <div v-if="form.imageFile || form.existingImageUrl" class="file-list">
+                      <div class="file-item">
+                        <div class="file-item-header">
+                          <div class="file-info">
+                            <img
+                              :src="form.imageFile ? imagePreviewUrl! : form.existingImageUrl!"
+                              :alt="$t('admin.form.preview')"
+                              style="
+                                width: 40px;
+                                height: 40px;
+                                object-fit: cover;
+                                border-radius: 4px;
+                                flex-shrink: 0;
+                              "
+                            />
+                            <div class="file-details">
+                              <span class="file-name">{{
+                                form.imageFile
+                                  ? form.imageFile.name
+                                  : $t('admin.events.form.image_current')
+                              }}</span>
+                              <span class="file-size">{{
+                                form.imageFile ? formatFileSize(form.imageFile.size) : ''
+                              }}</span>
+                            </div>
+                          </div>
+                          <button type="button" class="remove-btn" @click.stop="removeImage">
+                            <span class="icon icon-close" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <div v-if="formError" class="form-error">{{ formError }}</div>
             </div>
 
-            <div v-if="formError" class="form-error">{{ formError }}</div>
-          </div>
-
-          <div class="dialog__actions">
-            <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
-            <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            <div class="dialog__actions">
+              <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
+              <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
+            </div>
           </div>
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -617,7 +623,6 @@ $hero-muted: rgba(238, 232, 223, 0.72);
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  overflow-y: auto;
 }
 .dialog {
   background: var(--secondary-background);

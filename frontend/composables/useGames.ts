@@ -27,6 +27,21 @@ export interface Game {
   earliest_available_at?: string | null
 }
 
+export type SmartSearchIntent = 'SIMILARITY' | 'CATEGORY' | 'TAG' | 'FULLTEXT' | 'EMPTY'
+
+export interface SmartSearchMeta {
+  intent: SmartSearchIntent
+  reference_title?: string
+  reference_slug?: string
+  slug?: string
+  query?: string
+}
+
+export interface SmartSearchResult {
+  data: Game[]
+  meta: SmartSearchMeta
+}
+
 export interface GameFilters {
   search?: string
   category?: string
@@ -103,5 +118,17 @@ export function useGames() {
     return api.get<{ id: number; name: string }[]>('/languages')
   }
 
-  return { fetchGames, fetchGame, fetchCategories, fetchLanguages, fetchPackages, fetchPackage }
+  function smartSearch(q: string) {
+    return api.get<SmartSearchResult>('/games/smart-search', { params: { q } })
+  }
+
+  return {
+    fetchGames,
+    fetchGame,
+    fetchCategories,
+    fetchLanguages,
+    fetchPackages,
+    fetchPackage,
+    smartSearch,
+  }
 }

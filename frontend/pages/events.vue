@@ -88,9 +88,9 @@ function toCalendarEvent(e: ApiEvent) {
   } else {
     const [h, m] = e.time.split(':').map(Number)
     start = new Date(`${dateStr}T00:00:00`)
-    start.setHours(h, m, 0, 0)
+    start.setHours(h ?? 0, m, 0, 0)
     end = new Date(start)
-    end.setHours(h + 1, m, 0, 0)
+    end.setHours((h ?? 0) + 1, m, 0, 0)
   }
 
   return {
@@ -131,7 +131,7 @@ watch([loading, calendarEl], async ([isLoading, el]) => {
     events: events.map(toCalendarEvent),
     view: 'month',
     iconBasePath: '/svg-icons/',
-    onEventClick: (event) => {
+    onEventClick: (event: { id: string }) => {
       const original = events.find((e) => String(e.id) === event.id)
       if (original) selected.value = original
     },
