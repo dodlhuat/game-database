@@ -25,8 +25,7 @@ export function useEvents() {
     return res.data
   }
 
-  const deleteEvent = (id: number) =>
-    api.delete(`/admin/events/${id}`)
+  const deleteEvent = (id: number) => api.delete(`/admin/events/${id}`)
 
   return { fetchEvents, fetchAdminEvents, createEvent, updateEvent, deleteEvent }
 }

@@ -25,11 +25,15 @@
     </div>
 
     <template v-else>
-
       <!-- ═══ HERO ═══════════════════════════════════════════════════ -->
       <section class="gd-hero">
         <div class="gd-hero__bg" aria-hidden="true">
-          <img v-if="game.cover_image_url" :src="game.cover_image_url" class="gd-hero__bg-img" alt="" />
+          <img
+            v-if="game.cover_image_url"
+            :src="game.cover_image_url"
+            class="gd-hero__bg-img"
+            alt=""
+          />
           <div class="gd-hero__bg-veil" />
           <div class="gd-hero__grain" />
           <div class="gd-hero__fade" />
@@ -42,8 +46,15 @@
         <div class="gd-hero__stage">
           <div class="gd-hero__poster-wrap">
             <div class="gd-hero__poster-halo" aria-hidden="true" />
-            <img v-if="game.cover_image_url" :src="game.cover_image_url" :alt="game.title" class="gd-hero__poster" />
-            <div v-else class="gd-hero__poster-empty"><span class="icon icon-extension" aria-hidden="true" /></div>
+            <img
+              v-if="game.cover_image_url"
+              :src="game.cover_image_url"
+              :alt="game.title"
+              class="gd-hero__poster"
+            />
+            <div v-else class="gd-hero__poster-empty">
+              <span class="icon icon-extension" aria-hidden="true" />
+            </div>
           </div>
         </div>
 
@@ -55,9 +66,13 @@
               class="gd-pill"
               :class="game.available_copies_count > 0 ? 'gd-pill--avail' : 'gd-pill--out'"
             >
-              {{ game.available_copies_count > 0
-                ? `${game.available_copies_count} ${$t('common.badge.available')}`
-                : (game.copies_count === 0 ? $t('pages.game.not_available') : $t('pages.game.currently_loaned')) }}
+              {{
+                game.available_copies_count > 0
+                  ? `${game.available_copies_count} ${$t('common.badge.available')}`
+                  : game.copies_count === 0
+                    ? $t('pages.game.not_available')
+                    : $t('pages.game.currently_loaned')
+              }}
             </span>
           </div>
           <h1 class="gd-title">{{ game.title }}</h1>
@@ -75,7 +90,9 @@
             <div class="gd-stat">
               <span class="icon gd-stat__ico">group</span>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.players') }}</span>
-              <span class="gd-stat__val">{{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}</span>
+              <span class="gd-stat__val"
+                >{{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}</span
+              >
             </div>
           </template>
           <template v-if="game.duration_min">
@@ -83,7 +100,10 @@
             <div class="gd-stat">
               <span class="icon gd-stat__ico">schedule</span>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.duration') }}</span>
-              <span class="gd-stat__val">{{ game.duration_min }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.</span>
+              <span class="gd-stat__val"
+                >{{ game.duration_min
+                }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.</span
+              >
             </div>
           </template>
           <template v-if="game.min_age">
@@ -107,7 +127,7 @@
             <div class="gd-stat">
               <span class="icon gd-stat__ico">translate</span>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.language') }}</span>
-              <span class="gd-stat__val">{{ game.languages.map(l => l.name).join(', ') }}</span>
+              <span class="gd-stat__val">{{ game.languages.map((l) => l.name).join(', ') }}</span>
             </div>
           </template>
           <template v-if="game.year">
@@ -123,24 +143,33 @@
 
       <!-- ═══ BODY ═══════════════════════════════════════════════════ -->
       <main class="gd-main">
-
         <!-- Desktop CTA (hidden on mobile — float bar handles it) -->
         <div class="gd-actions">
           <template v-if="!auth.isLoggedIn">
             <NuxtLink to="/login" class="gd-btn gd-btn--primary">
-              <span class="icon icon-login" aria-hidden="true" />{{ $t('pages.game.login_to_borrow') }}
+              <span class="icon icon-login" aria-hidden="true" />{{
+                $t('pages.game.login_to_borrow')
+              }}
             </NuxtLink>
           </template>
           <template v-else-if="auth.isActive && !auth.isMember">
-            <NuxtLink to="/upgrade" class="gd-btn gd-btn--secondary">{{ $t('pages.game.membership_required') }}</NuxtLink>
+            <NuxtLink to="/upgrade" class="gd-btn gd-btn--secondary">{{
+              $t('pages.game.membership_required')
+            }}</NuxtLink>
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
             <span class="gd-btn gd-btn--done">
-              <span class="icon icon-check_circle" aria-hidden="true" />{{ $t('pages.game.already_borrowed') }}
+              <span class="icon icon-check_circle" aria-hidden="true" />{{
+                $t('pages.game.already_borrowed')
+              }}
             </span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
-            <button v-if="(auth.user?.tokens ?? 0) >= 2" class="gd-btn gd-btn--primary" @click="openLoanModal">
+            <button
+              v-if="(auth.user?.tokens ?? 0) >= 2"
+              class="gd-btn gd-btn--primary"
+              @click="openLoanModal"
+            >
               <span class="icon icon-send" aria-hidden="true" />{{ $t('btn.borrow_game') }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
@@ -148,17 +177,25 @@
             </NuxtLink>
           </template>
           <template v-else-if="auth.isMember">
-            <button class="gd-btn gd-btn--secondary" @click="handleReserve" :disabled="reserving">
-              <span class="icon icon-bookmark_add" aria-hidden="true" />{{ reserving ? $t('common.loading') : $t('btn.reserve') }}
+            <button class="gd-btn gd-btn--secondary" :disabled="reserving" @click="handleReserve">
+              <span class="icon icon-bookmark_add" aria-hidden="true" />{{
+                reserving ? $t('common.loading') : $t('btn.reserve')
+              }}
             </button>
             <span v-if="game.earliest_available_at" class="gd-avail-note">
-              Wieder verfügbar ab {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
+              Wieder verfügbar ab
+              {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
             </span>
           </template>
         </div>
 
         <Transition name="gd-status-fade">
-          <div v-if="reserveStatus" class="gd-reserve-status" :class="`gd-reserve-status--${reserveStatus.type}`" role="status">
+          <div
+            v-if="reserveStatus"
+            class="gd-reserve-status"
+            :class="`gd-reserve-status--${reserveStatus.type}`"
+            role="status"
+          >
             {{ reserveStatus.text }}
           </div>
         </Transition>
@@ -169,6 +206,7 @@
           <span v-for="tag in game.tags" :key="tag.id" class="gd-tag">{{ tag.name }}</span>
         </div>
 
+        <!-- eslint-disable-next-line vue/no-v-html -->
         <div v-if="game.description" class="prose gd-desc" v-html="game.description" />
 
         <div v-if="game.images?.length" class="gd-gallery">
@@ -177,11 +215,13 @@
               v-for="(img, i) in game.images"
               :key="img.id"
               class="gd-gallery__thumb"
-              @click="openLightbox(i)"
               :aria-label="`Bild ${i + 1} vergrößern`"
+              @click="openLightbox(i)"
             >
               <img :src="img.url" :alt="game.title" class="gd-gallery__img" loading="lazy" />
-              <span class="gd-gallery__zoom" aria-hidden="true"><span class="icon icon-zoom_in" /></span>
+              <span class="gd-gallery__zoom" aria-hidden="true"
+                ><span class="icon icon-zoom_in"
+              /></span>
             </button>
           </div>
         </div>
@@ -194,12 +234,17 @@
           class="gd-insta"
         >
           <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            <path
+              d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+            />
           </svg>
           {{ $t('pages.game.instagram_view') }}
-          <span class="icon icon-open_in_new" style="font-size:0.8rem;opacity:0.5" aria-hidden="true" />
+          <span
+            class="icon icon-open_in_new"
+            style="font-size: 0.8rem; opacity: 0.5"
+            aria-hidden="true"
+          />
         </a>
-
       </main>
 
       <!-- ═══ MOBILE FLOAT BAR ═══════════════════════════════════════ -->
@@ -208,41 +253,57 @@
           <div class="gd-bar__left">
             <span class="gd-bar__name">{{ game.title }}</span>
             <span v-if="auth.isLoggedIn && auth.isMember" class="gd-bar__tokens">
-              <span class="icon" style="font-size:.85rem">toll</span>{{ auth.user?.tokens ?? 0 }} Token
+              <span class="icon" style="font-size: 0.85rem">toll</span
+              >{{ auth.user?.tokens ?? 0 }} Token
             </span>
           </div>
           <template v-if="!auth.isLoggedIn">
-            <NuxtLink to="/login" class="gd-bar__btn">{{ $t('pages.game.login_to_borrow') }}</NuxtLink>
+            <NuxtLink to="/login" class="gd-bar__btn">{{
+              $t('pages.game.login_to_borrow')
+            }}</NuxtLink>
           </template>
           <template v-else-if="auth.isActive && !auth.isMember">
-            <NuxtLink to="/upgrade" class="gd-bar__btn gd-bar__btn--sec">{{ $t('pages.game.membership_required') }}</NuxtLink>
+            <NuxtLink to="/upgrade" class="gd-bar__btn gd-bar__btn--sec">{{
+              $t('pages.game.membership_required')
+            }}</NuxtLink>
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
-            <span class="gd-bar__btn gd-bar__btn--done"><span class="icon icon-check_circle" aria-hidden="true" /></span>
+            <span class="gd-bar__btn gd-bar__btn--done"
+              ><span class="icon icon-check_circle" aria-hidden="true"
+            /></span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
             <button v-if="(auth.user?.tokens ?? 0) >= 2" class="gd-bar__btn" @click="openLoanModal">
               {{ $t('btn.borrow_game') }}
             </button>
-            <NuxtLink v-else to="/tokens" class="gd-bar__btn gd-bar__btn--sec">{{ $t('btn.load_tokens') }}</NuxtLink>
+            <NuxtLink v-else to="/tokens" class="gd-bar__btn gd-bar__btn--sec">{{
+              $t('btn.load_tokens')
+            }}</NuxtLink>
           </template>
           <template v-else-if="auth.isMember">
-            <button class="gd-bar__btn gd-bar__btn--sec" @click="handleReserve" :disabled="reserving">
+            <button
+              class="gd-bar__btn gd-bar__btn--sec"
+              :disabled="reserving"
+              @click="handleReserve"
+            >
               {{ reserving ? '…' : $t('btn.reserve') }}
             </button>
           </template>
         </div>
         <Transition name="gd-status-fade">
-          <div v-if="reserveStatus" class="gd-bar__status" :class="`gd-bar__status--${reserveStatus.type}`" role="status">
+          <div
+            v-if="reserveStatus"
+            class="gd-bar__status"
+            :class="`gd-bar__status--${reserveStatus.type}`"
+            role="status"
+          >
             {{ reserveStatus.text }}
           </div>
         </Transition>
       </div>
-
     </template>
 
     <AppFooter />
-
   </div>
 </template>
 
@@ -261,21 +322,22 @@ const { t } = useI18n()
 
 const slug = route.params.slug as string
 
-const { data: game } = await useAsyncData<Game | null>(
-  `game-${slug}`,
-  async () => {
-    try {
-      return (await fetchGame(slug)).data
-    } catch (e: unknown) {
-      const errStatus = (e as { status?: number })?.status
-      if (errStatus !== 404) {
-        await new Promise(r => setTimeout(r, 800))
-        try { return (await fetchGame(slug)).data } catch { return null }
+const { data: game } = await useAsyncData<Game | null>(`game-${slug}`, async () => {
+  try {
+    return (await fetchGame(slug)).data
+  } catch (e: unknown) {
+    const errStatus = (e as { status?: number })?.status
+    if (errStatus !== 404) {
+      await new Promise((r) => setTimeout(r, 800))
+      try {
+        return (await fetchGame(slug)).data
+      } catch {
+        return null
       }
-      return null
     }
-  },
-)
+    return null
+  }
+})
 
 const loading = ref(false)
 const reserving = ref(false)
@@ -283,13 +345,15 @@ const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(nu
 
 function showReserveStatus(text: string, type: 'success' | 'error') {
   reserveStatus.value = { text, type }
-  setTimeout(() => { reserveStatus.value = null }, 4000)
+  setTimeout(() => {
+    reserveStatus.value = null
+  }, 4000)
 }
 
 function openLightbox(i: number) {
   if (!game.value?.images?.length) return
   new Lightbox({
-    images: game.value.images.map(img => ({ src: img.url, alt: game.value!.title })),
+    images: game.value.images.map((img) => ({ src: img.url, alt: game.value!.title })),
     startIndex: i,
   }).show()
 }
@@ -300,8 +364,11 @@ useHead({
   link: [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
     { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap' },
-  ]
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap',
+    },
+  ],
 })
 
 async function openLoanModal() {
@@ -326,12 +393,13 @@ async function openLoanModal() {
   }
 
   const deposit = game.value.deposit_tokens ?? 0
-  const depositHtml = deposit > 0
-    ? `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
+  const depositHtml =
+    deposit > 0
+      ? `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
         <span style="font-size:.8rem;color:var(--secondary-text)">${t('pages.game.confirm_borrow.deposit_label')}</span>
         <strong style="color:var(--accent-color)">${deposit} Token</strong>
        </div>`
-    : ''
+      : ''
 
   const content = `
     <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem">
@@ -354,7 +422,12 @@ async function openLoanModal() {
       <button id="loan-submit" class="button button-primary">${t('pages.game.confirm_borrow.confirm_btn')}</button>
     </div>`
 
-  const modal = new Modal({ content, header: t('pages.game.confirm_borrow_title'), footer, closeable: true })
+  const modal = new Modal({
+    content,
+    header: t('pages.game.confirm_borrow_title'),
+    footer,
+    closeable: true,
+  })
   modal.show()
 
   setTimeout(() => {
@@ -366,21 +439,38 @@ async function openLoanModal() {
 async function submitLoan(modal: InstanceType<typeof Modal>) {
   if (!game.value) return
 
-  const copy = game.value.copies?.find(c => c.is_available)
+  const copy = game.value.copies?.find((c) => c.is_available)
   const msgEl = document.getElementById('loan-msg') as HTMLElement | null
   const submitBtn = document.getElementById('loan-submit') as HTMLButtonElement | null
 
   if (!copy) {
-    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = t('pages.game.confirm_borrow.no_copy'); msgEl.style.display = 'block' }
+    if (msgEl) {
+      msgEl.style.color = 'var(--error)'
+      msgEl.textContent = t('pages.game.confirm_borrow.no_copy')
+      msgEl.style.display = 'block'
+    }
     return
   }
 
-  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = t('pages.game.confirm_borrow.processing') }
-  if (msgEl) { msgEl.style.display = 'none' }
+  if (submitBtn) {
+    submitBtn.disabled = true
+    submitBtn.textContent = t('pages.game.confirm_borrow.processing')
+  }
+  if (msgEl) {
+    msgEl.style.display = 'none'
+  }
 
   try {
-    await createLoan({ copy_id: copy.id, start_date: loanDates.start_date, due_date: loanDates.due_date })
-    if (msgEl) { msgEl.style.color = 'var(--success)'; msgEl.textContent = t('pages.game.confirm_borrow.success'); msgEl.style.display = 'block' }
+    await createLoan({
+      copy_id: copy.id,
+      start_date: loanDates.start_date,
+      due_date: loanDates.due_date,
+    })
+    if (msgEl) {
+      msgEl.style.color = 'var(--success)'
+      msgEl.textContent = t('pages.game.confirm_borrow.success')
+      msgEl.style.display = 'block'
+    }
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)
     game.value.already_borrowed = true
     if (auth.user) {
@@ -394,8 +484,15 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     setTimeout(() => modal.hide(), 2000)
   } catch (e: unknown) {
     const err = e as { message?: string }
-    if (msgEl) { msgEl.style.color = 'var(--error)'; msgEl.textContent = err?.message ?? t('pages.game.confirm_borrow.error'); msgEl.style.display = 'block' }
-    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = t('pages.game.confirm_borrow.confirm_btn') }
+    if (msgEl) {
+      msgEl.style.color = 'var(--error)'
+      msgEl.textContent = err?.message ?? t('pages.game.confirm_borrow.error')
+      msgEl.style.display = 'block'
+    }
+    if (submitBtn) {
+      submitBtn.disabled = false
+      submitBtn.textContent = t('pages.game.confirm_borrow.confirm_btn')
+    }
   }
 }
 
@@ -424,14 +521,16 @@ function difficultyLabel(d: string) {
   return DIFFICULTY[d] ? t(DIFFICULTY[d]) : d
 }
 
-const hasMeta = computed(() =>
-  game.value && (
-    game.value.min_players || game.value.min_age ||
-    game.value.duration_min || game.value.difficulty ||
-    game.value.languages?.length || game.value.year
-  )
+const hasMeta = computed(
+  () =>
+    game.value &&
+    (game.value.min_players ||
+      game.value.min_age ||
+      game.value.duration_min ||
+      game.value.difficulty ||
+      game.value.languages?.length ||
+      game.value.year)
 )
-
 
 useHead(() => ({
   title: game.value ? `${game.value.title} — ${t('pages.games.title')}` : t('pages.game.not_found'),
@@ -440,32 +539,55 @@ useHead(() => ({
 
 <style lang="scss" scoped>
 // ── Design tokens ─────────────────────────────────────────────────
-$ink:        #090705;
-$cream:      #F2EAD9;
-$cream-60:   rgba(242, 234, 217, 0.60);
-$amber:      #F7963D;
-$amber-dim:  rgba(247, 150, 61, 0.12);
+$ink: #090705;
+$cream: #f2ead9;
+$cream-60: rgba(242, 234, 217, 0.6);
+$amber: #f7963d;
+$amber-dim: rgba(247, 150, 61, 0.12);
 $amber-ring: rgba(247, 150, 61, 0.28);
 $amber-glow: rgba(247, 150, 61, 0.25);
-$nav-h:      64px;
-$bar-h:      72px;
+$nav-h: 64px;
+$bar-h: 72px;
 
 // ── Animations ────────────────────────────────────────────────────
 @keyframes gd-up {
-  from { opacity: 0; transform: translateY(28px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes gd-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes gd-poster-in {
-  from { opacity: 0; transform: scale(0.9) rotate(-2deg); }
-  to   { opacity: 1; transform: scale(1) rotate(-2deg); }
+  from {
+    opacity: 0;
+    transform: scale(0.9) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(-2deg);
+  }
 }
 @keyframes gd-cue {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
-  50%       { transform: translateY(8px); opacity: 0.9; }
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.9;
+  }
 }
 // ── Page shell ────────────────────────────────────────────────────
 .gd {
@@ -512,7 +634,7 @@ $bar-h:      72px;
   &__bg {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 40%, rgba(247,150,61,0.06) 0%, transparent 65%);
+    background: radial-gradient(ellipse at 50% 40%, rgba(247, 150, 61, 0.06) 0%, transparent 65%);
   }
 
   &__back {
@@ -564,22 +686,27 @@ $bar-h:      72px;
     border-radius: 8px;
     width: 75%;
 
-    &--short { width: 45%; height: 2.1rem; }
+    &--short {
+      width: 45%;
+      height: 2.1rem;
+    }
   }
 
   &__stats {
     display: flex;
     gap: 0;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   &__stat {
     flex: 1;
     height: 72px;
     border-radius: 0;
-    border-right: 1px solid rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
 
-    &:last-child { border-right: none; }
+    &:last-child {
+      border-right: none;
+    }
   }
 }
 
@@ -615,10 +742,10 @@ $bar-h:      72px;
     inset: 0;
     background: linear-gradient(
       180deg,
-      rgba(9,7,5,0.55)  0%,
-      rgba(9,7,5,0.20) 35%,
-      rgba(9,7,5,0.65) 70%,
-      rgba(9,7,5,0.97) 100%
+      rgba(9, 7, 5, 0.55) 0%,
+      rgba(9, 7, 5, 0.2) 35%,
+      rgba(9, 7, 5, 0.65) 70%,
+      rgba(9, 7, 5, 0.97) 100%
     );
   }
 
@@ -679,8 +806,8 @@ $bar-h:      72px;
     border-radius: 10px;
     transform: rotate(-2deg);
     box-shadow:
-      0 40px 90px rgba(0,0,0,0.75),
-      0 0 0 1px rgba(255,255,255,0.09),
+      0 40px 90px rgba(0, 0, 0, 0.75),
+      0 0 0 1px rgba(255, 255, 255, 0.09),
       0 0 60px $amber-glow;
     position: relative;
     z-index: 1;
@@ -690,13 +817,13 @@ $bar-h:      72px;
     width: 190px;
     height: 265px;
     border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     transform: rotate(-2deg);
-    color: rgba(255,255,255,0.25);
+    color: rgba(255, 255, 255, 0.25);
     font-size: 3rem;
     position: relative;
     z-index: 1;
@@ -741,19 +868,24 @@ $bar-h:      72px;
   text-decoration: none;
   padding: 0.38rem 0.8rem 0.38rem 0.5rem;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(9,7,5,0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(9, 7, 5, 0.45);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background 0.2s;
   animation: gd-in 0.5s ease both;
 
-  .icon { font-size: 1rem; }
+  .icon {
+    font-size: 1rem;
+  }
 
   &:hover {
     color: $cream;
-    border-color: rgba(255,255,255,0.22);
-    background: rgba(9,7,5,0.65);
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(9, 7, 5, 0.65);
   }
 }
 
@@ -777,9 +909,21 @@ $bar-h:      72px;
   border-radius: 999px;
   border: 1px solid;
 
-  &--cat  { color: $amber;   border-color: $amber-ring; background: $amber-dim; }
-  &--avail { color: #4ade80; border-color: rgba(74,222,128,0.32); background: rgba(74,222,128,0.1); }
-  &--out  { color: $amber;   border-color: $amber-ring; background: $amber-dim; }
+  &--cat {
+    color: $amber;
+    border-color: $amber-ring;
+    background: $amber-dim;
+  }
+  &--avail {
+    color: #4ade80;
+    border-color: rgba(74, 222, 128, 0.32);
+    background: rgba(74, 222, 128, 0.1);
+  }
+  &--out {
+    color: $amber;
+    border-color: $amber-ring;
+    background: $amber-dim;
+  }
 }
 
 // ── Game title ────────────────────────────────────────────────────
@@ -791,7 +935,7 @@ $bar-h:      72px;
   line-height: 1.1;
   color: $cream;
   margin: 0;
-  text-shadow: 0 2px 30px rgba(0,0,0,0.55);
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
 }
 
 // ── Stats bar ─────────────────────────────────────────────────────
@@ -803,7 +947,9 @@ $bar-h:      72px;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   &__track {
     display: flex;
@@ -891,19 +1037,41 @@ $bar-h:      72px;
   cursor: pointer;
   border: none;
   text-decoration: none;
-  transition: filter 0.18s, opacity 0.18s;
+  transition:
+    filter 0.18s,
+    opacity 0.18s;
 
-  .icon { font-size: 1.05rem; }
+  .icon {
+    font-size: 1.05rem;
+  }
 
-  &--primary  { background: $amber; color: #1a0d00; &:hover { filter: brightness(1.09); } }
+  &--primary {
+    background: $amber;
+    color: #1a0d00;
+    &:hover {
+      filter: brightness(1.09);
+    }
+  }
   &--secondary {
     background: transparent;
     color: $amber;
     border: 1.5px solid $amber-ring;
-    &:hover { background: $amber-dim; }
+    &:hover {
+      background: $amber-dim;
+    }
   }
-  &--done     { background: transparent; color: var(--secondary-text); border: 1.5px solid var(--divider); opacity: 0.6; cursor: default; }
-  &:disabled  { opacity: 0.45; cursor: default; pointer-events: none; }
+  &--done {
+    background: transparent;
+    color: var(--secondary-text);
+    border: 1.5px solid var(--divider);
+    opacity: 0.6;
+    cursor: default;
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+  }
 }
 
 .gd-avail-note {
@@ -942,7 +1110,9 @@ $bar-h:      72px;
   border: 1px solid var(--divider);
   border-radius: 999px;
   padding: 0.25rem 0.7rem;
-  transition: color 0.18s, border-color 0.18s;
+  transition:
+    color 0.18s,
+    border-color 0.18s;
 
   &:hover {
     color: $amber;
@@ -951,22 +1121,70 @@ $bar-h:      72px;
 }
 
 // ── Prose (rich text) ─────────────────────────────────────────────
-.gd-desc { font-size: 1rem; line-height: 1.75; color: var(--secondary-text); }
+.gd-desc {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--secondary-text);
+}
 
 .prose {
-  :deep(h2) { font-size: 1.2rem; font-weight: 700; color: var(--primary-text); margin: 1.25rem 0 0.5rem; letter-spacing: -0.02em; }
-  :deep(h3) { font-size: 1.05rem; font-weight: 700; color: var(--primary-text); margin: 1rem 0 0.4rem; }
-  :deep(p)  { margin-bottom: 0.75rem; }
-  :deep(p:last-child) { margin-bottom: 0; }
-  :deep(ul), :deep(ol) { margin-left: 1.5rem; margin-bottom: 0.75rem; }
-  :deep(ul) { list-style: disc; }
-  :deep(ol) { list-style: decimal; }
-  :deep(li) { margin-bottom: 0.2rem; line-height: 1.65; }
-  :deep(strong), :deep(b) { font-weight: 700; color: var(--primary-text); }
-  :deep(em), :deep(i) { font-style: italic; }
-  :deep(u) { text-underline-offset: 2px; }
-  :deep(s) { opacity: 0.6; }
-  :deep(a) { color: $amber; text-decoration: underline; text-underline-offset: 2px; &:hover { opacity: 0.8; } }
+  :deep(h2) {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    margin: 1.25rem 0 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  :deep(h3) {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    margin: 1rem 0 0.4rem;
+  }
+  :deep(p) {
+    margin-bottom: 0.75rem;
+  }
+  :deep(p:last-child) {
+    margin-bottom: 0;
+  }
+  :deep(ul),
+  :deep(ol) {
+    margin-left: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  :deep(ul) {
+    list-style: disc;
+  }
+  :deep(ol) {
+    list-style: decimal;
+  }
+  :deep(li) {
+    margin-bottom: 0.2rem;
+    line-height: 1.65;
+  }
+  :deep(strong),
+  :deep(b) {
+    font-weight: 700;
+    color: var(--primary-text);
+  }
+  :deep(em),
+  :deep(i) {
+    font-style: italic;
+  }
+  :deep(u) {
+    text-underline-offset: 2px;
+  }
+  :deep(s) {
+    opacity: 0.6;
+  }
+  :deep(a) {
+    color: $amber;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    &:hover {
+      opacity: 0.8;
+    }
+  }
   :deep(blockquote) {
     border-left: 3px solid $amber-ring;
     padding-left: 1rem;
@@ -989,7 +1207,9 @@ $bar-h:      72px;
     scrollbar-width: none;
     padding: 0.25rem 1.5rem 0.5rem;
 
-    &::-webkit-scrollbar { display: none; }
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   &__thumb {
@@ -1006,8 +1226,12 @@ $bar-h:      72px;
     overflow: hidden;
     scroll-snap-align: start;
 
-    &:hover .gd-gallery__zoom { opacity: 1; }
-    &:hover .gd-gallery__img  { transform: scale(1.04); }
+    &:hover .gd-gallery__zoom {
+      opacity: 1;
+    }
+    &:hover .gd-gallery__img {
+      transform: scale(1.04);
+    }
   }
 
   &__img {
@@ -1026,7 +1250,7 @@ $bar-h:      72px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(9,7,5,0.45);
+    background: rgba(9, 7, 5, 0.45);
     color: #fff;
     font-size: 1.75rem;
     opacity: 0;
@@ -1049,9 +1273,16 @@ $bar-h:      72px;
   border-radius: 999px;
   background: var(--secondary-background);
   align-self: flex-start;
-  transition: color 0.18s, border-color 0.18s, background 0.18s;
+  transition:
+    color 0.18s,
+    border-color 0.18s,
+    background 0.18s;
 
-  &:hover { color: $amber; border-color: $amber-ring; background: $amber-dim; }
+  &:hover {
+    color: $amber;
+    border-color: $amber-ring;
+    background: $amber-dim;
+  }
 }
 
 // ── Reserve status (desktop) ──────────────────────────────────────
@@ -1076,13 +1307,24 @@ $bar-h:      72px;
 }
 
 .gd-status-fade-enter-active,
-.gd-status-fade-leave-active { transition: opacity 0.25s ease, transform 0.25s ease; }
+.gd-status-fade-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
 .gd-status-fade-enter-from,
-.gd-status-fade-leave-to { opacity: 0; transform: translateY(-4px); }
+.gd-status-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
 
 @keyframes barSlideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
 
 // ── Mobile float CTA bar ──────────────────────────────────────────
@@ -1099,7 +1341,7 @@ $bar-h:      72px;
   -webkit-backdrop-filter: blur(20px) saturate(1.6);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 
-  [data-theme="dark"] & {
+  [data-theme='dark'] & {
     background: rgba(12, 10, 8, 0.92);
   }
 
@@ -1160,13 +1402,17 @@ $bar-h:      72px;
     white-space: nowrap;
     transition: filter 0.18s;
 
-    &:hover { filter: brightness(1.09); }
+    &:hover {
+      filter: brightness(1.09);
+    }
 
     &--sec {
       background: transparent;
       color: $amber;
       border: 1.5px solid $amber-ring;
-      &:hover { background: $amber-dim; }
+      &:hover {
+        background: $amber-dim;
+      }
     }
 
     &--done {
@@ -1177,7 +1423,10 @@ $bar-h:      72px;
       font-size: 1.2rem;
     }
 
-    &:disabled { opacity: 0.45; cursor: default; }
+    &:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
   }
 
   &__status {
@@ -1186,9 +1435,14 @@ $bar-h:      72px;
     font-weight: 500;
     text-align: center;
 
-    &--success { color: #86efac; background: rgba(22, 101, 52, 0.15); }
-    &--error   { color: #fca5a5; background: rgba(239, 68, 68, 0.1); }
+    &--success {
+      color: #86efac;
+      background: rgba(22, 101, 52, 0.15);
+    }
+    &--error {
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.1);
+    }
   }
 }
-
 </style>

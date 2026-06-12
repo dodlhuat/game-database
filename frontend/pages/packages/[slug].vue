@@ -19,8 +19,17 @@
         <div class="page-hero__body">
           <NuxtLink to="/packages" class="page-hero__back">{{ $t('btn.to_packages') }}</NuxtLink>
           <div class="page-hero__meta-row">
-            <span class="page-hero__type" :class="pkg.type === 'CURATED' ? 'page-hero__type--curated' : 'page-hero__type--category'">
-              {{ pkg.type === 'CURATED' ? $t('pages.package.type_curated') : $t('pages.package.type_category') }}
+            <span
+              class="page-hero__type"
+              :class="
+                pkg.type === 'CURATED' ? 'page-hero__type--curated' : 'page-hero__type--category'
+              "
+            >
+              {{
+                pkg.type === 'CURATED'
+                  ? $t('pages.package.type_curated')
+                  : $t('pages.package.type_category')
+              }}
             </span>
             <span v-if="pkg.category" class="page-hero__cat">{{ pkg.category.name }}</span>
           </div>
@@ -35,7 +44,9 @@
           <div class="detail__stats">
             <div class="detail__stat">
               <span class="detail__stat-label">{{ $t('pages.package.games_in_package') }}</span>
-              <span class="detail__stat-value">{{ pkg.games_count ?? pkg.games?.length ?? 0 }}</span>
+              <span class="detail__stat-value">{{
+                pkg.games_count ?? pkg.games?.length ?? 0
+              }}</span>
             </div>
             <div v-if="pkg.category" class="detail__stat">
               <span class="detail__stat-label">{{ $t('pages.package.type') }}</span>
@@ -43,7 +54,11 @@
             </div>
             <div class="detail__stat">
               <span class="detail__stat-label">{{ $t('pages.package.type') }}</span>
-              <span class="detail__stat-value">{{ pkg.type === 'CURATED' ? $t('pages.package.type_curated') : $t('pages.package.type_category') }}</span>
+              <span class="detail__stat-value">{{
+                pkg.type === 'CURATED'
+                  ? $t('pages.package.type_curated')
+                  : $t('pages.package.type_category')
+              }}</span>
             </div>
           </div>
 
@@ -57,9 +72,17 @@
                   <span
                     v-if="auth.isLoggedIn && game.available_copies_count !== undefined"
                     class="game-list__avail"
-                    :class="game.available_copies_count > 0 ? 'game-list__avail--yes' : 'game-list__avail--no'"
+                    :class="
+                      game.available_copies_count > 0
+                        ? 'game-list__avail--yes'
+                        : 'game-list__avail--no'
+                    "
                   >
-                    {{ game.available_copies_count > 0 ? $t('pages.package.game_available') : $t('pages.package.game_loaned') }}
+                    {{
+                      game.available_copies_count > 0
+                        ? $t('pages.package.game_available')
+                        : $t('pages.package.game_loaned')
+                    }}
                   </span>
                   <span class="game-list__arrow" aria-hidden="true">→</span>
                 </NuxtLink>
@@ -83,7 +106,9 @@
 
             <!-- Member, package available -->
             <template v-else-if="pkg.available">
-              <div v-if="loanError" class="alert alert-error" style="margin-bottom: 0.75rem">{{ loanError }}</div>
+              <div v-if="loanError" class="alert alert-error" style="margin-bottom: 0.75rem">
+                {{ loanError }}
+              </div>
               <button
                 v-if="(auth.user?.tokens ?? 0) >= 3"
                 class="detail__btn detail__btn--primary"
@@ -92,7 +117,9 @@
               >
                 {{ loaning ? $t('pages.package.borrowing') : $t('pages.package.borrow') }}
               </button>
-              <NuxtLink v-else to="/tokens" class="detail__btn">{{ $t('btn.load_tokens') }}</NuxtLink>
+              <NuxtLink v-else to="/tokens" class="detail__btn">{{
+                $t('btn.load_tokens')
+              }}</NuxtLink>
             </template>
 
             <!-- Member, package unavailable -->
@@ -121,13 +148,13 @@ const api = useApi()
 
 const slug = route.params.slug as string
 
-const { data: pkg } = await useAsyncData<Package | null>(
-  `package-${slug}`,
-  async () => {
-    try { return (await fetchPackage(slug)).data }
-    catch { return null }
-  },
-)
+const { data: pkg } = await useAsyncData<Package | null>(`package-${slug}`, async () => {
+  try {
+    return (await fetchPackage(slug)).data
+  } catch {
+    return null
+  }
+})
 
 const loading = ref(false)
 const loaning = ref(false)
@@ -150,22 +177,24 @@ async function borrowPackage() {
 }
 
 useHead(() => ({
-  title: pkg.value ? `${pkg.value.name} — ${t('pages.packages.title')}` : t('pages.package.not_found'),
+  title: pkg.value
+    ? `${pkg.value.name} — ${t('pages.packages.title')}`
+    : t('pages.package.not_found'),
 }))
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
 
-$amber-08:      rgba(212, 146, 30, 0.08);
-$amber-25:      rgba(212, 146, 30, 0.25);
-$amber-glow:    rgba(212, 146, 30, 0.20);
+$amber-08: rgba(212, 146, 30, 0.08);
+$amber-25: rgba(212, 146, 30, 0.25);
+$amber-glow: rgba(212, 146, 30, 0.2);
 
-$hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-text: #eee8df;
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-divider:  rgba(238, 232, 223, 0.10);
+$hero-divider: rgba(238, 232, 223, 0.1);
 
 .package-detail {
   min-height: 100vh;
@@ -176,13 +205,27 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
 .detail-state {
   flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 1rem;
   padding: calc(#{$nav-height} + 4rem) 1.5rem 4rem;
 
-  &__title { font-size: 1.25rem; font-weight: 700; color: var(--primary-text); padding-bottom: 0; }
-  &__back { font-size: 0.9rem; color: $amber; text-decoration: none; &:hover { text-decoration: underline; } }
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    padding-bottom: 0;
+  }
+  &__back {
+    font-size: 0.9rem;
+    color: $amber;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────
@@ -192,55 +235,100 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   padding: calc(#{$nav-height} + 3rem) 1.5rem 3rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
   &__glow {
     position: absolute;
-    width: 600px; height: 400px;
-    top: -100px; right: -100px;
+    width: 600px;
+    height: 400px;
+    top: -100px;
+    right: -100px;
     border-radius: 50%;
     filter: blur(100px);
     background: $amber-glow;
   }
 
   &__dots {
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: radial-gradient(ellipse 100% 100% at 80% 50%, black 10%, transparent 80%);
   }
 
-  &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+  &__body {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
   &__back {
     display: inline-block;
-    font-size: 0.85rem; font-weight: 500;
-    color: $hero-muted; text-decoration: none; margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: $hero-muted;
+    text-decoration: none;
+    margin-bottom: 1.5rem;
     transition: color 0.2s;
-    &:hover { color: $hero-text; }
+    &:hover {
+      color: $hero-text;
+    }
   }
 
-  &__meta-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+  &__meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
 
   &__type {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 0.2rem 0.55rem; border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
   }
-  &__type--curated  { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
-  &__type--category { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+  &__type--curated {
+    background: $amber-08;
+    color: $amber;
+    border: 1px solid $amber-25;
+  }
+  &__type--category {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+  }
 
   &__cat {
-    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: $hero-muted;
   }
 
   &__title {
     font-size: clamp(1.75rem, 4vw, 3rem);
-    font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0 0 0.75rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: $hero-text;
+    margin: 0 0 0.75rem;
   }
 
   &__desc {
-    font-size: 1rem; line-height: 1.7; color: $hero-muted; max-width: 640px; padding-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: $hero-muted;
+    max-width: 640px;
+    padding-bottom: 0;
   }
 }
 
@@ -249,7 +337,13 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   flex: 1;
   padding: 3rem 1.5rem 4rem;
 
-  &__inner { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 2rem; }
+  &__inner {
+    max-width: 700px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
 
   &__stats {
     display: grid;
@@ -262,18 +356,26 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 
   &__stat {
-    display: flex; flex-direction: column; gap: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     padding: 1rem 1.25rem;
     background: var(--secondary-background);
   }
 
   &__stat-label {
-    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--secondary-text);
   }
 
   &__stat-value {
-    font-size: 1.05rem; font-weight: 700; color: var(--primary-text); letter-spacing: -0.01em;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    letter-spacing: -0.01em;
   }
 
   &__cta {
@@ -281,22 +383,38 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     background: var(--secondary-background);
     border: 1px solid var(--divider);
     border-radius: 12px;
-    display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   &__cta-text {
-    font-size: 0.9rem; color: var(--secondary-text); padding-bottom: 0;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    padding-bottom: 0;
   }
 
   &__btn {
-    display: inline-flex; align-items: center; justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0.6rem 1.25rem;
-    background: $amber; color: #0F0E0C;
-    font-size: 0.875rem; font-weight: 700; font-family: inherit;
-    border: none; border-radius: 8px; text-decoration: none; cursor: pointer;
+    background: $amber;
+    color: #0f0e0c;
+    font-size: 0.875rem;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
     transition: opacity 0.2s;
     white-space: nowrap;
-    &:hover { opacity: 0.88; }
+    &:hover {
+      opacity: 0.88;
+    }
   }
 }
 
@@ -308,7 +426,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   overflow: hidden;
 
   &__title {
-    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--secondary-text);
     padding: 0.9rem 1.25rem;
     border-bottom: 1px solid var(--divider);
@@ -323,20 +444,30 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
   &__item {
     border-bottom: 1px solid var(--divider);
-    &:last-child { border-bottom: none; }
+    &:last-child {
+      border-bottom: none;
+    }
   }
 
   &__link {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0.75rem 1.25rem;
-    font-size: 0.9rem; font-weight: 500;
-    color: var(--primary-text); text-decoration: none;
-    transition: background 0.15s, color 0.15s;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--primary-text);
+    text-decoration: none;
+    transition:
+      background 0.15s,
+      color 0.15s;
 
     &:hover {
       background: var(--background);
       color: var(--accent-text);
-      .game-list__arrow { opacity: 1; }
+      .game-list__arrow {
+        opacity: 1;
+      }
     }
   }
 
@@ -357,9 +488,14 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     margin-left: auto;
     flex-shrink: 0;
 
-    &--yes { background: #166534; color: #bbf7d0; }
-    &--no  { background: #7c2d12; color: #fed7aa; }
+    &--yes {
+      background: #166534;
+      color: #bbf7d0;
+    }
+    &--no {
+      background: #7c2d12;
+      color: #fed7aa;
+    }
   }
 }
-
 </style>

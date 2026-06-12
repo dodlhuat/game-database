@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\CookieVersion;
+use App\Models\Event;
 use App\Models\Game;
 use App\Models\Language;
 use App\Models\LoanSetting;
@@ -100,8 +101,8 @@ class PublicTest extends TestCase
     public function test_terms_returns_latest_version(): void
     {
         TermsVersion::create([
-            'version'      => '1.0',
-            'content'      => 'Terms content',
+            'version' => '1.0',
+            'content' => 'Terms content',
             'published_at' => now(),
         ]);
 
@@ -113,8 +114,8 @@ class PublicTest extends TestCase
     public function test_privacy_returns_latest_version(): void
     {
         PrivacyVersion::create([
-            'version'      => '1.0',
-            'content'      => 'Privacy content',
+            'version' => '1.0',
+            'content' => 'Privacy content',
             'published_at' => now(),
         ]);
 
@@ -126,8 +127,8 @@ class PublicTest extends TestCase
     public function test_cookies_returns_latest_version(): void
     {
         CookieVersion::create([
-            'version'      => '1.0',
-            'content'      => 'Cookie content',
+            'version' => '1.0',
+            'content' => 'Cookie content',
             'published_at' => now(),
         ]);
 
@@ -144,7 +145,7 @@ class PublicTest extends TestCase
     public function test_events_returns_list_for_authenticated_user(): void
     {
         $user = User::factory()->create();
-        \App\Models\Event::factory()->count(2)->create();
+        Event::factory()->count(2)->create();
 
         $this->actingAs($user)
             ->getJson('/api/events')

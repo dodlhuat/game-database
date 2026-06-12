@@ -6,35 +6,36 @@ use App\Http\Requests\Loan\StoreExtensionRequest;
 use App\Http\Resources\ExtensionResource;
 use App\Models\Loan;
 use App\Models\LoanSetting;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 
 class ExtensionController extends Controller
 {
     public function store(StoreExtensionRequest $request, Loan $loan): JsonResponse|ExtensionResource
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
-        if (!$user->isAdmin()) {
-            if (!$user->isMember()) {
+        if (! $user->isAdmin()) {
+            if (! $user->isMember()) {
                 return response()->json([
                     'message' => 'Eine aktive Mitgliedschaft ist erforderlich.',
-                    'reason'  => 'membership_required',
+                    'reason' => 'membership_required',
                 ], 403);
             }
-            if (!$user->hasEnoughTokens(1)) {
+            if (! $user->hasEnoughTokens(1)) {
                 return response()->json([
                     'message' => 'Nicht genug Token. Verlängern kostet 1 Token.',
-                    'reason'  => 'insufficient_tokens',
+                    'reason' => 'insufficient_tokens',
                 ], 402);
             }
         }
 
-        if (!in_array($loan->status, ['ACTIVE', 'OVERDUE'])) {
+        if (! in_array($loan->status, ['ACTIVE', 'OVERDUE'])) {
             return response()->json(['message' => 'Für diese Ausleihe kann keine Verlängerung beantragt werden.'], 422);
         }
 
@@ -50,12 +51,12 @@ class ExtensionController extends Controller
         }
 
         $extension = $loan->extensions()->create([
-            'requested_at'       => now(),
+            'requested_at' => now(),
             'requested_due_date' => $request->requested_due_date,
-            'status'             => 'PENDING',
+            'status' => 'PENDING',
         ]);
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $user->decrement('tokens', 1);
         }
 

@@ -69,7 +69,7 @@ export function useGames() {
 
   function fetchGames(filters: GameFilters = {}) {
     const params = Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v !== undefined && v !== '' && v !== false),
+      Object.entries(filters).filter(([, v]) => v !== undefined && v !== '' && v !== false)
     ) as Record<string, string | number | boolean>
 
     return api.get<PaginatedGames>('/games', { params })

@@ -13,11 +13,11 @@ class PackageLoanFactory extends Factory
     public function definition(): array
     {
         return [
-            'package_id'  => Package::factory(),
-            'user_id'     => User::factory()->member(),
-            'start_date'  => now()->toDateString(),
-            'due_date'    => now()->addWeeks(4)->toDateString(),
-            'status'      => 'ACTIVE',
+            'package_id' => Package::factory(),
+            'user_id' => User::factory()->member(),
+            'start_date' => now()->toDateString(),
+            'due_date' => now()->addWeeks(4)->toDateString(),
+            'status' => 'ACTIVE',
         ];
     }
 }

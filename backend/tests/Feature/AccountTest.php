@@ -32,8 +32,8 @@ class AccountTest extends TestCase
 
         $this->actingAs($user)
             ->patchJson('/api/account', [
-                'current_password'          => 'OldPass1',
-                'new_password'              => 'NewPass1',
+                'current_password' => 'OldPass1',
+                'new_password' => 'NewPass1',
                 'new_password_confirmation' => 'NewPass1',
             ])
             ->assertOk();
@@ -47,8 +47,8 @@ class AccountTest extends TestCase
 
         $this->actingAs($user)
             ->patchJson('/api/account', [
-                'current_password'          => 'WrongPass',
-                'new_password'              => 'NewPass1',
+                'current_password' => 'WrongPass',
+                'new_password' => 'NewPass1',
                 'new_password_confirmation' => 'NewPass1',
             ])
             ->assertStatus(422);

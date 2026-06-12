@@ -41,19 +41,22 @@
     <!-- ── Filter Strip ────────────────────────────────────────── -->
     <div class="filter-strip" :class="{ 'filter-strip--filtered': hasActiveFilters }">
       <div class="filter-strip__scroll">
-
         <div
           ref="catChipRef"
           class="chip-wrap"
           :class="{ 'chip-wrap--active': !!filters.category, 'chip-wrap--open': catPopoverOpen }"
-          style="--i:0"
+          style="--i: 0"
           @click="toggleCatPopover"
         >
           <span class="chip-label">{{ categoryLabel }}</span>
           <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
         </div>
 
-        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.difficulty }" style="--i:1">
+        <div
+          class="chip-wrap chip-wrap--vd"
+          :class="{ 'chip-wrap--active': !!filters.difficulty }"
+          style="--i: 1"
+        >
           <UiVirtualDropdown
             v-model="filters.difficulty"
             :options="[
@@ -68,7 +71,11 @@
           />
         </div>
 
-        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.players }" style="--i:2">
+        <div
+          class="chip-wrap chip-wrap--vd"
+          :class="{ 'chip-wrap--active': !!filters.players }"
+          style="--i: 2"
+        >
           <UiVirtualDropdown
             v-model="filters.players"
             :options="[
@@ -85,7 +92,11 @@
           />
         </div>
 
-        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.duration }" style="--i:3">
+        <div
+          class="chip-wrap chip-wrap--vd"
+          :class="{ 'chip-wrap--active': !!filters.duration }"
+          style="--i: 3"
+        >
           <UiVirtualDropdown
             v-model="filters.duration"
             :options="[
@@ -99,7 +110,11 @@
           />
         </div>
 
-        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.min_age }" style="--i:4">
+        <div
+          class="chip-wrap chip-wrap--vd"
+          :class="{ 'chip-wrap--active': !!filters.min_age }"
+          style="--i: 4"
+        >
           <UiVirtualDropdown
             v-model="filters.min_age"
             :options="[
@@ -117,10 +132,17 @@
           />
         </div>
 
-        <div class="chip-wrap chip-wrap--vd" :class="{ 'chip-wrap--active': !!filters.language }" style="--i:5">
+        <div
+          class="chip-wrap chip-wrap--vd"
+          :class="{ 'chip-wrap--active': !!filters.language }"
+          style="--i: 5"
+        >
           <UiVirtualDropdown
             v-model="filters.language"
-            :options="[{ label: $t('pages.games.filter_language'), value: '' }, ...allLanguages.map(l => ({ label: l.name, value: l.id }))]"
+            :options="[
+              { label: $t('pages.games.filter_language'), value: '' },
+              ...allLanguages.map((l) => ({ label: l.name, value: l.id })),
+            ]"
             :placeholder="$t('pages.games.filter_language')"
             @change="resetPage"
           />
@@ -129,26 +151,36 @@
         <button
           class="chip-btn"
           :class="{ 'chip-btn--active': filters.available }"
-          style="--i:6"
-          @click="filters.available = !filters.available; resetPage()"
+          style="--i: 6"
+          @click="
+            filters.available = !filters.available
+            resetPage()
+          "
         >
           <span class="icon icon-check_circle chip-btn__icon" aria-hidden="true" />
           {{ $t('pages.games.filter_available') }}
         </button>
 
-        <div class="chip-wrap chip-wrap--sort chip-wrap--vd" style="--i:7">
+        <div class="chip-wrap chip-wrap--sort chip-wrap--vd" style="--i: 7">
           <UiVirtualDropdown
             v-model="filters.sort"
-            :options="[{ label: $t('pages.games.sort_az'), value: 'title' }, { label: $t('pages.games.sort_newest'), value: 'created_at' }]"
+            :options="[
+              { label: $t('pages.games.sort_az'), value: 'title' },
+              { label: $t('pages.games.sort_newest'), value: 'created_at' },
+            ]"
             :placeholder="$t('pages.games.sort_az')"
             @change="resetPage"
           />
         </div>
-
       </div>
 
       <Transition name="slide-clear">
-        <button v-if="hasActiveFilters" class="filter-clear" @click="clearFilters" :aria-label="$t('pages.games.filter_clear')">
+        <button
+          v-if="hasActiveFilters"
+          class="filter-clear"
+          :aria-label="$t('pages.games.filter_clear')"
+          @click="clearFilters"
+        >
           <span class="filter-clear__badge">{{ activeFilterCount }}</span>
           <span class="icon icon-close" aria-hidden="true" />
         </button>
@@ -158,7 +190,6 @@
     <!-- ── Catalog ─────────────────────────────────────────────── -->
     <section class="catalog">
       <div class="catalog__inner">
-
         <div v-if="loading" class="catalog__state">
           <div class="spinner" />
         </div>
@@ -170,7 +201,12 @@
 
         <template v-else>
           <div class="game-grid">
-            <GameCard v-for="(game, index) in games" :key="game.id" :game="game" :style="{ '--i': index }" />
+            <GameCard
+              v-for="(game, index) in games"
+              :key="game.id"
+              :game="game"
+              :style="{ '--i': index }"
+            />
           </div>
 
           <div v-if="meta.last_page > 1" class="pagination">
@@ -193,28 +229,20 @@
             </button>
           </div>
         </template>
-
       </div>
     </section>
 
     <AppFooter />
-
   </div>
 
   <!-- ── Category popover (teleported to body for z-index / overflow) ── -->
   <Teleport to="body">
     <Transition name="cat-pop">
-      <div
-        v-if="catPopoverOpen"
-        ref="catPopoverElRef"
-        class="cat-popover"
-        :style="catPopoverStyle"
-      >
+      <div v-if="catPopoverOpen" ref="catPopoverElRef" class="cat-popover" :style="catPopoverStyle">
         <div ref="catPickerEl" />
       </div>
     </Transition>
   </Teleport>
-
 </template>
 
 <script setup lang="ts">
@@ -225,7 +253,13 @@ import { GroupPicker } from '@dodlhuat/basix/js/group-picker'
 const { fetchGames, fetchCategories, fetchLanguages } = useGames()
 const { t } = useI18n()
 
-type CategoryItem = { id: number; slug: string; name: string; games_count: number; children: CategoryItem[] }
+type CategoryItem = {
+  id: number
+  slug: string
+  name: string
+  games_count: number
+  children: CategoryItem[]
+}
 
 const loading = ref(true)
 const games = ref<Game[]>([])
@@ -233,7 +267,6 @@ const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
 const categories = ref<CategoryItem[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
-
 
 // ── Category popover ───────────────────────────────────────────────
 const catChipRef = ref<HTMLElement | null>(null)
@@ -274,8 +307,8 @@ function initCatPicker() {
   if (!catPickerEl.value) return
   catPicker?.destroy()
 
-  const data = categories.value.map(cat => {
-    const subs = (cat.children ?? []).map(c => ({ id: c.slug, label: c.name }))
+  const data = categories.value.map((cat) => {
+    const subs = (cat.children ?? []).map((c) => ({ id: c.slug, label: c.name }))
     return subs.length
       ? { id: cat.slug, label: cat.name, subgroups: subs }
       : { id: cat.slug, label: cat.name }
@@ -286,12 +319,12 @@ function initCatPicker() {
     selectAllLabel: t('pages.games.category_select_all'),
     deselectLabel: t('pages.games.category_deselect'),
     emptyLabel: t('pages.games.category_empty'),
-    onSelectionChange: (sel: { parentGroups: string[]; subgroups: { groupId: string; subgroupId: string }[] }) => {
+    onSelectionChange: (sel: {
+      parentGroups: string[]
+      subgroups: { groupId: string; subgroupId: string }[]
+    }) => {
       if (isInitializingPicker) return
-      const slugs = [
-        ...sel.parentGroups,
-        ...sel.subgroups.map(s => s.subgroupId),
-      ]
+      const slugs = [...sel.parentGroups, ...sel.subgroups.map((s) => s.subgroupId)]
       filters.category = slugs.join(',')
       resetPage()
     },
@@ -304,11 +337,11 @@ function initCatPicker() {
     const parentGroups: string[] = []
     const subgroups: { groupId: string; subgroupId: string }[] = []
     for (const slug of slugs) {
-      if (categories.value.some(c => c.slug === slug)) {
+      if (categories.value.some((c) => c.slug === slug)) {
         parentGroups.push(slug)
       } else {
         for (const parent of categories.value) {
-          if ((parent.children ?? []).some(c => c.slug === slug)) {
+          if ((parent.children ?? []).some((c) => c.slug === slug)) {
             subgroups.push({ groupId: parent.slug, subgroupId: slug })
             break
           }
@@ -354,23 +387,39 @@ const categoryLabel = computed(() => {
   const slug = slugs[0]
   for (const cat of categories.value) {
     if (cat.slug === slug) return cat.name
-    const child = (cat.children ?? []).find(c => c.slug === slug)
+    const child = (cat.children ?? []).find((c) => c.slug === slug)
     if (child) return child.name
   }
   return t('pages.games.filter_category')
 })
 
 // ── Filter state ───────────────────────────────────────────────────
-const hasActiveFilters = computed(() =>
-  !!(filters.search || filters.category || filters.difficulty ||
-    filters.players || filters.duration || filters.language ||
-    filters.min_age || filters.available)
+const hasActiveFilters = computed(
+  () =>
+    !!(
+      filters.search ||
+      filters.category ||
+      filters.difficulty ||
+      filters.players ||
+      filters.duration ||
+      filters.language ||
+      filters.min_age ||
+      filters.available
+    )
 )
 
-const activeFilterCount = computed(() =>
-  [filters.search, filters.category, filters.difficulty, filters.players,
-   filters.duration, filters.language, filters.min_age, filters.available]
-    .filter(Boolean).length
+const activeFilterCount = computed(
+  () =>
+    [
+      filters.search,
+      filters.category,
+      filters.difficulty,
+      filters.players,
+      filters.duration,
+      filters.language,
+      filters.min_age,
+      filters.available,
+    ].filter(Boolean).length
 )
 
 function clearFilters() {
@@ -409,16 +458,23 @@ function changePage(page: number) {
 }
 
 let searchTimer: ReturnType<typeof setTimeout>
-watch(() => filters.search, () => {
-  clearTimeout(searchTimer)
-  searchTimer = setTimeout(resetPage, 300)
-})
+watch(
+  () => filters.search,
+  () => {
+    clearTimeout(searchTimer)
+    searchTimer = setTimeout(resetPage, 300)
+  }
+)
 
-useAsyncData('games-init', async () => {
-  const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
-  categories.value = cats.data
-  allLanguages.value = langs
-}, { server: false })
+useAsyncData(
+  'games-init',
+  async () => {
+    const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
+    categories.value = cats.data
+    allLanguages.value = langs
+  },
+  { server: false }
+)
 
 onMounted(() => {
   document.addEventListener('pointerdown', onOutsideClick, { capture: true })
@@ -433,30 +489,45 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
 
-$amber-08:      rgba($amber, 0.08);
-$amber-15:      rgba($amber, 0.15);
-$amber-25:      rgba($amber, 0.25);
-$amber-glow:    rgba($amber, 0.20);
+$amber-08: rgba($amber, 0.08);
+$amber-15: rgba($amber, 0.15);
+$amber-25: rgba($amber, 0.25);
+$amber-glow: rgba($amber, 0.2);
 
-$hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-text: #eee8df;
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-muted-50: rgba(238, 232, 223, 0.55);
-$hero-divider:  rgba(238, 232, 223, 0.10);
+$hero-divider: rgba(238, 232, 223, 0.1);
 $hero-input-bg: rgba(255, 255, 255, 0.06);
 $hero-input-border: rgba(255, 255, 255, 0.12);
 
 // ─── Keyframes ────────────────────────────────────────────────────
 @keyframes chipIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes searchGlow {
-  0%, 100% { box-shadow: 0 0 0 0 $amber-15, inset 0 0 0 1.5px $hero-input-border; }
-  50%       { box-shadow: 0 0 28px 4px $amber-15, inset 0 0 0 1.5px rgba($amber, 0.5); }
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 $amber-15,
+      inset 0 0 0 1.5px $hero-input-border;
+  }
+  50% {
+    box-shadow:
+      0 0 28px 4px $amber-15,
+      inset 0 0 0 1.5px rgba($amber, 0.5);
+  }
 }
 
 // ─── Page shell ───────────────────────────────────────────────────
@@ -474,12 +545,18 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   padding: calc(#{$nav-height} + 3rem) 1.5rem 2.5rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
   &__glow {
     position: absolute;
-    width: 600px; height: 600px;
-    top: -200px; right: -120px;
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    right: -120px;
     border-radius: 50%;
     filter: blur(110px);
     background: $amber-glow;
@@ -489,7 +566,7 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   &__dots {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%);
   }
@@ -541,7 +618,10 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   padding: 0 1rem;
   backdrop-filter: blur(12px);
-  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    background 0.25s;
 
   &--active {
     background: rgba(255, 255, 255, 0.09);
@@ -555,7 +635,9 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     flex-shrink: 0;
     transition: color 0.2s;
 
-    .hero-search--active & { color: $amber; }
+    .hero-search--active & {
+      color: $amber;
+    }
   }
 
   &__input {
@@ -569,24 +651,33 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     color: $hero-text;
     caret-color: $amber;
 
-    &::placeholder { color: $hero-muted-50; }
+    &::placeholder {
+      color: $hero-muted-50;
+    }
   }
 
   &__clear {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255, 255, 255, 0.08);
     border: none;
     border-radius: 6px;
     width: 28px;
     height: 28px;
     cursor: pointer;
     color: $hero-muted;
-    transition: background 0.15s, color 0.15s;
+    transition:
+      background 0.15s,
+      color 0.15s;
     flex-shrink: 0;
-    .icon { font-size: 0.875rem; }
-    &:hover { background: rgba(255,255,255,0.14); color: $hero-text; }
+    .icon {
+      font-size: 0.875rem;
+    }
+    &:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: $hero-text;
+    }
   }
 }
 
@@ -615,7 +706,9 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     flex: 1;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    &::-webkit-scrollbar { display: none; }
+    &::-webkit-scrollbar {
+      display: none;
+    }
     padding: 0.25rem 0;
   }
 }
@@ -633,7 +726,10 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
   animation: chipIn 0.35s ease calc(var(--i, 0) * 40ms) backwards;
 
   &--active {
@@ -654,7 +750,10 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   color: var(--secondary-text);
   pointer-events: none;
 
-  .chip-wrap--active & { color: $amber; font-weight: 600; }
+  .chip-wrap--active & {
+    color: $amber;
+    font-weight: 600;
+  }
 }
 
 .chip-chevron {
@@ -664,8 +763,12 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   flex-shrink: 0;
   transition: transform 0.2s;
 
-  .chip-wrap--active & { color: $amber; }
-  .chip-wrap--open & { transform: rotate(180deg); }
+  .chip-wrap--active & {
+    color: $amber;
+  }
+  .chip-wrap--open & {
+    transform: rotate(180deg);
+  }
 }
 
 // ─── VirtualDropdown chip override ───────────────────────────────
@@ -687,8 +790,16 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     padding: 0.375rem 0.625rem 0.375rem 0.75rem;
     gap: 0.25rem;
 
-    &:hover { border: none; box-shadow: none; background: transparent; }
-    &:focus { border: none; box-shadow: none; outline: none; }
+    &:hover {
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
+    &:focus {
+      border: none;
+      box-shadow: none;
+      outline: none;
+    }
   }
 
   :deep(.custom-dropdown.open) .dropdown-trigger,
@@ -711,8 +822,13 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   }
 
   &.chip-wrap--active {
-    :deep(.trigger-text) { color: $amber; font-weight: 600; }
-    :deep(.trigger-arrow) { color: $amber; }
+    :deep(.trigger-text) {
+      color: $amber;
+      font-weight: 600;
+    }
+    :deep(.trigger-arrow) {
+      color: $amber;
+    }
   }
 }
 
@@ -732,7 +848,10 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
   animation: chipIn 0.35s ease calc(var(--i, 0) * 40ms) backwards;
 
   &__icon {
@@ -747,7 +866,9 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     color: $amber;
     font-weight: 600;
 
-    .chip-btn__icon { opacity: 1; }
+    .chip-btn__icon {
+      opacity: 1;
+    }
   }
 }
 
@@ -763,9 +884,13 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   cursor: pointer;
   color: var(--secondary-text);
-  transition: color 0.2s, background 0.15s;
+  transition:
+    color 0.2s,
+    background 0.15s;
 
-  .icon { font-size: 1rem; }
+  .icon {
+    font-size: 1rem;
+  }
 
   &:hover {
     color: var(--primary-text);
@@ -789,18 +914,37 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
 }
 
 // ─── Transitions ──────────────────────────────────────────────────
-.fade-enter-active, .fade-leave-active { transition: opacity 0.15s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
-.slide-clear-enter-active, .slide-clear-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
-.slide-clear-enter-from, .slide-clear-leave-to { opacity: 0; transform: scale(0.8); }
+.slide-clear-enter-active,
+.slide-clear-leave-active {
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+.slide-clear-enter-from,
+.slide-clear-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
+}
 
 // ─── Catalog ──────────────────────────────────────────────────────
 .catalog {
   flex: 1;
   padding: 2.5rem 1.5rem 4rem;
 
-  &__inner { max-width: 1100px; margin: 0 auto; min-height: 400px; }
+  &__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: 400px;
+  }
 
   &__state {
     display: flex;
@@ -830,9 +974,15 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
 
-  @media (max-width: 1100px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 750px)  { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 480px)  { grid-template-columns: 1fr; }
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (max-width: 750px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 // ─── Pagination ───────────────────────────────────────────────────
@@ -853,14 +1003,19 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     border: 1px solid var(--divider);
     border-radius: 8px;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
 
     &:hover:not(:disabled) {
       border-color: var(--accent-color);
       color: var(--accent-text);
     }
 
-    &:disabled { opacity: 0.35; cursor: not-allowed; }
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
   }
 
   &__info {
@@ -868,7 +1023,6 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     color: var(--secondary-text);
   }
 }
-
 </style>
 
 <!-- Global (non-scoped) styles for the teleported category popover -->
@@ -879,7 +1033,9 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   background: var(--secondary-background);
   border: 1px solid var(--divider);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -899,7 +1055,9 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     margin-bottom: 0.5rem;
     box-shadow: none;
 
-    &:empty { display: none; } // hide when nothing is selected
+    &:empty {
+      display: none;
+    } // hide when nothing is selected
   }
 
   // Make the list scrollable
@@ -917,10 +1075,14 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
 
 // Popover enter/leave animation
 .cat-pop-enter-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 .cat-pop-leave-active {
-  transition: opacity 0.12s ease, transform 0.1s ease;
+  transition:
+    opacity 0.12s ease,
+    transform 0.1s ease;
 }
 .cat-pop-enter-from,
 .cat-pop-leave-to {

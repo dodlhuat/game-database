@@ -16,7 +16,6 @@
     <!-- ── Content ─────────────────────────────────────────────── -->
     <section class="catalog">
       <div class="catalog__inner">
-
         <div v-if="loading" class="catalog__state">
           <div class="spinner" />
         </div>
@@ -34,8 +33,19 @@
             class="package-card"
           >
             <div class="package-card__top">
-              <span class="package-card__type" :class="pkg.type === 'CURATED' ? 'package-card__type--curated' : 'package-card__type--category'">
-                {{ pkg.type === 'CURATED' ? $t('pages.packages.curated') : $t('pages.packages.category') }}
+              <span
+                class="package-card__type"
+                :class="
+                  pkg.type === 'CURATED'
+                    ? 'package-card__type--curated'
+                    : 'package-card__type--category'
+                "
+              >
+                {{
+                  pkg.type === 'CURATED'
+                    ? $t('pages.packages.curated')
+                    : $t('pages.packages.category')
+                }}
               </span>
               <span class="package-card__icon" aria-hidden="true">⬡</span>
             </div>
@@ -43,19 +53,24 @@
             <p v-if="pkg.description" class="package-card__desc">{{ pkg.description }}</p>
             <div class="package-card__meta">
               <span v-if="pkg.category" class="package-card__cat">{{ pkg.category.name }}</span>
-              <span class="package-card__count">{{ $t('pages.packages.games_count', { n: pkg.games_count ?? 0 }) }}</span>
+              <span class="package-card__count">{{
+                $t('pages.packages.games_count', { n: pkg.games_count ?? 0 })
+              }}</span>
               <span
                 v-if="auth.isLoggedIn"
                 class="package-card__avail"
                 :class="pkg.available ? 'package-card__avail--yes' : 'package-card__avail--no'"
               >
-                {{ pkg.available ? $t('pages.packages.available') : $t('pages.packages.not_available') }}
+                {{
+                  pkg.available
+                    ? $t('pages.packages.available')
+                    : $t('pages.packages.not_available')
+                }}
               </span>
             </div>
             <span class="package-card__arrow">{{ $t('pages.packages.details') }}</span>
           </NuxtLink>
         </div>
-
       </div>
     </section>
 
@@ -65,7 +80,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Package } from '~/composables/useGames'
 
 const { fetchPackages } = useGames()
 const auth = useAuthStore()
@@ -77,28 +91,30 @@ const { data: packagesData, status: packagesStatus } = useAsyncData(
     const result = await fetchPackages()
     return result.data
   },
-  { server: false },
+  { server: false }
 )
 
 const packages = computed(() => packagesData.value ?? [])
-const loading = computed(() => packagesStatus.value === 'idle' || packagesStatus.value === 'pending')
+const loading = computed(
+  () => packagesStatus.value === 'idle' || packagesStatus.value === 'pending'
+)
 
 useHead(() => ({ title: `${t('pages.packages.title')} — AUA` }))
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
 
-$amber-08:      rgba(212, 146, 30, 0.08);
-$amber-14:      rgba(212, 146, 30, 0.14);
-$amber-25:      rgba(212, 146, 30, 0.25);
-$amber-glow:    rgba(212, 146, 30, 0.18);
+$amber-08: rgba(212, 146, 30, 0.08);
+$amber-14: rgba(212, 146, 30, 0.14);
+$amber-25: rgba(212, 146, 30, 0.25);
+$amber-glow: rgba(212, 146, 30, 0.18);
 
-$hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-text: #eee8df;
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-divider:  rgba(238, 232, 223, 0.10);
+$hero-divider: rgba(238, 232, 223, 0.1);
 
 .packages-page {
   min-height: 100vh;
@@ -114,41 +130,64 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   padding: calc(#{$nav-height} + 3.5rem) 1.5rem 3.5rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
   &__glow {
     position: absolute;
-    width: 500px; height: 500px;
-    top: -150px; right: -100px;
+    width: 500px;
+    height: 500px;
+    top: -150px;
+    right: -100px;
     border-radius: 50%;
     filter: blur(100px);
     background: $amber-glow;
   }
 
   &__dots {
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%);
   }
 
-  &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+  &__body {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
   &__eyebrow {
     display: inline-block;
-    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
-    color: $amber; margin-bottom: 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $amber;
+    margin-bottom: 0.75rem;
     padding: 0.25rem 0.65rem;
-    border: 1px solid $amber-25; border-radius: 999px; background: $amber-08;
+    border: 1px solid $amber-25;
+    border-radius: 999px;
+    background: $amber-08;
   }
 
   &__title {
     font-size: clamp(2rem, 5vw, 3.25rem);
-    font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0 0 0.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: $hero-text;
+    margin: 0 0 0.5rem;
   }
 
   &__sub {
-    font-size: 1rem; color: $hero-muted; padding-bottom: 0;
+    font-size: 1rem;
+    color: $hero-muted;
+    padding-bottom: 0;
   }
 }
 
@@ -157,16 +196,31 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   flex: 1;
   padding: 2.5rem 1.5rem 4rem;
 
-  &__inner { max-width: 1100px; margin: 0 auto; }
-
-  &__state {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    min-height: 300px; gap: 0.5rem;
+  &__inner {
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
-  &__empty-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-text); padding-bottom: 0; }
-  &__empty-sub   { font-size: 0.9rem; color: var(--secondary-text); padding-bottom: 0; }
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 0.5rem;
+  }
+
+  &__empty-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    padding-bottom: 0;
+  }
+  &__empty-sub {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    padding-bottom: 0;
+  }
 }
 
 // ─── Package Grid ─────────────────────────────────────────────────
@@ -175,8 +229,12 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   grid-template-columns: repeat(3, 1fr);
   gap: 1.25rem;
 
-  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 560px) { grid-template-columns: 1fr; }
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .package-card {
@@ -189,14 +247,20 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   border-radius: 16px;
   text-decoration: none;
   color: var(--primary-text);
-  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    transform 0.15s;
 
   &:hover {
     border-color: $amber-25;
     background: $amber-08;
     transform: translateY(-2px);
 
-    .package-card__arrow { color: $amber; opacity: 1; }
+    .package-card__arrow {
+      color: $amber;
+      opacity: 1;
+    }
   }
 
   &__top {
@@ -206,12 +270,24 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 
   &__type {
-    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    padding: 0.2rem 0.55rem; border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
   }
 
-  &__type--curated  { background: $amber-08; color: $amber; border: 1px solid $amber-25; }
-  &__type--category { background: rgba(99,102,241,0.1); color: #818cf8; border: 1px solid rgba(99,102,241,0.25); }
+  &__type--curated {
+    background: $amber-08;
+    color: $amber;
+    border: 1px solid $amber-25;
+  }
+  &__type--category {
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.25);
+  }
 
   &__icon {
     font-size: 1.25rem;
@@ -247,7 +323,8 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 
   &__cat {
-    font-size: 0.78rem; font-weight: 600;
+    font-size: 0.78rem;
+    font-weight: 600;
     color: var(--secondary-text);
     background: var(--background);
     border: 1px solid var(--divider);
@@ -268,8 +345,14 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
 
-    &--yes { background: #166534; color: #bbf7d0; }
-    &--no  { background: #7c2d12; color: #fed7aa; }
+    &--yes {
+      background: #166534;
+      color: #bbf7d0;
+    }
+    &--no {
+      background: #7c2d12;
+      color: #fed7aa;
+    }
   }
 
   &__arrow {
@@ -277,9 +360,10 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     font-weight: 600;
     color: var(--secondary-text);
     opacity: 0.5;
-    transition: color 0.2s, opacity 0.2s;
+    transition:
+      color 0.2s,
+      opacity 0.2s;
     margin-top: auto;
   }
 }
-
 </style>

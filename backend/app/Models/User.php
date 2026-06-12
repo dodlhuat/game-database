@@ -9,12 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @property 'USER'|'MEMBER'|'ADMIN' $role
- * @property \Illuminate\Support\Carbon|null $membership_expires_at
- * @property \Illuminate\Support\Carbon|null $date_of_birth
+ * @property Carbon|null $membership_expires_at
+ * @property Carbon|null $date_of_birth
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -48,15 +49,15 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'date_of_birth'            => 'date:Y-m-d',
-            'email_verified_at'        => 'datetime',
-            'terms_accepted_at'        => 'datetime',
-            'membership_expires_at'    => 'datetime',
+            'date_of_birth' => 'date:Y-m-d',
+            'email_verified_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
+            'membership_expires_at' => 'datetime',
             'renewal_reminder_sent_at' => 'datetime',
-            'password'                 => 'hashed',
-            'newsletter_opt_in'        => 'boolean',
-            'tokens'                   => 'integer',
-            'tokens_blocked'           => 'integer',
+            'password' => 'hashed',
+            'newsletter_opt_in' => 'boolean',
+            'tokens' => 'integer',
+            'tokens_blocked' => 'integer',
         ];
     }
 

@@ -19,13 +19,20 @@ export function useAuth() {
   const auth = useAuthStore()
 
   async function register(payload: RegisterPayload) {
-    const data = await api.post<{ message: string; token: string; user: Parameters<typeof auth.setAuth>[0] }>('/auth/register', payload)
+    const data = await api.post<{
+      message: string
+      token: string
+      user: Parameters<typeof auth.setAuth>[0]
+    }>('/auth/register', payload)
     auth.setAuth(data.user, data.token)
     return data
   }
 
   async function login(payload: LoginPayload) {
-    const data = await api.post<{ token: string; user: Parameters<typeof auth.setAuth>[0] }>('/auth/login', payload)
+    const data = await api.post<{ token: string; user: Parameters<typeof auth.setAuth>[0] }>(
+      '/auth/login',
+      payload
+    )
     auth.setAuth(data.user, data.token)
     return data
   }

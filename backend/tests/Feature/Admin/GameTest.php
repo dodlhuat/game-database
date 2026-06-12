@@ -19,11 +19,12 @@ class GameTest extends TestCase
 
     private function gamePayload(array $overrides = []): array
     {
-        $slug = 'test-game-' . uniqid();
+        $slug = 'test-game-'.uniqid();
+
         return array_merge([
-            'title'      => 'Test Game',
-            'slug'       => $slug,
-            'is_active'  => true,
+            'title' => 'Test Game',
+            'slug' => $slug,
+            'is_active' => true,
             'category_id' => Category::factory()->create()->id,
         ], $overrides);
     }
@@ -78,7 +79,7 @@ class GameTest extends TestCase
 
         $this->actingAs($this->admin())
             ->putJson("/api/admin/games/{$game->id}", $this->gamePayload([
-                'slug'  => $game->slug,
+                'slug' => $game->slug,
                 'title' => 'Updated Title',
             ]))
             ->assertOk()

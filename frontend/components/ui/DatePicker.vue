@@ -18,7 +18,7 @@ import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue'
 import type { DatePicker as DatePickerClass } from '@dodlhuat/basix/js/datepicker'
 
 interface Props {
-  modelValue?: string   // ISO date string YYYY-MM-DD
+  modelValue?: string // ISO date string YYYY-MM-DD
   label?: string
   placeholder?: string
   required?: boolean
@@ -46,8 +46,18 @@ onMounted(async () => {
     locales: {
       days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
       months: [
-        'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-        'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+        'Januar',
+        'Februar',
+        'März',
+        'April',
+        'Mai',
+        'Juni',
+        'Juli',
+        'August',
+        'September',
+        'Oktober',
+        'November',
+        'Dezember',
       ],
     },
     format: (date: Date) => {
@@ -82,10 +92,13 @@ onBeforeUnmount(() => {
   picker = null
 })
 
-watch(() => props.modelValue, (val) => {
-  if (val) setDisplay(val)
-  else if (inputRef.value) inputRef.value.value = ''
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (val) setDisplay(val)
+    else if (inputRef.value) inputRef.value.value = ''
+  }
+)
 
 function setDisplay(iso: string) {
   if (!inputRef.value) return

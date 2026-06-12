@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Game;
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,9 +21,9 @@ class ReservationAvailable extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        $catalogUrl = config('frontend.url') . '/games/' . $this->game->slug;
+        $catalogUrl = config('frontend.url').'/games/'.$this->game->slug;
 
         return $this->buildFromTemplate('reservation_available', [
             'name' => $notifiable->name,

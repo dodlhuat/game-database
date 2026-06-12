@@ -2,7 +2,7 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix
 
 ## Erster Start (einmalig)
 setup:
@@ -60,3 +60,14 @@ db:
 api-generate:
 	docker compose exec backend php artisan scramble:export
 	cd frontend && npm run api:generate
+
+## Linter für Frontend (ESLint) und Backend (Pint) ausführen
+lint:
+	cd frontend && npm run lint
+	docker compose exec backend ./vendor/bin/pint --test
+
+## Linter ausführen und Fehler automatisch beheben
+lint-fix:
+	cd frontend && npm run lint:fix
+	cd frontend && npm run format
+	docker compose exec backend ./vendor/bin/pint

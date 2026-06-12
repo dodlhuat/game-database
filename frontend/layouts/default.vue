@@ -1,9 +1,15 @@
 <template>
   <nav class="push-menu">
     <ul>
-      <li><NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink></li>
-      <li><NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink></li>
-      <li v-show="auth.isLoggedIn"><NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink></li>
+      <li>
+        <NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink>
+      </li>
+      <li>
+        <NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink>
+      </li>
+      <li v-show="auth.isLoggedIn">
+        <NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink>
+      </li>
 
       <!-- Dashboard only for non-admin users at level 1 -->
       <li v-show="auth.isLoggedIn && !auth.isAdmin">
@@ -11,36 +17,79 @@
       </li>
 
       <!-- Admin sub-panel — the <a> text becomes the panel title -->
-      <li v-show="auth.isLoggedIn && auth.isAdmin" :class="{ 'push-nav__admin-active': isAdminRoute }">
+      <li
+        v-show="auth.isLoggedIn && auth.isAdmin"
+        :class="{ 'push-nav__admin-active': isAdminRoute }"
+      >
         <NuxtLink to="/admin">{{ $t('nav.admin') }}</NuxtLink>
         <ul>
-          <li><NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/events">{{ $t('admin.events.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/categories">{{ $t('admin.categories.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/users">{{ $t('admin.users.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/loans">{{ $t('admin.loans.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/package-loans">{{ $t('admin.package_loans.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/extensions">{{ $t('admin.extensions.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/damage-reports">{{ $t('admin.damage_reports.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/newsletters">{{ $t('admin.newsletters.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/emails">{{ $t('admin.emails.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/email-logs">{{ $t('admin.email_logs.title') }}</NuxtLink></li>
-          <li><NuxtLink to="/admin/loan-settings">{{ $t('admin.loan_settings.title') }}</NuxtLink></li>
+          <li>
+            <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/events">{{ $t('admin.events.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/categories">{{ $t('admin.categories.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/users">{{ $t('admin.users.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/loans">{{ $t('admin.loans.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/package-loans">{{ $t('admin.package_loans.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/extensions">{{ $t('admin.extensions.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/damage-reports">{{ $t('admin.damage_reports.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/newsletters">{{ $t('admin.newsletters.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/emails">{{ $t('admin.emails.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/email-logs">{{ $t('admin.email_logs.title') }}</NuxtLink>
+          </li>
+          <li>
+            <NuxtLink to="/admin/loan-settings">{{ $t('admin.loan_settings.title') }}</NuxtLink>
+          </li>
         </ul>
       </li>
 
-      <li v-show="!auth.isLoggedIn"><NuxtLink to="/login">{{ $t('nav.login') }}</NuxtLink></li>
-      <li v-show="!auth.isLoggedIn"><NuxtLink to="/register">{{ $t('nav.register') }}</NuxtLink></li>
+      <li v-show="!auth.isLoggedIn">
+        <NuxtLink to="/login">{{ $t('nav.login') }}</NuxtLink>
+      </li>
+      <li v-show="!auth.isLoggedIn">
+        <NuxtLink to="/register">{{ $t('nav.register') }}</NuxtLink>
+      </li>
       <li v-show="auth.isLoggedIn">
         <button class="push-nav__logout" @click="handleLogout">{{ $t('nav.logout') }}</button>
       </li>
       <li class="push-nav__divider" aria-hidden="true" />
-      <li class="push-nav__legal"><NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></li>
-      <li class="push-nav__legal"><NuxtLink to="/privacy">{{ $t('nav.privacy') }}</NuxtLink></li>
-      <li class="push-nav__legal"><NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink></li>
+      <li class="push-nav__legal">
+        <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink>
+      </li>
+      <li class="push-nav__legal">
+        <NuxtLink to="/privacy">{{ $t('nav.privacy') }}</NuxtLink>
+      </li>
+      <li class="push-nav__legal">
+        <NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink>
+      </li>
     </ul>
   </nav>
 
@@ -68,7 +117,9 @@ let checkboxEl: HTMLInputElement | null = null
 
 function openAdminPanelIfNeeded() {
   if (!isAdminRoute.value) return
-  const adminPanel = document.querySelector('.push-menu-panel[data-level="1"]') as HTMLElement | null
+  const adminPanel = document.querySelector(
+    '.push-menu-panel[data-level="1"]'
+  ) as HTMLElement | null
   if (adminPanel) PushMenuClass?.openPanel(adminPanel)
 }
 
@@ -94,9 +145,12 @@ onUnmounted(() => {
   PushMenuClass = null
 })
 
-watch(() => route.path, () => {
-  PushMenuClass?.close()
-})
+watch(
+  () => route.path,
+  () => {
+    PushMenuClass?.close()
+  }
+)
 
 async function handleLogout() {
   PushMenuClass?.close()
@@ -105,7 +159,9 @@ async function handleLogout() {
 </script>
 
 <style>
-.push-content { position: relative; }
+.push-content {
+  position: relative;
+}
 
 nav.push-menu a,
 nav.push-menu .push-menu-item {
@@ -133,7 +189,9 @@ nav.push-menu ul {
 </style>
 
 <style scoped>
-.push-nav__admin { color: #f7963d !important; }
+.push-nav__admin {
+  color: #f7963d !important;
+}
 
 .push-nav__logout {
   display: flex;
@@ -148,7 +206,9 @@ nav.push-menu ul {
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 .push-nav__logout:hover {
   color: rgba(238, 232, 223, 0.85);

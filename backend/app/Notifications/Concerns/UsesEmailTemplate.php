@@ -10,20 +10,20 @@ use Illuminate\Support\HtmlString;
 trait UsesEmailTemplate
 {
     /**
-     * @param array<string, mixed> $vars
+     * @param  array<string, mixed>  $vars
      */
     protected function buildFromTemplate(string $key, array $vars, string $actionUrl, ?object $notifiable = null): MailMessage
     {
         /** @var EmailTemplate|null $tpl */
         $tpl = EmailTemplate::where('key', $key)->first();
 
-        $subject    = $tpl?->subject    ?? '';
-        $greeting   = $tpl?->greeting   ?? 'Hallo,';
-        $body       = $tpl?->body       ?? '';
+        $subject = $tpl?->subject ?? '';
+        $greeting = $tpl?->greeting ?? 'Hallo,';
+        $body = $tpl?->body ?? '';
         $actionText = $tpl?->action_text ?? null;
 
-        $replace = fn(string $s): string => str_replace(
-            array_map(fn($k) => '{' . $k . '}', array_keys($vars)),
+        $replace = fn (string $s): string => str_replace(
+            array_map(fn ($k) => '{'.$k.'}', array_keys($vars)),
             array_values($vars),
             $s
         );
@@ -50,11 +50,11 @@ trait UsesEmailTemplate
     {
         try {
             EmailLog::create([
-                'user_id'         => $notifiable->id ?? null,
+                'user_id' => $notifiable->id ?? null,
                 'recipient_email' => $notifiable->email ?? '',
-                'template_key'    => $key,
-                'subject'         => $subject,
-                'sent_at'         => now(),
+                'template_key' => $key,
+                'subject' => $subject,
+                'sent_at' => now(),
             ]);
         } catch (\Throwable) {
             // Never block mail delivery due to logging failure

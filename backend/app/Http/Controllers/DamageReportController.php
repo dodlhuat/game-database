@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DamageReport;
 use App\Models\Loan;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,30 +13,30 @@ class DamageReportController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'loan_id'     => ['required', 'integer', 'exists:loans,id'],
+            'loan_id' => ['required', 'integer', 'exists:loans,id'],
             'description' => ['required', 'string', 'max:1000'],
-            'photo_url'   => ['nullable', 'url'],
+            'photo_url' => ['nullable', 'url'],
         ]);
 
-        /** @var \App\Models\Loan $loan */
+        /** @var Loan $loan */
         $loan = Loan::findOrFail($validated['loan_id']);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Nicht autorisiert.'], 403);
         }
 
-        if (!in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
+        if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return response()->json(['message' => 'Schadensmeldung nur für aktive Ausleihen möglich.'], 422);
         }
 
         $report = DamageReport::create([
-            'loan_id'     => $loan->id,
-            'user_id'     => $user->id,
+            'loan_id' => $loan->id,
+            'user_id' => $user->id,
             'description' => $validated['description'],
-            'photo_url'   => $validated['photo_url'] ?? null,
+            'photo_url' => $validated['photo_url'] ?? null,
         ]);
 
         return response()->json($report, 201);

@@ -16,37 +16,37 @@ class LoginController extends Controller
     {
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'E-Mail oder Passwort ist falsch.',
             ], 401);
         }
 
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'Bitte bestätige zuerst deine E-Mail-Adresse.',
-                'reason'  => 'email_not_verified',
+                'reason' => 'email_not_verified',
             ], 403);
         }
 
         if ($user->status === 'PENDING') {
             return response()->json([
                 'message' => 'Dein Konto wartet noch auf Freischaltung.',
-                'status'  => 'PENDING',
+                'status' => 'PENDING',
             ], 403);
         }
 
         if ($user->status === 'REJECTED') {
             return response()->json([
                 'message' => 'Deine Registrierung wurde abgelehnt.',
-                'status'  => 'REJECTED',
+                'status' => 'REJECTED',
             ], 403);
         }
 
         if ($user->status === 'SUSPENDED') {
             return response()->json([
                 'message' => 'Dein Konto ist gesperrt. Bitte kontaktiere uns.',
-                'status'  => 'SUSPENDED',
+                'status' => 'SUSPENDED',
             ], 403);
         }
 
@@ -54,13 +54,13 @@ class LoginController extends Controller
 
         return response()->json([
             'token' => $token,
-            'user'  => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 
     public function destroy(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $user->currentAccessToken()->delete();
 

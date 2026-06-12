@@ -10,7 +10,7 @@ class EnsureUserIsActive
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->isActive()) {
+        if (! $request->user() || ! $request->user()->isActive()) {
             return response()->json([
                 'message' => 'Dein Konto ist noch nicht freigeschaltet.',
             ], 403);

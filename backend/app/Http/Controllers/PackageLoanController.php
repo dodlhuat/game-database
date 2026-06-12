@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\PackageLoanResource;
 use App\Models\Copy;
+use App\Models\Game;
+use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Package;
 use App\Models\PackageLoan;
 use App\Models\TokenTransaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,7 +20,7 @@ class PackageLoanController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $loans = $user->packageLoans()
             ->with(['package', 'loans.copy.game'])
@@ -33,13 +36,13 @@ class PackageLoanController extends Controller
             'package_id' => ['required', 'integer', 'exists:packages,id'],
         ]);
 
-        /** @var \App\Models\User $user */
-        $user    = $request->user();
-        /** @var \App\Models\Package $package */
+        /** @var User $user */
+        $user = $request->user();
+        /** @var Package $package */
         $package = Package::with('games')->findOrFail($request->package_id);
         $setting = LoanSetting::instance();
 
-        if (!$package->is_active) {
+        if (! $package->is_active) {
             return response()->json(['message' => 'Paket nicht verfügbar.'], 422);
         }
 
@@ -47,11 +50,11 @@ class PackageLoanController extends Controller
             return response()->json(['message' => 'Dieses Paket enthält keine Spiele.'], 422);
         }
 
-        if (!$user->isAdmin()) {
-            if (!$user->isMember()) {
+        if (! $user->isAdmin()) {
+            if (! $user->isMember()) {
                 return response()->json([
                     'message' => 'Eine aktive Mitgliedschaft ist erforderlich um Pakete auszuleihen.',
-                    'reason'  => 'membership_required',
+                    'reason' => 'membership_required',
                 ], 403);
             }
         }
@@ -65,32 +68,32 @@ class PackageLoanController extends Controller
                 ->whereDoesntHave('activeLoans')
                 ->first();
 
-            if (!$copy) {
+            if (! $copy) {
                 return response()->json([
-                    'message' => 'Das Paket ist nicht vollständig verfügbar. "' . $game->title . '" ist derzeit ausgeliehen.',
-                    'reason'  => 'package_unavailable',
+                    'message' => 'Das Paket ist nicht vollständig verfügbar. "'.$game->title.'" ist derzeit ausgeliehen.',
+                    'reason' => 'package_unavailable',
                 ], 409);
             }
 
             $selectedCopies[] = $copy;
         }
 
-        if (!$user->isAdmin()) {
-            $loanCost    = $setting->loan_cost;
+        if (! $user->isAdmin()) {
+            $loanCost = $setting->loan_cost;
             $totalDeposit = 0;
             foreach ($selectedCopies as $copy) {
-                /** @var \App\Models\Game $copyGame */
+                /** @var Game $copyGame */
                 $copyGame = $copy->game;
                 $totalDeposit += $copy->calculateDeposit($copyGame, $setting);
             }
             $totalCost = $loanCost + $totalDeposit;
 
-            if (!$user->hasEnoughFreeTokens($totalCost)) {
+            if (! $user->hasEnoughFreeTokens($totalCost)) {
                 return response()->json([
-                    'message'    => "Nicht genug Token. Paket ausleihen kostet {$loanCost} Token + {$totalDeposit} Token Kaution.",
-                    'reason'     => 'insufficient_tokens',
+                    'message' => "Nicht genug Token. Paket ausleihen kostet {$loanCost} Token + {$totalDeposit} Token Kaution.",
+                    'reason' => 'insufficient_tokens',
                     'borrow_cost' => $loanCost,
-                    'deposit'    => $totalDeposit,
+                    'deposit' => $totalDeposit,
                 ], 402);
             }
         } else {
@@ -98,50 +101,50 @@ class PackageLoanController extends Controller
         }
 
         $startDate = $this->calcNextAppointment($setting);
-        $dueDate   = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
+        $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
 
         $packageLoan = PackageLoan::create([
             'package_id' => $package->id,
-            'user_id'    => $user->id,
+            'user_id' => $user->id,
             'start_date' => $startDate->toDateString(),
-            'due_date'   => $dueDate->toDateString(),
-            'status'     => 'ACTIVE',
+            'due_date' => $dueDate->toDateString(),
+            'status' => 'ACTIVE',
         ]);
 
         foreach ($selectedCopies as $copy) {
-            /** @var \App\Models\Game $copyGame */
+            /** @var Game $copyGame */
             $copyGame = $copy->game;
             $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($copyGame, $setting);
             $packageLoan->loans()->create([
-                'copy_id'        => $copy->id,
-                'user_id'        => $user->id,
-                'start_date'     => $startDate->toDateString(),
-                'due_date'       => $dueDate->toDateString(),
-                'status'         => 'ACTIVE',
+                'copy_id' => $copy->id,
+                'user_id' => $user->id,
+                'start_date' => $startDate->toDateString(),
+                'due_date' => $dueDate->toDateString(),
+                'status' => 'ACTIVE',
                 'deposit_tokens' => $deposit,
             ]);
             $copy->increment('borrow_count');
         }
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $loanCost = $setting->loan_cost;
 
             $user->decrement('tokens', $loanCost);
             TokenTransaction::create([
-                'user_id'     => $user->id,
-                'loan_id'     => null,
-                'type'        => 'BORROW',
-                'amount'      => -$loanCost,
+                'user_id' => $user->id,
+                'loan_id' => null,
+                'type' => 'BORROW',
+                'amount' => -$loanCost,
                 'description' => "Leihgebühr: Paket {$package->name}",
             ]);
 
             if ($totalDeposit > 0) {
                 $user->increment('tokens_blocked', $totalDeposit);
                 TokenTransaction::create([
-                    'user_id'     => $user->id,
-                    'loan_id'     => null,
-                    'type'        => 'DEPOSIT_BLOCK',
-                    'amount'      => -$totalDeposit,
+                    'user_id' => $user->id,
+                    'loan_id' => null,
+                    'type' => 'DEPOSIT_BLOCK',
+                    'amount' => -$totalDeposit,
                     'description' => "Kaution blockiert: Paket {$package->name}",
                 ]);
             }
@@ -154,9 +157,9 @@ class PackageLoanController extends Controller
 
     public function return(Request $request, PackageLoan $packageLoan): JsonResponse|PackageLoanResource
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
-        if ($packageLoan->user_id !== $user->id && !$user->isAdmin()) {
+        if ($packageLoan->user_id !== $user->id && ! $user->isAdmin()) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
@@ -169,9 +172,9 @@ class PackageLoanController extends Controller
             ->with('copy')
             ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
             ->get()
-            ->each(function (\App\Models\Loan $loan) {
+            ->each(function (Loan $loan) {
                 $loan->update(['status' => 'RETURNED', 'returned_at' => now()]);
-                /** @var \App\Models\Copy $loanCopy */
+                /** @var Copy $loanCopy */
                 $loanCopy = $loan->copy;
                 $loanCopy->update(['condition' => 'REVIEW']);
             });
@@ -185,8 +188,8 @@ class PackageLoanController extends Controller
 
     private function calcNextAppointment(LoanSetting $setting): Carbon
     {
-        $today     = Carbon::today();
-        $deadline  = $today->copy()->addDays($setting->grace_days);
+        $today = Carbon::today();
+        $deadline = $today->copy()->addDays($setting->grace_days);
         $startDate = Carbon::parse($setting->start_date);
 
         if ($setting->interval_days <= 0) {

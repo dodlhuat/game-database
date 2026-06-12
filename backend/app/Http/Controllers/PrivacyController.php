@@ -11,7 +11,7 @@ class PrivacyController extends Controller
     {
         $privacy = PrivacyVersion::orderByDesc('published_at')->first();
 
-        if (!$privacy) {
+        if (! $privacy) {
             return response()->json(['message' => 'Keine Datenschutzerklärung gefunden.'], 404);
         }
 

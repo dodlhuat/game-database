@@ -2,7 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Models\Copy;
+use App\Models\Game;
 use App\Models\Loan;
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,18 +23,18 @@ class LoanDueSoon extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        /** @var \App\Models\Copy $loanCopy */
+        /** @var Copy $loanCopy */
         $loanCopy = $this->loan->copy;
-        /** @var \App\Models\Game $game */
-        $game     = $loanCopy->game;
-        $dueDate  = $this->loan->due_date->format('d.m.Y');
-        $dashboardUrl = config('frontend.url') . '/dashboard';
+        /** @var Game $game */
+        $game = $loanCopy->game;
+        $dueDate = $this->loan->due_date->format('d.m.Y');
+        $dashboardUrl = config('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('loan_due_soon', [
-            'name'     => $notifiable->name,
-            'game'     => $game->title,
+            'name' => $notifiable->name,
+            'game' => $game->title,
             'due_date' => $dueDate,
         ], $dashboardUrl, $notifiable);
     }

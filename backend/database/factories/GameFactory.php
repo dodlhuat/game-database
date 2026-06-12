@@ -13,18 +13,19 @@ class GameFactory extends Factory
     public function definition(): array
     {
         $title = fake()->unique()->words(3, true);
+
         return [
-            'title'             => ucwords($title),
-            'slug'              => Str::slug($title) . '-' . fake()->randomNumber(5),
-            'description'       => fake()->paragraph(),
+            'title' => ucwords($title),
+            'slug' => Str::slug($title).'-'.fake()->randomNumber(5),
+            'description' => fake()->paragraph(),
             'short_description' => fake()->sentence(),
-            'category_id'       => Category::factory(),
-            'min_players'       => 2,
-            'max_players'       => 4,
-            'min_age'           => 10,
-            'difficulty'        => fake()->randomElement(['EASY', 'MEDIUM', 'HARD']),
-            'deposit_tokens'    => 0,
-            'is_active'         => true,
+            'category_id' => Category::factory(),
+            'min_players' => 2,
+            'max_players' => 4,
+            'min_age' => 10,
+            'difficulty' => fake()->randomElement(['EASY', 'MEDIUM', 'HARD']),
+            'deposit_tokens' => 0,
+            'is_active' => true,
         ];
     }
 

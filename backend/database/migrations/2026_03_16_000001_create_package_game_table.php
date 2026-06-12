@@ -18,7 +18,7 @@ return new class extends Migration
             }
         });
 
-        if (!Schema::hasTable('package_game')) {
+        if (! Schema::hasTable('package_game')) {
             Schema::create('package_game', function (Blueprint $table) {
                 $table->foreignId('package_id')->constrained()->cascadeOnDelete();
                 $table->foreignId('game_id')->constrained()->cascadeOnDelete();

@@ -8,6 +8,7 @@ use App\Imports\CategoryImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CategoryImportExportController extends Controller
 {
@@ -17,18 +18,18 @@ class CategoryImportExportController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $import = new CategoryImport();
+        $import = new CategoryImport;
         Excel::import($import, $request->file('file'));
 
         return response()->json([
-            'new'     => $import->newCount,
+            'new' => $import->newCount,
             'updated' => $import->updatedCount,
-            'total'   => $import->newCount + $import->updatedCount,
+            'total' => $import->newCount + $import->updatedCount,
         ]);
     }
 
-    public function export(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function export(): BinaryFileResponse
     {
-        return Excel::download(new CategoryExport(), 'kategorien.xlsx');
+        return Excel::download(new CategoryExport, 'kategorien.xlsx');
     }
 }

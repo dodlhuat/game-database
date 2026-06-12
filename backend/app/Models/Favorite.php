@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Database\Factories\FavoriteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Favorite extends Model
 {
-    /** @use HasFactory<\Database\Factories\FavoriteFactory> */
+    /** @use HasFactory<FavoriteFactory> */
     use HasFactory;
+
     protected $fillable = [
         'game_id',
         'user_id',

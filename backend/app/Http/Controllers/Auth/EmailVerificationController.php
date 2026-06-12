@@ -15,25 +15,25 @@ class EmailVerificationController extends Controller
     {
         $frontendUrl = config('frontend.url');
 
-        if (!$request->hasValidSignature()) {
-            return redirect($frontendUrl . '/email-verified?error=invalid_link');
+        if (! $request->hasValidSignature()) {
+            return redirect($frontendUrl.'/email-verified?error=invalid_link');
         }
 
         $user = User::find($id);
 
-        if (!$user) {
-            return redirect($frontendUrl . '/email-verified?error=invalid_link');
+        if (! $user) {
+            return redirect($frontendUrl.'/email-verified?error=invalid_link');
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect($frontendUrl . '/email-verified?already=1');
+            return redirect($frontendUrl.'/email-verified?already=1');
         }
 
         $user->markEmailAsVerified();
         $user->status = 'ACTIVE';
         $user->save();
 
-        return redirect($frontendUrl . '/email-verified?success=1');
+        return redirect($frontendUrl.'/email-verified?success=1');
     }
 
     public function resend(Request $request): JsonResponse
@@ -43,11 +43,11 @@ class EmailVerificationController extends Controller
         $user = User::where('email', $request->email)->first();
 
         // Keine Information preisgeben ob die E-Mail existiert
-        if (!$user || $user->hasVerifiedEmail()) {
+        if (! $user || $user->hasVerifiedEmail()) {
             return response()->json(['message' => 'Bestätigungs-E-Mail wurde erneut gesendet.']);
         }
 
-        $user->notify(new VerifyEmailNotification());
+        $user->notify(new VerifyEmailNotification);
 
         return response()->json(['message' => 'Bestätigungs-E-Mail wurde erneut gesendet.']);
     }

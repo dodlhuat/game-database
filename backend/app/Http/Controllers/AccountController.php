@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,22 +13,22 @@ class AccountController extends Controller
 {
     public function update(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $validated = $request->validate([
-            'name'              => ['sometimes', 'string', 'max:255'],
-            'email'             => ['sometimes', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'address'           => ['sometimes', 'nullable', 'string', 'max:255'],
-            'phone'             => ['sometimes', 'nullable', 'string', 'max:30'],
-            'date_of_birth'     => ['sometimes', 'nullable', 'date', 'before:today'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'address' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'date_of_birth' => ['sometimes', 'nullable', 'date', 'before:today'],
             'newsletter_opt_in' => ['sometimes', 'boolean'],
-            'current_password'  => ['required_with:new_password', 'string'],
-            'new_password'      => ['nullable', 'string', Password::min(8)->letters()->numbers(), 'confirmed'],
+            'current_password' => ['required_with:new_password', 'string'],
+            'new_password' => ['nullable', 'string', Password::min(8)->letters()->numbers(), 'confirmed'],
         ]);
 
         if (isset($validated['new_password'])) {
-            if (!Hash::check($validated['current_password'], $user->password)) {
+            if (! Hash::check($validated['current_password'], $user->password)) {
                 return response()->json(['message' => 'Das aktuelle Passwort ist falsch.'], 422);
             }
             $user->password = Hash::make($validated['new_password']);
@@ -61,7 +62,7 @@ class AccountController extends Controller
 
         return response()->json([
             'message' => 'Konto aktualisiert.',
-            'user'    => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 }

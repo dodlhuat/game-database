@@ -14,9 +14,13 @@
       <span
         v-if="auth.isLoggedIn && game.copies_count > 0"
         class="game-card__badge"
-        :class="game.available_copies_count > 0 ? 'game-card__badge--avail' : 'game-card__badge--out'"
+        :class="
+          game.available_copies_count > 0 ? 'game-card__badge--avail' : 'game-card__badge--out'
+        "
       >
-        {{ game.available_copies_count > 0 ? $t('common.badge.available') : $t('common.badge.loaned') }}
+        {{
+          game.available_copies_count > 0 ? $t('common.badge.available') : $t('common.badge.loaned')
+        }}
       </span>
     </div>
 
@@ -24,9 +28,14 @@
       <p v-if="game.category" class="game-card__cat">{{ game.category.name }}</p>
       <h3 class="game-card__title">{{ game.title }}</h3>
 
-      <p v-if="game.short_description" class="game-card__short-desc">{{ game.short_description }}</p>
+      <p v-if="game.short_description" class="game-card__short-desc">
+        {{ game.short_description }}
+      </p>
 
-      <div v-if="game.min_players || game.min_age || game.duration_min || game.difficulty" class="game-card__meta">
+      <div
+        v-if="game.min_players || game.min_age || game.duration_min || game.difficulty"
+        class="game-card__meta"
+      >
         <span v-if="game.min_players" class="game-card__chip">
           {{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }} Sp.
         </span>
@@ -34,7 +43,9 @@
         <span v-if="game.duration_min" class="game-card__chip">
           {{ game.duration_min }}{{ game.duration_max ? `–${game.duration_max}` : '' }} Min.
         </span>
-        <span v-if="game.difficulty" class="game-card__chip">{{ difficultyLabel(game.difficulty) }}</span>
+        <span v-if="game.difficulty" class="game-card__chip">{{
+          difficultyLabel(game.difficulty)
+        }}</span>
       </div>
     </div>
   </NuxtLink>
@@ -50,7 +61,10 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 const DIFFICULTY: Record<string, string> = {
-  EASY: 'admin.form.difficulty_easy', MEDIUM: 'admin.form.difficulty_medium', HARD: 'admin.form.difficulty_hard', EXPERT: 'admin.form.difficulty_expert',
+  EASY: 'admin.form.difficulty_easy',
+  MEDIUM: 'admin.form.difficulty_medium',
+  HARD: 'admin.form.difficulty_hard',
+  EXPERT: 'admin.form.difficulty_expert',
 }
 
 function difficultyLabel(d: string) {
@@ -60,11 +74,17 @@ function difficultyLabel(d: string) {
 
 <style lang="scss" scoped>
 $amber-08: rgba(212, 146, 30, 0.08);
-$amber-30: rgba(212, 146, 30, 0.30);
+$amber-30: rgba(212, 146, 30, 0.3);
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .game-card {
@@ -76,12 +96,17 @@ $amber-30: rgba(212, 146, 30, 0.30);
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
   animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) calc(min(var(--i, 0), 10) * 30ms) both;
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.30), 0 0 0 1px rgba(212, 146, 30, 0.18);
+    box-shadow:
+      0 20px 48px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(212, 146, 30, 0.18);
     border-color: $amber-30;
   }
 

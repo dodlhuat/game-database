@@ -17,7 +17,7 @@ class StoreReviewRequest extends FormRequest
         return [
             'game_id' => ['required', 'integer', 'exists:games,id'],
             'loan_id' => ['nullable', 'integer', 'exists:loans,id'],
-            'rating'  => ['required', 'integer', 'min:1', 'max:5'],
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'comment' => ['nullable', 'string', 'max:1000'],
         ];
     }

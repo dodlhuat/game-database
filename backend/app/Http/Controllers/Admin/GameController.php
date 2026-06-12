@@ -20,11 +20,9 @@ class GameController extends Controller
     {
         $games = Game::with(['category', 'tags', 'languages'])
             ->withCount('copies')
-            ->when($request->search, fn($q, $s) =>
-                $q->where('title', 'like', "%{$s}%")
+            ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%")
             )
-            ->when($request->has('is_active'), fn($q) =>
-                $q->where('is_active', $request->boolean('is_active'))
+            ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active'))
             )
             ->orderBy('title')
             ->paginate(25);

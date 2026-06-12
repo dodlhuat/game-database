@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,13 +18,13 @@ class MembershipRenewalReminderNotification extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        $renewalUrl = config('frontend.url') . '/dashboard';
+        $renewalUrl = config('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('membership_renewal_reminder', [
-            'name'         => $notifiable->name,
-            'expiry_date'  => $notifiable->membership_expires_at?->format('d.m.Y') ?? '',
+            'name' => $notifiable->name,
+            'expiry_date' => $notifiable->membership_expires_at?->format('d.m.Y') ?? '',
             'renewal_link' => $renewalUrl,
         ], $renewalUrl, $notifiable);
     }

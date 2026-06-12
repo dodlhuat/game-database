@@ -28,12 +28,12 @@ return new class extends Migration
 
         // Migrate existing language strings to pivot
         $nameMap = [
-            'de'       => 'Deutsch',
-            'deutsch'  => 'Deutsch',
-            'en'       => 'Englisch',
-            'en '      => 'Englisch',
+            'de' => 'Deutsch',
+            'deutsch' => 'Deutsch',
+            'en' => 'Englisch',
+            'en ' => 'Englisch',
             'englisch' => 'Englisch',
-            'english'  => 'Englisch',
+            'english' => 'Englisch',
         ];
 
         DB::table('games')->whereNotNull('language')->get()->each(function ($game) use ($nameMap) {
@@ -43,11 +43,13 @@ return new class extends Migration
                 $resolvedName = $nameMap[$part] ?? null;
                 if ($resolvedName) {
                     $lang = DB::table('languages')->where('name', $resolvedName)->first();
-                    if ($lang) $langIds[] = $lang->id;
+                    if ($lang) {
+                        $langIds[] = $lang->id;
+                    }
                 }
             }
             if ($langIds) {
-                $rows = array_map(fn($lid) => ['game_id' => $game->id, 'language_id' => $lid], array_unique($langIds));
+                $rows = array_map(fn ($lid) => ['game_id' => $game->id, 'language_id' => $lid], array_unique($langIds));
                 DB::table('game_language')->insert($rows);
             }
         });

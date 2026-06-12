@@ -6,32 +6,32 @@
 
 :root {
   // Core accent — orange
-  --accent-color:         #f7963d;
-  --accent-color-lighten: #fbb87a;   // lighter orange: link hover, datepicker hover bg
-  --accent-color-text:    #1a0d00;   // near-black: text ON orange backgrounds
-  --accent-text:          #f7963d;   // orange: active states, inline accent text
+  --accent-color: #f7963d;
+  --accent-color-lighten: #fbb87a; // lighter orange: link hover, datepicker hover bg
+  --accent-color-text: #1a0d00; // near-black: text ON orange backgrounds
+  --accent-text: #f7963d; // orange: active states, inline accent text
 
   // Missing variables referenced in page components but undefined in basix
-  --accent-color-muted:   rgba(247, 150, 61, 0.10);
+  --accent-color-muted: rgba(247, 150, 61, 0.1);
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
-  --success-muted:        rgba(46, 139, 87, 0.10);
+  --success-muted: rgba(46, 139, 87, 0.1);
 }
 
-[data-theme="dark"] {
-  --accent-color:         #f7963d;
-  --accent-color-lighten: rgba(247, 150, 61, 0.22);  // subtle orange wash in dark
-  --accent-color-text:    #1a0d00;   // near-black: text ON orange in dark context
-  --accent-text:          #f7963d;
+[data-theme='dark'] {
+  --accent-color: #f7963d;
+  --accent-color-lighten: rgba(247, 150, 61, 0.22); // subtle orange wash in dark
+  --accent-color-text: #1a0d00; // near-black: text ON orange in dark context
+  --accent-text: #f7963d;
 
-  --accent-color-muted:   rgba(247, 150, 61, 0.10);
+  --accent-color-muted: rgba(247, 150, 61, 0.1);
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
-  --success-muted:        rgba(92, 198, 137, 0.10);
+  --success-muted: rgba(92, 198, 137, 0.1);
 
   // Body background overrides Basix default (#111113) with our exact dark tone
-  --background:           #0F0E0C;
-  --primary-bg:           #0F0E0C;
+  --background: #0f0e0c;
+  --primary-bg: #0f0e0c;
   // Push-menu sidebar background matches the app's dark chrome
-  --primary-dark:         #0F0E0C;
+  --primary-dark: #0f0e0c;
 }
 
 // ─── Icon font + font-size override ──────────────────────────────
@@ -42,28 +42,56 @@
 // font-size: 1em lets icons inherit their context size instead of 24px.
 
 .icon {
-  font-family: "Material Symbols Outlined 24pt", 'Material Symbols Outlined', serif;
+  font-family: 'Material Symbols Outlined 24pt', 'Material Symbols Outlined', serif;
   font-size: 1em;
   line-height: 1;
 }
 
 // ─── Missing icons (not in basix subset) ─────────────────────────
-.icon-alert-triangle-outline::before { content: "\e002"; } // warning
-.icon-clock-outline::before          { content: "\e8b5"; } // schedule
-.icon-cube-outline::before           { content: "\e97b"; } // inventory_2
-.icon-download-outline::before       { content: "\f090"; } // download
-.icon-gift-outline::before           { content: "\e8f6"; } // card_giftcard
-.icon-strikethrough::before          { content: "\e257"; } // strikethrough_s
-.icon-arrow_back::before             { content: "\e5c4"; } // arrow_back
-.icon-extension::before              { content: "\e87b"; } // extension
-.icon-login::before                  { content: "\ea77"; } // login
-.icon-toll::before                   { content: "\e197"; } // toll
-.icon-bookmark_add::before           { content: "\e598"; } // bookmark_add
-.icon-zoom_in::before                { content: "\e8ff"; } // zoom_in
-.icon-open_in_new::before            { content: "\e89e"; } // open_in_new
+.icon-alert-triangle-outline::before {
+  content: '\e002';
+} // warning
+.icon-clock-outline::before {
+  content: '\e8b5';
+} // schedule
+.icon-cube-outline::before {
+  content: '\e97b';
+} // inventory_2
+.icon-download-outline::before {
+  content: '\f090';
+} // download
+.icon-gift-outline::before {
+  content: '\e8f6';
+} // card_giftcard
+.icon-strikethrough::before {
+  content: '\e257';
+} // strikethrough_s
+.icon-arrow_back::before {
+  content: '\e5c4';
+} // arrow_back
+.icon-extension::before {
+  content: '\e87b';
+} // extension
+.icon-login::before {
+  content: '\ea77';
+} // login
+.icon-toll::before {
+  content: '\e197';
+} // toll
+.icon-bookmark_add::before {
+  content: '\e598';
+} // bookmark_add
+.icon-zoom_in::before {
+  content: '\e8ff';
+} // zoom_in
+.icon-open_in_new::before {
+  content: '\e89e';
+} // open_in_new
 
 // Restore intentionally large display icons (empty states).
-.dash-empty__icon { font-size: 2.5rem; }
+.dash-empty__icon {
+  font-size: 2.5rem;
+}
 
 // ─── File uploader icon ───────────────────────────────────────────
 // Global .icon override sets font-size: 1em, which is too small for the

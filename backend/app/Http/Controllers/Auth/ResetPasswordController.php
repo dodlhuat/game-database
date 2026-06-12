@@ -14,9 +14,9 @@ class ResetPasswordController extends Controller
     public function store(Request $request): JsonResponse
     {
         $request->validate([
-            'token'                 => ['required', 'string'],
-            'email'                 => ['required', 'email'],
-            'password'              => ['required', 'confirmed', PasswordRule::min(8)],
+            'token' => ['required', 'string'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', PasswordRule::min(8)],
         ]);
 
         $status = Password::reset(
@@ -34,8 +34,8 @@ class ResetPasswordController extends Controller
         return response()->json([
             'message' => match ($status) {
                 Password::INVALID_TOKEN => 'Dieser Link ist ungültig oder bereits abgelaufen.',
-                Password::INVALID_USER  => 'Kein Konto mit dieser E-Mail-Adresse gefunden.',
-                default                 => 'Fehler beim Zurücksetzen des Passworts.',
+                Password::INVALID_USER => 'Kein Konto mit dieser E-Mail-Adresse gefunden.',
+                default => 'Fehler beim Zurücksetzen des Passworts.',
             },
         ], 422);
     }

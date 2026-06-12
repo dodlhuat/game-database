@@ -17,7 +17,7 @@ defineProps<{ label: string }>()
 
 <style lang="scss" scoped>
 $hero-muted: rgba(238, 232, 223, 0.72);
-$hero-text:  #EEE8DF;
+$hero-text: #eee8df;
 
 // Override basix breadcrumb colors for the dark admin hero background
 .breadcrumb {
@@ -36,7 +36,7 @@ $hero-text:  #EEE8DF;
     }
   }
 
-  :deep(li[aria-current="page"] > span) {
+  :deep(li[aria-current='page'] > span) {
     color: $amber;
     font-weight: 600;
   }

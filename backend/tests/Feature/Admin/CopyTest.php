@@ -36,7 +36,7 @@ class CopyTest extends TestCase
 
         $this->actingAs($this->admin())
             ->postJson('/api/admin/copies', [
-                'game_id'   => $game->id,
+                'game_id' => $game->id,
                 'condition' => 'NEW',
             ])
             ->assertCreated();
@@ -58,7 +58,7 @@ class CopyTest extends TestCase
 
         $this->actingAs($this->admin())
             ->putJson("/api/admin/copies/{$copy->id}", [
-                'game_id'   => $copy->game_id,
+                'game_id' => $copy->game_id,
                 'condition' => 'GOOD',
             ])
             ->assertOk()

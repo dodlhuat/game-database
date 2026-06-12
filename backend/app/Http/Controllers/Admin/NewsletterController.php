@@ -25,7 +25,7 @@ class NewsletterController extends Controller
     {
         $validated = $request->validate([
             'subject' => ['required', 'string', 'max:200'],
-            'body'    => ['required', 'string'],
+            'body' => ['required', 'string'],
         ]);
 
         $recipients = User::where('newsletter_opt_in', true)
@@ -38,14 +38,14 @@ class NewsletterController extends Controller
             );
         }
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $newsletter = Newsletter::create([
-            'subject'         => $validated['subject'],
-            'body'            => $validated['body'],
-            'sent_at'         => now(),
+            'subject' => $validated['subject'],
+            'body' => $validated['body'],
+            'sent_at' => now(),
             'recipient_count' => $recipients->count(),
-            'sent_by'         => $user->id,
+            'sent_by' => $user->id,
         ]);
 
         return response()->json($newsletter->load('sender'), 201);

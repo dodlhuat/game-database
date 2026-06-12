@@ -39,7 +39,7 @@ class ExtensionTest extends TestCase
         $loan = Loan::factory()->create(['status' => 'ACTIVE']);
         $extension = Extension::factory()->create([
             'loan_id' => $loan->id,
-            'status'  => 'PENDING',
+            'status' => 'PENDING',
         ]);
 
         $this->actingAs($this->admin())

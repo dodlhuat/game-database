@@ -31,7 +31,13 @@ export interface Loan {
 export interface TokenTransaction {
   id: number
   loan_id: number | null
-  type: 'BORROW' | 'DEPOSIT_BLOCK' | 'DEPOSIT_RELEASE' | 'DEPOSIT_FORFEIT' | 'PURCHASE' | 'ADMIN_ADJUSTMENT'
+  type:
+    | 'BORROW'
+    | 'DEPOSIT_BLOCK'
+    | 'DEPOSIT_RELEASE'
+    | 'DEPOSIT_FORFEIT'
+    | 'PURCHASE'
+    | 'ADMIN_ADJUSTMENT'
   amount: number
   description: string | null
   created_at: string
@@ -75,25 +81,22 @@ export function useLoans() {
   const requestExtension = (loanId: number, requestedDueDate: string) =>
     api.post(`/loans/${loanId}/extend`, { requested_due_date: requestedDueDate })
 
-  const addFavorite = (gameId: number) =>
-    api.post('/favorites', { game_id: gameId })
+  const addFavorite = (gameId: number) => api.post('/favorites', { game_id: gameId })
 
-  const removeFavorite = (gameId: number) =>
-    api.delete(`/favorites/${gameId}`)
+  const removeFavorite = (gameId: number) => api.delete(`/favorites/${gameId}`)
 
-  const addReservation = (gameId: number) =>
-    api.post('/reservations', { game_id: gameId })
+  const addReservation = (gameId: number) => api.post('/reservations', { game_id: gameId })
 
-  const removeReservation = (reservationId: number) =>
-    api.delete(`/reservations/${reservationId}`)
+  const removeReservation = (reservationId: number) => api.delete(`/reservations/${reservationId}`)
 
   const reportDamage = (loanId: number, description: string, photoUrl?: string) =>
     api.post('/damage-reports', { loan_id: loanId, description, photo_url: photoUrl || undefined })
 
   const fetchTokenTransactions = (page = 1) =>
-    api.get<{ data: TokenTransaction[]; meta: { current_page: number; last_page: number; total: number } }>(
-      `/token-transactions?page=${page}`
-    )
+    api.get<{
+      data: TokenTransaction[]
+      meta: { current_page: number; last_page: number; total: number }
+    }>(`/token-transactions?page=${page}`)
 
   return {
     fetchDashboard,

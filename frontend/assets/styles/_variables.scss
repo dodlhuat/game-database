@@ -5,7 +5,7 @@ $color-primary: #f7963d;
 $color-primary-hover: #d4741a;
 $color-primary-light: #fde3c3;
 
-$amber: $color-primary;                    // alias used across components
+$amber: $color-primary; // alias used across components
 
 $color-secondary: #64748b;
 $color-secondary-hover: #475569;
@@ -48,17 +48,21 @@ $color-pending-bg: $color-warning-light;
 // ============================================================
 // Typografie
 // ============================================================
-$font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+$font-family-base:
+  'Inter',
+  system-ui,
+  -apple-system,
+  sans-serif;
 $font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-$font-size-xs: 0.75rem;    // 12px
-$font-size-sm: 0.875rem;   // 14px
-$font-size-base: 1rem;     // 16px
-$font-size-lg: 1.125rem;   // 18px
-$font-size-xl: 1.25rem;    // 20px
-$font-size-2xl: 1.5rem;    // 24px
-$font-size-3xl: 1.875rem;  // 30px
-$font-size-4xl: 2.25rem;   // 36px
+$font-size-xs: 0.75rem; // 12px
+$font-size-sm: 0.875rem; // 14px
+$font-size-base: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+$font-size-2xl: 1.5rem; // 24px
+$font-size-3xl: 1.875rem; // 30px
+$font-size-4xl: 2.25rem; // 36px
 
 $font-weight-normal: 400;
 $font-weight-medium: 500;
@@ -72,16 +76,16 @@ $line-height-relaxed: 1.75;
 // ============================================================
 // Abstände
 // ============================================================
-$spacing-1: 0.25rem;   // 4px
-$spacing-2: 0.5rem;    // 8px
-$spacing-3: 0.75rem;   // 12px
-$spacing-4: 1rem;      // 16px
-$spacing-5: 1.25rem;   // 20px
-$spacing-6: 1.5rem;    // 24px
-$spacing-8: 2rem;      // 32px
-$spacing-10: 2.5rem;   // 40px
-$spacing-12: 3rem;     // 48px
-$spacing-16: 4rem;     // 64px
+$spacing-1: 0.25rem; // 4px
+$spacing-2: 0.5rem; // 8px
+$spacing-3: 0.75rem; // 12px
+$spacing-4: 1rem; // 16px
+$spacing-5: 1.25rem; // 20px
+$spacing-6: 1.5rem; // 24px
+$spacing-8: 2rem; // 32px
+$spacing-10: 2.5rem; // 40px
+$spacing-12: 3rem; // 48px
+$spacing-16: 4rem; // 64px
 
 // ============================================================
 // Breakpoints
@@ -105,8 +109,12 @@ $radius-full: 9999px;
 // Shadows
 // ============================================================
 $shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-$shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-$shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+$shadow-md:
+  0 4px 6px -1px rgb(0 0 0 / 0.1),
+  0 2px 4px -2px rgb(0 0 0 / 0.1);
+$shadow-lg:
+  0 10px 15px -3px rgb(0 0 0 / 0.1),
+  0 4px 6px -4px rgb(0 0 0 / 0.1);
 
 // ============================================================
 // Transitions

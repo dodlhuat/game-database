@@ -11,11 +11,11 @@ class CategoryController extends Controller
     public function index(): AnonymousResourceCollection
     {
         $categories = Category::with(['children' => function ($q) {
-                $q->where('is_active', true)
-                  ->withCount('games')
-                  ->orderBy('sort_order')
-                  ->orderBy('name');
-            }])
+            $q->where('is_active', true)
+                ->withCount('games')
+                ->orderBy('sort_order')
+                ->orderBy('name');
+        }])
             ->withCount('games')
             ->where('is_active', true)
             ->whereNull('parent_id')

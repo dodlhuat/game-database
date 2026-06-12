@@ -2,54 +2,57 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Copy;
+use App\Models\Game;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 
-/** @mixin \App\Models\Game */
+/** @mixin Game */
 class GameResource extends JsonResource
 {
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
         return [
-            'id'                => $this->id,
-            'title'             => $this->title,
-            'slug'              => $this->slug,
-            'description'       => $this->description,
+            'id' => $this->id,
+            'title' => $this->title,
+            'slug' => $this->slug,
+            'description' => $this->description,
             'short_description' => $this->short_description,
-            'category'          => new CategoryResource($this->whenLoaded('category')),
-            'tags'              => TagResource::collection($this->whenLoaded('tags')),
-            'min_players'       => $this->min_players,
-            'max_players'       => $this->max_players,
-            'min_age'           => $this->min_age,
-            'duration_min'      => $this->duration_min,
-            'duration_max'      => $this->duration_max,
-            'difficulty'        => $this->difficulty,
-            'languages'         => $this->whenLoaded('languages', fn() => $this->languages->map(fn($l) => ['id' => $l->id, 'name' => $l->name])->values()),
-            'year'              => $this->year,
-            'instagram_url'     => $this->instagram_url,
-            'deposit_tokens'    => $this->deposit_tokens,
+            'category' => new CategoryResource($this->whenLoaded('category')),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
+            'min_players' => $this->min_players,
+            'max_players' => $this->max_players,
+            'min_age' => $this->min_age,
+            'duration_min' => $this->duration_min,
+            'duration_max' => $this->duration_max,
+            'difficulty' => $this->difficulty,
+            'languages' => $this->whenLoaded('languages', fn () => $this->languages->map(fn ($l) => ['id' => $l->id, 'name' => $l->name])->values()),
+            'year' => $this->year,
+            'instagram_url' => $this->instagram_url,
+            'deposit_tokens' => $this->deposit_tokens,
             'cover_image_url' => $this->cover_image_url,
-            'is_active'       => $this->is_active,
+            'is_active' => $this->is_active,
             'available_copies_count' => $this->whenCounted('available_copies_count', $this->available_copies_count ?? 0),
-            'copies_count'          => $this->whenCounted('copies', $this->copies_count ?? 0),
-            'avg_rating'      => $this->whenCounted('reviews') ? null : $this->when(
+            'copies_count' => $this->whenCounted('copies', $this->copies_count ?? 0),
+            'avg_rating' => $this->whenCounted('reviews') ? null : $this->when(
                 $this->relationLoaded('reviews'),
-                fn() => $this->reviews->avg('rating')
+                fn () => $this->reviews->avg('rating')
             ),
-            'reviews_count'   => $this->whenCounted('reviews'),
-            'is_favorited'      => $this->when(isset($this->is_favorited), $this->is_favorited),
-            'already_borrowed'  => $this->when(isset($this->already_borrowed), $this->already_borrowed),
-            'images'                => $this->whenLoaded('images', fn() => $this->images->map(fn($img) => ['id' => $img->id, 'url' => $img->url])),
-            'copies'                => CopyResource::collection($this->whenLoaded('copies')),
+            'reviews_count' => $this->whenCounted('reviews'),
+            'is_favorited' => $this->when(isset($this->is_favorited), $this->is_favorited),
+            'already_borrowed' => $this->when(isset($this->already_borrowed), $this->already_borrowed),
+            'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($img) => ['id' => $img->id, 'url' => $img->url])),
+            'copies' => CopyResource::collection($this->whenLoaded('copies')),
             'earliest_available_at' => $this->when(
                 $this->relationLoaded('copies'),
-                fn() => $this->copies
-                    ->flatMap(fn(\App\Models\Copy $copy): \Illuminate\Support\Collection => $copy->activeLoans ?? collect())
+                fn () => $this->copies
+                    ->flatMap(fn (Copy $copy): Collection => $copy->activeLoans ?? collect())
                     ->whereIn('status', ['ACTIVE', 'EXTENDED'])
                     ->min('due_date')
             ),
-            'created_at'      => $this->created_at,
+            'created_at' => $this->created_at,
         ];
     }
 }

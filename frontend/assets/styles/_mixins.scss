@@ -4,27 +4,39 @@
 // Responsive Breakpoints
 // ============================================================
 @mixin sm {
-  @media (min-width: #{$bp-sm}) { @content; }
+  @media (min-width: #{$bp-sm}) {
+    @content;
+  }
 }
 
 @mixin md {
-  @media (min-width: #{$bp-md}) { @content; }
+  @media (min-width: #{$bp-md}) {
+    @content;
+  }
 }
 
 @mixin lg {
-  @media (min-width: #{$bp-lg}) { @content; }
+  @media (min-width: #{$bp-lg}) {
+    @content;
+  }
 }
 
 @mixin xl {
-  @media (min-width: #{$bp-xl}) { @content; }
+  @media (min-width: #{$bp-xl}) {
+    @content;
+  }
 }
 
 @mixin max-sm {
-  @media (max-width: #{$bp-sm - 1}) { @content; }
+  @media (max-width: #{$bp-sm - 1}) {
+    @content;
+  }
 }
 
 @mixin max-md {
-  @media (max-width: #{$bp-md - 1}) { @content; }
+  @media (max-width: #{$bp-md - 1}) {
+    @content;
+  }
 }
 
 // ============================================================
@@ -108,7 +120,9 @@
   background-color: $color-white;
   border: 1px solid $color-gray-300;
   border-radius: $radius-md;
-  transition: border-color $transition-fast, box-shadow $transition-fast;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
   appearance: none;
 
   &:focus {

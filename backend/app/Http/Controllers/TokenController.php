@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,13 +14,13 @@ class TokenController extends Controller
     public function add(Request $request): JsonResponse
     {
         $request->validate([
-            'amount' => ['required', 'integer', 'in:' . implode(',', self::ALLOWED_AMOUNTS)],
+            'amount' => ['required', 'integer', 'in:'.implode(',', self::ALLOWED_AMOUNTS)],
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
-        if (!$user->isMember() && !$user->isAdmin()) {
+        if (! $user->isMember() && ! $user->isAdmin()) {
             return response()->json(['message' => 'Nur Mitglieder können Token kaufen.'], 403);
         }
 
@@ -28,7 +29,7 @@ class TokenController extends Controller
 
         return response()->json([
             'message' => "{$request->amount} Token wurden deinem Konto hinzugefügt.",
-            'user'    => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 }

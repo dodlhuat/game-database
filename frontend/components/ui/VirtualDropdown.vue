@@ -19,7 +19,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number | null]
-  'change': []
+  change: []
 }>()
 
 // Sentinel for null values since VirtualDropdown only accepts string | number
@@ -56,7 +56,7 @@ async function init() {
 
   dropdown = new VDClass({
     container: containerRef.value,
-    options: props.options.map(o => ({ label: o.label, value: encode(o.value) })),
+    options: props.options.map((o) => ({ label: o.label, value: encode(o.value) })),
     placeholder: props.placeholder ?? 'Auswählen...',
     onSelect: (vals: Array<string | number>) => {
       const val = vals.length > 0 ? decode(vals[0]) : null
@@ -78,7 +78,10 @@ function syncValue(val: string | number | null | undefined) {
 }
 
 onMounted(init)
-onBeforeUnmount(() => { dropdown?.destroy(); dropdown = null })
+onBeforeUnmount(() => {
+  dropdown?.destroy()
+  dropdown = null
+})
 
 watch(() => props.modelValue, syncValue)
 watch(() => props.options, init, { deep: true })

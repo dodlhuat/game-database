@@ -8,6 +8,7 @@ use App\Http\Resources\EventResource;
 use App\Models\Event;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 
 class EventController extends Controller
 {
@@ -55,7 +56,7 @@ class EventController extends Controller
         return new EventResource($event);
     }
 
-    public function destroy(Event $event): \Illuminate\Http\Response
+    public function destroy(Event $event): Response
     {
         if ($event->image_url) {
             $this->imageUpload->deleteByUrl($event->image_url);

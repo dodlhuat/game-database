@@ -14,7 +14,6 @@
 
     <div class="account-content">
       <div class="account-content__inner">
-
         <!-- Profil -->
         <section class="account-section">
           <h2 class="account-section__title">{{ $t('account.profile_title') }}</h2>
@@ -23,8 +22,19 @@
           <div v-if="profileError" class="alert alert-error">{{ profileError }}</div>
 
           <div class="account-section__fields">
-            <UiInput v-model="profileForm.name" :label="$t('auth.name')" :error="profileErrors.name" autocomplete="name" />
-            <UiInput v-model="profileForm.email" type="email" :label="$t('auth.email')" :error="profileErrors.email" autocomplete="email" />
+            <UiInput
+              v-model="profileForm.name"
+              :label="$t('auth.name')"
+              :error="profileErrors.name"
+              autocomplete="name"
+            />
+            <UiInput
+              v-model="profileForm.email"
+              type="email"
+              :label="$t('auth.email')"
+              :error="profileErrors.email"
+              autocomplete="email"
+            />
             <UiInput
               v-if="auth.isMember"
               v-model="profileForm.address"
@@ -49,14 +59,22 @@
             />
           </div>
 
-          <UiButton :loading="savingProfile" @click="saveProfile">{{ $t('account.profile_save') }}</UiButton>
+          <UiButton :loading="savingProfile" @click="saveProfile">{{
+            $t('account.profile_save')
+          }}</UiButton>
         </section>
 
         <!-- Newsletter -->
         <section class="account-section">
           <h2 class="account-section__title">{{ $t('account.newsletter_title') }}</h2>
-          <UiSwitch v-model="newsletterOptIn" :label="$t('account.newsletter_subscribe')" @change="saveNewsletter" />
-          <div v-if="newsletterMsg" class="alert alert-success" style="margin-top: 0.75rem;">{{ newsletterMsg }}</div>
+          <UiSwitch
+            v-model="newsletterOptIn"
+            :label="$t('account.newsletter_subscribe')"
+            @change="saveNewsletter"
+          />
+          <div v-if="newsletterMsg" class="alert alert-success" style="margin-top: 0.75rem">
+            {{ newsletterMsg }}
+          </div>
         </section>
 
         <!-- Passwort -->
@@ -64,17 +82,35 @@
           <h2 class="account-section__title">{{ $t('account.password_title') }}</h2>
 
           <div class="account-section__fields">
-            <UiInput v-model="pwForm.current_password" type="password" :label="$t('account.password_current')" :error="pwErrors.current_password" autocomplete="current-password" />
-            <UiInput v-model="pwForm.new_password" type="password" :label="$t('account.password_new')" :error="pwErrors.new_password" autocomplete="new-password" />
-            <UiInput v-model="pwForm.new_password_confirmation" type="password" :label="$t('account.password_confirm_new')" autocomplete="off" />
+            <UiInput
+              v-model="pwForm.current_password"
+              type="password"
+              :label="$t('account.password_current')"
+              :error="pwErrors.current_password"
+              autocomplete="current-password"
+            />
+            <UiInput
+              v-model="pwForm.new_password"
+              type="password"
+              :label="$t('account.password_new')"
+              :error="pwErrors.new_password"
+              autocomplete="new-password"
+            />
+            <UiInput
+              v-model="pwForm.new_password_confirmation"
+              type="password"
+              :label="$t('account.password_confirm_new')"
+              autocomplete="off"
+            />
           </div>
 
           <div v-if="pwError" class="alert alert-error">{{ pwError }}</div>
           <div v-if="pwSuccess" class="alert alert-success">{{ pwSuccess }}</div>
 
-          <UiButton :loading="savingPw" @click="changePassword">{{ $t('account.password_save') }}</UiButton>
+          <UiButton :loading="savingPw" @click="changePassword">{{
+            $t('account.password_save')
+          }}</UiButton>
         </section>
-
       </div>
     </div>
   </div>
@@ -154,7 +190,9 @@ async function saveNewsletter() {
   newsletterMsg.value = ''
   try {
     await api.patch('/account', { newsletter_opt_in: newsletterOptIn.value })
-    newsletterMsg.value = newsletterOptIn.value ? t('account.newsletter_subscribed') : t('account.newsletter_unsubscribed')
+    newsletterMsg.value = newsletterOptIn.value
+      ? t('account.newsletter_subscribed')
+      : t('account.newsletter_unsubscribed')
   } catch {
     newsletterOptIn.value = !newsletterOptIn.value
   }
@@ -196,10 +234,10 @@ async function changePassword() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:    #0F0E0C;
+$hero-bg: #0f0e0c;
 $nav-height: 64px;
 $amber-glow: rgba(212, 146, 30, 0.15);
-$hero-text:  #EEE8DF;
+$hero-text: #eee8df;
 $hero-muted: rgba(238, 232, 223, 0.72);
 
 // ─── Page shell ───────────────────────────────────────────────────
@@ -215,33 +253,62 @@ $hero-muted: rgba(238, 232, 223, 0.72);
   padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
   &__glow {
-    position: absolute; width: 400px; height: 400px;
-    top: -120px; left: -60px; border-radius: 50%;
-    filter: blur(90px); background: $amber-glow;
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    top: -120px;
+    left: -60px;
+    border-radius: 50%;
+    filter: blur(90px);
+    background: $amber-glow;
   }
   &__dots {
-    position: absolute; inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: radial-gradient(ellipse 80% 100% at 30% 50%, black 20%, transparent 100%);
   }
 
   &__body {
-    position: relative; z-index: 1;
-    max-width: 1100px; margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
   }
 
   &__back {
-    display: inline-block; font-size: 0.8rem;
-    color: $hero-muted; text-decoration: none;
-    margin-bottom: 0.75rem; transition: color 0.15s;
-    &:hover { color: $hero-text; }
+    display: inline-block;
+    font-size: 0.8rem;
+    color: $hero-muted;
+    text-decoration: none;
+    margin-bottom: 0.75rem;
+    transition: color 0.15s;
+    &:hover {
+      color: $hero-text;
+    }
   }
 
-  &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; margin-bottom: 0.4rem; }
-  &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0; }
+  &__eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $amber;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.4rem;
+  }
+  &__title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: $hero-text;
+    margin: 0;
+  }
 }
 
 // ─── Content (theme-aware) ────────────────────────────────────────

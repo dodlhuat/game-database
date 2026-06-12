@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
+use App\Models\User;
 use App\Notifications\WelcomeMemberNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ class MembershipController extends Controller
 {
     public function upgrade(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($user->role !== 'USER') {
@@ -22,23 +23,23 @@ class MembershipController extends Controller
             'address' => ['required', 'string', 'max:255'],
         ]);
 
-        $user->role                  = 'MEMBER';
-        $user->tokens               += 20;
+        $user->role = 'MEMBER';
+        $user->tokens += 20;
         $user->membership_expires_at = now()->addYear();
-        $user->address               = $validated['address'];
+        $user->address = $validated['address'];
         $user->save();
 
-        $user->notify(new WelcomeMemberNotification());
+        $user->notify(new WelcomeMemberNotification);
 
         return response()->json([
             'message' => 'Willkommen als Mitglied! Du hast 20 Token erhalten.',
-            'user'    => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 
     public function renew(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         if ($user->role !== 'MEMBER') {
@@ -62,13 +63,13 @@ class MembershipController extends Controller
             : now();
 
         $user->membership_expires_at = $base->addYear();
-        $user->tokens                += 20;
+        $user->tokens += 20;
         $user->renewal_reminder_sent_at = null; // allow reminder to be sent again next cycle
         $user->save();
 
         return response()->json([
             'message' => 'Mitgliedschaft verlängert! Du hast 20 Token erhalten.',
-            'user'    => new UserResource($user),
+            'user' => new UserResource($user),
         ]);
     }
 }

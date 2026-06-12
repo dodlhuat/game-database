@@ -20,12 +20,12 @@ class NewUserRegistered extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        $approveUrl = config('frontend.url') . '/admin/users';
+        $approveUrl = config('frontend.url').'/admin/users';
 
         return $this->buildFromTemplate('new_user_registered', [
-            'name'  => $this->newUser->name,
+            'name' => $this->newUser->name,
             'email' => $this->newUser->email,
         ], $approveUrl, $notifiable);
     }

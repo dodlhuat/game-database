@@ -14,7 +14,7 @@ class SetupDemoDatabase extends Command
 
     public function handle(): int
     {
-        if (!app()->isLocal() && !$this->confirm('This will wipe the database. Continue?')) {
+        if (! app()->isLocal() && ! $this->confirm('This will wipe the database. Continue?')) {
             return self::FAILURE;
         }
 

@@ -14,7 +14,7 @@ class ImageUploadService
             $this->deleteByUrl($oldUrl);
         }
 
-        $filename = 'covers/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = 'covers/'.Str::uuid().'.'.$file->getClientOriginalExtension();
         $contents = file_get_contents((string) $file->getRealPath());
         if ($contents === false) {
             throw new \RuntimeException('Could not read uploaded file.');
@@ -26,7 +26,7 @@ class ImageUploadService
 
     public function uploadGameImage(UploadedFile $file): string
     {
-        $filename = 'game-images/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = 'game-images/'.Str::uuid().'.'.$file->getClientOriginalExtension();
         $contents = file_get_contents((string) $file->getRealPath());
         if ($contents === false) {
             throw new \RuntimeException('Could not read uploaded file.');
@@ -42,7 +42,7 @@ class ImageUploadService
             $this->deleteByUrl($oldUrl);
         }
 
-        $filename = 'events/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $filename = 'events/'.Str::uuid().'.'.$file->getClientOriginalExtension();
         $contents = file_get_contents((string) $file->getRealPath());
         if ($contents === false) {
             throw new \RuntimeException('Could not read uploaded file.');

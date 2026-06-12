@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -15,12 +14,12 @@ class AuthTest extends TestCase
     private function registerPayload(array $overrides = []): array
     {
         return array_merge([
-            'name'                  => 'Test User',
-            'email'                 => fake()->unique()->safeEmail(),
-            'password'              => 'password123',
+            'name' => 'Test User',
+            'email' => fake()->unique()->safeEmail(),
+            'password' => 'password123',
             'password_confirmation' => 'password123',
-            'terms_accepted'        => true,
-            'form_loaded_at'        => (int) (microtime(true) * 1000) - 4000,
+            'terms_accepted' => true,
+            'form_loaded_at' => (int) (microtime(true) * 1000) - 4000,
         ], $overrides);
     }
 
@@ -53,12 +52,12 @@ class AuthTest extends TestCase
     public function test_login_returns_token(): void
     {
         $user = User::factory()->create([
-            'email'    => 'login@example.com',
+            'email' => 'login@example.com',
             'password' => Hash::make('password123'),
         ]);
 
         $response = $this->postJson('/api/auth/login', [
-            'email'    => 'login@example.com',
+            'email' => 'login@example.com',
             'password' => 'password123',
         ]);
 
@@ -68,12 +67,12 @@ class AuthTest extends TestCase
     public function test_login_fails_with_wrong_password(): void
     {
         User::factory()->create([
-            'email'    => 'user@example.com',
+            'email' => 'user@example.com',
             'password' => Hash::make('correct'),
         ]);
 
         $this->postJson('/api/auth/login', [
-            'email'    => 'user@example.com',
+            'email' => 'user@example.com',
             'password' => 'wrong',
         ])->assertStatus(401);
     }

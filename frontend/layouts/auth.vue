@@ -17,19 +17,31 @@
 </template>
 
 <style lang="scss">
-$_a-bg:    #0F0E0C;
-$_a-glow:  rgba(212, 146, 30, 0.18);
-$_a-text:  #EEE8DF;
+$_a-bg: #0f0e0c;
+$_a-glow: rgba(212, 146, 30, 0.18);
+$_a-text: #eee8df;
 $_a-muted: rgba(238, 232, 223, 0.65);
 
 @keyframes authIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes authSuccessPop {
-  from { opacity: 0; transform: scale(0.5); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .auth-page {
@@ -156,7 +168,9 @@ $_a-muted: rgba(238, 232, 223, 0.65);
       color: $amber;
       text-decoration: none;
       font-weight: 600;
-      &:hover { text-decoration: underline; }
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 
@@ -168,8 +182,12 @@ $_a-muted: rgba(238, 232, 223, 0.65);
     text-align: center;
     animation: authSuccessPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s both;
 
-    &--muted { color: $_a-muted; }
-    &--error { color: rgba(200, 60, 60, 0.9); }
+    &--muted {
+      color: $_a-muted;
+    }
+    &--error {
+      color: rgba(200, 60, 60, 0.9);
+    }
   }
 
   &__success {
@@ -209,7 +227,9 @@ $_a-muted: rgba(238, 232, 223, 0.65);
     font-weight: 600;
     color: $amber;
     text-decoration: none;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 </style>

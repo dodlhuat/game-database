@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -17,9 +18,9 @@ class WelcomeMemberNotification extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        $dashboardUrl = config('frontend.url') . '/dashboard';
+        $dashboardUrl = config('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('welcome_member', [
             'name' => $notifiable->name,

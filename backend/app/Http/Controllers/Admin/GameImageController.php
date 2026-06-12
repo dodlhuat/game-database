@@ -16,24 +16,24 @@ class GameImageController extends Controller
     public function store(Request $request, Game $game): JsonResponse
     {
         $request->validate([
-            'images'   => ['required', 'array', 'max:10'],
+            'images' => ['required', 'array', 'max:10'],
             'images.*' => ['required', 'image', 'max:10240'],
         ]);
 
         $nextOrder = $game->images()->max('sort_order') + 1;
-        /** @var \App\Models\GameImage[] $created */
+        /** @var GameImage[] $created */
         $created = [];
 
         foreach ($request->file('images') as $file) {
             $url = $this->imageUpload->uploadGameImage($file);
             $created[] = $game->images()->create([
-                'url'        => $url,
+                'url' => $url,
                 'sort_order' => $nextOrder++,
             ]);
         }
 
         return response()->json([
-            'images' => array_map(fn (\App\Models\GameImage $img) => ['id' => $img->id, 'url' => $img->url], $created),
+            'images' => array_map(fn (GameImage $img) => ['id' => $img->id, 'url' => $img->url], $created),
         ]);
     }
 

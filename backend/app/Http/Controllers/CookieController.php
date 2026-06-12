@@ -11,7 +11,7 @@ class CookieController extends Controller
     {
         $cookie = CookieVersion::orderByDesc('published_at')->first();
 
-        if (!$cookie) {
+        if (! $cookie) {
             return response()->json(['message' => 'Keine Cookie-Richtlinie gefunden.'], 404);
         }
 

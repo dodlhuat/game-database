@@ -14,10 +14,10 @@ return new class extends Migration
         }
 
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'tokens')) {
+            if (! Schema::hasColumn('users', 'tokens')) {
                 $table->unsignedInteger('tokens')->default(0)->after('role');
             }
-            if (!Schema::hasColumn('users', 'membership_expires_at')) {
+            if (! Schema::hasColumn('users', 'membership_expires_at')) {
                 $table->timestamp('membership_expires_at')->nullable()->after('tokens');
             }
         });

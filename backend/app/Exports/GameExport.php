@@ -3,17 +3,17 @@
 namespace App\Exports;
 
 use App\Models\Game;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Illuminate\Support\Collection;
 
-/** @implements WithMapping<\App\Models\Game> */
+/** @implements WithMapping<Game> */
 class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    /** @return Collection<int, \App\Models\Game> */
+    /** @return Collection<int, Game> */
     public function collection(): Collection
     {
         return Game::with(['category', 'tags', 'languages'])->orderBy('title')->get();

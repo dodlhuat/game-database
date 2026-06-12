@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use App\Models\Package;
-use App\Models\Tag;
 use App\Models\CookieVersion;
+use App\Models\Package;
 use App\Models\PrivacyVersion;
+use App\Models\Tag;
 use App\Models\TermsVersion;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -38,7 +38,7 @@ class AdminSeeder extends Seeder
 
                     "8. ÄNDERUNGEN DIESER COOKIE-RICHTLINIE\nWir behalten uns vor, diese Cookie-Richtlinie zu aktualisieren, wenn wir neue Technologien einsetzen oder sich die gesetzlichen Anforderungen ändern. Die jeweils aktuelle Fassung ist auf dieser Seite abrufbar. Bei wesentlichen Änderungen, die Einwilligungspflichten betreffen, werden aktive Mitglieder informiert.",
 
-                    "Zuletzt aktualisiert: Juni 2026",
+                    'Zuletzt aktualisiert: Juni 2026',
                 ]),
                 'published_at' => now(),
             ]
@@ -71,7 +71,7 @@ class AdminSeeder extends Seeder
 
                     "10. ÄNDERUNGEN DIESER DATENSCHUTZERKLÄRUNG\nWir behalten uns vor, diese Datenschutzerklärung zu aktualisieren, wenn sich rechtliche Vorgaben ändern oder wir neue Verarbeitungsvorgänge einführen. Die aktuelle Version ist stets auf dieser Seite abrufbar. Bei wesentlichen Änderungen werden aktive Mitglieder per E-Mail informiert.",
 
-                    "Zuletzt aktualisiert: Juni 2026",
+                    'Zuletzt aktualisiert: Juni 2026',
                 ]),
                 'published_at' => now(),
             ]
@@ -81,7 +81,7 @@ class AdminSeeder extends Seeder
         TermsVersion::firstOrCreate(
             ['version' => '1.0'],
             [
-                'content'      => "§1 Geltungsbereich\nDiese Nutzungsbedingungen gelten für alle Mitglieder der Spielothek.\n\n§2 Ausleihe\nSpiele können für 14 Tage ausgeliehen werden. Eine Verlängerung ist auf Anfrage möglich.\n\n§3 Haftung\nBei Beschädigung oder Verlust ist der Zeitwert des Spiels zu ersetzen.\n\n§4 Datenschutz\nWir verarbeiten Ihre Daten gemäß unserer Datenschutzerklärung.",
+                'content' => "§1 Geltungsbereich\nDiese Nutzungsbedingungen gelten für alle Mitglieder der Spielothek.\n\n§2 Ausleihe\nSpiele können für 14 Tage ausgeliehen werden. Eine Verlängerung ist auf Anfrage möglich.\n\n§3 Haftung\nBei Beschädigung oder Verlust ist der Zeitwert des Spiels zu ersetzen.\n\n§4 Datenschutz\nWir verarbeiten Ihre Daten gemäß unserer Datenschutzerklärung.",
                 'published_at' => now(),
             ]
         );
@@ -117,23 +117,23 @@ class AdminSeeder extends Seeder
         $trinkspiele = Category::where('name', 'Trinkspiele')->first();
 
         Package::firstOrCreate(['slug' => 'gruppenspiele-paket'], [
-            'name'        => 'Gruppenspiele',
+            'name' => 'Gruppenspiele',
             'description' => 'Ein Paket mit Spielen für die große Gruppe (8+ Personen) aus dem Bereich Großgruppenspiele.',
-            'type'        => 'CATEGORY',
+            'type' => 'CATEGORY',
             'category_id' => $grossgruppe?->id,
         ]);
 
         Package::firstOrCreate(['slug' => 'trinkspiele-paket'], [
-            'name'        => 'Trinkspiele',
+            'name' => 'Trinkspiele',
             'description' => 'Ein Paket mit Trinkspielen aus der Kategorie.',
-            'type'        => 'CATEGORY',
+            'type' => 'CATEGORY',
             'category_id' => $trinkspiele?->id,
         ]);
 
         Package::firstOrCreate(['slug' => 'ueberraschungspaket-des-monats'], [
-            'name'        => 'Überraschungspaket des Monats',
+            'name' => 'Überraschungspaket des Monats',
             'description' => '3 ausgewählte Spieleempfehlungen – jeden Monat neu zusammengestellt.',
-            'type'        => 'CURATED',
+            'type' => 'CURATED',
             'category_id' => null,
         ]);
     }

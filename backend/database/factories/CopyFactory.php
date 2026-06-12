@@ -12,8 +12,8 @@ class CopyFactory extends Factory
     public function definition(): array
     {
         return [
-            'game_id'     => Game::factory(),
-            'condition'   => 'NEW',
+            'game_id' => Game::factory(),
+            'condition' => 'NEW',
             'borrow_count' => 0,
         ];
     }

@@ -51,7 +51,9 @@ defineEmits<{
   border-radius: 999px;
   background: var(--divider);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
   flex-shrink: 0;
 }
 
@@ -62,7 +64,9 @@ defineEmits<{
   height: 14px;
   border-radius: 50%;
   background: var(--secondary-text);
-  transition: transform 0.2s, background 0.2s;
+  transition:
+    transform 0.2s,
+    background 0.2s;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
@@ -73,7 +77,7 @@ defineEmits<{
 
 .ui-switch__input:checked + .ui-switch__track .ui-switch__thumb {
   transform: translateX(16px);
-  background: #0F0E0C;
+  background: #0f0e0c;
 }
 
 .ui-switch__input:disabled + .ui-switch__track {

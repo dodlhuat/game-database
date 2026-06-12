@@ -20,10 +20,10 @@ class CopyRequest extends FormRequest
         $copyId = $route instanceof Copy ? $route->id : null;
 
         return [
-            'game_id'   => ['required', 'integer', 'exists:games,id'],
+            'game_id' => ['required', 'integer', 'exists:games,id'],
             'condition' => ['required', 'in:NEW,VERY_GOOD,GOOD,REVIEW,DAMAGED,LOCKED'],
-            'qr_code'   => ['nullable', 'string', Rule::unique('copies', 'qr_code')->ignore($copyId)],
-            'notes'     => ['nullable', 'string', 'max:1000'],
+            'qr_code' => ['nullable', 'string', Rule::unique('copies', 'qr_code')->ignore($copyId)],
+            'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

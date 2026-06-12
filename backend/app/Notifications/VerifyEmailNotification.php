@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -18,7 +19,7 @@ class VerifyEmailNotification extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
         $verificationUrl = URL::temporarySignedRoute(
             'auth.verify-email',
@@ -27,7 +28,7 @@ class VerifyEmailNotification extends Notification
         );
 
         return $this->buildFromTemplate('email_verification', [
-            'name'              => $notifiable->name,
+            'name' => $notifiable->name,
             'verification_link' => $verificationUrl,
         ], $verificationUrl, $notifiable);
     }

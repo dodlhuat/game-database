@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Game;
-use App\Models\Loan;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,7 +15,7 @@ class ReviewFactory extends Factory
         return [
             'game_id' => Game::factory(),
             'user_id' => User::factory()->member(),
-            'rating'  => fake()->numberBetween(1, 5),
+            'rating' => fake()->numberBetween(1, 5),
             'comment' => fake()->sentence(),
         ];
     }

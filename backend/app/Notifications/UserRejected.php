@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -19,14 +20,14 @@ class UserRejected extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
         $message = $this->buildFromTemplate('user_rejected', [
             'name' => $notifiable->name,
         ], '', $notifiable);
 
         if ($this->reason) {
-            $message->line('**Grund:** ' . $this->reason);
+            $message->line('**Grund:** '.$this->reason);
         }
 
         return $message;

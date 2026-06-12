@@ -61,20 +61,33 @@
           <div v-if="auth.isMember" class="membership-bar__member">
             <div class="token-bar">
               <span class="token-bar__icon">◈</span>
-              <span class="token-bar__count">{{ auth.user?.tokens ?? 0 }} {{ $t('dashboard.tokens.label') }}</span>
-              <NuxtLink to="/tokens" class="token-bar__link">{{ $t('dashboard.tokens.charge') }}</NuxtLink>
+              <span class="token-bar__count"
+                >{{ auth.user?.tokens ?? 0 }} {{ $t('dashboard.tokens.label') }}</span
+              >
+              <NuxtLink to="/tokens" class="token-bar__link">{{
+                $t('dashboard.tokens.charge')
+              }}</NuxtLink>
             </div>
             <div class="membership-expiry" :class="expiryClass">
               <span class="membership-expiry__label">{{ $t('dashboard.membership.label') }}</span>
-              <span class="membership-expiry__date">{{ formatDate(auth.user?.membership_expires_at) }}</span>
-              <NuxtLink v-if="canRenew" to="/dashboard" class="membership-expiry__renew" @click.prevent="renew">
+              <span class="membership-expiry__date">{{
+                formatDate(auth.user?.membership_expires_at)
+              }}</span>
+              <NuxtLink
+                v-if="canRenew"
+                to="/dashboard"
+                class="membership-expiry__renew"
+                @click.prevent="renew"
+              >
                 {{ $t('btn.renew') }}
               </NuxtLink>
             </div>
           </div>
           <div v-else-if="auth.isRegisteredUser" class="membership-bar__upgrade">
             <span class="membership-bar__text">{{ $t('dashboard.membership.not_member') }}</span>
-            <NuxtLink to="/upgrade" class="membership-bar__cta">{{ $t('dashboard.membership.upgrade') }}</NuxtLink>
+            <NuxtLink to="/upgrade" class="membership-bar__cta">{{
+              $t('dashboard.membership.upgrade')
+            }}</NuxtLink>
           </div>
         </div>
       </div>
@@ -83,13 +96,11 @@
     <!-- ── Content ──────────────────────────────────────────────── -->
     <div class="dashboard-content">
       <div class="dashboard-content__inner">
-
         <div v-if="loading" class="dashboard-state">
           <div class="spinner" />
         </div>
 
         <template v-else>
-
           <!-- Aktive Ausleihen ───────────────────────────────────── -->
           <section class="dash-section">
             <header class="dash-section__header">
@@ -139,8 +150,12 @@
                             {{ $t('btn.extend') }}
                           </button>
                         </template>
-                        <button class="action-btn" @click="openReturn(loan)">{{ $t('btn.return') }}</button>
-                        <button class="action-btn action-btn--danger" @click="openDamage(loan)">{{ $t('btn.damage') }}</button>
+                        <button class="action-btn" @click="openReturn(loan)">
+                          {{ $t('btn.return') }}
+                        </button>
+                        <button class="action-btn action-btn--danger" @click="openDamage(loan)">
+                          {{ $t('btn.damage') }}
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -177,7 +192,10 @@
                       <span class="queue-badge"># {{ res.position }}</span>
                     </td>
                     <td :data-label="$t('dashboard.table.actions')">
-                      <button class="action-btn action-btn--danger" @click="cancelReservation(res.id)">
+                      <button
+                        class="action-btn action-btn--danger"
+                        @click="cancelReservation(res.id)"
+                      >
                         {{ $t('dashboard.cancel_reservation') }}
                       </button>
                     </td>
@@ -210,7 +228,9 @@
                 <tbody>
                   <tr v-for="loan in loanHistory" :key="loan.id">
                     <td :data-label="$t('dashboard.table.game')">{{ loan.game?.title }}</td>
-                    <td :data-label="$t('dashboard.table.returned_at')">{{ formatDate(loan.returned_at!) }}</td>
+                    <td :data-label="$t('dashboard.table.returned_at')">
+                      {{ formatDate(loan.returned_at!) }}
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -228,7 +248,6 @@
               {{ $t('dashboard.footer_logout') }}
             </button>
           </div>
-
         </template>
       </div>
     </div>
@@ -276,7 +295,9 @@
           <UiInput v-model="damageDescription" :label="$t('dashboard.damage_description')" />
           <UiInput v-model="damagePhotoUrl" :label="$t('dashboard.damage_photo_url')" />
           <div class="dialog__actions">
-            <UiButton :loading="reporting" @click="submitDamage">{{ $t('dashboard.damage_report') }}</UiButton>
+            <UiButton :loading="reporting" @click="submitDamage">{{
+              $t('dashboard.damage_report')
+            }}</UiButton>
             <button class="action-btn" @click="damageLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
@@ -289,12 +310,20 @@
         <div class="dialog">
           <div class="dialog__header">
             <h3 class="dialog__title">{{ $t('dashboard.extension_title') }}</h3>
-            <button class="dialog__close" :aria-label="$t('btn.close')" @click="extensionLoan = null">
+            <button
+              class="dialog__close"
+              :aria-label="$t('btn.close')"
+              @click="extensionLoan = null"
+            >
               <span class="icon icon-close" aria-hidden="true" />
             </button>
           </div>
           <p class="dialog__game">{{ extensionLoan.game?.title }}</p>
-          <UiDatePicker v-model="extensionDate" :label="$t('dashboard.extension_new_due_date')" :max-date="maxExtensionDate" />
+          <UiDatePicker
+            v-model="extensionDate"
+            :label="$t('dashboard.extension_new_due_date')"
+            :max-date="maxExtensionDate"
+          />
           <div class="dialog__actions">
             <UiButton :loading="extending" @click="submitExtension">{{ $t('btn.apply') }}</UiButton>
             <button class="action-btn" @click="extensionLoan = null">{{ $t('btn.cancel') }}</button>
@@ -304,7 +333,6 @@
     </Transition>
 
     <AppFooter />
-
   </div>
 </template>
 
@@ -317,8 +345,13 @@ definePageMeta({ middleware: ['auth'] })
 const auth = useAuthStore()
 const { logout } = useAuth()
 const { t } = useI18n()
-const { fetchDashboard, returnLoan: doReturn, requestExtension, removeReservation, reportDamage } = useLoans()
-
+const {
+  fetchDashboard,
+  returnLoan: doReturn,
+  requestExtension,
+  removeReservation,
+  reportDamage,
+} = useLoans()
 
 const loading = ref(true)
 const data = ref<DashboardData | null>(null)
@@ -336,19 +369,24 @@ const damageDescription = ref('')
 const damagePhotoUrl = ref('')
 const reporting = ref(false)
 
-const maxExtensionDate = new Date(); maxExtensionDate.setDate(maxExtensionDate.getDate() + 14)
+const maxExtensionDate = new Date()
+maxExtensionDate.setDate(maxExtensionDate.getDate() + 14)
 
 const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
 const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
 const reservations = computed<Reservation[]>(() => data.value?.reservations ?? [])
 
-useAsyncData('dashboard', async () => {
-  try {
-    data.value = await fetchDashboard()
-  } finally {
-    loading.value = false
-  }
-}, { server: false })
+useAsyncData(
+  'dashboard',
+  async () => {
+    try {
+      data.value = await fetchDashboard()
+    } finally {
+      loading.value = false
+    }
+  },
+  { server: false }
+)
 
 function openReturn(loan: Loan) {
   returnLoan.value = loan
@@ -395,7 +433,11 @@ async function submitDamage() {
   if (!damageLoan.value || !damageDescription.value) return
   reporting.value = true
   try {
-    await reportDamage(damageLoan.value.id, damageDescription.value, damagePhotoUrl.value || undefined)
+    await reportDamage(
+      damageLoan.value.id,
+      damageDescription.value,
+      damagePhotoUrl.value || undefined
+    )
     damageLoan.value = null
   } finally {
     reporting.value = false
@@ -471,22 +513,22 @@ async function renew() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
 
-$amber-08:      rgba(212, 146, 30, 0.08);
-$amber-14:      rgba(212, 146, 30, 0.14);
-$amber-25:      rgba(212, 146, 30, 0.25);
-$amber-40:      rgba(212, 146, 30, 0.40);
-$amber-glow:    rgba(212, 146, 30, 0.20);
-$warm-glow:     rgba(44, 40, 32, 0.70);
+$amber-08: rgba(212, 146, 30, 0.08);
+$amber-14: rgba(212, 146, 30, 0.14);
+$amber-25: rgba(212, 146, 30, 0.25);
+$amber-40: rgba(212, 146, 30, 0.4);
+$amber-glow: rgba(212, 146, 30, 0.2);
+$warm-glow: rgba(44, 40, 32, 0.7);
 
-$hero-text:     #EEE8DF;
-$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-text: #eee8df;
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-muted-20: rgba(238, 232, 223, 0.20);
-$hero-divider:  rgba(238, 232, 223, 0.10);
-$hero-divider-20: rgba(238, 232, 223, 0.20);
+$hero-muted-20: rgba(238, 232, 223, 0.2);
+$hero-divider: rgba(238, 232, 223, 0.1);
+$hero-divider-20: rgba(238, 232, 223, 0.2);
 
 // ─── Page Shell ───────────────────────────────────────────────────
 .dashboard-page {
@@ -503,7 +545,11 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   padding: calc(#{$nav-height} + 3rem) 1.5rem 3.5rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
   &__glow {
     position: absolute;
@@ -530,7 +576,7 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   &__dots {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
     background-size: 24px 24px;
     mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%);
   }
@@ -578,10 +624,16 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 
-  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 480px) { grid-template-columns: 1fr; }
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
 
-  &--loading { opacity: 0.5; }
+  &--loading {
+    opacity: 0.5;
+  }
 }
 
 .stat-card {
@@ -592,7 +644,9 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   background: rgba(238, 232, 223, 0.04);
   border: 1px solid $hero-divider;
   border-radius: 12px;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 
   &:hover {
     background: rgba(238, 232, 223, 0.07);
@@ -603,8 +657,13 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
 
-    .stat-card__icon { background: rgba(239, 68, 68, 0.12); color: #f87171; }
-    .stat-card__value { color: #f87171; }
+    .stat-card__icon {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+    }
+    .stat-card__value {
+      color: #f87171;
+    }
   }
 
   &--skeleton {
@@ -625,7 +684,9 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     align-items: center;
     justify-content: center;
 
-    .icon { font-size: 1.25rem; }
+    .icon {
+      font-size: 1.25rem;
+    }
   }
 
   &__body {
@@ -650,8 +711,13 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 // ─── Content Area ─────────────────────────────────────────────────
@@ -776,7 +842,9 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
 
   tbody tr {
     transition: background 0.15s;
-    &:hover { background: var(--background); }
+    &:hover {
+      background: var(--background);
+    }
   }
 
   &__link {
@@ -784,20 +852,28 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
-    &:hover { color: var(--accent-color); }
+    &:hover {
+      color: var(--accent-color);
+    }
   }
 
   // ── Mobile: table → card list ──────────────────────────────
   @media (max-width: 680px) {
-    thead { display: none; }
+    thead {
+      display: none;
+    }
 
     tbody tr {
       display: flex;
       flex-direction: column;
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--divider);
-      &:last-child { border-bottom: none; }
-      &:hover { background: transparent; }
+      &:last-child {
+        border-bottom: none;
+      }
+      &:hover {
+        background: transparent;
+      }
     }
 
     td {
@@ -826,14 +902,17 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
         margin-top: 0.25rem;
         border-top: 1px solid var(--divider);
 
-        &::before { margin-bottom: 0; }
+        &::before {
+          margin-bottom: 0;
+        }
 
-        .action-row { flex-wrap: wrap; }
+        .action-row {
+          flex-wrap: wrap;
+        }
       }
     }
   }
 }
-
 
 .queue-badge {
   display: inline-block;
@@ -873,10 +952,14 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   border: 1px solid var(--divider);
   border-radius: 7px;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
   white-space: nowrap;
 
-  .icon { font-size: 0.875rem; }
+  .icon {
+    font-size: 0.875rem;
+  }
 
   &:hover {
     border-color: var(--accent-color);
@@ -925,9 +1008,13 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   text-decoration: none;
   transition: color 0.2s;
 
-  .icon { font-size: 1rem; }
+  .icon {
+    font-size: 1rem;
+  }
 
-  &:hover { color: var(--primary-text); }
+  &:hover {
+    color: var(--primary-text);
+  }
 }
 
 // ─── Dialog ────────────────────────────────────────────────────────
@@ -977,10 +1064,14 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     border-radius: 6px;
     color: var(--secondary-text);
     cursor: pointer;
-    transition: background 0.15s, color 0.15s;
+    transition:
+      background 0.15s,
+      color 0.15s;
     flex-shrink: 0;
 
-    .icon { font-size: 1.125rem; }
+    .icon {
+      font-size: 1.125rem;
+    }
 
     &:hover {
       background: var(--background);
@@ -1038,7 +1129,9 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   transition: opacity 0.2s ease;
 
   .dialog {
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
   }
 }
 
@@ -1076,7 +1169,10 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     font-size: 0.875rem;
   }
 
-  &__text { color: $hero-muted; flex: 1; }
+  &__text {
+    color: $hero-muted;
+    flex: 1;
+  }
 
   &__cta {
     display: inline-flex;
@@ -1092,7 +1188,9 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
     white-space: nowrap;
     transition: filter 0.18s;
 
-    &:hover { filter: brightness(1.09); }
+    &:hover {
+      filter: brightness(1.09);
+    }
   }
 }
 
@@ -1105,15 +1203,24 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   border-radius: 20px;
   padding: 0.3rem 0.85rem;
 
-  &__icon { color: $amber; font-size: 0.9rem; }
-  &__count { font-size: 0.875rem; font-weight: 700; color: $hero-text; }
+  &__icon {
+    color: $amber;
+    font-size: 0.9rem;
+  }
+  &__count {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: $hero-text;
+  }
   &__link {
     font-size: 0.75rem;
     color: $amber;
     text-decoration: none;
     font-weight: 600;
     margin-left: 0.2rem;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 
@@ -1124,18 +1231,29 @@ $hero-divider-20: rgba(238, 232, 223, 0.20);
   font-size: 0.825rem;
   color: $hero-muted;
 
-  &__label { opacity: 0.7; }
-  &__date { font-weight: 600; color: $hero-text; }
+  &__label {
+    opacity: 0.7;
+  }
+  &__date {
+    font-weight: 600;
+    color: $hero-text;
+  }
   &__renew {
     color: $amber;
     font-size: 0.78rem;
     font-weight: 600;
     text-decoration: none;
     margin-left: 0.25rem;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
-  &--warn .membership-expiry__date { color: #e8a838; }
-  &--critical .membership-expiry__date { color: #e06060; }
+  &--warn .membership-expiry__date {
+    color: #e8a838;
+  }
+  &--critical .membership-expiry__date {
+    color: #e06060;
+  }
 }
 </style>

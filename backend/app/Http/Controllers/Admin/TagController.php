@@ -31,7 +31,7 @@ class TagController extends Controller
     public function update(Request $request, Tag $tag): TagResource
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:100', 'unique:tags,name,' . $tag->id],
+            'name' => ['required', 'string', 'max:100', 'unique:tags,name,'.$tag->id],
         ]);
 
         $data['slug'] = Str::slug($data['name']);

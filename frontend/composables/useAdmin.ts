@@ -40,18 +40,16 @@ export function useAdmin() {
     URL.revokeObjectURL(url)
   }
 
-  const createGame = (formData: FormData) =>
-    api.post('/admin/games', formData)
+  const createGame = (formData: FormData) => api.post('/admin/games', formData)
 
   const updateGame = (id: number, formData: FormData) =>
     api.post(`/admin/games/${id}?_method=PUT`, formData)
 
-  const deleteGame = (id: number) =>
-    api.delete(`/admin/games/${id}`)
+  const deleteGame = (id: number) => api.delete(`/admin/games/${id}`)
 
   const uploadGameImages = (gameId: number, files: File[]) => {
     const fd = new FormData()
-    files.forEach(f => fd.append('images[]', f))
+    files.forEach((f) => fd.append('images[]', f))
     return api.post<{ images: { id: number; url: string }[] }>(`/admin/games/${gameId}/images`, fd)
   }
 
@@ -65,15 +63,12 @@ export function useAdmin() {
   const createTag = (name: string) =>
     api.post<{ data: { id: number; name: string; slug: string } }>('/admin/tags', { name })
 
-  const updateTag = (id: number, name: string) =>
-    api.put(`/admin/tags/${id}`, { name })
+  const updateTag = (id: number, name: string) => api.put(`/admin/tags/${id}`, { name })
 
-  const deleteTag = (id: number) =>
-    api.delete(`/admin/tags/${id}`)
+  const deleteTag = (id: number) => api.delete(`/admin/tags/${id}`)
 
   // Categories
-  const fetchAdminCategories = () =>
-    api.get<{ data: unknown[] }>('/admin/categories')
+  const fetchAdminCategories = () => api.get<{ data: unknown[] }>('/admin/categories')
 
   const importCategories = (file: File) => {
     const fd = new FormData()
@@ -100,37 +95,29 @@ export function useAdmin() {
     URL.revokeObjectURL(url)
   }
 
-  const createCategory = (data: unknown) =>
-    api.post('/admin/categories', data)
+  const createCategory = (data: unknown) => api.post('/admin/categories', data)
 
-  const updateCategory = (id: number, data: unknown) =>
-    api.put(`/admin/categories/${id}`, data)
+  const updateCategory = (id: number, data: unknown) => api.put(`/admin/categories/${id}`, data)
 
-  const patchCategory = (id: number, data: unknown) =>
-    api.patch(`/admin/categories/${id}`, data)
+  const patchCategory = (id: number, data: unknown) => api.patch(`/admin/categories/${id}`, data)
 
-  const deleteCategory = (id: number) =>
-    api.delete(`/admin/categories/${id}`)
+  const deleteCategory = (id: number) => api.delete(`/admin/categories/${id}`)
 
   // Copies
   const fetchCopies = (params?: Record<string, string | number>) =>
     api.get<{ data: unknown[]; meta: unknown }>('/admin/copies', { params })
 
-  const createCopy = (data: unknown) =>
-    api.post('/admin/copies', data)
+  const createCopy = (data: unknown) => api.post('/admin/copies', data)
 
-  const updateCopy = (id: number, data: unknown) =>
-    api.put(`/admin/copies/${id}`, data)
+  const updateCopy = (id: number, data: unknown) => api.put(`/admin/copies/${id}`, data)
 
-  const deleteCopy = (id: number) =>
-    api.delete(`/admin/copies/${id}`)
+  const deleteCopy = (id: number) => api.delete(`/admin/copies/${id}`)
 
   // Loans
   const fetchAdminLoans = (params?: Record<string, string | number>) =>
     api.get<{ data: unknown[]; meta: unknown }>('/admin/loans', { params })
 
-  const markOverdue = (id: number) =>
-    api.patch(`/admin/loans/${id}/overdue`)
+  const markOverdue = (id: number) => api.patch(`/admin/loans/${id}/overdue`)
 
   // Extensions
   const fetchExtensions = (status = 'PENDING') =>
@@ -143,8 +130,7 @@ export function useAdmin() {
     api.patch(`/admin/extensions/${id}/reject`, { admin_note: adminNote })
 
   // Newsletters
-  const fetchNewsletters = () =>
-    api.get<{ data: unknown[] }>('/admin/newsletters')
+  const fetchNewsletters = () => api.get<{ data: unknown[] }>('/admin/newsletters')
 
   const sendNewsletter = (subject: string, body: string) =>
     api.post('/admin/newsletters', { subject, body })
@@ -154,39 +140,61 @@ export function useAdmin() {
     api.get<{ data: unknown[] }>('/admin/damage-reports', { params })
 
   // Email Templates
-  const fetchEmailTemplates = () =>
-    api.get<{ data: unknown[] }>('/admin/email-templates')
+  const fetchEmailTemplates = () => api.get<{ data: unknown[] }>('/admin/email-templates')
 
   const updateEmailTemplate = (key: string, data: unknown) =>
     api.put(`/admin/email-templates/${key}`, data)
 
-  const resetEmailTemplate = (key: string) =>
-    api.post(`/admin/email-templates/${key}/reset`, {})
+  const resetEmailTemplate = (key: string) => api.post(`/admin/email-templates/${key}/reset`, {})
 
   // Packages
-  const fetchAdminPackages = () =>
-    api.get<{ data: unknown[] }>('/admin/packages')
+  const fetchAdminPackages = () => api.get<{ data: unknown[] }>('/admin/packages')
 
-  const createPackage = (data: unknown) =>
-    api.post('/admin/packages', data)
+  const createPackage = (data: unknown) => api.post('/admin/packages', data)
 
-  const updatePackage = (id: number, data: unknown) =>
-    api.put(`/admin/packages/${id}`, data)
+  const updatePackage = (id: number, data: unknown) => api.put(`/admin/packages/${id}`, data)
 
-  const deletePackage = (id: number) =>
-    api.delete(`/admin/packages/${id}`)
+  const deletePackage = (id: number) => api.delete(`/admin/packages/${id}`)
 
   return {
     fetchStats,
-    fetchAdminGames, createGame, updateGame, deleteGame, importGames, exportGames, uploadGameImages, deleteGameImage,
-    fetchAdminTags, createTag, updateTag, deleteTag,
-    fetchAdminCategories, importCategories, exportCategories, createCategory, updateCategory, patchCategory, deleteCategory,
-    fetchCopies, createCopy, updateCopy, deleteCopy,
-    fetchAdminLoans, markOverdue,
-    fetchExtensions, approveExtension, rejectExtension,
-    fetchNewsletters, sendNewsletter,
+    fetchAdminGames,
+    createGame,
+    updateGame,
+    deleteGame,
+    importGames,
+    exportGames,
+    uploadGameImages,
+    deleteGameImage,
+    fetchAdminTags,
+    createTag,
+    updateTag,
+    deleteTag,
+    fetchAdminCategories,
+    importCategories,
+    exportCategories,
+    createCategory,
+    updateCategory,
+    patchCategory,
+    deleteCategory,
+    fetchCopies,
+    createCopy,
+    updateCopy,
+    deleteCopy,
+    fetchAdminLoans,
+    markOverdue,
+    fetchExtensions,
+    approveExtension,
+    rejectExtension,
+    fetchNewsletters,
+    sendNewsletter,
     fetchDamageReports,
-    fetchAdminPackages, createPackage, updatePackage, deletePackage,
-    fetchEmailTemplates, updateEmailTemplate, resetEmailTemplate,
+    fetchAdminPackages,
+    createPackage,
+    updatePackage,
+    deletePackage,
+    fetchEmailTemplates,
+    updateEmailTemplate,
+    resetEmailTemplate,
   }
 }

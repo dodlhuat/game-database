@@ -10,14 +10,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('games', function (Blueprint $table) {
-            if (!Schema::hasColumn('games', 'deposit_tokens')) {
+            if (! Schema::hasColumn('games', 'deposit_tokens')) {
                 $table->unsignedInteger('deposit_tokens')->default(0)->after('is_active');
             }
         });
 
         // MariaDB requires dropping the old enum and re-adding it
         Schema::table('copies', function (Blueprint $table) {
-            if (!Schema::hasColumn('copies', 'borrow_count')) {
+            if (! Schema::hasColumn('copies', 'borrow_count')) {
                 $table->unsignedInteger('borrow_count')->default(0)->after('condition');
             }
         });
@@ -28,13 +28,13 @@ return new class extends Migration
         }
 
         Schema::table('loans', function (Blueprint $table) {
-            if (!Schema::hasColumn('loans', 'deposit_tokens')) {
+            if (! Schema::hasColumn('loans', 'deposit_tokens')) {
                 $table->unsignedInteger('deposit_tokens')->default(0)->after('return_condition');
             }
         });
 
         Schema::table('users', function (Blueprint $table) {
-            if (!Schema::hasColumn('users', 'tokens_blocked')) {
+            if (! Schema::hasColumn('users', 'tokens_blocked')) {
                 $table->unsignedInteger('tokens_blocked')->default(0)->after('tokens');
             }
         });

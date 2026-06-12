@@ -32,14 +32,14 @@ class DemoSeeder extends Seeder
     private function seedUsers(): void
     {
         User::firstOrCreate(['email' => 'admin@example.at'], [
-            'name'               => 'Admin Mustermann',
-            'password'           => Hash::make('password'),
-            'role'               => 'ADMIN',
-            'status'             => 'ACTIVE',
-            'email_verified_at'  => now(),
-            'terms_accepted_at'  => now(),
-            'terms_version'      => '1.0',
-            'tokens'             => 0,
+            'name' => 'Admin Mustermann',
+            'password' => Hash::make('password'),
+            'role' => 'ADMIN',
+            'status' => 'ACTIVE',
+            'email_verified_at' => now(),
+            'terms_accepted_at' => now(),
+            'terms_version' => '1.0',
+            'tokens' => 0,
         ]);
 
         $members = [
@@ -52,14 +52,14 @@ class DemoSeeder extends Seeder
 
         foreach ($members as $data) {
             User::firstOrCreate(['email' => $data['email']], [
-                'name'                  => $data['name'],
-                'password'              => Hash::make('password'),
-                'role'                  => 'MEMBER',
-                'status'                => 'ACTIVE',
-                'email_verified_at'     => now(),
-                'terms_accepted_at'     => now(),
-                'terms_version'         => '1.0',
-                'tokens'                => rand(5, 20),
+                'name' => $data['name'],
+                'password' => Hash::make('password'),
+                'role' => 'MEMBER',
+                'status' => 'ACTIVE',
+                'email_verified_at' => now(),
+                'terms_accepted_at' => now(),
+                'terms_version' => '1.0',
+                'tokens' => rand(5, 20),
                 'membership_expires_at' => now()->addMonths(rand(1, 12)),
             ]);
         }
@@ -72,23 +72,23 @@ class DemoSeeder extends Seeder
 
         foreach ($regularUsers as $data) {
             User::firstOrCreate(['email' => $data['email']], [
-                'name'                => $data['name'],
-                'password'            => Hash::make('password'),
-                'role'                => 'USER',
-                'status'              => 'ACTIVE',
-                'email_verified_at'   => now(),
-                'terms_accepted_at'   => now(),
-                'terms_version'       => '1.0',
-                'tokens'              => 0,
+                'name' => $data['name'],
+                'password' => Hash::make('password'),
+                'role' => 'USER',
+                'status' => 'ACTIVE',
+                'email_verified_at' => now(),
+                'terms_accepted_at' => now(),
+                'terms_version' => '1.0',
+                'tokens' => 0,
             ]);
         }
 
         User::firstOrCreate(['email' => 'inaktiv@example.at'], [
-            'name'     => 'Gesperrter Nutzer',
+            'name' => 'Gesperrter Nutzer',
             'password' => Hash::make('password'),
-            'role'     => 'USER',
-            'status'   => 'SUSPENDED',
-            'tokens'   => 0,
+            'role' => 'USER',
+            'status' => 'SUSPENDED',
+            'tokens' => 0,
         ]);
     }
 
@@ -102,252 +102,252 @@ class DemoSeeder extends Seeder
     private function seedGames(): void
     {
         $categories = Category::all()->keyBy('name');
-        $tags       = Tag::all()->keyBy('name');
-        $languages  = Language::all()->keyBy('name');
+        $tags = Tag::all()->keyBy('name');
+        $languages = Language::all()->keyBy('name');
 
         $games = [
             [
-                'title'             => 'Catan',
-                'slug'              => 'catan',
+                'title' => 'Catan',
+                'slug' => 'catan',
                 'short_description' => 'Baue Siedlungen, handle Rohstoffe und werde Herrscher über Catan.',
-                'description'       => 'Bei Catan besiedeln die Spieler eine Insel und versuchen durch Handel und geschicktes Bauen die Vorherrschaft zu erlangen. Rohstoffe werden durch Würfeln gesammelt und gegen Siedlungen, Straßen und Städte eingetauscht.',
-                'category'          => 'Strategiespiele',
-                'min_players'       => 3, 'max_players' => 4, 'min_age' => 10,
-                'duration_min'      => 60, 'duration_max' => 120,
-                'difficulty'        => 'MEDIUM', 'year' => 1995,
-                'deposit_tokens'    => 5,
-                'tags'              => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
-                'languages'         => ['Deutsch', 'Englisch'],
-                'copies'            => 2,
+                'description' => 'Bei Catan besiedeln die Spieler eine Insel und versuchen durch Handel und geschicktes Bauen die Vorherrschaft zu erlangen. Rohstoffe werden durch Würfeln gesammelt und gegen Siedlungen, Straßen und Städte eingetauscht.',
+                'category' => 'Strategiespiele',
+                'min_players' => 3, 'max_players' => 4, 'min_age' => 10,
+                'duration_min' => 60, 'duration_max' => 120,
+                'difficulty' => 'MEDIUM', 'year' => 1995,
+                'deposit_tokens' => 5,
+                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
+                'languages' => ['Deutsch', 'Englisch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Ticket to Ride',
-                'slug'              => 'ticket-to-ride',
+                'title' => 'Ticket to Ride',
+                'slug' => 'ticket-to-ride',
                 'short_description' => 'Verbinde Städte mit Zugstrecken und sammle Punkte.',
-                'description'       => 'Spieler sammeln Waggonkarten und setzen ihre Waggons ein, um Zugrouten zwischen Städten zu beanspruchen. Wer die längste Strecke baut und seine geheimen Zielkarten erfüllt, gewinnt.',
-                'category'          => 'Familienspiele',
-                'min_players'       => 2, 'max_players' => 5, 'min_age' => 8,
-                'duration_min'      => 45, 'duration_max' => 75,
-                'difficulty'        => 'EASY', 'year' => 2004,
-                'deposit_tokens'    => 4,
-                'tags'              => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 2,
+                'description' => 'Spieler sammeln Waggonkarten und setzen ihre Waggons ein, um Zugrouten zwischen Städten zu beanspruchen. Wer die längste Strecke baut und seine geheimen Zielkarten erfüllt, gewinnt.',
+                'category' => 'Familienspiele',
+                'min_players' => 2, 'max_players' => 5, 'min_age' => 8,
+                'duration_min' => 45, 'duration_max' => 75,
+                'difficulty' => 'EASY', 'year' => 2004,
+                'deposit_tokens' => 4,
+                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
+                'languages' => ['Deutsch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Pandemic',
-                'slug'              => 'pandemic',
+                'title' => 'Pandemic',
+                'slug' => 'pandemic',
                 'short_description' => 'Stoppt gemeinsam vier gefährliche Krankheiten.',
-                'description'       => 'In diesem kooperativen Spiel kämpfen die Spieler als Spezialisten gegen vier Krankheiten, die sich weltweit ausbreiten. Nur durch Zusammenarbeit und kluge Planung können alle Krankheiten geheilt werden.',
-                'category'          => 'Kooperationsspiele',
-                'min_players'       => 2, 'max_players' => 4, 'min_age' => 8,
-                'duration_min'      => 45, 'duration_max' => 60,
-                'difficulty'        => 'MEDIUM', 'year' => 2008,
-                'deposit_tokens'    => 4,
-                'tags'              => ['2-4 Spieler', '60 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch', 'Englisch'],
-                'copies'            => 1,
+                'description' => 'In diesem kooperativen Spiel kämpfen die Spieler als Spezialisten gegen vier Krankheiten, die sich weltweit ausbreiten. Nur durch Zusammenarbeit und kluge Planung können alle Krankheiten geheilt werden.',
+                'category' => 'Kooperationsspiele',
+                'min_players' => 2, 'max_players' => 4, 'min_age' => 8,
+                'duration_min' => 45, 'duration_max' => 60,
+                'difficulty' => 'MEDIUM', 'year' => 2008,
+                'deposit_tokens' => 4,
+                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger'],
+                'languages' => ['Deutsch', 'Englisch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'Carcassonne',
-                'slug'              => 'carcassonne',
+                'title' => 'Carcassonne',
+                'slug' => 'carcassonne',
                 'short_description' => 'Lege Landschaftskarten und beanspruche Städte, Straßen und Klöster.',
-                'description'       => 'Carcassonne ist ein Legespiel, bei dem Spieler Landschaftskärtchen anlegen und ihre Gefolgsleute als Ritter, Räuber oder Mönche einsetzen. Punkte gibt es für vollendete Städte, Straßen und Klöster.',
-                'category'          => 'Familienspiele',
-                'min_players'       => 2, 'max_players' => 5, 'min_age' => 8,
-                'duration_min'      => 35, 'duration_max' => 45,
-                'difficulty'        => 'EASY', 'year' => 2000,
-                'deposit_tokens'    => 3,
-                'tags'              => ['2-4 Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 2,
+                'description' => 'Carcassonne ist ein Legespiel, bei dem Spieler Landschaftskärtchen anlegen und ihre Gefolgsleute als Ritter, Räuber oder Mönche einsetzen. Punkte gibt es für vollendete Städte, Straßen und Klöster.',
+                'category' => 'Familienspiele',
+                'min_players' => 2, 'max_players' => 5, 'min_age' => 8,
+                'duration_min' => 35, 'duration_max' => 45,
+                'difficulty' => 'EASY', 'year' => 2000,
+                'deposit_tokens' => 3,
+                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
+                'languages' => ['Deutsch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Codenames',
-                'slug'              => 'codenames',
+                'title' => 'Codenames',
+                'slug' => 'codenames',
                 'short_description' => 'Gebt euren Agenten Hinweise mit einem Wort.',
-                'description'       => 'Zwei Spionageteams versuchen, ihre Agenten auf einem Raster aus Codewörtern zu identifizieren. Die Geheimdienstchefs geben mit je einem Wort Hinweise auf mehrere Karten gleichzeitig.',
-                'category'          => 'Partyspiele',
-                'min_players'       => 4, 'max_players' => 8, 'min_age' => 14,
-                'duration_min'      => 15, 'duration_max' => 30,
-                'difficulty'        => 'EASY', 'year' => 2015,
-                'deposit_tokens'    => 2,
-                'tags'              => ['4+ Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 2,
+                'description' => 'Zwei Spionageteams versuchen, ihre Agenten auf einem Raster aus Codewörtern zu identifizieren. Die Geheimdienstchefs geben mit je einem Wort Hinweise auf mehrere Karten gleichzeitig.',
+                'category' => 'Partyspiele',
+                'min_players' => 4, 'max_players' => 8, 'min_age' => 14,
+                'duration_min' => 15, 'duration_max' => 30,
+                'difficulty' => 'EASY', 'year' => 2015,
+                'deposit_tokens' => 2,
+                'tags' => ['4+ Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
+                'languages' => ['Deutsch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Azul',
-                'slug'              => 'azul',
+                'title' => 'Azul',
+                'slug' => 'azul',
                 'short_description' => 'Lege farbige Kacheln nach Mustern.',
-                'description'       => 'Inspiriert von portugiesischen Azulejo-Kacheln. Spieler nehmen reihum Kacheln aus der Fabrik und legen sie in Mustern ab. Wer am Ende die meisten Punkte gesammelt hat, gewinnt.',
-                'category'          => 'Strategiespiele',
-                'min_players'       => 2, 'max_players' => 4, 'min_age' => 8,
-                'duration_min'      => 30, 'duration_max' => 45,
-                'difficulty'        => 'EASY', 'year' => 2017,
-                'deposit_tokens'    => 4,
-                'tags'              => ['2-4 Spieler', '30 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch', 'Englisch'],
-                'copies'            => 1,
+                'description' => 'Inspiriert von portugiesischen Azulejo-Kacheln. Spieler nehmen reihum Kacheln aus der Fabrik und legen sie in Mustern ab. Wer am Ende die meisten Punkte gesammelt hat, gewinnt.',
+                'category' => 'Strategiespiele',
+                'min_players' => 2, 'max_players' => 4, 'min_age' => 8,
+                'duration_min' => 30, 'duration_max' => 45,
+                'difficulty' => 'EASY', 'year' => 2017,
+                'deposit_tokens' => 4,
+                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger'],
+                'languages' => ['Deutsch', 'Englisch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'Dixit',
-                'slug'              => 'dixit',
+                'title' => 'Dixit',
+                'slug' => 'dixit',
                 'short_description' => 'Erzähle Geschichten mit traumhaften Illustrationen.',
-                'description'       => 'Dixit ist ein kreatives Assoziationsspiel. Ein Spieler beschreibt eine Karte, die anderen legen passende Karten dazu – alle versuchen zu erraten, welche die echte ist.',
-                'category'          => 'Familienspiele',
-                'min_players'       => 3, 'max_players' => 6, 'min_age' => 8,
-                'duration_min'      => 30, 'duration_max' => 45,
-                'difficulty'        => 'EASY', 'year' => 2008,
-                'deposit_tokens'    => 3,
-                'tags'              => ['2-6 Spieler', '30 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 1,
+                'description' => 'Dixit ist ein kreatives Assoziationsspiel. Ein Spieler beschreibt eine Karte, die anderen legen passende Karten dazu – alle versuchen zu erraten, welche die echte ist.',
+                'category' => 'Familienspiele',
+                'min_players' => 3, 'max_players' => 6, 'min_age' => 8,
+                'duration_min' => 30, 'duration_max' => 45,
+                'difficulty' => 'EASY', 'year' => 2008,
+                'deposit_tokens' => 3,
+                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger'],
+                'languages' => ['Deutsch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'Wingspan',
-                'slug'              => 'wingspan',
+                'title' => 'Wingspan',
+                'slug' => 'wingspan',
                 'short_description' => 'Sammle Vögel und baue dein Vogelschutzgebiet aus.',
-                'description'       => 'Wingspan ist ein Engine-Building-Spiel für Vogelbegeisterte. Spieler ziehen Vögel in ihr Schutzgebiet, aktivieren Fähigkeiten und sammeln Eier.',
-                'category'          => 'Strategiespiele',
-                'min_players'       => 1, 'max_players' => 5, 'min_age' => 10,
-                'duration_min'      => 40, 'duration_max' => 70,
-                'difficulty'        => 'MEDIUM', 'year' => 2019,
-                'deposit_tokens'    => 6,
-                'tags'              => ['2-4 Spieler', '60 Min', 'Experten'],
-                'languages'         => ['Deutsch', 'Englisch'],
-                'copies'            => 1,
+                'description' => 'Wingspan ist ein Engine-Building-Spiel für Vogelbegeisterte. Spieler ziehen Vögel in ihr Schutzgebiet, aktivieren Fähigkeiten und sammeln Eier.',
+                'category' => 'Strategiespiele',
+                'min_players' => 1, 'max_players' => 5, 'min_age' => 10,
+                'duration_min' => 40, 'duration_max' => 70,
+                'difficulty' => 'MEDIUM', 'year' => 2019,
+                'deposit_tokens' => 6,
+                'tags' => ['2-4 Spieler', '60 Min', 'Experten'],
+                'languages' => ['Deutsch', 'Englisch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'The Mind',
-                'slug'              => 'the-mind',
+                'title' => 'The Mind',
+                'slug' => 'the-mind',
                 'short_description' => 'Spielt Karten ohne zu sprechen in der richtigen Reihenfolge.',
-                'description'       => 'The Mind ist ein kooperatives Kartenspiel, bei dem alle ihre Handkarten in aufsteigender Reihenfolge ablegen müssen – ohne miteinander zu kommunizieren.',
-                'category'          => 'Kooperationsspiele',
-                'min_players'       => 2, 'max_players' => 4, 'min_age' => 8,
-                'duration_min'      => 15, 'duration_max' => 20,
-                'difficulty'        => 'EASY', 'year' => 2017,
-                'deposit_tokens'    => 2,
-                'tags'              => ['2-4 Spieler', '30 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 2,
+                'description' => 'The Mind ist ein kooperatives Kartenspiel, bei dem alle ihre Handkarten in aufsteigender Reihenfolge ablegen müssen – ohne miteinander zu kommunizieren.',
+                'category' => 'Kooperationsspiele',
+                'min_players' => 2, 'max_players' => 4, 'min_age' => 8,
+                'duration_min' => 15, 'duration_max' => 20,
+                'difficulty' => 'EASY', 'year' => 2017,
+                'deposit_tokens' => 2,
+                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger'],
+                'languages' => ['Deutsch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Just One',
-                'slug'              => 'just-one',
+                'title' => 'Just One',
+                'slug' => 'just-one',
                 'short_description' => 'Erratet gemeinsam Begriffe mit einzigartigen Hinweisen.',
-                'description'       => 'Just One ist ein kooperatives Ratespiel. Alle schreiben einen Hinweis – doppelte werden gestrichen. Der Ratende muss den Begriff mit den verbleibenden Hinweisen erraten.',
-                'category'          => 'Partyspiele',
-                'min_players'       => 3, 'max_players' => 7, 'min_age' => 8,
-                'duration_min'      => 20, 'duration_max' => 40,
-                'difficulty'        => 'EASY', 'year' => 2018,
-                'deposit_tokens'    => 2,
-                'tags'              => ['4+ Spieler', '30 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 2,
+                'description' => 'Just One ist ein kooperatives Ratespiel. Alle schreiben einen Hinweis – doppelte werden gestrichen. Der Ratende muss den Begriff mit den verbleibenden Hinweisen erraten.',
+                'category' => 'Partyspiele',
+                'min_players' => 3, 'max_players' => 7, 'min_age' => 8,
+                'duration_min' => 20, 'duration_max' => 40,
+                'difficulty' => 'EASY', 'year' => 2018,
+                'deposit_tokens' => 2,
+                'tags' => ['4+ Spieler', '30 Min', 'Einsteiger'],
+                'languages' => ['Deutsch'],
+                'copies' => 2,
             ],
             [
-                'title'             => 'Agricola',
-                'slug'              => 'agricola',
+                'title' => 'Agricola',
+                'slug' => 'agricola',
                 'short_description' => 'Bewirtschafte deinen Bauernhof und versorge deine Familie.',
-                'description'       => 'Agricola ist ein Ressourcenmanagement-Spiel. Spieler führen Bauern, müssen ihre Familie ernähren und Punkte durch Felder, Tiere und Häuser sammeln.',
-                'category'          => 'Strategiespiele',
-                'min_players'       => 1, 'max_players' => 5, 'min_age' => 12,
-                'duration_min'      => 30, 'duration_max' => 150,
-                'difficulty'        => 'HARD', 'year' => 2007,
-                'deposit_tokens'    => 6,
-                'tags'              => ['2-4 Spieler', '90+ Min', 'Experten', 'ab 12'],
-                'languages'         => ['Deutsch', 'Englisch'],
-                'copies'            => 1,
+                'description' => 'Agricola ist ein Ressourcenmanagement-Spiel. Spieler führen Bauern, müssen ihre Familie ernähren und Punkte durch Felder, Tiere und Häuser sammeln.',
+                'category' => 'Strategiespiele',
+                'min_players' => 1, 'max_players' => 5, 'min_age' => 12,
+                'duration_min' => 30, 'duration_max' => 150,
+                'difficulty' => 'HARD', 'year' => 2007,
+                'deposit_tokens' => 6,
+                'tags' => ['2-4 Spieler', '90+ Min', 'Experten', 'ab 12'],
+                'languages' => ['Deutsch', 'Englisch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'King of Tokyo',
-                'slug'              => 'king-of-tokyo',
+                'title' => 'King of Tokyo',
+                'slug' => 'king-of-tokyo',
                 'short_description' => 'Monster kämpfen um die Herrschaft über Tokyo.',
-                'description'       => 'In King of Tokyo schlüpfen Spieler in Monster, Aliens oder Roboter und kämpfen mit Würfeln um die Herrschaft über Tokyo. Energie sammeln, heilen oder angreifen – wer 20 Punkte hat oder alle anderen besiegt, gewinnt.',
-                'category'          => 'Partyspiele',
-                'min_players'       => 2, 'max_players' => 6, 'min_age' => 8,
-                'duration_min'      => 30, 'duration_max' => 45,
-                'difficulty'        => 'EASY', 'year' => 2011,
-                'deposit_tokens'    => 3,
-                'tags'              => ['2-6 Spieler', '30 Min', 'Einsteiger'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 1,
+                'description' => 'In King of Tokyo schlüpfen Spieler in Monster, Aliens oder Roboter und kämpfen mit Würfeln um die Herrschaft über Tokyo. Energie sammeln, heilen oder angreifen – wer 20 Punkte hat oder alle anderen besiegt, gewinnt.',
+                'category' => 'Partyspiele',
+                'min_players' => 2, 'max_players' => 6, 'min_age' => 8,
+                'duration_min' => 30, 'duration_max' => 45,
+                'difficulty' => 'EASY', 'year' => 2011,
+                'deposit_tokens' => 3,
+                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger'],
+                'languages' => ['Deutsch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'Dominion',
-                'slug'              => 'dominion',
+                'title' => 'Dominion',
+                'slug' => 'dominion',
                 'short_description' => 'Baue deinen Kartenstapel und errichte dein Königreich.',
-                'description'       => 'Dominion gilt als Urvater der Deck-Building-Spiele. Spieler kaufen Karten für ihren persönlichen Stapel und versuchen, am Ende die meisten Siegpunkte zu sammeln.',
-                'category'          => 'Kartenspiele',
-                'min_players'       => 2, 'max_players' => 4, 'min_age' => 14,
-                'duration_min'      => 30, 'duration_max' => 60,
-                'difficulty'        => 'MEDIUM', 'year' => 2008,
-                'deposit_tokens'    => 4,
-                'tags'              => ['2-4 Spieler', '60 Min', 'Experten', 'ab 12'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 1,
+                'description' => 'Dominion gilt als Urvater der Deck-Building-Spiele. Spieler kaufen Karten für ihren persönlichen Stapel und versuchen, am Ende die meisten Siegpunkte zu sammeln.',
+                'category' => 'Kartenspiele',
+                'min_players' => 2, 'max_players' => 4, 'min_age' => 14,
+                'duration_min' => 30, 'duration_max' => 60,
+                'difficulty' => 'MEDIUM', 'year' => 2008,
+                'deposit_tokens' => 4,
+                'tags' => ['2-4 Spieler', '60 Min', 'Experten', 'ab 12'],
+                'languages' => ['Deutsch'],
+                'copies' => 1,
             ],
             [
-                'title'             => 'Uno',
-                'slug'              => 'uno',
+                'title' => 'Uno',
+                'slug' => 'uno',
                 'short_description' => 'Klassisches Kartenspiel: Werde als Erster deine Karten los.',
-                'description'       => 'Uno ist das beliebte Kartenspiel, bei dem Spieler ihre Karten nach Farbe oder Zahl ablegen. Aktionskarten sorgen für Spannung.',
-                'category'          => 'Kartenspiele',
-                'min_players'       => 2, 'max_players' => 10, 'min_age' => 7,
-                'duration_min'      => 15, 'duration_max' => 45,
-                'difficulty'        => 'EASY', 'year' => 1971,
-                'deposit_tokens'    => 1,
-                'tags'              => ['2-6 Spieler', '30 Min', 'Einsteiger', 'ab 8'],
-                'languages'         => ['Deutsch'],
-                'copies'            => 3,
+                'description' => 'Uno ist das beliebte Kartenspiel, bei dem Spieler ihre Karten nach Farbe oder Zahl ablegen. Aktionskarten sorgen für Spannung.',
+                'category' => 'Kartenspiele',
+                'min_players' => 2, 'max_players' => 10, 'min_age' => 7,
+                'duration_min' => 15, 'duration_max' => 45,
+                'difficulty' => 'EASY', 'year' => 1971,
+                'deposit_tokens' => 1,
+                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger', 'ab 8'],
+                'languages' => ['Deutsch'],
+                'copies' => 3,
             ],
             [
-                'title'             => '7 Wonders',
-                'slug'              => '7-wonders',
+                'title' => '7 Wonders',
+                'slug' => '7-wonders',
                 'short_description' => 'Führe deine antike Zivilisation zur Größe.',
-                'description'       => 'In 7 Wonders leiten Spieler eine antike Zivilisation und wählen reihum Karten aus. Militär, Wissenschaft, Handel und Wunder bringen unterschiedliche Siegpunkte.',
-                'category'          => 'Strategiespiele',
-                'min_players'       => 2, 'max_players' => 7, 'min_age' => 10,
-                'duration_min'      => 30, 'duration_max' => 45,
-                'difficulty'        => 'MEDIUM', 'year' => 2010,
-                'deposit_tokens'    => 4,
-                'tags'              => ['4+ Spieler', '30 Min', 'Experten'],
-                'languages'         => ['Deutsch', 'Englisch', 'Französisch'],
-                'copies'            => 1,
+                'description' => 'In 7 Wonders leiten Spieler eine antike Zivilisation und wählen reihum Karten aus. Militär, Wissenschaft, Handel und Wunder bringen unterschiedliche Siegpunkte.',
+                'category' => 'Strategiespiele',
+                'min_players' => 2, 'max_players' => 7, 'min_age' => 10,
+                'duration_min' => 30, 'duration_max' => 45,
+                'difficulty' => 'MEDIUM', 'year' => 2010,
+                'deposit_tokens' => 4,
+                'tags' => ['4+ Spieler', '30 Min', 'Experten'],
+                'languages' => ['Deutsch', 'Englisch', 'Französisch'],
+                'copies' => 1,
             ],
         ];
 
         foreach ($games as $data) {
             $game = Game::firstOrCreate(['slug' => $data['slug']], [
-                'title'             => $data['title'],
-                'description'       => $data['description'],
+                'title' => $data['title'],
+                'description' => $data['description'],
                 'short_description' => $data['short_description'],
-                'category_id'       => $categories->get($data['category'])?->id,
-                'min_players'       => $data['min_players'],
-                'max_players'       => $data['max_players'],
-                'min_age'           => $data['min_age'],
-                'duration_min'      => $data['duration_min'],
-                'duration_max'      => $data['duration_max'],
-                'difficulty'        => $data['difficulty'],
-                'year'              => $data['year'],
-                'deposit_tokens'    => $data['deposit_tokens'],
-                'is_active'         => true,
+                'category_id' => $categories->get($data['category'])?->id,
+                'min_players' => $data['min_players'],
+                'max_players' => $data['max_players'],
+                'min_age' => $data['min_age'],
+                'duration_min' => $data['duration_min'],
+                'duration_max' => $data['duration_max'],
+                'difficulty' => $data['difficulty'],
+                'year' => $data['year'],
+                'deposit_tokens' => $data['deposit_tokens'],
+                'is_active' => true,
             ]);
 
             $game->tags()->syncWithoutDetaching(
-                collect($data['tags'])->map(fn($n) => $tags->get($n)?->id)->filter()->values()->all()
+                collect($data['tags'])->map(fn ($n) => $tags->get($n)?->id)->filter()->values()->all()
             );
 
             $game->languages()->syncWithoutDetaching(
-                collect($data['languages'])->map(fn($n) => $languages->get($n)?->id)->filter()->values()->all()
+                collect($data['languages'])->map(fn ($n) => $languages->get($n)?->id)->filter()->values()->all()
             );
 
             $existingCopies = $game->copies()->count();
             for ($i = $existingCopies; $i < $data['copies']; $i++) {
                 Copy::create([
-                    'game_id'      => $game->id,
-                    'condition'    => ['NEW', 'VERY_GOOD', 'GOOD'][array_rand(['NEW', 'VERY_GOOD', 'GOOD'])],
+                    'game_id' => $game->id,
+                    'condition' => ['NEW', 'VERY_GOOD', 'GOOD'][array_rand(['NEW', 'VERY_GOOD', 'GOOD'])],
                     'borrow_count' => rand(0, 15),
                 ]);
             }
@@ -358,31 +358,31 @@ class DemoSeeder extends Seeder
     {
         $events = [
             [
-                'title'       => 'Spieleabend: Strategieklassiker',
-                'date'        => now()->addDays(7)->toDateString(),
-                'time'        => '19:00',
-                'is_all_day'  => false,
+                'title' => 'Spieleabend: Strategieklassiker',
+                'date' => now()->addDays(7)->toDateString(),
+                'time' => '19:00',
+                'is_all_day' => false,
                 'description' => 'Gemeinsamer Abend mit Strategieklassikern wie Catan und Carcassonne. Für Einsteiger und Fortgeschrittene.',
             ],
             [
-                'title'       => 'Familienspiele-Nachmittag',
-                'date'        => now()->addDays(14)->toDateString(),
-                'time'        => '14:00',
-                'is_all_day'  => false,
+                'title' => 'Familienspiele-Nachmittag',
+                'date' => now()->addDays(14)->toDateString(),
+                'time' => '14:00',
+                'is_all_day' => false,
                 'description' => 'Ein entspannter Nachmittag mit Familienspielen für alle Altersgruppen. Kinder willkommen!',
             ],
             [
-                'title'       => 'Kooperations-Turnier',
-                'date'        => now()->addDays(21)->toDateString(),
-                'time'        => '15:00',
-                'is_all_day'  => false,
+                'title' => 'Kooperations-Turnier',
+                'date' => now()->addDays(21)->toDateString(),
+                'time' => '15:00',
+                'is_all_day' => false,
                 'description' => 'Tretet gemeinsam in Teams an und löst knifflige Kooperationsspiele. Preis für das beste Team!',
             ],
             [
-                'title'       => 'Spieletausch-Flohmarkt',
-                'date'        => now()->addDays(30)->toDateString(),
-                'time'        => null,
-                'is_all_day'  => true,
+                'title' => 'Spieletausch-Flohmarkt',
+                'date' => now()->addDays(30)->toDateString(),
+                'time' => null,
+                'is_all_day' => true,
                 'description' => 'Tauscht eure nicht mehr gespielten Spiele gegen neue. Eintritt frei, Mitmachen erwünscht!',
             ],
         ];
@@ -394,11 +394,11 @@ class DemoSeeder extends Seeder
 
     private function seedLoansAndReviews(): void
     {
-        $loanSetting  = LoanSetting::first();
-        $memberUsers  = User::where('role', 'MEMBER')->get();
-        $allCopies    = Copy::with('game')->get();
+        $loanSetting = LoanSetting::first();
+        $memberUsers = User::where('role', 'MEMBER')->get();
+        $allCopies = Copy::with('game')->get();
 
-        if (!$loanSetting || $memberUsers->isEmpty() || $allCopies->isEmpty()) {
+        if (! $loanSetting || $memberUsers->isEmpty() || $allCopies->isEmpty()) {
             return;
         }
 
@@ -413,9 +413,9 @@ class DemoSeeder extends Seeder
 
         // 4 zurückgegebene Ausleihen mit Bewertungen
         foreach ($allCopies->take(4) as $i => $copy) {
-            $user      = $memberUsers[$i % $memberUsers->count()];
+            $user = $memberUsers[$i % $memberUsers->count()];
             $startDate = now()->subDays(rand(30, 90));
-            $dueDate   = $startDate->copy()->addWeeks($durationWeeks);
+            $dueDate = $startDate->copy()->addWeeks($durationWeeks);
             $returnedAt = $dueDate->copy()->subDays(rand(1, 5));
 
             if (Loan::where('copy_id', $copy->id)->where('user_id', $user->id)->exists()) {
@@ -423,12 +423,12 @@ class DemoSeeder extends Seeder
             }
 
             $loan = Loan::create([
-                'copy_id'        => $copy->id,
-                'user_id'        => $user->id,
-                'start_date'     => $startDate,
-                'due_date'       => $dueDate,
-                'returned_at'    => $returnedAt,
-                'status'         => 'RETURNED',
+                'copy_id' => $copy->id,
+                'user_id' => $user->id,
+                'start_date' => $startDate,
+                'due_date' => $dueDate,
+                'returned_at' => $returnedAt,
+                'status' => 'RETURNED',
                 'deposit_tokens' => $copy->game->deposit_tokens ?? 0,
             ]);
 
@@ -436,40 +436,40 @@ class DemoSeeder extends Seeder
                 'game_id' => $copy->game_id,
                 'loan_id' => $loan->id,
                 'user_id' => $user->id,
-                'rating'  => rand(3, 5),
+                'rating' => rand(3, 5),
                 'comment' => $comments[$i % count($comments)],
             ]);
         }
 
         // 3 aktive Ausleihen
         foreach ($allCopies->slice(4, 3) as $i => $copy) {
-            $user      = $memberUsers[($i + 2) % $memberUsers->count()];
+            $user = $memberUsers[($i + 2) % $memberUsers->count()];
             $startDate = now()->subDays(rand(3, 10));
-            $dueDate   = $startDate->copy()->addWeeks($durationWeeks);
+            $dueDate = $startDate->copy()->addWeeks($durationWeeks);
 
             if (Loan::where('copy_id', $copy->id)->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->exists()) {
                 continue;
             }
 
             Loan::create([
-                'copy_id'        => $copy->id,
-                'user_id'        => $user->id,
-                'start_date'     => $startDate,
-                'due_date'       => $dueDate,
-                'status'         => 'ACTIVE',
+                'copy_id' => $copy->id,
+                'user_id' => $user->id,
+                'start_date' => $startDate,
+                'due_date' => $dueDate,
+                'status' => 'ACTIVE',
                 'deposit_tokens' => $copy->game->deposit_tokens ?? 0,
             ]);
         }
 
         // 1 überfällige Ausleihe
         $overdueCopy = $allCopies->get(7);
-        if ($overdueCopy && !Loan::where('copy_id', $overdueCopy->id)->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->exists()) {
+        if ($overdueCopy && ! Loan::where('copy_id', $overdueCopy->id)->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->exists()) {
             Loan::create([
-                'copy_id'        => $overdueCopy->id,
-                'user_id'        => $memberUsers->first()->id,
-                'start_date'     => now()->subDays(30),
-                'due_date'       => now()->subDays(16),
-                'status'         => 'OVERDUE',
+                'copy_id' => $overdueCopy->id,
+                'user_id' => $memberUsers->first()->id,
+                'start_date' => now()->subDays(30),
+                'due_date' => now()->subDays(16),
+                'status' => 'OVERDUE',
                 'deposit_tokens' => $overdueCopy->game->deposit_tokens ?? 0,
             ]);
         }
@@ -478,10 +478,10 @@ class DemoSeeder extends Seeder
         $catan = Game::where('slug', 'catan')->first();
         if ($catan) {
             foreach ($memberUsers->take(3) as $pos => $user) {
-                if (!Reservation::where('game_id', $catan->id)->where('user_id', $user->id)->exists()) {
+                if (! Reservation::where('game_id', $catan->id)->where('user_id', $user->id)->exists()) {
                     Reservation::create([
-                        'game_id'  => $catan->id,
-                        'user_id'  => $user->id,
+                        'game_id' => $catan->id,
+                        'user_id' => $user->id,
                         'position' => $pos + 1,
                     ]);
                 }

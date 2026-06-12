@@ -13,8 +13,8 @@ class DamageReportFactory extends Factory
     public function definition(): array
     {
         return [
-            'loan_id'     => Loan::factory(),
-            'user_id'     => User::factory()->member(),
+            'loan_id' => Loan::factory(),
+            'user_id' => User::factory()->member(),
             'description' => fake()->sentence(),
         ];
     }

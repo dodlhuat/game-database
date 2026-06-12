@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Database\Factories\ExtensionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Extension extends Model
 {
-    /** @use HasFactory<\Database\Factories\ExtensionFactory> */
+    /** @use HasFactory<ExtensionFactory> */
     use HasFactory;
+
     protected $fillable = [
         'loan_id',
         'requested_at',

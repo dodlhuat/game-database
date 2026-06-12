@@ -12,11 +12,12 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         $name = fake()->unique()->words(2, true);
+
         return [
-            'name'       => ucfirst($name),
-            'slug'       => Str::slug($name) . '-' . fake()->randomNumber(4),
+            'name' => ucfirst($name),
+            'slug' => Str::slug($name).'-'.fake()->randomNumber(4),
             'sort_order' => fake()->numberBetween(0, 100),
-            'is_active'  => true,
+            'is_active' => true,
         ];
     }
 }

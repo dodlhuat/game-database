@@ -10,10 +10,10 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-/** @implements WithMapping<\App\Models\Category> */
+/** @implements WithMapping<Category> */
 class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithStyles
 {
-    /** @return Collection<int, \App\Models\Category> */
+    /** @return Collection<int, Category> */
     public function collection(): Collection
     {
         // Flat list: parents first, then children, ordered by sort_order / name

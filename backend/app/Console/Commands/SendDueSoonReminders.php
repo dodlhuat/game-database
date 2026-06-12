@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Mail\DueSoonReminderMail;
 use App\Models\Loan;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -24,7 +25,7 @@ class SendDueSoonReminders extends Command
             ->get();
 
         foreach ($loans as $loan) {
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = $loan->user;
             Mail::to($user->email)->queue(new DueSoonReminderMail($loan));
         }

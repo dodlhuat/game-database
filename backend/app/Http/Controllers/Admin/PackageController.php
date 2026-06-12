@@ -23,14 +23,14 @@ class PackageController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'slug'        => 'nullable|string|max:255|unique:packages,slug',
+            'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255|unique:packages,slug',
             'description' => 'nullable|string',
-            'type'        => 'required|in:CATEGORY,CURATED',
+            'type' => 'required|in:CATEGORY,CURATED',
             'category_id' => 'nullable|exists:categories,id',
-            'game_ids'    => 'nullable|array',
-            'game_ids.*'  => 'exists:games,id',
-            'is_active'   => 'boolean',
+            'game_ids' => 'nullable|array',
+            'game_ids.*' => 'exists:games,id',
+            'is_active' => 'boolean',
         ]);
 
         $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
@@ -54,14 +54,14 @@ class PackageController extends Controller
     public function update(Request $request, Package $package): JsonResponse
     {
         $data = $request->validate([
-            'name'        => 'sometimes|string|max:255',
-            'slug'        => 'sometimes|string|max:255|unique:packages,slug,' . $package->id,
+            'name' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|string|max:255|unique:packages,slug,'.$package->id,
             'description' => 'nullable|string',
-            'type'        => 'sometimes|in:CATEGORY,CURATED',
+            'type' => 'sometimes|in:CATEGORY,CURATED',
             'category_id' => 'nullable|exists:categories,id',
-            'game_ids'    => 'nullable|array',
-            'game_ids.*'  => 'exists:games,id',
-            'is_active'   => 'boolean',
+            'game_ids' => 'nullable|array',
+            'game_ids.*' => 'exists:games,id',
+            'is_active' => 'boolean',
         ]);
 
         $package->update($data);

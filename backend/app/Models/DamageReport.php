@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Database\Factories\DamageReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DamageReport extends Model
 {
-    /** @use HasFactory<\Database\Factories\DamageReportFactory> */
+    /** @use HasFactory<DamageReportFactory> */
     use HasFactory;
+
     protected $fillable = [
         'loan_id',
         'user_id',

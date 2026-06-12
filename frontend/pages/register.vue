@@ -44,16 +44,39 @@
       <!-- Honeypot: hidden from real users, bots will fill this -->
       <div class="hp-field" aria-hidden="true">
         <label for="website">Website</label>
-        <input id="website" v-model="form.website" type="text" name="website" tabindex="-1" autocomplete="off" />
+        <input
+          id="website"
+          v-model="form.website"
+          type="text"
+          name="website"
+          tabindex="-1"
+          autocomplete="off"
+        />
       </div>
 
       <div class="auth-card__checkboxes">
-        <input v-model="form.newsletter_opt_in" type="checkbox" class="styled-checkbox" id="newsletter-opt-in" />
+        <input
+          id="newsletter-opt-in"
+          v-model="form.newsletter_opt_in"
+          type="checkbox"
+          class="styled-checkbox"
+        />
         <label for="newsletter-opt-in">{{ $t('auth.newsletter_opt_in') }}</label>
 
-        <input v-model="form.terms_accepted" type="checkbox" class="styled-checkbox" id="terms-accepted" required />
-        <label for="terms-accepted">{{ $t('auth.terms_accept') }} <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></label>
-        <p v-if="errors.terms_accepted" class="error-text" role="alert">{{ errors.terms_accepted }}</p>
+        <input
+          id="terms-accepted"
+          v-model="form.terms_accepted"
+          type="checkbox"
+          class="styled-checkbox"
+          required
+        />
+        <label for="terms-accepted"
+          >{{ $t('auth.terms_accept') }}
+          <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></label
+        >
+        <p v-if="errors.terms_accepted" class="error-text" role="alert">
+          {{ errors.terms_accepted }}
+        </p>
       </div>
 
       <div v-if="serverError" class="alert alert-error" role="alert">{{ serverError }}</div>
@@ -138,7 +161,9 @@ $_muted: rgba(238, 232, 223, 0.65);
       color: $amber;
       text-decoration: none;
       font-weight: 600;
-      &:hover { text-decoration: underline; }
+      &:hover {
+        text-decoration: underline;
+      }
     }
   }
 

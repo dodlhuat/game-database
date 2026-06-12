@@ -15,8 +15,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const variantClass = computed(() => ({
   'badge-success': props.variant === 'available',
-  'badge-error':   props.variant === 'loaned',
+  'badge-error': props.variant === 'loaned',
   'badge-warning': props.variant === 'pending',
-  'badge-info':    props.variant === 'info',
+  'badge-info': props.variant === 'info',
 }))
 </script>

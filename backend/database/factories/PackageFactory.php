@@ -13,13 +13,14 @@ class PackageFactory extends Factory
     public function definition(): array
     {
         $name = fake()->unique()->words(2, true);
+
         return [
-            'name'        => ucwords($name),
-            'slug'        => Str::slug($name) . '-' . fake()->randomNumber(4),
+            'name' => ucwords($name),
+            'slug' => Str::slug($name).'-'.fake()->randomNumber(4),
             'description' => fake()->paragraph(),
-            'type'        => 'CURATED',
+            'type' => 'CURATED',
             'category_id' => Category::factory(),
-            'is_active'   => true,
+            'is_active' => true,
         ];
     }
 }

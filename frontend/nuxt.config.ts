@@ -10,10 +10,7 @@ export default defineNuxtConfig({
     app: 'app',
   },
 
-  modules: [
-    '@pinia/nuxt',
-    '@nuxtjs/i18n',
-  ],
+  modules: ['@nuxt/eslint', '@pinia/nuxt', '@nuxtjs/i18n'],
 
   i18n: {
     locales: [{ code: 'de', file: 'de.json' }],

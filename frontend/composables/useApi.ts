@@ -27,10 +27,7 @@ export function useApi() {
     return url.toString()
   }
 
-  async function request<T = unknown>(
-    path: string,
-    options: ApiOptions = {},
-  ): Promise<T> {
+  async function request<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
     const { params, headers: customHeaders, ...fetchOptions } = options
 
     const token = getToken()

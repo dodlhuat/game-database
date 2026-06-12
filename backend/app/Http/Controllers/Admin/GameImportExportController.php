@@ -8,6 +8,7 @@ use App\Imports\GameImport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class GameImportExportController extends Controller
 {
@@ -17,18 +18,18 @@ class GameImportExportController extends Controller
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
-        $import = new GameImport();
+        $import = new GameImport;
         Excel::import($import, $request->file('file'));
 
         return response()->json([
-            'new'     => $import->newCount,
+            'new' => $import->newCount,
             'updated' => $import->updatedCount,
-            'total'   => $import->newCount + $import->updatedCount,
+            'total' => $import->newCount + $import->updatedCount,
         ]);
     }
 
-    public function export(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function export(): BinaryFileResponse
     {
-        return Excel::download(new GameExport(), 'spiele.xlsx');
+        return Excel::download(new GameExport, 'spiele.xlsx');
     }
 }

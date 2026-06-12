@@ -14,7 +14,7 @@ class PackageLoanController extends Controller
     {
         $loans = PackageLoan::query()
             ->with(['package', 'user', 'loans.copy.game'])
-            ->when($request->status, fn($q, $status) => $q->where('status', $status))
+            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
             ->orderByDesc('created_at')
             ->paginate(20);
 

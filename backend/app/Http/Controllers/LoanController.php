@@ -6,10 +6,12 @@ use App\Http\Requests\Loan\ReturnLoanRequest;
 use App\Http\Requests\Loan\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
 use App\Models\Copy;
+use App\Models\Game;
 use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Reservation;
 use App\Models\TokenTransaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,7 +21,7 @@ class LoanController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $loans = $user->loans()
             ->with(['copy.game', 'extensions'])
@@ -31,20 +33,20 @@ class LoanController extends Controller
 
     public function store(StoreLoanRequest $request): JsonResponse|LoanResource
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
-        if (!$user->isAdmin()) {
-            if (!$user->isMember()) {
+        if (! $user->isAdmin()) {
+            if (! $user->isMember()) {
                 return response()->json([
                     'message' => 'Eine aktive Mitgliedschaft ist erforderlich um Spiele auszuleihen.',
-                    'reason'  => 'membership_required',
+                    'reason' => 'membership_required',
                 ], 403);
             }
         }
 
-        /** @var \App\Models\Copy $copy */
-        $copy    = Copy::with('game')->findOrFail($request->copy_id);
+        /** @var Copy $copy */
+        $copy = Copy::with('game')->findOrFail($request->copy_id);
         $setting = LoanSetting::instance();
 
         if (in_array($copy->condition, ['LOCKED', 'REVIEW', 'DAMAGED'])) {
@@ -52,7 +54,7 @@ class LoanController extends Controller
         }
 
         $isAvailable = $copy->activeLoans()->doesntExist();
-        if (!$isAvailable) {
+        if (! $isAvailable) {
             return response()->json(['message' => 'Diese Kopie ist gerade ausgeliehen.'], 422);
         }
 
@@ -65,20 +67,20 @@ class LoanController extends Controller
             return response()->json(['message' => 'Du hast dieses Spiel bereits ausgeliehen.'], 422);
         }
 
-        /** @var \App\Models\Game $game */
+        /** @var Game $game */
         $game = $copy->game;
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $loanCost = $setting->loan_cost;
-            $deposit  = $copy->calculateDeposit($game, $setting);
+            $deposit = $copy->calculateDeposit($game, $setting);
             $totalCost = $loanCost + $deposit;
 
-            if (!$user->hasEnoughFreeTokens($totalCost)) {
+            if (! $user->hasEnoughFreeTokens($totalCost)) {
                 return response()->json([
-                    'message'    => "Nicht genug Token. Ausleihen kostet {$loanCost} Token + {$deposit} Token Kaution.",
-                    'reason'     => 'insufficient_tokens',
+                    'message' => "Nicht genug Token. Ausleihen kostet {$loanCost} Token + {$deposit} Token Kaution.",
+                    'reason' => 'insufficient_tokens',
                     'borrow_cost' => $loanCost,
-                    'deposit'    => $deposit,
+                    'deposit' => $deposit,
                 ], 402);
             }
         } else {
@@ -86,36 +88,36 @@ class LoanController extends Controller
         }
 
         $startDate = $this->calcNextAppointment($setting);
-        $dueDate   = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
+        $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
 
         $loan = Loan::create([
-            'copy_id'        => $copy->id,
-            'user_id'        => $user->id,
-            'start_date'     => $startDate->toDateString(),
-            'due_date'       => $dueDate->toDateString(),
-            'status'         => 'ACTIVE',
+            'copy_id' => $copy->id,
+            'user_id' => $user->id,
+            'start_date' => $startDate->toDateString(),
+            'due_date' => $dueDate->toDateString(),
+            'status' => 'ACTIVE',
             'deposit_tokens' => $deposit,
         ]);
 
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             $loanCost = $setting->loan_cost;
 
             $user->decrement('tokens', $loanCost);
             TokenTransaction::create([
-                'user_id'     => $user->id,
-                'loan_id'     => $loan->id,
-                'type'        => 'BORROW',
-                'amount'      => -$loanCost,
+                'user_id' => $user->id,
+                'loan_id' => $loan->id,
+                'type' => 'BORROW',
+                'amount' => -$loanCost,
                 'description' => "Leihgebühr: {$game->title}",
             ]);
 
             if ($deposit > 0) {
                 $user->increment('tokens_blocked', $deposit);
                 TokenTransaction::create([
-                    'user_id'     => $user->id,
-                    'loan_id'     => $loan->id,
-                    'type'        => 'DEPOSIT_BLOCK',
-                    'amount'      => -$deposit,
+                    'user_id' => $user->id,
+                    'loan_id' => $loan->id,
+                    'type' => 'DEPOSIT_BLOCK',
+                    'amount' => -$deposit,
                     'description' => "Kaution blockiert: {$game->title}",
                 ]);
             }
@@ -130,8 +132,8 @@ class LoanController extends Controller
 
     private function calcNextAppointment(LoanSetting $setting): Carbon
     {
-        $today     = Carbon::today();
-        $deadline  = $today->copy()->addDays($setting->grace_days);
+        $today = Carbon::today();
+        $deadline = $today->copy()->addDays($setting->grace_days);
         $startDate = Carbon::parse($setting->start_date);
 
         if ($setting->interval_days <= 0) {
@@ -146,7 +148,7 @@ class LoanController extends Controller
 
     public function show(Request $request, Loan $loan): JsonResponse|LoanResource
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
@@ -159,24 +161,24 @@ class LoanController extends Controller
 
     public function return(ReturnLoanRequest $request, Loan $loan): JsonResponse|LoanResource
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         if ($loan->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);
         }
 
-        if (!in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
+        if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
         }
 
         $loan->update([
-            'status'           => 'RETURNED',
-            'returned_at'      => now(),
+            'status' => 'RETURNED',
+            'returned_at' => now(),
             'return_condition' => $request->return_condition,
         ]);
 
         // Copy goes to REVIEW — admin must approve before it becomes available again
-        /** @var \App\Models\Copy $loanCopy */
+        /** @var Copy $loanCopy */
         $loanCopy = $loan->copy;
         $loanCopy->update(['condition' => 'REVIEW']);
 

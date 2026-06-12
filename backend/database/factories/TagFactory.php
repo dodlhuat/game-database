@@ -11,7 +11,8 @@ class TagFactory extends Factory
 {
     public function definition(): array
     {
-        $name = fake()->unique()->word() . fake()->randomNumber(4);
+        $name = fake()->unique()->word().fake()->randomNumber(4);
+
         return [
             'name' => ucfirst($name),
             'slug' => Str::slug($name),

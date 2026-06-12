@@ -2,7 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Models\Copy;
+use App\Models\Game;
 use App\Models\Loan;
+use App\Models\User;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,17 +23,17 @@ class DepositReleased extends Notification
         return ['mail'];
     }
 
-    public function toMail(\App\Models\User $notifiable): MailMessage
+    public function toMail(User $notifiable): MailMessage
     {
-        /** @var \App\Models\Copy $loanCopy */
-        $loanCopy     = $this->loan->copy;
-        /** @var \App\Models\Game $game */
-        $game         = $loanCopy->game;
-        $dashboardUrl = config('frontend.url') . '/dashboard';
+        /** @var Copy $loanCopy */
+        $loanCopy = $this->loan->copy;
+        /** @var Game $game */
+        $game = $loanCopy->game;
+        $dashboardUrl = config('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('deposit_released', [
-            'name'    => $notifiable->name,
-            'game'    => $game->title,
+            'name' => $notifiable->name,
+            'game' => $game->title,
             'deposit' => $this->loan->deposit_tokens,
         ], $dashboardUrl, $notifiable);
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExtensionResource;
 use App\Models\Extension;
+use App\Models\Loan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -14,7 +15,7 @@ class ExtensionController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $extensions = Extension::with(['loan.copy.game', 'loan.user'])
-            ->when($request->status ?? 'PENDING', fn($q, $s) => $q->where('status', $s))
+            ->when($request->status ?? 'PENDING', fn ($q, $s) => $q->where('status', $s))
             ->orderByDesc('requested_at')
             ->paginate(25);
 
@@ -28,15 +29,15 @@ class ExtensionController extends Controller
         }
 
         $extension->update([
-            'status'     => 'APPROVED',
+            'status' => 'APPROVED',
             'admin_note' => $request->admin_note,
         ]);
 
-        /** @var \App\Models\Loan $loan */
+        /** @var Loan $loan */
         $loan = $extension->loan;
         $loan->update([
             'due_date' => $extension->requested_due_date,
-            'status'   => 'EXTENDED',
+            'status' => 'EXTENDED',
         ]);
 
         return new ExtensionResource($extension->load(['loan.copy.game', 'loan.user']));
@@ -49,7 +50,7 @@ class ExtensionController extends Controller
         }
 
         $extension->update([
-            'status'     => 'REJECTED',
+            'status' => 'REJECTED',
             'admin_note' => $request->admin_note,
         ]);
 

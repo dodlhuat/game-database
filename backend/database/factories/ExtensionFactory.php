@@ -12,10 +12,10 @@ class ExtensionFactory extends Factory
     public function definition(): array
     {
         return [
-            'loan_id'            => Loan::factory(),
-            'requested_at'       => now(),
+            'loan_id' => Loan::factory(),
+            'requested_at' => now(),
             'requested_due_date' => now()->addWeeks(4)->toDateString(),
-            'status'             => 'PENDING',
+            'status' => 'PENDING',
         ];
     }
 

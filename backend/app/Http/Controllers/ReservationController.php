@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ReservationResource;
 use App\Models\Game;
 use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -13,7 +14,7 @@ class ReservationController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         $reservations = $user->reservations()
             ->with('game')
@@ -27,10 +28,10 @@ class ReservationController extends Controller
     {
         $request->validate(['game_id' => ['required', 'integer', 'exists:games,id']]);
 
-        /** @var \App\Models\Game $game */
+        /** @var Game $game */
         $game = Game::findOrFail($request->game_id);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $already = Reservation::where('game_id', $game->id)
@@ -56,7 +57,7 @@ class ReservationController extends Controller
 
     public function destroy(Request $request, Reservation $reservation): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
         if ($reservation->user_id !== $user->id) {
             return response()->json(['message' => 'Keine Berechtigung.'], 403);

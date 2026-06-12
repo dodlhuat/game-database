@@ -13,8 +13,8 @@ class ReservationFactory extends Factory
     public function definition(): array
     {
         return [
-            'game_id'  => Game::factory(),
-            'user_id'  => User::factory()->member(),
+            'game_id' => Game::factory(),
+            'user_id' => User::factory()->member(),
             'position' => 1,
         ];
     }

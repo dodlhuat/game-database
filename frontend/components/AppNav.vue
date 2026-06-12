@@ -18,7 +18,9 @@
       <div class="l-nav__actions">
         <template v-if="!auth.isLoggedIn">
           <NuxtLink to="/login" class="button l-nav__btn">{{ $t('nav.login') }}</NuxtLink>
-          <NuxtLink to="/register" class="button button-primary l-nav__btn">{{ $t('nav.register') }}</NuxtLink>
+          <NuxtLink to="/register" class="button button-primary l-nav__btn">{{
+            $t('nav.register')
+          }}</NuxtLink>
         </template>
         <template v-else>
           <span class="l-nav__user">{{ firstName }}</span>
@@ -104,21 +106,26 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
-$hero-bg-85:    rgba(15, 14, 12, 0.85);
-$hero-text:     #EEE8DF;
-$hero-text-08:  rgba(238, 232, 223, 0.08);
-$hero-text-10:  rgba(238, 232, 223, 0.10);
-$hero-muted:    rgba(238, 232, 223, 0.72);
-$hero-divider:  rgba(238, 232, 223, 0.10);
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
+$hero-bg-85: rgba(15, 14, 12, 0.85);
+$hero-text: #eee8df;
+$hero-text-08: rgba(238, 232, 223, 0.08);
+$hero-text-10: rgba(238, 232, 223, 0.1);
+$hero-muted: rgba(238, 232, 223, 0.72);
+$hero-divider: rgba(238, 232, 223, 0.1);
 
 .l-nav {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
   height: $nav-height;
-  transition: background 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    backdrop-filter 0.3s ease;
   border-bottom: 1px solid transparent;
 
   &--solid {
@@ -129,19 +136,34 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
   }
 
   &__inner {
-    max-width: 1200px; margin: 0 auto; height: 100%;
-    padding: 0 1.5rem; display: flex; align-items: center; gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 
   &__brand {
-    display: flex; align-items: center; gap: 0.5rem;
-    text-decoration: none; flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    flex-shrink: 0;
   }
 
-  &__brand-hex { font-size: 1.4rem; color: $amber; line-height: 1; }
+  &__brand-hex {
+    font-size: 1.4rem;
+    color: $amber;
+    line-height: 1;
+  }
 
   &__brand-name {
-    font-size: 1.1rem; font-weight: 700; color: $hero-text; letter-spacing: -0.02em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $hero-text;
+    letter-spacing: -0.02em;
   }
 
   // ── Desktop inline nav links ────────────────────────────────
@@ -151,7 +173,9 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     gap: 0.25rem;
     margin-left: 1rem;
 
-    @media (max-width: 900px) { display: none; }
+    @media (max-width: 900px) {
+      display: none;
+    }
   }
 
   &__link {
@@ -162,7 +186,9 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
     padding: 0.3rem 0.6rem;
     border-radius: 6px;
     white-space: nowrap;
-    transition: color 0.2s, background 0.2s;
+    transition:
+      color 0.2s,
+      background 0.2s;
 
     &:hover {
       color: $hero-text;
@@ -176,36 +202,81 @@ $hero-divider:  rgba(238, 232, 223, 0.10);
 
   // ── Auth actions ────────────────────────────────────────────
   &__actions {
-    display: flex; align-items: center; gap: 0.5rem; margin-left: auto;
-    @media (max-width: 640px) { display: none; }
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    @media (max-width: 640px) {
+      display: none;
+    }
   }
 
-  &__btn { font-size: 0.875rem; padding: 0.4rem 1rem; }
+  &__btn {
+    font-size: 0.875rem;
+    padding: 0.4rem 1rem;
+  }
 
-  &__user { font-size: 0.9rem; font-weight: 500; color: $hero-muted; }
+  &__user {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: $hero-muted;
+  }
 
   // ── Theme toggle ────────────────────────────────────────────
   &__theme-btn {
-    display: flex; align-items: center; justify-content: center;
-    width: 32px; height: 32px; padding: 0;
-    background: transparent; border: none;
-    border-radius: 8px; color: $hero-muted; cursor: pointer; flex-shrink: 0;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
-    .icon { font-size: 1.125rem; }
-    &:hover { background: $hero-text-10; color: $hero-text; transform: rotate(12deg); }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: $hero-muted;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      transform 0.2s;
+    .icon {
+      font-size: 1.125rem;
+    }
+    &:hover {
+      background: $hero-text-10;
+      color: $hero-text;
+      transform: rotate(12deg);
+    }
   }
 
   // Push-menu trigger
   &__trigger {
-    display: flex; align-items: center; justify-content: center;
-    width: 38px; height: 38px; flex-shrink: 0;
-    background: $hero-text-08; border: 1px solid $hero-text-08;
-    border-radius: 8px; color: $hero-muted; cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-    &:hover { background: $hero-text-10; color: $hero-text; }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: $hero-text-08;
+    border: 1px solid $hero-text-08;
+    border-radius: 8px;
+    color: $hero-muted;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      color 0.2s;
+    &:hover {
+      background: $hero-text-10;
+      color: $hero-text;
+    }
 
-    input { display: none; }
-    .icon { font-size: 1.25rem; }
+    input {
+      display: none;
+    }
+    .icon {
+      font-size: 1.25rem;
+    }
   }
 }
 </style>

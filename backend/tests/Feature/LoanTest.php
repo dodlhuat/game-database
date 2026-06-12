@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\Copy;
-use App\Models\Game;
 use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\User;
@@ -123,7 +122,7 @@ class LoanTest extends TestCase
         $loan = Loan::factory()->create([
             'user_id' => $user->id,
             'copy_id' => $copy->id,
-            'status'  => 'ACTIVE',
+            'status' => 'ACTIVE',
         ]);
 
         $this->actingAs($user)

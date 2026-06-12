@@ -18,11 +18,11 @@ class UserController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $users = User::query()
-            ->when($request->status, fn($q, $status) => $q->where('status', $status))
-            ->when($request->role, fn($q, $role) => $q->where('role', $role))
-            ->when($request->search, fn($q, $search) => $q->where(function ($q) use ($search) {
+            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
+            ->when($request->role, fn ($q, $role) => $q->where('role', $role))
+            ->when($request->search, fn ($q, $search) => $q->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             }))
             ->orderByDesc('created_at')
             ->paginate(20);
@@ -38,19 +38,19 @@ class UserController extends Controller
     public function store(Request $request): UserResource
     {
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', 'unique:users,email'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'role'     => ['required', 'in:USER,MEMBER,ADMIN'],
-            'status'   => ['required', 'in:PENDING,ACTIVE,REJECTED,SUSPENDED'],
+            'role' => ['required', 'in:USER,MEMBER,ADMIN'],
+            'status' => ['required', 'in:PENDING,ACTIVE,REJECTED,SUSPENDED'],
         ]);
 
         $user = User::create([
-            'name'     => $data['name'],
-            'email'    => $data['email'],
+            'name' => $data['name'],
+            'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'role'     => $data['role'],
-            'status'   => $data['status'],
+            'role' => $data['role'],
+            'status' => $data['status'],
         ]);
 
         return new UserResource($user);
@@ -59,19 +59,19 @@ class UserController extends Controller
     public function update(Request $request, User $user): UserResource
     {
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'role'     => ['required', 'in:USER,MEMBER,ADMIN'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'role' => ['required', 'in:USER,MEMBER,ADMIN'],
             'password' => ['nullable', 'string', 'min:8'],
         ]);
 
         $update = [
-            'name'  => $data['name'],
+            'name' => $data['name'],
             'email' => $data['email'],
-            'role'  => $data['role'],
+            'role' => $data['role'],
         ];
 
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $update['password'] = Hash::make($data['password']);
         }
 
@@ -83,7 +83,7 @@ class UserController extends Controller
     public function approve(User $user): JsonResponse
     {
         $user->update(['status' => 'ACTIVE']);
-        $user->notify(new UserApproved());
+        $user->notify(new UserApproved);
 
         return response()->json(['message' => 'Mitglied freigeschaltet.', 'user' => new UserResource($user)]);
     }

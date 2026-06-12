@@ -11,8 +11,8 @@
       <div class="hero__body">
         <p class="hero__eyebrow">{{ $t('pages.home.hero_eyebrow') }}</p>
         <h1 class="hero__title">
-          {{ $t('pages.home.hero_title_1') }}<br>
-          {{ $t('pages.home.hero_title_2') }}<br>
+          {{ $t('pages.home.hero_title_1') }}<br />
+          {{ $t('pages.home.hero_title_2') }}<br />
           <em class="hero__title-em">{{ $t('pages.home.hero_title_3') }}</em>
         </h1>
         <p class="hero__desc">{{ $t('pages.home.hero_desc') }}</p>
@@ -46,7 +46,7 @@
     </section>
 
     <!-- ── Features ────────────────────────────────────────────── -->
-    <section class="features" ref="featuresRef">
+    <section ref="featuresRef" class="features">
       <div class="features__inner">
         <header class="features__header">
           <h2 class="features__title">{{ $t('pages.home.features_title') }}</h2>
@@ -54,7 +54,6 @@
         </header>
 
         <div class="features__grid" :class="{ 'features__grid--visible': featVisible }">
-
           <!-- Primary feature: hero card spanning the full left column -->
           <article class="feat-card feat-card--hero" style="--idx: 0">
             <div class="feat-card__glow" aria-hidden="true" />
@@ -95,7 +94,6 @@
               </div>
             </div>
           </article>
-
         </div>
       </div>
     </section>
@@ -109,7 +107,9 @@
             <p class="cta-strip__sub">{{ $t('pages.home.cta_sub') }}</p>
           </div>
           <div class="cta-strip__actions">
-            <NuxtLink to="/register" class="button button-primary">{{ $t('pages.home.cta_register') }}</NuxtLink>
+            <NuxtLink to="/register" class="button button-primary">{{
+              $t('pages.home.cta_register')
+            }}</NuxtLink>
             <NuxtLink to="/login" class="button">{{ $t('pages.home.cta_login') }}</NuxtLink>
           </div>
         </div>
@@ -117,7 +117,6 @@
     </Transition>
 
     <AppFooter />
-
   </div>
 </template>
 
@@ -129,7 +128,7 @@ const auth = useAuthStore()
 
 // Feature section: scroll-triggered entrance via IntersectionObserver
 const featuresRef = ref<HTMLElement | null>(null)
-const featVisible  = ref(false)
+const featVisible = ref(false)
 
 onMounted(() => {
   const el = featuresRef.value
@@ -141,34 +140,34 @@ onMounted(() => {
         observer.disconnect()
       }
     },
-    { threshold: 0.1 },
+    { threshold: 0.1 }
   )
   observer.observe(el)
 })
 </script>
 
 <style lang="scss" scoped>
-$hero-bg:       #0F0E0C;
-$nav-height:    64px;
+$hero-bg: #0f0e0c;
+$nav-height: 64px;
 
-$amber-08:      rgba(212, 146, 30, 0.08);
-$amber-14:      rgba(212, 146, 30, 0.14);
-$amber-35:      rgba(212, 146, 30, 0.35);
-$amber-40:      rgba(212, 146, 30, 0.40);
-$amber-65:      rgba(212, 146, 30, 0.65);
-$amber-glow:    rgba(212, 146, 30, 0.28);
+$amber-08: rgba(212, 146, 30, 0.08);
+$amber-14: rgba(212, 146, 30, 0.14);
+$amber-35: rgba(212, 146, 30, 0.35);
+$amber-40: rgba(212, 146, 30, 0.4);
+$amber-65: rgba(212, 146, 30, 0.65);
+$amber-glow: rgba(212, 146, 30, 0.28);
 
-$hero-bg-85:    rgba(15, 14, 12, 0.85);
+$hero-bg-85: rgba(15, 14, 12, 0.85);
 
-$hero-text:     #EEE8DF;
-$hero-text-08:  rgba(238, 232, 223, 0.08);
+$hero-text: #eee8df;
+$hero-text-08: rgba(238, 232, 223, 0.08);
 
-$hero-muted:    rgba(238, 232, 223, 0.72);
+$hero-muted: rgba(238, 232, 223, 0.72);
 $hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-muted-60: rgba(238, 232, 223, 0.60);
+$hero-muted-60: rgba(238, 232, 223, 0.6);
 
-$hero-divider:  rgba(238, 232, 223, 0.10);
-$indigo-glow:   rgba(44, 40, 32, 0.60);
+$hero-divider: rgba(238, 232, 223, 0.1);
+$indigo-glow: rgba(44, 40, 32, 0.6);
 
 // ─── Page ─────────────────────────────────────────────────────────
 .landing {
@@ -179,9 +178,13 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
 
 // ─── Fade transition ──────────────────────────────────────────────
 .fade-enter-active,
-.fade-leave-active { transition: opacity 0.3s ease; }
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
 .fade-enter-from,
-.fade-leave-to { opacity: 0; }
+.fade-leave-to {
+  opacity: 0;
+}
 
 // ─── Hero ─────────────────────────────────────────────────────────
 .hero {
@@ -299,7 +302,9 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     color: $hero-muted;
     text-decoration: none;
     transition: color 0.2s;
-    &:hover { color: $hero-text; }
+    &:hover {
+      color: $hero-text;
+    }
   }
 
   &__admin-chip {
@@ -317,7 +322,9 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
       border: 1px solid $amber-40;
       border-radius: 999px;
       background: $amber-08;
-      transition: background 0.2s, border-color 0.2s;
+      transition:
+        background 0.2s,
+        border-color 0.2s;
 
       &:hover {
         background: $amber-14;
@@ -346,28 +353,52 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
 }
 
 @keyframes scrollHint {
-  0%, 100% { opacity: 0.3; transform: scaleY(1); }
-  50%       { opacity: 0.8; transform: scaleY(1.3); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleY(1.3);
+  }
 }
 
 @keyframes heroIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ─── Features ─────────────────────────────────────────────────────
 @keyframes featIn {
-  from { opacity: 0; transform: translateY(24px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .features {
   background: var(--background);
   padding: 6rem 1.5rem 5rem;
 
-  &__inner { max-width: 1100px; margin: 0 auto; }
+  &__inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
 
-  &__header { margin-bottom: 3.5rem; }
+  &__header {
+    margin-bottom: 3.5rem;
+  }
 
   &__title {
     font-size: clamp(1.75rem, 4vw, 2.5rem);
@@ -496,7 +527,7 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     right: -18%;
     width: 280px;
     height: 280px;
-    background: radial-gradient(circle, rgba($amber, 0.10) 0%, transparent 65%);
+    background: radial-gradient(circle, rgba($amber, 0.1) 0%, transparent 65%);
     border-radius: 50%;
     pointer-events: none;
     opacity: 0.55;
@@ -549,7 +580,9 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     align-items: flex-start;
   }
 
-  &__sat-content { min-width: 0; }
+  &__sat-content {
+    min-width: 0;
+  }
 
   // Small numbered counter label (sat cards)
   &__sat-num {
@@ -582,8 +615,13 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
   }
 
   // Hero size overrides
-  &--hero &__title { font-size: 1.3rem; margin-bottom: 0.6rem; }
-  &--hero &__text  { font-size: 0.95rem; }
+  &--hero &__title {
+    font-size: 1.3rem;
+    margin-bottom: 0.6rem;
+  }
+  &--hero &__text {
+    font-size: 0.95rem;
+  }
 }
 
 .feat-icon {
@@ -595,11 +633,28 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
   align-items: center;
   justify-content: center;
 
-  .icon { font-size: 1.4rem; }
+  .icon {
+    font-size: 1.4rem;
+  }
 
-  &--amber { background: var(--accent-color-muted);   .icon { color: var(--accent-color); } }
-  &--blue  { background: var(--accent-lighten-muted); .icon { color: var(--accent-color-lighten); } }
-  &--green { background: var(--success-muted);        .icon { color: var(--success); } }
+  &--amber {
+    background: var(--accent-color-muted);
+    .icon {
+      color: var(--accent-color);
+    }
+  }
+  &--blue {
+    background: var(--accent-lighten-muted);
+    .icon {
+      color: var(--accent-color-lighten);
+    }
+  }
+  &--green {
+    background: var(--success-muted);
+    .icon {
+      color: var(--success);
+    }
+  }
 }
 
 // ─── CTA Strip ────────────────────────────────────────────────────
@@ -633,7 +688,11 @@ $indigo-glow:   rgba(44, 40, 32, 0.60);
     padding-bottom: 0;
   }
 
-  &__actions { display: flex; gap: 0.75rem; flex-shrink: 0; flex-wrap: wrap; }
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
 }
-
 </style>

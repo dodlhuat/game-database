@@ -15,14 +15,14 @@ class PackageController extends Controller
             ->orderBy('name')
             ->get();
 
-        $packages->each(fn($package) => $this->appendAvailability($package));
+        $packages->each(fn ($package) => $this->appendAvailability($package));
 
         return response()->json(['data' => $packages]);
     }
 
     public function show(Package $package): JsonResponse
     {
-        if (!$package->is_active) {
+        if (! $package->is_active) {
             return response()->json(['message' => 'Paket nicht gefunden.'], 404);
         }
 
@@ -32,12 +32,12 @@ class PackageController extends Controller
         $games = $package->games()
             ->withCount(['copies as available_copies_count' => function ($q) {
                 $q->where('condition', '!=', 'LOCKED')
-                  ->whereDoesntHave('activeLoans');
+                    ->whereDoesntHave('activeLoans');
             }])
             ->get(['games.id', 'games.title', 'games.slug']);
 
         $package->setRelation('games', $games);
-        $package->setAttribute('available', $games->every(fn($g) => $g->available_copies_count > 0));
+        $package->setAttribute('available', $games->every(fn ($g) => $g->available_copies_count > 0));
 
         return response()->json(['data' => $package]);
     }
@@ -47,10 +47,10 @@ class PackageController extends Controller
         $games = $package->games()
             ->withCount(['copies as available_copies_count' => function ($q) {
                 $q->where('condition', '!=', 'LOCKED')
-                  ->whereDoesntHave('activeLoans');
+                    ->whereDoesntHave('activeLoans');
             }])
             ->get(['games.id']);
 
-        $package->setAttribute('available', $games->isNotEmpty() && $games->every(fn($g) => $g->available_copies_count > 0));
+        $package->setAttribute('available', $games->isNotEmpty() && $games->every(fn ($g) => $g->available_copies_count > 0));
     }
 }

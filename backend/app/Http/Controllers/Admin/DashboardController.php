@@ -15,13 +15,13 @@ class DashboardController extends Controller
     {
         return response()->json([
             'users' => [
-                'total'   => User::count(),
+                'total' => User::count(),
                 'pending' => User::where('status', 'PENDING')->count(),
-                'active'  => User::where('status', 'ACTIVE')->count(),
+                'active' => User::where('status', 'ACTIVE')->count(),
             ],
             'loans' => [
-                'active'   => Loan::whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->count(),
-                'overdue'  => Loan::where('status', 'OVERDUE')->count(),
+                'active' => Loan::whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])->count(),
+                'overdue' => Loan::where('status', 'OVERDUE')->count(),
                 'returned_today' => Loan::where('status', 'RETURNED')
                     ->whereDate('returned_at', today())
                     ->count(),

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\LoanResource;
 use App\Http\Resources\ReservationResource;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $activeLoans = $user->loans()
@@ -33,15 +34,15 @@ class DashboardController extends Controller
             ->get();
 
         return response()->json([
-            'active_loans'  => LoanResource::collection($activeLoans),
-            'loan_history'  => LoanResource::collection($loanHistory),
-            'reservations'  => ReservationResource::collection($reservations),
+            'active_loans' => LoanResource::collection($activeLoans),
+            'loan_history' => LoanResource::collection($loanHistory),
+            'reservations' => ReservationResource::collection($reservations),
             'stats' => [
-                'total_loans'        => $user->loans()->count(),
+                'total_loans' => $user->loans()->count(),
                 'active_loans_count' => $activeLoans->count(),
-                'overdue_count'      => $activeLoans->where('status', 'OVERDUE')->count(),
+                'overdue_count' => $activeLoans->where('status', 'OVERDUE')->count(),
                 'reservations_count' => $reservations->count(),
-                'tokens_blocked'     => $user->tokens_blocked,
+                'tokens_blocked' => $user->tokens_blocked,
             ],
         ]);
     }

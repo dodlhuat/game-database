@@ -37,7 +37,9 @@
     <div v-else class="auth-card__success">
       <span class="auth-card__success-icon" aria-hidden="true">✓</span>
       <p>{{ $t('auth.reset_success') }}</p>
-      <NuxtLink to="/login" class="auth-card__success-link">{{ $t('auth.reset_to_login') }}</NuxtLink>
+      <NuxtLink to="/login" class="auth-card__success-link">{{
+        $t('auth.reset_to_login')
+      }}</NuxtLink>
     </div>
 
     <p v-if="!done" class="auth-card__footer-text">

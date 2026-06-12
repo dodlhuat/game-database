@@ -20,7 +20,7 @@ class ReviewTest extends TestCase
         $this->actingAs($user)
             ->postJson('/api/reviews', [
                 'game_id' => $game->id,
-                'rating'  => 4,
+                'rating' => 4,
                 'comment' => 'Great game!',
             ])
             ->assertCreated();
@@ -37,7 +37,7 @@ class ReviewTest extends TestCase
         $this->actingAs($user)
             ->postJson('/api/reviews', [
                 'game_id' => $game->id,
-                'rating'  => 3,
+                'rating' => 3,
             ])
             ->assertStatus(422);
     }

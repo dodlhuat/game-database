@@ -14,26 +14,27 @@
 
     <div class="upgrade-content">
       <div class="upgrade-content__inner">
-
         <div v-if="auth.isMember" class="already-member">
           <div class="already-member__icon">✓</div>
           <h2 class="already-member__title">{{ $t('pages.upgrade.already_member') }}</h2>
           <p class="already-member__text">
             Deine Mitgliedschaft ist gültig bis
-            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong>.
+            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong
+            >.
           </p>
           <NuxtLink to="/dashboard" class="btn-secondary">Zum Dashboard</NuxtLink>
         </div>
 
         <div v-else class="upgrade-layout">
-
           <!-- Benefits -->
           <div class="benefits-panel">
             <h2 class="benefits-panel__title">{{ $t('pages.upgrade.benefits_title') }}</h2>
 
             <ul class="benefit-list">
               <li class="benefit-list__item">
-                <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true">◈</span>
+                <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
+                  >◈</span
+                >
                 <div>{{ $t('pages.upgrade.benefit_tokens') }}</div>
               </li>
               <li class="benefit-list__item">
@@ -82,9 +83,7 @@
 
             <UiButton :loading="loading" @click="upgrade">{{ $t('btn.upgrade') }}</UiButton>
           </div>
-
         </div>
-
       </div>
     </div>
   </div>
@@ -109,7 +108,11 @@ if (auth.isAdmin) {
 
 function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
-  return new Date(dateStr).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('de-AT', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
 }
 
 async function upgrade() {
@@ -123,7 +126,9 @@ async function upgrade() {
 
   loading.value = true
   try {
-    const data = await api.post<{ user: typeof auth.user }>('/membership/upgrade', { address: address.value })
+    const data = await api.post<{ user: typeof auth.user }>('/membership/upgrade', {
+      address: address.value,
+    })
     if (data.user) auth.setUser(data.user)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
@@ -140,10 +145,10 @@ async function upgrade() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0F0E0C;
+$hero-bg: #0f0e0c;
 $nav-height: 3.5rem;
 $amber-glow: rgba(212, 146, 30, 0.15);
-$hero-text: #EEE8DF;
+$hero-text: #eee8df;
 $hero-muted: rgba(238, 232, 223, 0.72);
 $surface: rgba(255, 255, 255, 0.04);
 $border: rgba(238, 232, 223, 0.1);
@@ -154,13 +159,53 @@ $border: rgba(238, 232, 223, 0.1);
   padding: calc(#{$nav-height} + 1.75rem) 1.5rem 1.75rem;
   overflow: hidden;
 
-  &__backdrop { position: absolute; inset: 0; pointer-events: none; }
-  &__glow { position: absolute; width: 400px; height: 400px; top: -120px; right: -60px; border-radius: 50%; filter: blur(90px); background: $amber-glow; }
-  &__dots { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 24px 24px; mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%); }
-  &__body { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
-  &__eyebrow { font-size: 0.78rem; font-weight: 600; color: $amber; letter-spacing: 0.02em; margin-bottom: 0.4rem; }
-  &__title { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 800; letter-spacing: -0.04em; color: $hero-text; margin: 0 0 0.5rem; }
-  &__sub { font-size: 0.95rem; color: $hero-muted; margin: 0; }
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  &__glow {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    top: -120px;
+    right: -60px;
+    border-radius: 50%;
+    filter: blur(90px);
+    background: $amber-glow;
+  }
+  &__dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%);
+  }
+  &__body {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  &__eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: $amber;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.4rem;
+  }
+  &__title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: $hero-text;
+    margin: 0 0 0.5rem;
+  }
+  &__sub {
+    font-size: 0.95rem;
+    color: $hero-muted;
+    margin: 0;
+  }
 }
 
 .upgrade-content {
@@ -183,9 +228,21 @@ $border: rgba(238, 232, 223, 0.1);
   max-width: 480px;
   margin: 0 auto;
 
-  &__icon { font-size: 3rem; color: $amber; margin-bottom: 1rem; }
-  &__title { font-size: 1.5rem; font-weight: 700; color: $hero-text; margin-bottom: 0.5rem; }
-  &__text { color: $hero-muted; margin-bottom: 1.5rem; }
+  &__icon {
+    font-size: 3rem;
+    color: $amber;
+    margin-bottom: 1rem;
+  }
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: $hero-text;
+    margin-bottom: 0.5rem;
+  }
+  &__text {
+    color: $hero-muted;
+    margin-bottom: 1.5rem;
+  }
 }
 
 .upgrade-layout {
@@ -237,7 +294,9 @@ $border: rgba(238, 232, 223, 0.1);
     font-size: 0.9rem;
     line-height: 1.5;
 
-    strong { color: $hero-text; }
+    strong {
+      color: $hero-text;
+    }
   }
 
   &__icon {
@@ -250,9 +309,13 @@ $border: rgba(238, 232, 223, 0.1);
     align-items: center;
     justify-content: center;
 
-    &--token { font-size: 0.85rem; }
+    &--token {
+      font-size: 0.85rem;
+    }
 
-    .icon { font-size: 1rem; }
+    .icon {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -275,7 +338,6 @@ $border: rgba(238, 232, 223, 0.1);
     color: $hero-muted;
     margin-bottom: 1.5rem;
   }
-
 }
 
 .btn-secondary {
@@ -289,6 +351,8 @@ $border: rgba(238, 232, 223, 0.1);
   font-weight: 500;
   transition: border-color 0.2s;
 
-  &:hover { border-color: $amber; }
+  &:hover {
+    border-color: $amber;
+  }
 }
 </style>

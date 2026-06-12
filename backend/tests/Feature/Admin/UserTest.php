@@ -46,11 +46,11 @@ class UserTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->postJson('/api/admin/users', [
-                'name'     => 'New User',
-                'email'    => 'newuser@example.com',
+                'name' => 'New User',
+                'email' => 'newuser@example.com',
                 'password' => 'password123',
-                'role'     => 'USER',
-                'status'   => 'PENDING',
+                'role' => 'USER',
+                'status' => 'PENDING',
             ])
             ->assertCreated();
 
@@ -63,9 +63,9 @@ class UserTest extends TestCase
 
         $this->actingAs($this->admin())
             ->putJson("/api/admin/users/{$target->id}", [
-                'name'  => 'Updated Name',
+                'name' => 'Updated Name',
                 'email' => $target->email,
-                'role'  => 'MEMBER',
+                'role' => 'MEMBER',
             ])
             ->assertOk()
             ->assertJsonPath('data.role', 'MEMBER');

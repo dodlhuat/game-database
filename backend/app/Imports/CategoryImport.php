@@ -10,6 +10,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class CategoryImport implements ToModel, WithHeadingRow
 {
     public int $newCount = 0;
+
     public int $updatedCount = 0;
 
     /** @param array<string, mixed> $row */
@@ -46,12 +47,12 @@ class CategoryImport implements ToModel, WithHeadingRow
         }
 
         $data = [
-            'name'       => $name,
-            'slug'       => $slug,
-            'parent_id'  => $parentId,
-            'icon_url'   => isset($row['icon_url']) && $row['icon_url'] !== '' ? trim($row['icon_url']) : null,
+            'name' => $name,
+            'slug' => $slug,
+            'parent_id' => $parentId,
+            'icon_url' => isset($row['icon_url']) && $row['icon_url'] !== '' ? trim($row['icon_url']) : null,
             'sort_order' => isset($row['sort_order']) && $row['sort_order'] !== '' ? (int) $row['sort_order'] : 0,
-            'is_active'  => isset($row['is_active']) && $row['is_active'] !== '' ? (bool)(int) $row['is_active'] : true,
+            'is_active' => isset($row['is_active']) && $row['is_active'] !== '' ? (bool) (int) $row['is_active'] : true,
         ];
 
         if ($isNew) {

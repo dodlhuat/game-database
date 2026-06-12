@@ -8,7 +8,8 @@ use Illuminate\Console\Command;
 
 class SendMembershipRenewalReminders extends Command
 {
-    protected $signature   = 'members:send-renewal-reminders';
+    protected $signature = 'members:send-renewal-reminders';
+
     protected $description = 'Send renewal reminder emails to members whose membership expires within 90 days';
 
     public function handle(): int
@@ -18,12 +19,12 @@ class SendMembershipRenewalReminders extends Command
             ->whereBetween('membership_expires_at', [now(), now()->addDays(90)])
             ->where(function ($q) {
                 $q->whereNull('renewal_reminder_sent_at')
-                  ->orWhere('renewal_reminder_sent_at', '<', now()->subDays(90));
+                    ->orWhere('renewal_reminder_sent_at', '<', now()->subDays(90));
             })
             ->get();
 
         foreach ($users as $user) {
-            $user->notify(new MembershipRenewalReminderNotification());
+            $user->notify(new MembershipRenewalReminderNotification);
             $user->update(['renewal_reminder_sent_at' => now()]);
             $this->line("Reminder sent to: {$user->email}");
         }

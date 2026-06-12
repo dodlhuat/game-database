@@ -11,7 +11,7 @@ class TermsController extends Controller
     {
         $terms = TermsVersion::orderByDesc('published_at')->first();
 
-        if (!$terms) {
+        if (! $terms) {
             return response()->json(['message' => 'Keine Nutzungsbedingungen gefunden.'], 404);
         }
 

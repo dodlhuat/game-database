@@ -43,7 +43,7 @@
         <button type="button" data-editor-action="link" title="Insert link (Ctrl+K)">
           <span class="icon icon-add" aria-hidden="true" />
         </button>
-        <button type="button" data-editor-action="image" title="Insert image" style="display: none;">
+        <button type="button" data-editor-action="image" title="Insert image" style="display: none">
           <span class="icon icon-add_photo_alternate" aria-hidden="true" />
         </button>
         <input type="file" data-editor="image-file" accept="image/*" hidden />
@@ -86,9 +86,7 @@
     <div class="editor-footer">
       <span data-editor="wordcount" class="editor-wordcount">0 words</span>
       <span class="editor-shortcuts">
-        <kbd>Ctrl+B</kbd> Bold
-        <kbd>Ctrl+K</kbd> Link
-        <kbd>Ctrl+S</kbd> Save
+        <kbd>Ctrl+B</kbd> Bold <kbd>Ctrl+K</kbd> Link <kbd>Ctrl+S</kbd> Save
       </span>
     </div>
   </div>
@@ -118,18 +116,24 @@ onMounted(() => {
   editor = new Editor({ root: editorRoot.value })
 
   observer = new MutationObserver(() => {
-    if (ignoreNext) { ignoreNext = false; return }
+    if (ignoreNext) {
+      ignoreNext = false
+      return
+    }
     emit('update:modelValue', editableEl.innerHTML)
   })
   observer.observe(editableEl, { childList: true, subtree: true, characterData: true })
 })
 
-watch(() => props.modelValue, (val) => {
-  const editableEl = editorRoot.value?.querySelector<HTMLElement>('[data-editor="editable"]')
-  if (!editableEl || editableEl.innerHTML === val) return
-  ignoreNext = true
-  editableEl.innerHTML = val ?? ''
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    const editableEl = editorRoot.value?.querySelector<HTMLElement>('[data-editor="editable"]')
+    if (!editableEl || editableEl.innerHTML === val) return
+    ignoreNext = true
+    editableEl.innerHTML = val ?? ''
+  }
+)
 
 onUnmounted(() => {
   observer?.disconnect()

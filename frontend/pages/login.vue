@@ -20,18 +20,27 @@
         required
         autocomplete="current-password"
       />
-      <NuxtLink to="/forgot-password" class="forgot-link">{{ $t('auth.forgot_password') }}</NuxtLink>
+      <NuxtLink to="/forgot-password" class="forgot-link">{{
+        $t('auth.forgot_password')
+      }}</NuxtLink>
 
       <div v-if="emailNotVerified" class="alert alert-warning" role="alert">
         {{ $t('auth.email_not_verified') }}
-        <button type="button" class="resend-link" :disabled="resendLoading" @click="resendVerification">
+        <button
+          type="button"
+          class="resend-link"
+          :disabled="resendLoading"
+          @click="resendVerification"
+        >
           {{ resendLoading ? $t('auth.resending') : $t('auth.resend_link') }}
         </button>
         <span v-if="resendSuccess" class="resend-success">{{ $t('auth.email_sent') }}</span>
         <span v-if="resendError" class="resend-error">{{ $t('common.error.generic') }}</span>
       </div>
 
-      <div v-else-if="statusMessage" class="alert alert-error" role="alert">{{ statusMessage }}</div>
+      <div v-else-if="statusMessage" class="alert alert-error" role="alert">
+        {{ statusMessage }}
+      </div>
 
       <UiButton type="submit" :loading="loading">{{ $t('btn.login') }}</UiButton>
     </form>
@@ -58,9 +67,7 @@ const resendSuccess = ref(false)
 const resendError = ref(false)
 const lastEmail = ref('')
 const statusMessage = ref(
-  route.query.reason === 'unauthenticated'
-    ? t('common.error.session_expired')
-    : ''
+  route.query.reason === 'unauthenticated' ? t('common.error.session_expired') : ''
 )
 
 const form = reactive({ email: '', password: '' })
@@ -77,7 +84,12 @@ async function submit() {
     await login(form)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
-    const e = err as { status?: number; reason?: string; message?: string; errors?: Record<string, string[]> }
+    const e = err as {
+      status?: number
+      reason?: string
+      message?: string
+      errors?: Record<string, string[]>
+    }
 
     if (e.reason === 'email_not_verified') {
       emailNotVerified.value = true
@@ -123,7 +135,9 @@ async function resendVerification() {
   margin-bottom: 1.25rem;
   transition: color 0.2s;
 
-  &:hover { color: $amber; }
+  &:hover {
+    color: $amber;
+  }
 }
 
 .resend-link {
@@ -137,7 +151,10 @@ async function resendVerification() {
   margin-left: 0.5rem;
   text-decoration: underline;
 
-  &:disabled { opacity: 0.5; cursor: default; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
 }
 
 .resend-success {
