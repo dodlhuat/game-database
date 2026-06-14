@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LoanResource;
 use App\Models\Copy;
 use App\Models\Loan;
+use App\Notifications\LoanOverdueReminder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -35,6 +36,21 @@ class LoanController extends Controller
         $loan->update(['status' => 'OVERDUE']);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
+    }
+
+    public function sendOverdueReminder(Loan $loan): JsonResponse|LoanResource
+    {
+        if ($loan->status !== 'OVERDUE') {
+            return response()->json(['message' => 'Nur überfällige Ausleihen können erinnert werden.'], 422);
+        }
+
+        $loan->load(['copy.game', 'user', 'extensions']);
+
+        $loan->user->notify(new LoanOverdueReminder($loan));
+
+        $loan->update(['overdue_reminder_sent_at' => now()]);
+
+        return new LoanResource($loan);
     }
 
     public function return(Request $request, Loan $loan): JsonResponse|LoanResource

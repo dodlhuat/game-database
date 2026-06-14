@@ -59,154 +59,259 @@
       </div>
     </section>
 
-    <!-- ── Filter Strip ────────────────────────────────────────── -->
+    <!-- ── Filter Bar ────────────────────────────────────────── -->
     <div
       v-show="!isSmartSearch"
-      class="filter-strip"
-      :class="{ 'filter-strip--filtered': hasActiveFilters }"
+      class="filter-bar"
+      :class="{ 'filter-bar--active': hasActiveFilters, 'filter-bar--open': filterPanelOpen }"
     >
-      <div class="filter-strip__scroll">
-        <div
-          ref="catChipRef"
-          class="chip-wrap"
-          :class="{ 'chip-wrap--active': !!filters.category, 'chip-wrap--open': catPopoverOpen }"
-          style="--i: 0"
-          @click="toggleCatPopover"
-        >
-          <span class="chip-label">{{ categoryLabel }}</span>
-          <span class="icon icon-expand_more chip-chevron" aria-hidden="true" />
-        </div>
-
-        <div
-          class="chip-wrap chip-wrap--vd"
-          :class="{ 'chip-wrap--active': !!filters.difficulty }"
-          style="--i: 1"
-        >
-          <UiVirtualDropdown
-            v-model="filters.difficulty"
-            :options="[
-              { label: $t('pages.games.filter_difficulty'), value: '' },
-              { label: $t('pages.games.filter_difficulty_easy'), value: 'EASY' },
-              { label: $t('pages.games.filter_difficulty_medium'), value: 'MEDIUM' },
-              { label: $t('pages.games.filter_difficulty_hard'), value: 'HARD' },
-              { label: $t('pages.games.filter_difficulty_expert'), value: 'EXPERT' },
-            ]"
-            :placeholder="$t('pages.games.filter_difficulty')"
-            @change="resetPage"
-          />
-        </div>
-
-        <div
-          class="chip-wrap chip-wrap--vd"
-          :class="{ 'chip-wrap--active': !!filters.players }"
-          style="--i: 2"
-        >
-          <UiVirtualDropdown
-            v-model="filters.players"
-            :options="[
-              { label: $t('pages.games.filter_players'), value: '' },
-              { label: $t('pages.games.filter_players_count', { n: 1 }), value: '1' },
-              { label: $t('pages.games.filter_players_count', { n: 2 }), value: '2' },
-              { label: $t('pages.games.filter_players_count', { n: 3 }), value: '3' },
-              { label: $t('pages.games.filter_players_count', { n: 4 }), value: '4' },
-              { label: $t('pages.games.filter_players_count', { n: 5 }), value: '5' },
-              { label: $t('pages.games.filter_players_count_plus', { n: 6 }), value: '6' },
-            ]"
-            :placeholder="$t('pages.games.filter_players')"
-            @change="resetPage"
-          />
-        </div>
-
-        <div
-          class="chip-wrap chip-wrap--vd"
-          :class="{ 'chip-wrap--active': !!filters.duration }"
-          style="--i: 3"
-        >
-          <UiVirtualDropdown
-            v-model="filters.duration"
-            :options="[
-              { label: $t('pages.games.filter_duration'), value: '' },
-              { label: $t('pages.games.filter_duration_short'), value: 'short' },
-              { label: $t('pages.games.filter_duration_medium'), value: 'medium' },
-              { label: $t('pages.games.filter_duration_long'), value: 'long' },
-            ]"
-            :placeholder="$t('pages.games.filter_duration')"
-            @change="resetPage"
-          />
-        </div>
-
-        <div
-          class="chip-wrap chip-wrap--vd"
-          :class="{ 'chip-wrap--active': !!filters.min_age }"
-          style="--i: 4"
-        >
-          <UiVirtualDropdown
-            v-model="filters.min_age"
-            :options="[
-              { label: $t('pages.games.filter_age'), value: '' },
-              { label: $t('pages.games.filter_age_from', { n: 6 }), value: '6' },
-              { label: $t('pages.games.filter_age_from', { n: 8 }), value: '8' },
-              { label: $t('pages.games.filter_age_from', { n: 10 }), value: '10' },
-              { label: $t('pages.games.filter_age_from', { n: 12 }), value: '12' },
-              { label: $t('pages.games.filter_age_from', { n: 14 }), value: '14' },
-              { label: $t('pages.games.filter_age_from', { n: 16 }), value: '16' },
-              { label: $t('pages.games.filter_age_from', { n: 18 }), value: '18' },
-            ]"
-            :placeholder="$t('pages.games.filter_age')"
-            @change="resetPage"
-          />
-        </div>
-
-        <div
-          class="chip-wrap chip-wrap--vd"
-          :class="{ 'chip-wrap--active': !!filters.language }"
-          style="--i: 5"
-        >
-          <UiVirtualDropdown
-            v-model="filters.language"
-            :options="[
-              { label: $t('pages.games.filter_language'), value: '' },
-              ...allLanguages.map((l) => ({ label: l.name, value: l.id })),
-            ]"
-            :placeholder="$t('pages.games.filter_language')"
-            @change="resetPage"
-          />
-        </div>
-
+      <!-- Top row -->
+      <div class="filter-bar__row">
+        <!-- Toggle button -->
         <button
-          class="chip-btn"
-          :class="{ 'chip-btn--active': filters.available }"
-          style="--i: 6"
-          @click="toggleAvailable"
+          class="filter-toggle"
+          :class="{ 'filter-toggle--open': filterPanelOpen }"
+          :aria-expanded="filterPanelOpen"
+          @click="filterPanelOpen = !filterPanelOpen"
         >
-          <span class="icon icon-check_circle chip-btn__icon" aria-hidden="true" />
-          {{ $t('pages.games.filter_available') }}
+          <span class="icon icon-tune filter-toggle__icon" aria-hidden="true" />
+          <span class="filter-toggle__label">{{ $t('pages.games.filter_open') }}</span>
+          <Transition name="badge-pop">
+            <span v-if="activeFilterCount" class="filter-toggle__badge">{{
+              activeFilterCount
+            }}</span>
+          </Transition>
         </button>
 
-        <div class="chip-wrap chip-wrap--sort chip-wrap--vd" style="--i: 7">
-          <UiVirtualDropdown
-            v-model="filters.sort"
-            :options="[
-              { label: $t('pages.games.sort_az'), value: 'title' },
-              { label: $t('pages.games.sort_newest'), value: 'created_at' },
-            ]"
-            :placeholder="$t('pages.games.sort_az')"
-            @change="resetPage"
-          />
+        <!-- Active filter pills (only when panel is closed) -->
+        <div v-if="hasActiveFilters && !filterPanelOpen" class="active-pills-wrap">
+          <div class="active-pills">
+            <button
+              v-if="filters.category"
+              class="active-pill"
+              @click.stop="
+                filters.category = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ categoryLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.difficulty"
+              class="active-pill"
+              @click.stop="
+                filters.difficulty = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ difficultyLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.players"
+              class="active-pill"
+              @click.stop="
+                filters.players = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ playersLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.duration"
+              class="active-pill"
+              @click.stop="
+                filters.duration = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ durationLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.min_age"
+              class="active-pill"
+              @click.stop="
+                filters.min_age = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ ageLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.language"
+              class="active-pill"
+              @click.stop="
+                filters.language = ''
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ languageLabel }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+            <button
+              v-if="filters.available"
+              class="active-pill"
+              @click.stop="
+                filters.available = false
+                resetPage()
+              "
+            >
+              <span class="active-pill__text">{{ $t('pages.games.filter_available') }}</span>
+              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Spacer when no active pills -->
+        <div v-else class="filter-bar__spacer" />
+
+        <!-- Right cluster: sort + clear -->
+        <div class="filter-bar__controls">
+          <div class="sort-control" role="group" :aria-label="$t('pages.games.sort_az')">
+            <button
+              class="sort-btn"
+              :class="{ 'sort-btn--active': filters.sort === 'title' }"
+              @click="
+                filters.sort = 'title'
+                resetPage()
+              "
+            >
+              <span class="sort-btn__label">{{ $t('pages.games.sort_az') }}</span>
+            </button>
+            <button
+              class="sort-btn"
+              :class="{ 'sort-btn--active': filters.sort === 'created_at' }"
+              @click="
+                filters.sort = 'created_at'
+                resetPage()
+              "
+            >
+              <span class="sort-btn__label">{{ $t('pages.games.sort_newest') }}</span>
+            </button>
+          </div>
+
+          <Transition name="slide-clear">
+            <button
+              v-if="hasActiveFilters"
+              class="clear-all-btn"
+              :aria-label="$t('pages.games.filter_clear')"
+              @click="clearFilters"
+            >
+              <span class="icon icon-close" aria-hidden="true" />
+            </button>
+          </Transition>
         </div>
       </div>
 
-      <Transition name="slide-clear">
-        <button
-          v-if="hasActiveFilters"
-          class="filter-clear"
-          :aria-label="$t('pages.games.filter_clear')"
-          @click="clearFilters"
-        >
-          <span class="filter-clear__badge">{{ activeFilterCount }}</span>
-          <span class="icon icon-close" aria-hidden="true" />
-        </button>
-      </Transition>
+      <!-- ── Expandable filter panel ──────────────────────────── -->
+      <div class="filter-panel" :class="{ 'filter-panel--open': filterPanelOpen }">
+        <div class="filter-panel__inner">
+          <!-- Category -->
+          <div class="filter-section filter-section--category">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_category') }}</h4>
+            <div ref="catPickerEl" class="cat-picker-host" />
+          </div>
+
+          <!-- Difficulty -->
+          <div class="filter-section">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_difficulty') }}</h4>
+            <div
+              class="option-chips"
+              role="group"
+              :aria-label="$t('pages.games.filter_difficulty')"
+            >
+              <button
+                v-for="d in difficultyOptions"
+                :key="d.value"
+                class="option-chip"
+                :class="{ 'option-chip--active': filters.difficulty === d.value }"
+                @click="selectFilter('difficulty', d.value)"
+              >
+                {{ d.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Players -->
+          <div class="filter-section">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_players') }}</h4>
+            <div class="player-chips" role="group" :aria-label="$t('pages.games.filter_players')">
+              <button
+                v-for="p in playerOptions"
+                :key="p.value"
+                class="player-chip"
+                :class="{ 'player-chip--active': filters.players === p.value }"
+                :aria-pressed="filters.players === p.value"
+                @click="selectFilter('players', p.value)"
+              >
+                {{ p.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Duration -->
+          <div class="filter-section">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_duration') }}</h4>
+            <div class="option-chips" role="group" :aria-label="$t('pages.games.filter_duration')">
+              <button
+                v-for="d in durationOptions"
+                :key="d.value"
+                class="option-chip"
+                :class="{ 'option-chip--active': filters.duration === d.value }"
+                @click="selectFilter('duration', d.value)"
+              >
+                {{ d.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Age -->
+          <div class="filter-section">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_age') }}</h4>
+            <div class="option-chips" role="group" :aria-label="$t('pages.games.filter_age')">
+              <button
+                v-for="a in ageOptions"
+                :key="a.value"
+                class="option-chip"
+                :class="{ 'option-chip--active': filters.min_age === a.value }"
+                @click="selectFilter('min_age', a.value)"
+              >
+                {{ a.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Language -->
+          <div v-if="allLanguages.length" class="filter-section">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_language') }}</h4>
+            <div class="option-chips" role="group" :aria-label="$t('pages.games.filter_language')">
+              <button
+                v-for="l in allLanguages"
+                :key="l.id"
+                class="option-chip"
+                :class="{ 'option-chip--active': String(filters.language) === String(l.id) }"
+                @click="selectLanguage(l.id)"
+              >
+                {{ l.name }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Available -->
+          <div class="filter-section filter-section--switch">
+            <div class="switch-row">
+              <h4 class="filter-section__title filter-section__title--inline">
+                {{ $t('pages.games.filter_available') }}
+              </h4>
+              <UiSwitch v-model="filters.available" @update:model-value="resetPage" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- ── Catalog ─────────────────────────────────────────────── -->
@@ -256,15 +361,6 @@
 
     <AppFooter />
   </div>
-
-  <!-- ── Category popover (teleported to body for z-index / overflow) ── -->
-  <Teleport to="body">
-    <Transition name="cat-pop">
-      <div v-if="catPopoverOpen" ref="catPopoverElRef" class="cat-popover" :style="catPopoverStyle">
-        <div ref="catPickerEl" />
-      </div>
-    </Transition>
-  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -290,43 +386,47 @@ const smartMeta = ref<SmartSearchMeta | null>(null)
 const categories = ref<CategoryItem[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
+const filterPanelOpen = ref(false)
 
 const isSmartSearch = computed(() => !!filters.search)
 
-// ── Category popover ───────────────────────────────────────────────
-const catChipRef = ref<HTMLElement | null>(null)
+// ── Filter options ─────────────────────────────────────────────────
+const difficultyOptions = computed(() => [
+  { label: t('pages.games.filter_difficulty_easy'), value: 'EASY' },
+  { label: t('pages.games.filter_difficulty_medium'), value: 'MEDIUM' },
+  { label: t('pages.games.filter_difficulty_hard'), value: 'HARD' },
+  { label: t('pages.games.filter_difficulty_expert'), value: 'EXPERT' },
+])
+
+const playerOptions = computed(() => [
+  { label: '1', value: '1' },
+  { label: '2', value: '2' },
+  { label: '3', value: '3' },
+  { label: '4', value: '4' },
+  { label: '5', value: '5' },
+  { label: '6+', value: '6' },
+])
+
+const durationOptions = computed(() => [
+  { label: t('pages.games.filter_duration_short'), value: 'short' },
+  { label: t('pages.games.filter_duration_medium'), value: 'medium' },
+  { label: t('pages.games.filter_duration_long'), value: 'long' },
+])
+
+const ageOptions = computed(() => [
+  { label: t('pages.games.filter_age_from', { n: 6 }), value: '6' },
+  { label: t('pages.games.filter_age_from', { n: 8 }), value: '8' },
+  { label: t('pages.games.filter_age_from', { n: 10 }), value: '10' },
+  { label: t('pages.games.filter_age_from', { n: 12 }), value: '12' },
+  { label: t('pages.games.filter_age_from', { n: 14 }), value: '14' },
+  { label: t('pages.games.filter_age_from', { n: 16 }), value: '16' },
+  { label: t('pages.games.filter_age_from', { n: 18 }), value: '18' },
+])
+
+// ── Category picker ────────────────────────────────────────────────
 const catPickerEl = ref<HTMLElement | null>(null)
-const catPopoverElRef = ref<HTMLElement | null>(null)
-const catPopoverOpen = ref(false)
-const catPopoverPos = ref({ top: 0, left: 0, width: 300 })
 let catPicker: InstanceType<typeof GroupPicker> | null = null
 let isInitializingPicker = false
-
-const catPopoverStyle = computed(() => ({
-  top: `${catPopoverPos.value.top}px`,
-  left: `${catPopoverPos.value.left}px`,
-  width: `${catPopoverPos.value.width}px`,
-}))
-
-function toggleCatPopover() {
-  catPopoverOpen.value ? closeCatPopover() : openCatPopover()
-}
-
-function openCatPopover() {
-  const rect = catChipRef.value?.getBoundingClientRect()
-  if (!rect) return
-  const w = 300
-  const left = Math.min(rect.left, window.innerWidth - w - 12)
-  catPopoverPos.value = { top: rect.bottom + 6, left: Math.max(8, left), width: w }
-  catPopoverOpen.value = true
-  nextTick(() => initCatPicker())
-}
-
-function closeCatPopover() {
-  catPopoverOpen.value = false
-  catPicker?.destroy()
-  catPicker = null
-}
 
 function initCatPicker() {
   if (!catPickerEl.value) return
@@ -378,32 +478,32 @@ function initCatPicker() {
   }
 }
 
-function onOutsideClick(e: PointerEvent) {
-  if (!catPopoverOpen.value) return
-  const target = e.target as Element
-  if (!catChipRef.value?.contains(target) && !catPopoverElRef.value?.contains(target)) {
-    closeCatPopover()
+// Init/re-init picker when panel opens and categories are ready
+watch([filterPanelOpen, categories], ([open, cats]) => {
+  if (open && cats.length > 0) {
+    nextTick(() => initCatPicker())
   }
-}
+})
 
 function onEscapeKey(e: KeyboardEvent) {
-  if (e.key === 'Escape' && catPopoverOpen.value) closeCatPopover()
+  if (e.key === 'Escape' && filterPanelOpen.value) filterPanelOpen.value = false
 }
 
+// ── Filters ────────────────────────────────────────────────────────
 const filters = reactive({
   search: '',
   category: '',
   difficulty: '',
   players: '',
   duration: '' as '' | 'short' | 'medium' | 'long',
-  language: '',
+  language: '' as string | number,
   min_age: '',
   available: false,
   sort: 'title',
   page: 1,
 })
 
-// ── Chip labels ────────────────────────────────────────────────────
+// ── Active filter labels ───────────────────────────────────────────
 const categoryLabel = computed(() => {
   if (!filters.category) return t('pages.games.filter_category')
   const slugs = filters.category.split(',').filter(Boolean)
@@ -416,6 +516,27 @@ const categoryLabel = computed(() => {
     if (child) return child.name
   }
   return t('pages.games.filter_category')
+})
+
+const difficultyLabel = computed(() => {
+  return difficultyOptions.value.find((o) => o.value === filters.difficulty)?.label ?? ''
+})
+
+const playersLabel = computed(() => {
+  return playerOptions.value.find((o) => o.value === filters.players)?.label ?? ''
+})
+
+const durationLabel = computed(() => {
+  return durationOptions.value.find((o) => o.value === filters.duration)?.label ?? ''
+})
+
+const ageLabel = computed(() => {
+  return ageOptions.value.find((o) => o.value === filters.min_age)?.label ?? ''
+})
+
+const languageLabel = computed(() => {
+  if (!filters.language) return ''
+  return allLanguages.value.find((l) => String(l.id) === String(filters.language))?.name ?? ''
 })
 
 // ── Filter state ───────────────────────────────────────────────────
@@ -447,8 +568,14 @@ const activeFilterCount = computed(
     ].filter(Boolean).length
 )
 
-function toggleAvailable() {
-  filters.available = !filters.available
+// ── Filter actions ─────────────────────────────────────────────────
+function selectFilter(key: 'difficulty' | 'players' | 'duration' | 'min_age', value: string) {
+  filters[key] = filters[key] === value ? '' : (value as never)
+  resetPage()
+}
+
+function selectLanguage(id: number) {
+  filters.language = String(filters.language) === String(id) ? '' : id
   resetPage()
 }
 
@@ -461,6 +588,7 @@ function clearFilters() {
   filters.language = ''
   filters.min_age = ''
   filters.available = false
+  catPicker?.setSelection({ parentGroups: [], subgroups: [] })
   resetPage()
 }
 
@@ -520,12 +648,10 @@ useAsyncData(
 )
 
 onMounted(() => {
-  document.addEventListener('pointerdown', onOutsideClick, { capture: true })
   document.addEventListener('keydown', onEscapeKey)
 })
 
 onUnmounted(() => {
-  document.removeEventListener('pointerdown', onOutsideClick, { capture: true })
   document.removeEventListener('keydown', onEscapeKey)
   catPicker?.destroy()
 })
@@ -536,8 +662,10 @@ $hero-bg: #0f0e0c;
 $nav-height: 64px;
 
 $amber-08: rgba($amber, 0.08);
+$amber-12: rgba($amber, 0.12);
 $amber-15: rgba($amber, 0.15);
 $amber-25: rgba($amber, 0.25);
+$amber-35: rgba($amber, 0.35);
 $amber-glow: rgba($amber, 0.2);
 
 $hero-text: #eee8df;
@@ -548,17 +676,6 @@ $hero-input-bg: rgba(255, 255, 255, 0.06);
 $hero-input-border: rgba(255, 255, 255, 0.12);
 
 // ─── Keyframes ────────────────────────────────────────────────────
-@keyframes chipIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes searchGlow {
   0%,
   100% {
@@ -570,6 +687,38 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     box-shadow:
       0 0 28px 4px $amber-15,
       inset 0 0 0 1.5px rgba($amber, 0.5);
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes playerRingPulse {
+  0% {
+    box-shadow:
+      0 0 0 0 $amber-25,
+      0 0 0 0 $amber-12;
+  }
+  60% {
+    box-shadow:
+      0 0 0 6px $amber-08,
+      0 0 0 11px rgba($amber, 0.03);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 transparent,
+      0 0 0 0 transparent;
   }
 }
 
@@ -770,220 +919,125 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   transform: translateY(-6px);
 }
 
-// ─── Filter Strip ─────────────────────────────────────────────────
-.filter-strip {
+// ─── Filter Bar ───────────────────────────────────────────────────
+.filter-bar {
   position: sticky;
   top: $nav-height;
   z-index: 50;
-  background: var(--secondary-background);
+  background: rgba($hero-bg, 0.9);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
   border-bottom: 1px solid var(--divider);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
-  transition: box-shadow 0.3s;
+  transition:
+    box-shadow 0.45s,
+    border-bottom-color 0.3s;
 
-  &--filtered {
-    box-shadow: 0 2px 12px rgba($amber, 0.08);
+  // Amber sweep line — contracts inward from edges as filters activate
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 30%;
+    right: 30%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, $amber-35, transparent);
+    opacity: 0;
+    transition:
+      opacity 0.5s ease,
+      left 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      right 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
   }
 
-  &__scroll {
+  &--active {
+    box-shadow: 0 4px 40px rgba($amber, 0.05);
+
+    &::after {
+      opacity: 1;
+      left: 12%;
+      right: 12%;
+    }
+  }
+
+  // When panel is open, dissolve the bottom border so panel feels like an extension
+  &--open {
+    border-bottom-color: transparent;
+  }
+
+  &__row {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    overflow-x: auto;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    min-height: 52px;
+  }
+
+  &__spacer {
     flex: 1;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-    padding: 0.25rem 0;
+  }
+
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
   }
 }
 
-// ─── Filter Chips ─────────────────────────────────────────────────
-.chip-wrap {
-  position: relative;
+// ─── Filter Toggle Button ─────────────────────────────────────────
+.filter-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 0.625rem 0.375rem 0.75rem;
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 999px;
+  gap: 0.375rem;
+  padding: 0.4375rem 0.8125rem 0.4375rem 0.625rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
   cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--secondary-text);
   white-space: nowrap;
   flex-shrink: 0;
   transition:
-    border-color 0.2s,
-    background 0.2s,
-    color 0.2s;
-  animation: chipIn 0.35s ease calc(var(--i, 0) * 40ms) backwards;
+    border-color 0.25s,
+    background 0.25s,
+    color 0.25s,
+    box-shadow 0.25s;
 
-  &--active {
+  &:hover:not(&--open) {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--primary-text);
+  }
+
+  &--open {
     background: $amber-08;
     border-color: $amber-25;
     color: $amber;
-  }
+    box-shadow:
+      0 0 0 1px $amber-12,
+      0 0 22px $amber-08;
 
-  &--sort {
-    margin-left: auto;
-    border-style: dashed;
-  }
-}
-
-.chip-label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--secondary-text);
-  pointer-events: none;
-
-  .chip-wrap--active & {
-    color: $amber;
-    font-weight: 600;
-  }
-}
-
-.chip-chevron {
-  font-size: 0.875rem;
-  color: var(--secondary-text);
-  pointer-events: none;
-  flex-shrink: 0;
-  transition: transform 0.2s;
-
-  .chip-wrap--active & {
-    color: $amber;
-  }
-  .chip-wrap--open & {
-    transform: rotate(180deg);
-  }
-}
-
-// ─── VirtualDropdown chip override ───────────────────────────────
-.chip-wrap--vd {
-  padding: 0;
-
-  :deep(.custom-dropdown) {
-    display: flex;
-    align-items: stretch;
-    width: auto;
-  }
-
-  :deep(.dropdown-trigger) {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    min-height: unset;
-    border-radius: 999px;
-    padding: 0.375rem 0.625rem 0.375rem 0.75rem;
-    gap: 0.25rem;
-
-    &:hover {
-      border: none;
-      box-shadow: none;
-      background: transparent;
-    }
-    &:focus {
-      border: none;
-      box-shadow: none;
-      outline: none;
+    .filter-toggle__icon {
+      transform: rotate(180deg);
+      filter: drop-shadow(0 0 5px $amber-35);
     }
   }
-
-  :deep(.custom-dropdown.open) .dropdown-trigger,
-  :deep(.custom-dropdown.open .dropdown-trigger) {
-    border: none;
-    box-shadow: none;
-  }
-
-  :deep(.trigger-text) {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--secondary-text);
-    opacity: 1;
-  }
-
-  :deep(.trigger-arrow) {
-    font-size: 0.875rem;
-    color: var(--secondary-text);
-    margin-left: 0;
-  }
-
-  &.chip-wrap--active {
-    :deep(.trigger-text) {
-      color: $amber;
-      font-weight: 600;
-    }
-    :deep(.trigger-arrow) {
-      color: $amber;
-    }
-  }
-}
-
-// ─── Availability toggle chip ─────────────────────────────────────
-.chip-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.375rem 0.75rem;
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 999px;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  font-family: inherit;
-  color: var(--secondary-text);
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition:
-    border-color 0.2s,
-    background 0.2s,
-    color 0.2s;
-  animation: chipIn 0.35s ease calc(var(--i, 0) * 40ms) backwards;
 
   &__icon {
-    font-size: 0.875rem;
-    opacity: 0.4;
-    transition: opacity 0.2s;
-  }
-
-  &--active {
-    background: $amber-08;
-    border-color: $amber-25;
-    color: $amber;
-    font-weight: 600;
-
-    .chip-btn__icon {
-      opacity: 1;
-    }
-  }
-}
-
-// ─── Clear button ─────────────────────────────────────────────────
-.filter-clear {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-shrink: 0;
-  padding: 0.375rem 0.5rem;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--secondary-text);
-  transition:
-    color 0.2s,
-    background 0.15s;
-
-  .icon {
     font-size: 1rem;
+    flex-shrink: 0;
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.25s;
   }
 
-  &:hover {
-    color: var(--primary-text);
-    background: var(--background);
+  &__label {
+    @media (max-width: 360px) {
+      display: none;
+    }
   }
 
   &__badge {
@@ -996,9 +1050,420 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     background: $amber;
     color: #1a0d00;
     border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
+    font-size: 0.68rem;
+    font-weight: 800;
     line-height: 1;
+    letter-spacing: 0;
+    box-shadow: 0 0 8px $amber-35;
+  }
+}
+
+// ─── Active filter pills ──────────────────────────────────────────
+.active-pills-wrap {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 36px;
+    background: linear-gradient(to right, transparent, rgba($hero-bg, 0.9));
+    pointer-events: none;
+  }
+}
+
+.active-pills {
+  display: flex;
+  gap: 0.3rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0.1875rem 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.4375rem 0.25rem 0.625rem;
+  background: $amber-08;
+  border: 1px solid $amber-15;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &__text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $amber;
+    letter-spacing: 0.01em;
+  }
+
+  &__x {
+    font-size: 0.625rem;
+    color: rgba($amber, 0.45);
+    transition:
+      color 0.15s,
+      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+  }
+
+  &:hover {
+    background: $amber-15;
+    border-color: $amber-25;
+    box-shadow: 0 0 12px $amber-08;
+
+    .active-pill__x {
+      color: $amber;
+      transform: scale(1.25);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+  }
+}
+
+// ─── Sort segmented control ───────────────────────────────────────
+.sort-control {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0;
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.1875rem;
+}
+
+.sort-btn {
+  position: relative;
+  padding: 0.25rem 0.625rem;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--secondary-text);
+  background: transparent;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
+
+  &--active {
+    background: rgba(255, 255, 255, 0.07);
+    color: $amber;
+    font-weight: 600;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+
+    // Amber underline indicator
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 55%;
+      height: 2px;
+      background: $amber;
+      border-radius: 1px;
+      box-shadow: 0 0 8px $amber-35;
+    }
+  }
+
+  &:hover:not(&--active) {
+    color: var(--primary-text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+    border-radius: 7px;
+  }
+}
+
+// ─── Clear all button ─────────────────────────────────────────────
+.clear-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  transition:
+    color 0.2s,
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  .icon {
+    font-size: 0.875rem;
+  }
+
+  &:hover {
+    color: #e05555;
+    background: rgba(200, 50, 50, 0.09);
+    border-color: rgba(200, 50, 50, 0.22);
+    box-shadow: 0 0 12px rgba(200, 50, 50, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+  }
+}
+
+// ─── Filter Panel ─────────────────────────────────────────────────
+.filter-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--open {
+    max-height: 980px;
+    border-top: 1px solid var(--divider);
+  }
+
+  &__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding: 0.75rem 0.875rem 1.125rem;
+    gap: 0.3125rem;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 0.4375rem;
+
+      .filter-section--category {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (min-width: 1000px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+
+// ─── Filter sections ──────────────────────────────────────────────
+// Default state: invisible (hidden by overflow anyway when panel is closed)
+// Transition is fast with no delay — so closing is immediate
+.filter-section {
+  padding: 0.75rem 0.875rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.024);
+  border: 1px solid transparent;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease,
+    background 0.25s,
+    border-color 0.25s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.042);
+    border-color: rgba(255, 255, 255, 0.055);
+  }
+
+  // Staggered reveal — only applies while panel is open
+  // Longer duration + per-child delay for the open direction
+  .filter-panel--open & {
+    opacity: 1;
+    transform: translateY(0);
+    transition:
+      opacity 0.32s ease,
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      background 0.25s,
+      border-color 0.25s;
+
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i}) {
+        transition-delay: #{($i - 1) * 38}ms;
+      }
+    }
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 0.4375rem;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+    opacity: 0.6;
+    margin-bottom: 0.6875rem;
+
+    // Amber accent dot — subtle hierarchy marker
+    &::before {
+      content: '';
+      flex-shrink: 0;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: $amber;
+      opacity: 0.65;
+    }
+
+    &--inline {
+      margin-bottom: 0;
+    }
+  }
+
+  &--switch {
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-top: 0.125rem;
+    }
+  }
+
+  &--category {
+    background: rgba(255, 255, 255, 0.032);
+  }
+}
+
+// ─── Option chip grids (difficulty / duration / age / language) ───
+.option-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3125rem;
+}
+
+.option-chip {
+  padding: 0.375rem 0.8125rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--secondary-text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s,
+    box-shadow 0.2s,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--active {
+    background: radial-gradient(ellipse at 50% 0%, $amber-15 0%, $amber-08 100%);
+    border-color: $amber-25;
+    color: $amber;
+    font-weight: 600;
+    box-shadow:
+      0 0 0 1px $amber-12,
+      0 0 16px $amber-08;
+    text-shadow: 0 0 10px $amber-35;
+  }
+
+  &:hover:not(&--active) {
+    border-color: rgba(255, 255, 255, 0.16);
+    color: var(--primary-text);
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+  }
+}
+
+// ─── Player number circles ────────────────────────────────────────
+.player-chips {
+  display: flex;
+  gap: 0.4375rem;
+  flex-wrap: wrap;
+}
+
+.player-chip {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--secondary-text);
+  cursor: pointer;
+  transition:
+    background 0.22s,
+    border-color 0.22s,
+    color 0.22s,
+    box-shadow 0.22s,
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--active {
+    background: radial-gradient(circle at center, $amber-25 0%, $amber-08 70%);
+    border-color: $amber-35;
+    color: $amber;
+    font-weight: 800;
+    // Three-layer ring: tight border + soft halo + ambient glow
+    box-shadow:
+      0 0 0 1px $amber-25,
+      0 0 0 5px $amber-08,
+      0 0 22px $amber-12;
+    text-shadow: 0 0 8px $amber-25;
+    transform: scale(1.07);
+    animation: playerRingPulse 2.4s ease-out infinite;
+  }
+
+  &:hover:not(&--active) {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--primary-text);
+    background: rgba(255, 255, 255, 0.07);
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active:not(&--active) {
+    transform: scale(0.93);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 3px;
   }
 }
 
@@ -1022,6 +1487,19 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
 .slide-clear-leave-to {
   opacity: 0;
   transform: scale(0.8);
+}
+
+.badge-pop-enter-active {
+  animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.badge-pop-leave-active {
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+.badge-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.5);
 }
 
 // ─── Catalog ──────────────────────────────────────────────────────
@@ -1114,68 +1592,43 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
 }
 </style>
 
-<!-- Global (non-scoped) styles for the teleported category popover -->
+<!-- Global (non-scoped) styles for the inline GroupPicker in the filter panel -->
 <style lang="scss">
-.cat-popover {
-  position: fixed;
-  z-index: 200;
-  background: var(--secondary-background);
-  border: 1px solid var(--divider);
-  border-radius: 12px;
-  box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-
-  // GroupPicker fills the popover
+// GroupPicker inside the filter panel — stripped back to match dark aesthetic
+.cat-picker-host {
   .group-picker {
     display: flex;
     flex-direction: column;
-    max-height: 460px;
+    max-height: 280px;
     overflow: hidden;
-    padding: 0.75rem;
   }
 
-  // Make the selection summary compact inside the popover
-  .group-picker__selection {
-    min-height: unset;
+  .group-picker__search {
     margin-bottom: 0.5rem;
-    box-shadow: none;
-
-    &:empty {
-      display: none;
-    } // hide when nothing is selected
   }
 
-  // Make the list scrollable
   .group-picker__list {
     flex: 1;
     overflow-y: auto;
     scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+    }
   }
 
-  // Search input spacing
-  .group-picker__search {
+  .group-picker__selection {
+    min-height: unset;
     margin-bottom: 0.5rem;
-  }
-}
 
-// Popover enter/leave animation
-.cat-pop-enter-active {
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease;
-}
-.cat-pop-leave-active {
-  transition:
-    opacity 0.12s ease,
-    transform 0.1s ease;
-}
-.cat-pop-enter-from,
-.cat-pop-leave-to {
-  opacity: 0;
-  transform: translateY(-4px) scale(0.98);
+    &:empty {
+      display: none;
+    }
+  }
 }
 </style>

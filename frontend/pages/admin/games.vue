@@ -256,6 +256,7 @@
                       {{ $t('btn.add') }}
                     </button>
                   </div>
+                  <div v-if="tagError" class="form-error">{{ tagError }}</div>
                 </div>
 
                 <div class="form-grid__full">
@@ -724,6 +725,7 @@ const coverInputRef = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const saving = ref(false)
 const formError = ref('')
+const tagError = ref('')
 const imageInputRef = ref<HTMLInputElement | null>(null)
 const imageUploading = ref(false)
 const games = ref<Game[]>([])
@@ -916,13 +918,16 @@ function formatFileSize(bytes: number) {
 async function addTag() {
   const name = newTagName.value.trim()
   if (!name) return
+  tagError.value = ''
   try {
     const res = await createTag(name)
     allTags.value.push(res.data)
     form.tag_ids.push(res.data.id)
     newTagName.value = ''
-  } catch {
-    /* ignore tag creation errors */
+  } catch (err) {
+    const msg = (err as { message?: string }).message ?? ''
+    tagError.value =
+      msg === 'validation.unique' ? t('admin.tags.error_duplicate') : t('common.error.save')
   }
 }
 

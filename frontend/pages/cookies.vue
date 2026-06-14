@@ -137,7 +137,7 @@ $hero-muted: rgba(238, 232, 223, 0.5);
   }
 
   &__back {
-    display: inline-block;
+    display: block;
     font-size: 0.78rem;
     font-weight: 500;
     color: $hero-muted;

@@ -70,14 +70,36 @@
                     }}</span>
                   </td>
                   <td>
-                    <button
-                      v-if="['ACTIVE', 'EXTENDED'].includes(loan.status)"
-                      class="action-btn action-btn--danger"
-                      @click="setOverdue(loan.id)"
-                    >
-                      {{ $t('admin.loans.mark_overdue') }}
-                    </button>
-                    <span v-else class="text-muted text-sm">—</span>
+                    <div class="action-row">
+                      <button
+                        v-if="['ACTIVE', 'EXTENDED'].includes(loan.status)"
+                        class="action-btn action-btn--danger"
+                        @click="setOverdue(loan.id)"
+                      >
+                        {{ $t('admin.loans.mark_overdue') }}
+                      </button>
+                      <template v-else-if="loan.status === 'OVERDUE'">
+                        <div class="remind-wrap">
+                          <button
+                            class="action-btn action-btn--remind"
+                            :disabled="remindingId === loan.id"
+                            @click="remind(loan.id)"
+                          >
+                            <span v-if="remindingId === loan.id" class="spinner spinner--sm" />
+                            <span v-else class="icon icon-mail" />
+                            {{ $t('admin.loans.send_reminder') }}
+                          </button>
+                          <span v-if="loan.overdue_reminder_sent_at" class="remind-sent">
+                            {{
+                              $t('admin.loans.reminder_sent_at', {
+                                date: formatDate(loan.overdue_reminder_sent_at),
+                              })
+                            }}
+                          </span>
+                        </div>
+                      </template>
+                      <span v-else class="text-muted text-sm">—</span>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -104,11 +126,12 @@ import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
-const { fetchAdminLoans, markOverdue } = useAdmin()
+const { fetchAdminLoans, markOverdue, sendOverdueReminder } = useAdmin()
 const { t } = useI18n()
 
 const year = new Date().getFullYear()
 const loading = ref(true)
+const remindingId = ref<number | null>(null)
 const statusFilter = ref('')
 const loans = ref<
   {
@@ -118,6 +141,7 @@ const loans = ref<
     start_date: string
     due_date: string
     status: string
+    overdue_reminder_sent_at: string | null
   }[]
 >([])
 
@@ -151,6 +175,16 @@ async function load() {
 async function setOverdue(id: number) {
   await markOverdue(id)
   await load()
+}
+
+async function remind(id: number) {
+  remindingId.value = id
+  try {
+    await sendOverdueReminder(id)
+    await load()
+  } finally {
+    remindingId.value = null
+  }
 }
 
 function statusLabel(s: string) {
@@ -423,6 +457,42 @@ $hero-divider: rgba(238, 232, 223, 0.1);
       border-color: rgba(239, 68, 68, 0.5);
     }
   }
+  &--remind {
+    color: $amber;
+    border-color: rgba(212, 146, 30, 0.3);
+    background: rgba(212, 146, 30, 0.06);
+    &:hover:not(:disabled) {
+      border-color: rgba(212, 146, 30, 0.55);
+      background: rgba(212, 146, 30, 0.1);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .icon {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.remind-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.remind-sent {
+  font-size: 0.72rem;
+  color: var(--secondary-text);
+  opacity: 0.7;
+}
+
+.spinner--sm {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-width: 2px;
+  flex-shrink: 0;
 }
 
 .text-muted {

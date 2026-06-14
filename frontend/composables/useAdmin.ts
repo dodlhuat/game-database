@@ -119,6 +119,8 @@ export function useAdmin() {
 
   const markOverdue = (id: number) => api.patch(`/admin/loans/${id}/overdue`)
 
+  const sendOverdueReminder = (id: number) => api.post(`/admin/loans/${id}/remind`)
+
   // Extensions
   const fetchExtensions = (status = 'PENDING') =>
     api.get<{ data: unknown[] }>('/admin/extensions', { params: { status } })
@@ -183,6 +185,7 @@ export function useAdmin() {
     deleteCopy,
     fetchAdminLoans,
     markOverdue,
+    sendOverdueReminder,
     fetchExtensions,
     approveExtension,
     rejectExtension,

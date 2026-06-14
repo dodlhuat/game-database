@@ -238,6 +238,7 @@
       "filter_language_en": "Englisch",
       "filter_language_de_en": "Deutsch / Englisch",
       "filter_available": "Verfügbar",
+      "filter_open": "Filter",
       "sort_az": "A – Z",
       "sort_newest": "Neueste",
       "empty_title": "Keine Spiele gefunden",
@@ -526,7 +527,8 @@
       "title": "Tags verwalten",
       "all": "Alle Tags",
       "add": "Tag hinzufügen",
-      "rename": "Tag umbenennen"
+      "rename": "Tag umbenennen",
+      "error_duplicate": "Dieser Tag existiert bereits."
     },
     "users": {
       "title": "Mitgliederverwaltung",
@@ -566,6 +568,8 @@
       "loaned_at": "Ausgeliehen am",
       "due_at": "Fällig am",
       "mark_overdue": "Als überfällig markieren",
+      "send_reminder": "Erinnerung senden",
+      "reminder_sent_at": "Gesendet am {date}",
       "empty": "Keine Ausleihen für diesen Filter."
     },
     "extensions_admin": {

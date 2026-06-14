@@ -15,6 +15,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DemoSeeder extends Seeder
 {
@@ -109,6 +110,7 @@ class DemoSeeder extends Seeder
             [
                 'title' => 'Catan',
                 'slug' => 'catan',
+                'cover_image_url' => 'https://picsum.photos/seed/catan/400/560',
                 'short_description' => 'Baue Siedlungen, handle Rohstoffe und werde Herrscher über Catan.',
                 'description' => 'Bei Catan besiedeln die Spieler eine Insel und versuchen durch Handel und geschicktes Bauen die Vorherrschaft zu erlangen. Rohstoffe werden durch Würfeln gesammelt und gegen Siedlungen, Straßen und Städte eingetauscht.',
                 'category' => 'Strategiespiele',
@@ -116,13 +118,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 60, 'duration_max' => 120,
                 'difficulty' => 'MEDIUM', 'year' => 1995,
                 'deposit_tokens' => 5,
-                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
+                'tags' => ['Taktisch', 'Handelsspiel', 'Spannend', 'Bestseller'],
                 'languages' => ['Deutsch', 'Englisch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Ticket to Ride',
                 'slug' => 'ticket-to-ride',
+                'cover_image_url' => 'https://picsum.photos/seed/ticket-to-ride/400/560',
                 'short_description' => 'Verbinde Städte mit Zugstrecken und sammle Punkte.',
                 'description' => 'Spieler sammeln Waggonkarten und setzen ihre Waggons ein, um Zugrouten zwischen Städten zu beanspruchen. Wer die längste Strecke baut und seine geheimen Zielkarten erfüllt, gewinnt.',
                 'category' => 'Familienspiele',
@@ -130,13 +133,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 45, 'duration_max' => 75,
                 'difficulty' => 'EASY', 'year' => 2004,
                 'deposit_tokens' => 4,
-                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger', 'Bestseller'],
+                'tags' => ['Entspannt', 'Gemein', 'Familienfreundlich', 'Bestseller'],
                 'languages' => ['Deutsch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Pandemic',
                 'slug' => 'pandemic',
+                'cover_image_url' => 'https://picsum.photos/seed/pandemic/400/560',
                 'short_description' => 'Stoppt gemeinsam vier gefährliche Krankheiten.',
                 'description' => 'In diesem kooperativen Spiel kämpfen die Spieler als Spezialisten gegen vier Krankheiten, die sich weltweit ausbreiten. Nur durch Zusammenarbeit und kluge Planung können alle Krankheiten geheilt werden.',
                 'category' => 'Kooperationsspiele',
@@ -144,13 +148,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 45, 'duration_max' => 60,
                 'difficulty' => 'MEDIUM', 'year' => 2008,
                 'deposit_tokens' => 4,
-                'tags' => ['2-4 Spieler', '60 Min', 'Einsteiger'],
+                'tags' => ['Kooperativ', 'Stressig', 'Thematisch', 'Teamplay'],
                 'languages' => ['Deutsch', 'Englisch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'Carcassonne',
                 'slug' => 'carcassonne',
+                'cover_image_url' => 'https://picsum.photos/seed/carcassonne/400/560',
                 'short_description' => 'Lege Landschaftskarten und beanspruche Städte, Straßen und Klöster.',
                 'description' => 'Carcassonne ist ein Legespiel, bei dem Spieler Landschaftskärtchen anlegen und ihre Gefolgsleute als Ritter, Räuber oder Mönche einsetzen. Punkte gibt es für vollendete Städte, Straßen und Klöster.',
                 'category' => 'Familienspiele',
@@ -158,13 +163,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 35, 'duration_max' => 45,
                 'difficulty' => 'EASY', 'year' => 2000,
                 'deposit_tokens' => 3,
-                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
+                'tags' => ['Entspannt', 'Gemütlich', 'Taktisch', 'Familienfreundlich'],
                 'languages' => ['Deutsch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Codenames',
                 'slug' => 'codenames',
+                'cover_image_url' => 'https://picsum.photos/seed/codenames/400/560',
                 'short_description' => 'Gebt euren Agenten Hinweise mit einem Wort.',
                 'description' => 'Zwei Spionageteams versuchen, ihre Agenten auf einem Raster aus Codewörtern zu identifizieren. Die Geheimdienstchefs geben mit je einem Wort Hinweise auf mehrere Karten gleichzeitig.',
                 'category' => 'Partyspiele',
@@ -172,13 +178,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 15, 'duration_max' => 30,
                 'difficulty' => 'EASY', 'year' => 2015,
                 'deposit_tokens' => 2,
-                'tags' => ['4+ Spieler', '30 Min', 'Einsteiger', 'Bestseller'],
+                'tags' => ['Lustig', 'Kreativ', 'Teamplay', 'Wortspiel'],
                 'languages' => ['Deutsch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Azul',
                 'slug' => 'azul',
+                'cover_image_url' => 'https://picsum.photos/seed/azul/400/560',
                 'short_description' => 'Lege farbige Kacheln nach Mustern.',
                 'description' => 'Inspiriert von portugiesischen Azulejo-Kacheln. Spieler nehmen reihum Kacheln aus der Fabrik und legen sie in Mustern ab. Wer am Ende die meisten Punkte gesammelt hat, gewinnt.',
                 'category' => 'Strategiespiele',
@@ -186,13 +193,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 45,
                 'difficulty' => 'EASY', 'year' => 2017,
                 'deposit_tokens' => 4,
-                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger'],
+                'tags' => ['Entspannt', 'Taktisch', 'Gemein', 'Abstrakt'],
                 'languages' => ['Deutsch', 'Englisch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'Dixit',
                 'slug' => 'dixit',
+                'cover_image_url' => 'https://picsum.photos/seed/dixit/400/560',
                 'short_description' => 'Erzähle Geschichten mit traumhaften Illustrationen.',
                 'description' => 'Dixit ist ein kreatives Assoziationsspiel. Ein Spieler beschreibt eine Karte, die anderen legen passende Karten dazu – alle versuchen zu erraten, welche die echte ist.',
                 'category' => 'Familienspiele',
@@ -200,13 +208,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 45,
                 'difficulty' => 'EASY', 'year' => 2008,
                 'deposit_tokens' => 3,
-                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger'],
+                'tags' => ['Kreativ', 'Fantasievoll', 'Stimmungsvoll', 'Familienfreundlich'],
                 'languages' => ['Deutsch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'Wingspan',
                 'slug' => 'wingspan',
+                'cover_image_url' => 'https://picsum.photos/seed/wingspan/400/560',
                 'short_description' => 'Sammle Vögel und baue dein Vogelschutzgebiet aus.',
                 'description' => 'Wingspan ist ein Engine-Building-Spiel für Vogelbegeisterte. Spieler ziehen Vögel in ihr Schutzgebiet, aktivieren Fähigkeiten und sammeln Eier.',
                 'category' => 'Strategiespiele',
@@ -214,13 +223,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 40, 'duration_max' => 70,
                 'difficulty' => 'MEDIUM', 'year' => 2019,
                 'deposit_tokens' => 6,
-                'tags' => ['2-4 Spieler', '60 Min', 'Experten'],
+                'tags' => ['Entspannt', 'Lehrreich', 'Grübeln', 'Komplex'],
                 'languages' => ['Deutsch', 'Englisch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'The Mind',
                 'slug' => 'the-mind',
+                'cover_image_url' => 'https://picsum.photos/seed/the-mind/400/560',
                 'short_description' => 'Spielt Karten ohne zu sprechen in der richtigen Reihenfolge.',
                 'description' => 'The Mind ist ein kooperatives Kartenspiel, bei dem alle ihre Handkarten in aufsteigender Reihenfolge ablegen müssen – ohne miteinander zu kommunizieren.',
                 'category' => 'Kooperationsspiele',
@@ -228,13 +238,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 15, 'duration_max' => 20,
                 'difficulty' => 'EASY', 'year' => 2017,
                 'deposit_tokens' => 2,
-                'tags' => ['2-4 Spieler', '30 Min', 'Einsteiger'],
+                'tags' => ['Kooperativ', 'Spannend', 'Verrückt', 'Einzigartig'],
                 'languages' => ['Deutsch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Just One',
                 'slug' => 'just-one',
+                'cover_image_url' => 'https://picsum.photos/seed/just-one/400/560',
                 'short_description' => 'Erratet gemeinsam Begriffe mit einzigartigen Hinweisen.',
                 'description' => 'Just One ist ein kooperatives Ratespiel. Alle schreiben einen Hinweis – doppelte werden gestrichen. Der Ratende muss den Begriff mit den verbleibenden Hinweisen erraten.',
                 'category' => 'Partyspiele',
@@ -242,13 +253,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 20, 'duration_max' => 40,
                 'difficulty' => 'EASY', 'year' => 2018,
                 'deposit_tokens' => 2,
-                'tags' => ['4+ Spieler', '30 Min', 'Einsteiger'],
+                'tags' => ['Kooperativ', 'Lustig', 'Kreativ', 'Teamplay'],
                 'languages' => ['Deutsch'],
                 'copies' => 2,
             ],
             [
                 'title' => 'Agricola',
                 'slug' => 'agricola',
+                'cover_image_url' => 'https://picsum.photos/seed/agricola/400/560',
                 'short_description' => 'Bewirtschafte deinen Bauernhof und versorge deine Familie.',
                 'description' => 'Agricola ist ein Ressourcenmanagement-Spiel. Spieler führen Bauern, müssen ihre Familie ernähren und Punkte durch Felder, Tiere und Häuser sammeln.',
                 'category' => 'Strategiespiele',
@@ -256,13 +268,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 150,
                 'difficulty' => 'HARD', 'year' => 2007,
                 'deposit_tokens' => 6,
-                'tags' => ['2-4 Spieler', '90+ Min', 'Experten', 'ab 12'],
+                'tags' => ['Grübeln', 'Anspruchsvoll', 'Stressig', 'Taktisch'],
                 'languages' => ['Deutsch', 'Englisch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'King of Tokyo',
                 'slug' => 'king-of-tokyo',
+                'cover_image_url' => 'https://picsum.photos/seed/king-of-tokyo/400/560',
                 'short_description' => 'Monster kämpfen um die Herrschaft über Tokyo.',
                 'description' => 'In King of Tokyo schlüpfen Spieler in Monster, Aliens oder Roboter und kämpfen mit Würfeln um die Herrschaft über Tokyo. Energie sammeln, heilen oder angreifen – wer 20 Punkte hat oder alle anderen besiegt, gewinnt.',
                 'category' => 'Partyspiele',
@@ -270,13 +283,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 45,
                 'difficulty' => 'EASY', 'year' => 2011,
                 'deposit_tokens' => 3,
-                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger'],
+                'tags' => ['Aggressiv', 'Lustig', 'Chaotisch', 'Spannend'],
                 'languages' => ['Deutsch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'Dominion',
                 'slug' => 'dominion',
+                'cover_image_url' => 'https://picsum.photos/seed/dominion/400/560',
                 'short_description' => 'Baue deinen Kartenstapel und errichte dein Königreich.',
                 'description' => 'Dominion gilt als Urvater der Deck-Building-Spiele. Spieler kaufen Karten für ihren persönlichen Stapel und versuchen, am Ende die meisten Siegpunkte zu sammeln.',
                 'category' => 'Kartenspiele',
@@ -284,13 +298,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 60,
                 'difficulty' => 'MEDIUM', 'year' => 2008,
                 'deposit_tokens' => 4,
-                'tags' => ['2-4 Spieler', '60 Min', 'Experten', 'ab 12'],
+                'tags' => ['Taktisch', 'Grübeln', 'Komplex', 'Gemein'],
                 'languages' => ['Deutsch'],
                 'copies' => 1,
             ],
             [
                 'title' => 'Uno',
                 'slug' => 'uno',
+                'cover_image_url' => 'https://picsum.photos/seed/uno/400/560',
                 'short_description' => 'Klassisches Kartenspiel: Werde als Erster deine Karten los.',
                 'description' => 'Uno ist das beliebte Kartenspiel, bei dem Spieler ihre Karten nach Farbe oder Zahl ablegen. Aktionskarten sorgen für Spannung.',
                 'category' => 'Kartenspiele',
@@ -298,13 +313,14 @@ class DemoSeeder extends Seeder
                 'duration_min' => 15, 'duration_max' => 45,
                 'difficulty' => 'EASY', 'year' => 1971,
                 'deposit_tokens' => 1,
-                'tags' => ['2-6 Spieler', '30 Min', 'Einsteiger', 'ab 8'],
+                'tags' => ['Gemein', 'Lustig', 'Chaotisch', 'Familienfreundlich'],
                 'languages' => ['Deutsch'],
                 'copies' => 3,
             ],
             [
                 'title' => '7 Wonders',
                 'slug' => '7-wonders',
+                'cover_image_url' => 'https://picsum.photos/seed/7-wonders/400/560',
                 'short_description' => 'Führe deine antike Zivilisation zur Größe.',
                 'description' => 'In 7 Wonders leiten Spieler eine antike Zivilisation und wählen reihum Karten aus. Militär, Wissenschaft, Handel und Wunder bringen unterschiedliche Siegpunkte.',
                 'category' => 'Strategiespiele',
@@ -312,7 +328,7 @@ class DemoSeeder extends Seeder
                 'duration_min' => 30, 'duration_max' => 45,
                 'difficulty' => 'MEDIUM', 'year' => 2010,
                 'deposit_tokens' => 4,
-                'tags' => ['4+ Spieler', '30 Min', 'Experten'],
+                'tags' => ['Taktisch', 'Vielschichtig', 'Anspruchsvoll', 'Komplex'],
                 'languages' => ['Deutsch', 'Englisch', 'Französisch'],
                 'copies' => 1,
             ],
@@ -323,6 +339,7 @@ class DemoSeeder extends Seeder
                 'title' => $data['title'],
                 'description' => $data['description'],
                 'short_description' => $data['short_description'],
+                'cover_image_url' => $data['cover_image_url'],
                 'category_id' => $categories->get($data['category'])?->id,
                 'min_players' => $data['min_players'],
                 'max_players' => $data['max_players'],
@@ -335,9 +352,18 @@ class DemoSeeder extends Seeder
                 'is_active' => true,
             ]);
 
-            $game->tags()->syncWithoutDetaching(
-                collect($data['tags'])->map(fn ($n) => $tags->get($n)?->id)->filter()->values()->all()
-            );
+            $game->update(['cover_image_url' => $data['cover_image_url']]);
+
+            $tagIds = collect($data['tags'])->map(function (string $name) use (&$tags) {
+                if (! $tags->has($name)) {
+                    $tag = Tag::firstOrCreate(['name' => $name], ['slug' => Str::slug($name)]);
+                    $tags->put($name, $tag);
+                }
+
+                return $tags->get($name)?->id;
+            })->filter()->values()->all();
+
+            $game->tags()->syncWithoutDetaching($tagIds);
 
             $game->languages()->syncWithoutDetaching(
                 collect($data['languages'])->map(fn ($n) => $languages->get($n)?->id)->filter()->values()->all()

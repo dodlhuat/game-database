@@ -160,6 +160,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Ausleihverwaltung
     Route::get('/loans', [App\Http\Controllers\Admin\LoanController::class, 'index']);
     Route::patch('/loans/{loan}/overdue', [App\Http\Controllers\Admin\LoanController::class, 'markOverdue']);
+    Route::post('/loans/{loan}/remind', [App\Http\Controllers\Admin\LoanController::class, 'sendOverdueReminder']);
     Route::post('/loans/{loan}/return', [App\Http\Controllers\Admin\LoanController::class, 'return']);
 
     // Verlängerungsanträge

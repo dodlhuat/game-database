@@ -26,6 +26,7 @@ class Loan extends Model
         'start_date',
         'due_date',
         'returned_at',
+        'overdue_reminder_sent_at',
         'return_condition',
         'deposit_tokens',
         'status',
@@ -37,6 +38,7 @@ class Loan extends Model
             'start_date' => 'date',
             'due_date' => 'date',
             'returned_at' => 'datetime',
+            'overdue_reminder_sent_at' => 'datetime',
         ];
     }
 

@@ -87,6 +87,13 @@ class EmailTemplateSeeder extends Seeder
                 'body' => '<p>Deine Mitgliedschaft läuft am <strong>{expiry_date}</strong> ab. Bitte erneuere sie rechtzeitig, damit du weiterhin Spiele ausleihen kannst.</p>',
                 'action_text' => 'Mitgliedschaft erneuern',
             ],
+            [
+                'key' => 'loan_overdue_reminder',
+                'subject' => 'Erinnerung: Rückgabe von „{game}" ist überfällig',
+                'greeting' => 'Hallo {name},',
+                'body' => '<p>Deine Ausleihe von <strong>{game}</strong> war am <strong>{due_date}</strong> zur Rückgabe fällig und ist derzeit überfällig.</p><p>Bitte bringe das Spiel so bald wie möglich zurück. Bei Fragen wende dich an uns.</p>',
+                'action_text' => 'Zum Dashboard',
+            ],
         ];
 
         foreach ($templates as $template) {

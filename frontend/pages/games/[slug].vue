@@ -1143,9 +1143,13 @@ $bar-h: 72px;
   }
   :deep(p) {
     margin-bottom: 0.75rem;
+    color: inherit;
   }
   :deep(p:last-child) {
     margin-bottom: 0;
+  }
+  :deep(div) {
+    color: inherit;
   }
   :deep(ul),
   :deep(ol) {

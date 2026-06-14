@@ -39,6 +39,13 @@ class EmailTemplateController extends Controller
             'body' => '<p>Deine Ausleihe von <strong>{game}</strong> läuft am <strong>{due_date}</strong> ab.</p><p>Falls du das Spiel länger behalten möchtest, kannst du eine Verlängerung beantragen.</p>',
             'action_text' => 'Zum Dashboard',
         ],
+        'loan_overdue_reminder' => [
+            'key' => 'loan_overdue_reminder',
+            'subject' => 'Erinnerung: Rückgabe von „{game}" ist überfällig',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Deine Ausleihe von <strong>{game}</strong> war am <strong>{due_date}</strong> zur Rückgabe fällig und ist derzeit überfällig.</p><p>Bitte bringe das Spiel so bald wie möglich zurück. Bei Fragen wende dich an uns.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
         'reservation_available' => [
             'key' => 'reservation_available',
             'subject' => '„{game}" ist jetzt verfügbar!',

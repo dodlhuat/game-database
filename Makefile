@@ -9,6 +9,12 @@ setup:
 	sh docker/setup.sh
 	git config core.hooksPath .githooks
 
+## start frontend with cleared cache
+fe-up:
+	cd frontend
+	rm -rf .nuxt
+	npm run dev
+
 ## Container starten
 up:
 	docker compose up -d

@@ -3,9 +3,12 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Copy;
+use App\Models\EmailTemplate;
 use App\Models\Loan;
 use App\Models\User;
+use App\Notifications\LoanOverdueReminder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class LoanTest extends TestCase
@@ -77,5 +80,64 @@ class LoanTest extends TestCase
                 'return_condition' => 'GOOD',
             ])
             ->assertStatus(422);
+    }
+
+    public function test_send_overdue_reminder_queues_notification(): void
+    {
+        Notification::fake();
+        EmailTemplate::create([
+            'key' => 'loan_overdue_reminder',
+            'subject' => 'Überfällig: {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Bitte zurückbringen.</p>',
+            'action_text' => 'Zum Dashboard',
+        ]);
+
+        $loan = Loan::factory()->overdue()->create();
+
+        $this->actingAs($this->admin())
+            ->postJson("/api/admin/loans/{$loan->id}/remind")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'OVERDUE');
+
+        Notification::assertSentTo($loan->user, LoanOverdueReminder::class);
+    }
+
+    public function test_send_overdue_reminder_records_timestamp(): void
+    {
+        Notification::fake();
+        EmailTemplate::create([
+            'key' => 'loan_overdue_reminder',
+            'subject' => 'Test',
+            'greeting' => 'Hi,',
+            'body' => '<p>Test</p>',
+            'action_text' => null,
+        ]);
+
+        $loan = Loan::factory()->overdue()->create();
+
+        $this->actingAs($this->admin())
+            ->postJson("/api/admin/loans/{$loan->id}/remind")
+            ->assertOk();
+
+        $this->assertNotNull($loan->fresh()->overdue_reminder_sent_at);
+    }
+
+    public function test_send_overdue_reminder_fails_for_non_overdue_loan(): void
+    {
+        $loan = Loan::factory()->create(['status' => 'ACTIVE']);
+
+        $this->actingAs($this->admin())
+            ->postJson("/api/admin/loans/{$loan->id}/remind")
+            ->assertStatus(422);
+    }
+
+    public function test_send_overdue_reminder_requires_admin(): void
+    {
+        $loan = Loan::factory()->overdue()->create();
+
+        $this->actingAs(User::factory()->member()->create())
+            ->postJson("/api/admin/loans/{$loan->id}/remind")
+            ->assertForbidden();
     }
 }
