@@ -70,10 +70,10 @@
           class="styled-checkbox"
           required
         />
-        <label for="terms-accepted"
-          >{{ $t('auth.terms_accept') }}
-          <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink></label
-        >
+        <label for="terms-accepted">
+          {{ $t('auth.terms_accept') }}
+          <a href="#" class="terms-link" @click.prevent="openTerms">{{ $t('nav.terms') }}</a>
+        </label>
         <p v-if="errors.terms_accepted" class="error-text" role="alert">
           {{ errors.terms_accepted }}
         </p>
@@ -88,18 +88,70 @@
       {{ $t('auth.already_member') }} <NuxtLink to="/login">{{ $t('btn.login') }}</NuxtLink>
     </p>
   </div>
+
+  <dialog ref="termsDialog" class="terms-modal" @click.self="closeTerms">
+    <div class="terms-modal__inner">
+      <div class="terms-modal__header">
+        <h2 class="terms-modal__title">{{ $t('nav.terms') }}</h2>
+        <button
+          type="button"
+          class="terms-modal__close"
+          :aria-label="$t('btn.close')"
+          @click="closeTerms"
+        >
+          <span class="icon icon-close" aria-hidden="true" />
+        </button>
+      </div>
+      <div class="terms-modal__body">
+        <p v-if="termsLoading" class="terms-modal__loading">…</p>
+        <p v-else-if="termsError" class="terms-modal__error">{{ termsError }}</p>
+        <template v-else>
+          <p v-for="(para, i) in termsParagraphs" :key="i" class="terms-modal__para">{{ para }}</p>
+        </template>
+      </div>
+      <div class="terms-modal__footer">
+        <UiButton type="button" @click="closeTerms">{{ $t('btn.close') }}</UiButton>
+      </div>
+    </div>
+  </dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 definePageMeta({ layout: 'auth', middleware: [] })
 
 const { register } = useAuth()
+const api = useApi()
 const { t } = useI18n()
 const loading = ref(false)
 const success = ref('')
 const serverError = ref('')
+
+const termsDialog = ref<HTMLDialogElement | null>(null)
+const termsContent = ref('')
+const termsLoading = ref(false)
+const termsError = ref('')
+const termsParagraphs = computed(() => termsContent.value.split('\n\n').filter(Boolean))
+
+async function openTerms() {
+  termsDialog.value?.showModal()
+  if (termsContent.value) return
+  termsLoading.value = true
+  termsError.value = ''
+  try {
+    const data = await api.get<{ content: string }>('/terms')
+    termsContent.value = data.content
+  } catch {
+    termsError.value = t('common.error.generic')
+  } finally {
+    termsLoading.value = false
+  }
+}
+
+function closeTerms() {
+  termsDialog.value?.close()
+}
 
 const formLoadedAt = Date.now()
 
@@ -186,5 +238,117 @@ $_muted: rgba(238, 232, 223, 0.65);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
+}
+
+.terms-link {
+  color: $amber;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.terms-modal {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:not([open]) {
+    display: none;
+  }
+
+  &__inner {
+    background: #1a1917;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    width: min(560px, calc(100vw - 2rem));
+    max-height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-text);
+    margin: 0;
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(238, 232, 223, 0.5);
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+
+    &:hover {
+      color: var(--primary-text);
+    }
+  }
+
+  &__body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  &__para {
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: rgba(238, 232, 223, 0.75);
+    margin-bottom: 1rem;
+    white-space: pre-line;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__loading,
+  &__error {
+    font-size: 0.875rem;
+    color: rgba(238, 232, 223, 0.5);
+    text-align: center;
+    padding: 2rem 0;
+  }
+
+  &__error {
+    color: #f87171;
+  }
+
+  &__footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    justify-content: flex-end;
+    flex-shrink: 0;
+  }
 }
 </style>

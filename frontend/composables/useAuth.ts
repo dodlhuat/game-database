@@ -38,7 +38,7 @@ export function useAuth() {
   }
 
   async function logout() {
-    await api.post('/auth/logout').catch(() => {})
+    await api.post('/auth/logout', undefined, { skipAuthRedirect: true }).catch(() => {})
     auth.logout()
     await navigateTo('/login')
   }

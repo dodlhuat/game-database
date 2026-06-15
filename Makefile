@@ -11,9 +11,7 @@ setup:
 
 ## start frontend with cleared cache
 fe-up:
-	cd frontend
-	rm -rf .nuxt
-	npm run dev
+	cd frontend && rm -rf .nuxt && npm run dev
 
 ## Container starten
 up:

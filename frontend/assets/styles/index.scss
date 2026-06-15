@@ -35,7 +35,8 @@ nav {
   padding-top: 1rem;
 }
 
-// basix checkbox: checkmark horizontal position
-.checkbox input[type='checkbox'] + label::after {
-  left: 0;
+// basix checkbox: checkmark position override
+.checkbox input[type='checkbox']:checked + label::after {
+  left: calc(0px + 0.5rem);
+  top: calc(3px + 0.5rem);
 }

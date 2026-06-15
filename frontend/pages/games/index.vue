@@ -86,79 +86,38 @@
         <!-- Active filter pills (only when panel is closed) -->
         <div v-if="hasActiveFilters && !filterPanelOpen" class="active-pills-wrap">
           <div class="active-pills">
-            <button
-              v-if="filters.category"
-              class="active-pill"
-              @click.stop="
-                filters.category = ''
-                resetPage()
-              "
-            >
+            <button v-if="filters.category" class="active-pill" @click.stop="clearPill('category')">
               <span class="active-pill__text">{{ categoryLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
             <button
               v-if="filters.difficulty"
               class="active-pill"
-              @click.stop="
-                filters.difficulty = ''
-                resetPage()
-              "
+              @click.stop="clearPill('difficulty')"
             >
               <span class="active-pill__text">{{ difficultyLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
-            <button
-              v-if="filters.players"
-              class="active-pill"
-              @click.stop="
-                filters.players = ''
-                resetPage()
-              "
-            >
+            <button v-if="filters.players" class="active-pill" @click.stop="clearPill('players')">
               <span class="active-pill__text">{{ playersLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
-            <button
-              v-if="filters.duration"
-              class="active-pill"
-              @click.stop="
-                filters.duration = ''
-                resetPage()
-              "
-            >
+            <button v-if="filters.duration" class="active-pill" @click.stop="clearPill('duration')">
               <span class="active-pill__text">{{ durationLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
-            <button
-              v-if="filters.min_age"
-              class="active-pill"
-              @click.stop="
-                filters.min_age = ''
-                resetPage()
-              "
-            >
+            <button v-if="filters.min_age" class="active-pill" @click.stop="clearPill('min_age')">
               <span class="active-pill__text">{{ ageLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
-            <button
-              v-if="filters.language"
-              class="active-pill"
-              @click.stop="
-                filters.language = ''
-                resetPage()
-              "
-            >
+            <button v-if="filters.language" class="active-pill" @click.stop="clearPill('language')">
               <span class="active-pill__text">{{ languageLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
             <button
               v-if="filters.available"
               class="active-pill"
-              @click.stop="
-                filters.available = false
-                resetPage()
-              "
+              @click.stop="clearPill('available')"
             >
               <span class="active-pill__text">{{ $t('pages.games.filter_available') }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
@@ -175,20 +134,14 @@
             <button
               class="sort-btn"
               :class="{ 'sort-btn--active': filters.sort === 'title' }"
-              @click="
-                filters.sort = 'title'
-                resetPage()
-              "
+              @click="setSort('title')"
             >
               <span class="sort-btn__label">{{ $t('pages.games.sort_az') }}</span>
             </button>
             <button
               class="sort-btn"
               :class="{ 'sort-btn--active': filters.sort === 'created_at' }"
-              @click="
-                filters.sort = 'created_at'
-                resetPage()
-              "
+              @click="setSort('created_at')"
             >
               <span class="sort-btn__label">{{ $t('pages.games.sort_newest') }}</span>
             </button>
@@ -576,6 +529,16 @@ function selectFilter(key: 'difficulty' | 'players' | 'duration' | 'min_age', va
 
 function selectLanguage(id: number) {
   filters.language = String(filters.language) === String(id) ? '' : id
+  resetPage()
+}
+
+function setSort(value: string) {
+  filters.sort = value
+  resetPage()
+}
+
+function clearPill(key: keyof typeof filters) {
+  ;(filters as Record<string, unknown>)[key] = key === 'available' ? false : ''
   resetPage()
 }
 

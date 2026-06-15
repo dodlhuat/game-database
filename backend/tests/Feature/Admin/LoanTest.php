@@ -85,13 +85,10 @@ class LoanTest extends TestCase
     public function test_send_overdue_reminder_queues_notification(): void
     {
         Notification::fake();
-        EmailTemplate::create([
-            'key' => 'loan_overdue_reminder',
-            'subject' => 'Überfällig: {game}',
-            'greeting' => 'Hallo {name},',
-            'body' => '<p>Bitte zurückbringen.</p>',
-            'action_text' => 'Zum Dashboard',
-        ]);
+        EmailTemplate::firstOrCreate(
+            ['key' => 'loan_overdue_reminder'],
+            ['subject' => 'Überfällig: {game}', 'greeting' => 'Hallo {name},', 'body' => '<p>Bitte zurückbringen.</p>', 'action_text' => 'Zum Dashboard']
+        );
 
         $loan = Loan::factory()->overdue()->create();
 
@@ -106,13 +103,10 @@ class LoanTest extends TestCase
     public function test_send_overdue_reminder_records_timestamp(): void
     {
         Notification::fake();
-        EmailTemplate::create([
-            'key' => 'loan_overdue_reminder',
-            'subject' => 'Test',
-            'greeting' => 'Hi,',
-            'body' => '<p>Test</p>',
-            'action_text' => null,
-        ]);
+        EmailTemplate::firstOrCreate(
+            ['key' => 'loan_overdue_reminder'],
+            ['subject' => 'Test', 'greeting' => 'Hi,', 'body' => '<p>Test</p>', 'action_text' => null]
+        );
 
         $loan = Loan::factory()->overdue()->create();
 

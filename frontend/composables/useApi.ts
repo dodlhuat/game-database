@@ -5,6 +5,7 @@
 
 interface ApiOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>
+  skipAuthRedirect?: boolean
 }
 
 export function useApi() {
@@ -28,7 +29,7 @@ export function useApi() {
   }
 
   async function request<T = unknown>(path: string, options: ApiOptions = {}): Promise<T> {
-    const { params, headers: customHeaders, ...fetchOptions } = options
+    const { params, skipAuthRedirect, headers: customHeaders, ...fetchOptions } = options
 
     const token = getToken()
     const isFormData = fetchOptions.body instanceof FormData
@@ -49,7 +50,7 @@ export function useApi() {
     })
 
     if (!response.ok) {
-      if (response.status === 401) {
+      if (response.status === 401 && !skipAuthRedirect) {
         const auth = useAuthStore()
         auth.logout()
         await navigateTo('/login?reason=unauthenticated')

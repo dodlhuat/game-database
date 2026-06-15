@@ -100,11 +100,10 @@ class PublicTest extends TestCase
 
     public function test_terms_returns_latest_version(): void
     {
-        TermsVersion::create([
-            'version' => '1.0',
-            'content' => 'Terms content',
-            'published_at' => now(),
-        ]);
+        TermsVersion::firstOrCreate(
+            ['version' => '1.0'],
+            ['content' => 'Terms content', 'published_at' => now()]
+        );
 
         $this->getJson('/api/terms')
             ->assertOk()
@@ -113,11 +112,10 @@ class PublicTest extends TestCase
 
     public function test_privacy_returns_latest_version(): void
     {
-        PrivacyVersion::create([
-            'version' => '1.0',
-            'content' => 'Privacy content',
-            'published_at' => now(),
-        ]);
+        PrivacyVersion::firstOrCreate(
+            ['version' => '1.0'],
+            ['content' => 'Privacy content', 'published_at' => now()]
+        );
 
         $this->getJson('/api/privacy')
             ->assertOk()
@@ -126,11 +124,10 @@ class PublicTest extends TestCase
 
     public function test_cookies_returns_latest_version(): void
     {
-        CookieVersion::create([
-            'version' => '1.0',
-            'content' => 'Cookie content',
-            'published_at' => now(),
-        ]);
+        CookieVersion::firstOrCreate(
+            ['version' => '1.0'],
+            ['content' => 'Cookie content', 'published_at' => now()]
+        );
 
         $this->getJson('/api/cookies')
             ->assertOk()

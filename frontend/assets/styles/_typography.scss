@@ -56,7 +56,9 @@ p {
   color: $color-gray-700;
 }
 
-a:not(.button):not([class*='button-']):not([class*='detail__btn']):not([class*='btn']) {
+a:not(.button):not([class*='button-']):not([class*='detail__btn']):not([class*='btn']):not(
+    [class*='__cta']
+  ) {
   color: $color-primary;
   text-decoration: none;
   transition: color $transition-base;
