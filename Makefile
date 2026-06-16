@@ -2,7 +2,8 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
+        prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan
 
 ## Erster Start (einmalig)
 setup:
@@ -81,3 +82,31 @@ lint-fix:
 	cd frontend && npm run lint:fix
 	cd frontend && npm run format
 	docker compose exec backend ./vendor/bin/pint 2>/dev/null || echo "⚠ Backend-Container nicht aktiv, Pint übersprungen"
+
+# ============================================================
+# Produktion
+# ============================================================
+
+## Prod-Container starten
+prod-up:
+	docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+
+## Prod-Container stoppen
+prod-down:
+	docker compose -f docker-compose.prod.yml down
+
+## Prod-Logs verfolgen
+prod-logs:
+	docker compose -f docker-compose.prod.yml logs -f
+
+## Auf Server deployen: make prod-deploy SERVER=user@yourserver.com
+prod-deploy:
+	./deploy.sh $(SERVER)
+
+## Shell im Prod-Backend öffnen
+prod-shell:
+	docker compose -f docker-compose.prod.yml exec backend sh
+
+## Artisan-Befehl auf Prod: make prod-artisan CMD="migrate:status"
+prod-artisan:
+	docker compose -f docker-compose.prod.yml exec backend php artisan $(CMD)
