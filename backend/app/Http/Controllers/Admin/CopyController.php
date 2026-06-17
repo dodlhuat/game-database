@@ -17,6 +17,7 @@ use App\Notifications\ReservationAvailable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CopyController extends Controller
@@ -73,44 +74,61 @@ class CopyController extends Controller
         }
 
         $setting = LoanSetting::instance();
-        $newCondition = $copy->resolveConditionFromBorrowCount($setting);
-        $copy->update(['condition' => $newCondition]);
 
-        $loan = $copy->loans()
-            ->where('status', 'RETURNED')
-            ->latest('returned_at')
-            ->with(['user', 'copy.game'])
-            ->first();
+        ['depositLoan' => $depositLoan, 'reservationUser' => $reservationUser, 'reservationGame' => $reservationGame] = DB::transaction(function () use ($copy, $setting) {
+            $newCondition = $copy->resolveConditionFromBorrowCount($setting);
+            $copy->update(['condition' => $newCondition]);
 
-        if ($loan && $loan->deposit_tokens > 0) {
-            /** @var User $loanUser */
-            $loanUser = $loan->user;
-            /** @var Copy $loanCopy */
-            $loanCopy = $loan->copy;
-            /** @var Game $loanGame */
-            $loanGame = $loanCopy->game;
-            $loanUser->decrement('tokens_blocked', $loan->deposit_tokens);
-            TokenTransaction::create([
-                'user_id' => $loan->user_id,
-                'loan_id' => $loan->id,
-                'type' => 'DEPOSIT_RELEASE',
-                'amount' => $loan->deposit_tokens,
-                'description' => "Kaution freigegeben: {$loanGame->title}",
-            ]);
-            $loanUser->notify(new DepositReleased($loan));
+            $loan = $copy->loans()
+                ->where('status', 'RETURNED')
+                ->latest('returned_at')
+                ->with(['user', 'copy.game'])
+                ->first();
+
+            $depositLoan = null;
+
+            if ($loan && $loan->deposit_tokens > 0) {
+                /** @var User $loanUser */
+                $loanUser = $loan->user;
+                /** @var Copy $loanCopy */
+                $loanCopy = $loan->copy;
+                /** @var Game $loanGame */
+                $loanGame = $loanCopy->game;
+                $loanUser->decrement('tokens_blocked', $loan->deposit_tokens);
+                TokenTransaction::create([
+                    'user_id' => $loan->user_id,
+                    'loan_id' => $loan->id,
+                    'type' => 'DEPOSIT_RELEASE',
+                    'amount' => $loan->deposit_tokens,
+                    'description' => "Kaution freigegeben: {$loanGame->title}",
+                ]);
+                $depositLoan = $loan;
+            }
+
+            $reservation = Reservation::where('game_id', $copy->game_id)
+                ->orderBy('position')
+                ->first();
+
+            $reservationUser = null;
+            $reservationGame = null;
+
+            if ($reservation) {
+                /** @var User $resUser */
+                $resUser = $reservation->user;
+                $reservationUser = $resUser;
+                $reservationGame = $copy->game;
+                $reservation->update(['notified_at' => now()]);
+            }
+
+            return compact('depositLoan', 'reservationUser', 'reservationGame');
+        });
+
+        if ($depositLoan) {
+            $depositLoan->user->notify(new DepositReleased($depositLoan));
         }
 
-        $reservation = Reservation::where('game_id', $copy->game_id)
-            ->orderBy('position')
-            ->first();
-
-        if ($reservation) {
-            /** @var User $reservationUser */
-            $reservationUser = $reservation->user;
-            /** @var Game $copyGame */
-            $copyGame = $copy->game;
-            $reservationUser->notify(new ReservationAvailable($copyGame));
-            $reservation->update(['notified_at' => now()]);
+        if ($reservationUser && $reservationGame) {
+            $reservationUser->notify(new ReservationAvailable($reservationGame));
         }
 
         return response()->json([
@@ -129,33 +147,45 @@ class CopyController extends Controller
             return response()->json(['message' => 'Kopie ist nicht im Status "Überprüfen".'], 422);
         }
 
-        $copy->update([
-            'condition' => 'DAMAGED',
-            'notes' => $request->notes ?? $copy->notes,
-        ]);
+        $notes = $request->notes;
 
-        $loan = $copy->loans()
-            ->where('status', 'RETURNED')
-            ->latest('returned_at')
-            ->with(['user', 'copy.game'])
-            ->first();
-
-        if ($loan && $loan->deposit_tokens > 0) {
-            /** @var User $loanUser */
-            $loanUser = $loan->user;
-            /** @var Copy $loanCopy */
-            $loanCopy = $loan->copy;
-            /** @var Game $loanGame */
-            $loanGame = $loanCopy->game;
-            $loanUser->decrement('tokens_blocked', $loan->deposit_tokens);
-            TokenTransaction::create([
-                'user_id' => $loan->user_id,
-                'loan_id' => $loan->id,
-                'type' => 'DEPOSIT_FORFEIT',
-                'amount' => -$loan->deposit_tokens,
-                'description' => "Kaution einbehalten (Beschädigung): {$loanGame->title}",
+        ['depositLoan' => $depositLoan] = DB::transaction(function () use ($copy, $notes) {
+            $copy->update([
+                'condition' => 'DAMAGED',
+                'notes' => $notes ?? $copy->notes,
             ]);
-            $loanUser->notify(new DepositForfeited($loan, $request->notes));
+
+            $loan = $copy->loans()
+                ->where('status', 'RETURNED')
+                ->latest('returned_at')
+                ->with(['user', 'copy.game'])
+                ->first();
+
+            $depositLoan = null;
+
+            if ($loan && $loan->deposit_tokens > 0) {
+                /** @var User $loanUser */
+                $loanUser = $loan->user;
+                /** @var Copy $loanCopy */
+                $loanCopy = $loan->copy;
+                /** @var Game $loanGame */
+                $loanGame = $loanCopy->game;
+                $loanUser->decrement('tokens_blocked', $loan->deposit_tokens);
+                TokenTransaction::create([
+                    'user_id' => $loan->user_id,
+                    'loan_id' => $loan->id,
+                    'type' => 'DEPOSIT_FORFEIT',
+                    'amount' => -$loan->deposit_tokens,
+                    'description' => "Kaution einbehalten (Beschädigung): {$loanGame->title}",
+                ]);
+                $depositLoan = $loan;
+            }
+
+            return compact('depositLoan');
+        });
+
+        if ($depositLoan) {
+            $depositLoan->user->notify(new DepositForfeited($depositLoan, $notes));
         }
 
         return response()->json(['message' => 'Kopie als beschädigt markiert.']);

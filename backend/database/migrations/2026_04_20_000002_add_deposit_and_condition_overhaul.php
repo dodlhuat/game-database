@@ -22,9 +22,13 @@ return new class extends Migration
             }
         });
 
-        DB::statement("UPDATE copies SET `condition` = 'GOOD' WHERE `condition` = 'WORN'");
-        if (DB::getDriverName() !== 'sqlite') {
+        DB::statement("UPDATE copies SET condition = 'GOOD' WHERE condition = 'WORN'");
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('NEW','VERY_GOOD','GOOD','REVIEW','DAMAGED','LOCKED') NOT NULL DEFAULT 'NEW'");
+        } elseif ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE copies DROP CONSTRAINT IF EXISTS copies_condition_check');
+            DB::statement("ALTER TABLE copies ADD CONSTRAINT copies_condition_check CHECK (condition IN ('NEW','VERY_GOOD','GOOD','REVIEW','DAMAGED','LOCKED'))");
         }
 
         Schema::table('loans', function (Blueprint $table) {
@@ -50,8 +54,12 @@ return new class extends Migration
             $table->dropColumn('borrow_count');
         });
 
-        if (DB::getDriverName() !== 'sqlite') {
+        $driver = DB::getDriverName();
+        if ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('GOOD','WORN','DAMAGED','LOCKED') NOT NULL DEFAULT 'GOOD'");
+        } elseif ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE copies DROP CONSTRAINT IF EXISTS copies_condition_check');
+            DB::statement("ALTER TABLE copies ADD CONSTRAINT copies_condition_check CHECK (condition IN ('GOOD','WORN','DAMAGED','LOCKED'))");
         }
 
         Schema::table('loans', function (Blueprint $table) {

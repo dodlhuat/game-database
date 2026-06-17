@@ -9,13 +9,13 @@ use App\Models\Copy;
 use App\Models\Game;
 use App\Models\Loan;
 use App\Models\LoanSetting;
-use App\Models\Reservation;
 use App\Models\TokenTransaction;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
@@ -36,46 +36,24 @@ class LoanController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if (! $user->isAdmin()) {
-            if (! $user->isMember()) {
-                return response()->json([
-                    'message' => 'Eine aktive Mitgliedschaft ist erforderlich um Spiele auszuleihen.',
-                    'reason' => 'membership_required',
-                ], 403);
-            }
+        if (! $user->isAdmin() && ! $user->isMember()) {
+            return response()->json([
+                'message' => 'Eine aktive Mitgliedschaft ist erforderlich um Spiele auszuleihen.',
+                'reason' => 'membership_required',
+            ], 403);
         }
 
-        /** @var Copy $copy */
-        $copy = Copy::with('game')->findOrFail($request->copy_id);
         $setting = LoanSetting::instance();
 
-        if (in_array($copy->condition, ['LOCKED', 'REVIEW', 'DAMAGED'])) {
-            return response()->json(['message' => 'Diese Kopie ist nicht ausleihbar.'], 422);
-        }
-
-        $isAvailable = $copy->activeLoans()->doesntExist();
-        if (! $isAvailable) {
-            return response()->json(['message' => 'Diese Kopie ist gerade ausgeliehen.'], 422);
-        }
-
-        $alreadyBorrowed = $user->loans()
-            ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
-            ->whereHas('copy', fn ($q) => $q->where('game_id', $copy->game_id))
-            ->exists();
-
-        if ($alreadyBorrowed) {
-            return response()->json(['message' => 'Du hast dieses Spiel bereits ausgeliehen.'], 422);
-        }
-
-        /** @var Game $game */
-        $game = $copy->game;
-
+        // Vorzeitige Token-Prüfung außerhalb der Transaktion, damit wir früh abbrechen können
         if (! $user->isAdmin()) {
+            $copy = Copy::with('game')->findOrFail($request->copy_id);
+            /** @var Game $game */
+            $game = $copy->game;
             $loanCost = $setting->loan_cost;
             $deposit = $copy->calculateDeposit($game, $setting);
-            $totalCost = $loanCost + $deposit;
 
-            if (! $user->hasEnoughFreeTokens($totalCost)) {
+            if (! $user->hasEnoughFreeTokens($loanCost + $deposit)) {
                 return response()->json([
                     'message' => "Nicht genug Token. Ausleihen kostet {$loanCost} Token + {$deposit} Token Kaution.",
                     'reason' => 'insufficient_tokens',
@@ -83,47 +61,73 @@ class LoanController extends Controller
                     'deposit' => $deposit,
                 ], 402);
             }
-        } else {
-            $deposit = 0;
         }
 
-        $startDate = $this->calcNextAppointment($setting);
-        $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
+        $loan = DB::transaction(function () use ($request, $user, $setting) {
+            // Kopie mit Lock holen, damit kein zweiter Request dieselbe Kopie gleichzeitig verleiht
+            /** @var Copy $copy */
+            $copy = Copy::with('game')->lockForUpdate()->findOrFail($request->copy_id);
+            /** @var Game $game */
+            $game = $copy->game;
 
-        $loan = Loan::create([
-            'copy_id' => $copy->id,
-            'user_id' => $user->id,
-            'start_date' => $startDate->toDateString(),
-            'due_date' => $dueDate->toDateString(),
-            'status' => 'ACTIVE',
-            'deposit_tokens' => $deposit,
-        ]);
+            if (in_array($copy->condition, ['LOCKED', 'REVIEW', 'DAMAGED'])) {
+                abort(422, 'Diese Kopie ist nicht ausleihbar.');
+            }
 
-        if (! $user->isAdmin()) {
-            $loanCost = $setting->loan_cost;
+            if ($copy->activeLoans()->exists()) {
+                abort(422, 'Diese Kopie ist gerade ausgeliehen.');
+            }
 
-            $user->decrement('tokens', $loanCost);
-            TokenTransaction::create([
+            $alreadyBorrowed = $user->loans()
+                ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
+                ->whereHas('copy', fn ($q) => $q->where('game_id', $copy->game_id))
+                ->exists();
+
+            if ($alreadyBorrowed) {
+                abort(422, 'Du hast dieses Spiel bereits ausgeliehen.');
+            }
+
+            $loanCost = $user->isAdmin() ? 0 : $setting->loan_cost;
+            $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($game, $setting);
+
+            $startDate = $this->calcNextAppointment($setting);
+            $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
+
+            $loan = Loan::create([
+                'copy_id' => $copy->id,
                 'user_id' => $user->id,
-                'loan_id' => $loan->id,
-                'type' => 'BORROW',
-                'amount' => -$loanCost,
-                'description' => "Leihgebühr: {$game->title}",
+                'start_date' => $startDate->toDateString(),
+                'due_date' => $dueDate->toDateString(),
+                'status' => 'ACTIVE',
+                'deposit_tokens' => $deposit,
             ]);
 
-            if ($deposit > 0) {
-                $user->increment('tokens_blocked', $deposit);
+            if (! $user->isAdmin()) {
+                $user->decrement('tokens', $loanCost);
                 TokenTransaction::create([
                     'user_id' => $user->id,
                     'loan_id' => $loan->id,
-                    'type' => 'DEPOSIT_BLOCK',
-                    'amount' => -$deposit,
-                    'description' => "Kaution blockiert: {$game->title}",
+                    'type' => 'BORROW',
+                    'amount' => -$loanCost,
+                    'description' => "Leihgebühr: {$game->title}",
                 ]);
-            }
-        }
 
-        $copy->increment('borrow_count');
+                if ($deposit > 0) {
+                    $user->increment('tokens_blocked', $deposit);
+                    TokenTransaction::create([
+                        'user_id' => $user->id,
+                        'loan_id' => $loan->id,
+                        'type' => 'DEPOSIT_BLOCK',
+                        'amount' => -$deposit,
+                        'description' => "Kaution blockiert: {$game->title}",
+                    ]);
+                }
+            }
+
+            $copy->increment('borrow_count');
+
+            return $loan;
+        });
 
         $loan->load(['copy.game', 'extensions']);
 
@@ -146,13 +150,9 @@ class LoanController extends Controller
         return $startDate->copy()->addDays($n * $setting->interval_days);
     }
 
-    public function show(Request $request, Loan $loan): JsonResponse|LoanResource
+    public function show(Request $request, Loan $loan): LoanResource
     {
-        /** @var User $user */
-        $user = $request->user();
-        if ($loan->user_id !== $user->id) {
-            return response()->json(['message' => 'Keine Berechtigung.'], 403);
-        }
+        $this->authorize('view', $loan);
 
         $loan->load(['copy.game', 'extensions']);
 
@@ -161,11 +161,7 @@ class LoanController extends Controller
 
     public function return(ReturnLoanRequest $request, Loan $loan): JsonResponse|LoanResource
     {
-        /** @var User $user */
-        $user = $request->user();
-        if ($loan->user_id !== $user->id) {
-            return response()->json(['message' => 'Keine Berechtigung.'], 403);
-        }
+        $this->authorize('return', $loan);
 
         if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
@@ -177,12 +173,7 @@ class LoanController extends Controller
             'return_condition' => $request->return_condition,
         ]);
 
-        // Copy goes to REVIEW — admin must approve before it becomes available again
-        /** @var Copy $loanCopy */
-        $loanCopy = $loan->copy;
-        $loanCopy->update(['condition' => 'REVIEW']);
-
-        // Reservation notify happens only after admin approves the copy
+        $loan->copy->update(['condition' => 'REVIEW']);
 
         $loan->load(['copy.game', 'extensions']);
 

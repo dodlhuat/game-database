@@ -16,9 +16,7 @@ class ExtensionController extends Controller
         /** @var User $user */
         $user = $request->user();
 
-        if ($loan->user_id !== $user->id) {
-            return response()->json(['message' => 'Keine Berechtigung.'], 403);
-        }
+        $this->authorize('extend', $loan);
 
         if (! $user->isAdmin()) {
             if (! $user->isMember()) {

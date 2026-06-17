@@ -68,7 +68,7 @@ class GameController extends Controller
             ->when($request->available, fn ($q) => $q->whereHas('copies', fn ($q) => $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])->whereDoesntHave('activeLoans')
             )
             )
-            ->orderBy($request->get('sort', 'title'))
+            ->orderBy(in_array($request->get('sort'), ['title', 'created_at', 'min_age', 'duration_min', 'difficulty']) ? $request->get('sort') : 'title')
             ->paginate(24);
 
         // is_favorited Flag für eingeloggte User
@@ -96,7 +96,7 @@ class GameController extends Controller
         $game->load(['category', 'tags', 'languages', 'reviews.user', 'images']);
         $game->loadCount('copies');
         $game->loadCount(['copies as available_copies_count' => function ($q) {
-            $q->where('condition', '!=', 'LOCKED')
+            $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])
                 ->whereDoesntHave('activeLoans');
         }]);
 
