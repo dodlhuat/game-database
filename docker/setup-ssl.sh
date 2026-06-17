@@ -24,7 +24,7 @@ echo "==> SSL-Zertifikat für $DOMAIN holen..."
 
 docker run --rm -it \
   -p 80:80 \
-  -v "$(pwd)/docker/letsencrypt:/etc/letsencrypt" \
+  -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
   certbot/certbot certonly \
     --standalone \
     --preferred-challenges http \
@@ -35,7 +35,7 @@ docker run --rm -it \
 
 # Let's Encrypt Options-Datei herunterladen (für nginx include)
 curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf \
-  > docker/letsencrypt/options-ssl-nginx.conf 2>/dev/null || \
+  > letsencrypt/options-ssl-nginx.conf 2>/dev/null || \
   docker run --rm certbot/certbot \
     install-certbot-check > /dev/null || true
 

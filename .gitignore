@@ -33,6 +33,8 @@ frontend/.cache/
 frontend/.env
 .env.prod
 frontend-dist/
+letsencrypt/
+certbot-www/
 
 # ============================================================
 # Claude Code
