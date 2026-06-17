@@ -94,5 +94,26 @@ export function useApi() {
 
     delete: <T = unknown>(path: string, options?: ApiOptions) =>
       request<T>(path, { ...options, method: 'DELETE' }),
+
+    download: async (
+      path: string,
+      filename: string,
+      accept = 'application/octet-stream'
+    ): Promise<void> => {
+      const token = getToken()
+      const headers: Record<string, string> = {
+        Accept: accept,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      }
+      const response = await fetch(buildUrl(path), { headers })
+      if (!response.ok) throw new Error('Download fehlgeschlagen')
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      a.click()
+      URL.revokeObjectURL(url)
+    },
   }
 }

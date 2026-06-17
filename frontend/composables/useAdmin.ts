@@ -21,24 +21,12 @@ export function useAdmin() {
     return api.post<{ new: number; updated: number; total: number }>('/admin/games/import', fd)
   }
 
-  const exportGames = async (): Promise<void> => {
-    const config = useRuntimeConfig()
-    const token = localStorage.getItem('auth_token')
-    const response = await fetch(`${config.public.apiBase}/admin/games/export`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      },
-    })
-    if (!response.ok) throw new Error('Export fehlgeschlagen')
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'spiele.xlsx'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+  const exportGames = () =>
+    api.download(
+      '/admin/games/export',
+      'spiele.xlsx',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
   const createGame = (formData: FormData) => api.post('/admin/games', formData)
 
@@ -76,24 +64,12 @@ export function useAdmin() {
     return api.post<{ new: number; updated: number; total: number }>('/admin/categories/import', fd)
   }
 
-  const exportCategories = async (): Promise<void> => {
-    const config = useRuntimeConfig()
-    const token = localStorage.getItem('auth_token')
-    const response = await fetch(`${config.public.apiBase}/admin/categories/export`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      },
-    })
-    if (!response.ok) throw new Error('Export fehlgeschlagen')
-    const blob = await response.blob()
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'kategorien.xlsx'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+  const exportCategories = () =>
+    api.download(
+      '/admin/categories/export',
+      'kategorien.xlsx',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
   const createCategory = (data: unknown) => api.post('/admin/categories', data)
 

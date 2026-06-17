@@ -61,10 +61,4 @@ export default defineNuxtConfig({
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
     },
   },
-
-  // Routen-Middleware
-  routeRules: {
-    '/admin/**': { ssr: false },
-    '/dashboard/**': { ssr: false },
-  },
 })

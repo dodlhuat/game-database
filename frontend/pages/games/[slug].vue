@@ -166,7 +166,7 @@
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
             <button
-              v-if="(auth.user?.tokens ?? 0) >= 2"
+              v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-btn gd-btn--primary"
               @click="openLoanModal"
             >
@@ -273,7 +273,11 @@
             /></span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
-            <button v-if="(auth.user?.tokens ?? 0) >= 2" class="gd-bar__btn" @click="openLoanModal">
+            <button
+              v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
+              class="gd-bar__btn"
+              @click="openLoanModal"
+            >
               {{ $t('btn.borrow_game') }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-bar__btn gd-bar__btn--sec">{{
@@ -308,7 +312,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import type { Game } from '~/composables/useGames'
 import { Modal } from '@dodlhuat/basix/js/modal'
 import { Lightbox } from '@dodlhuat/basix/js/lightbox'
@@ -322,7 +326,7 @@ const { t } = useI18n()
 
 const slug = route.params.slug as string
 
-const { data: game } = await useAsyncData<Game | null>(`game-${slug}`, async () => {
+const { data: game, pending: loading } = useAsyncData<Game | null>(`game-${slug}`, async () => {
   try {
     return (await fetchGame(slug)).data
   } catch (e: unknown) {
@@ -339,7 +343,17 @@ const { data: game } = await useAsyncData<Game | null>(`game-${slug}`, async () 
   }
 })
 
-const loading = ref(false)
+const loanCost = ref(1)
+
+onMounted(async () => {
+  try {
+    const s = await fetchSettings()
+    loanCost.value = s.loan_cost
+  } catch {
+    // keep default
+  }
+})
+
 const reserving = ref(false)
 const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(null)
 
@@ -430,10 +444,12 @@ async function openLoanModal() {
   })
   modal.show()
 
-  setTimeout(() => {
-    document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
-    document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
-  }, 50)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
+      document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
+    })
+  })
 }
 
 async function submitLoan(modal: InstanceType<typeof Modal>) {
@@ -477,7 +493,7 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
       const deposit = game.value.deposit_tokens ?? 0
       auth.setUser({
         ...auth.user,
-        tokens: Math.max(0, auth.user.tokens - 2),
+        tokens: Math.max(0, auth.user.tokens - loanCost.value),
         tokens_blocked: (auth.user.tokens_blocked ?? 0) + deposit,
       })
     }
