@@ -7,6 +7,8 @@ interface RegisterPayload {
   password_confirmation: string
   newsletter_opt_in: boolean
   terms_accepted: boolean
+  website: string
+  form_loaded_at: number
 }
 
 interface LoginPayload {
