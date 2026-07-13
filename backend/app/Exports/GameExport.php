@@ -16,7 +16,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
     /** @return Collection<int, Game> */
     public function collection(): Collection
     {
-        return Game::with(['category', 'tags', 'languages'])->orderBy('title')->get();
+        return Game::with(['tags', 'mechanics', 'languages'])->orderBy('title')->get();
     }
 
     /** @return array<int, string> */
@@ -28,7 +28,6 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             'slug',
             'short_description',
             'description',
-            'category',
             'min_players',
             'max_players',
             'min_age',
@@ -39,6 +38,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             'year',
             'is_active',
             'tags',
+            'mechanics',
         ];
     }
 
@@ -51,7 +51,6 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $game->slug,
             $game->short_description,
             $game->description,
-            $game->category?->name,
             $game->min_players,
             $game->max_players,
             $game->min_age,
@@ -62,6 +61,7 @@ class GameExport implements FromCollection, WithHeadings, WithMapping, WithStyle
             $game->year,
             $game->is_active ? 1 : 0,
             $game->tags->pluck('name')->join(', '),
+            $game->mechanics->pluck('name')->join(', '),
         ];
     }
 

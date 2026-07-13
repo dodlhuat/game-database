@@ -3,7 +3,7 @@ import type { components, operations } from './api.generated'
 // ─── Schemas (response shapes) ────────────────────────────────────
 export type ApiEvent = components['schemas']['EventResource']
 export type ApiGame = components['schemas']['GameResource']
-export type ApiCategory = components['schemas']['CategoryResource']
+export type ApiMechanic = components['schemas']['MechanicResource']
 export type ApiTag = components['schemas']['TagResource']
 export type ApiCopy = components['schemas']['CopyResource']
 export type ApiLoan = components['schemas']['LoanResource']

@@ -55,29 +55,16 @@ export function useAdmin() {
 
   const deleteTag = (id: number) => api.delete(`/admin/tags/${id}`)
 
-  // Categories
-  const fetchAdminCategories = () => api.get<{ data: unknown[] }>('/admin/categories')
+  // Mechanics
+  const fetchAdminMechanics = () =>
+    api.get<{ data: { id: number; name: string; slug: string }[] }>('/admin/mechanics')
 
-  const importCategories = (file: File) => {
-    const fd = new FormData()
-    fd.append('file', file)
-    return api.post<{ new: number; updated: number; total: number }>('/admin/categories/import', fd)
-  }
+  const createMechanic = (name: string) =>
+    api.post<{ data: { id: number; name: string; slug: string } }>('/admin/mechanics', { name })
 
-  const exportCategories = () =>
-    api.download(
-      '/admin/categories/export',
-      'kategorien.xlsx',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    )
+  const updateMechanic = (id: number, name: string) => api.put(`/admin/mechanics/${id}`, { name })
 
-  const createCategory = (data: unknown) => api.post('/admin/categories', data)
-
-  const updateCategory = (id: number, data: unknown) => api.put(`/admin/categories/${id}`, data)
-
-  const patchCategory = (id: number, data: unknown) => api.patch(`/admin/categories/${id}`, data)
-
-  const deleteCategory = (id: number) => api.delete(`/admin/categories/${id}`)
+  const deleteMechanic = (id: number) => api.delete(`/admin/mechanics/${id}`)
 
   // Copies
   const fetchCopies = (params?: Record<string, string | number>) =>
@@ -148,13 +135,10 @@ export function useAdmin() {
     createTag,
     updateTag,
     deleteTag,
-    fetchAdminCategories,
-    importCategories,
-    exportCategories,
-    createCategory,
-    updateCategory,
-    patchCategory,
-    deleteCategory,
+    fetchAdminMechanics,
+    createMechanic,
+    updateMechanic,
+    deleteMechanic,
     fetchCopies,
     createCopy,
     updateCopy,

@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
 use App\Models\CookieVersion;
 use App\Models\Event;
 use App\Models\Game;
 use App\Models\Language;
 use App\Models\LoanSetting;
+use App\Models\Mechanic;
 use App\Models\Package;
 use App\Models\PrivacyVersion;
 use App\Models\TermsVersion;
@@ -55,11 +55,11 @@ class PublicTest extends TestCase
         $this->getJson('/api/games/inactive-game')->assertNotFound();
     }
 
-    public function test_categories_index_returns_list(): void
+    public function test_mechanics_index_returns_list(): void
     {
-        Category::factory()->count(3)->create();
+        Mechanic::factory()->count(3)->create();
 
-        $this->getJson('/api/categories')
+        $this->getJson('/api/mechanics')
             ->assertOk()
             ->assertJsonStructure(['data']);
     }

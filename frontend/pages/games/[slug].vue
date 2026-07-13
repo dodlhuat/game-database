@@ -60,7 +60,6 @@
 
         <div class="gd-hero__caption">
           <div class="gd-pills">
-            <span v-if="game.category" class="gd-pill gd-pill--cat">{{ game.category.name }}</span>
             <span
               v-if="auth.isLoggedIn"
               class="gd-pill"
@@ -201,6 +200,12 @@
         </Transition>
 
         <p v-if="game.short_description" class="gd-summary">{{ game.short_description }}</p>
+
+        <div v-if="game.mechanics?.length" class="gd-mechanics">
+          <span v-for="mechanic in game.mechanics" :key="mechanic.id" class="gd-mechanic">{{
+            mechanic.name
+          }}</span>
+        </div>
 
         <div v-if="game.tags?.length" class="gd-tags">
           <span v-for="tag in game.tags" :key="tag.id" class="gd-tag">{{ tag.name }}</span>
@@ -1109,6 +1114,23 @@ $bar-h: 72px;
   margin: 0;
   padding-left: 1rem;
   border-left: 3px solid $amber;
+}
+
+// ── Mechaniken ────────────────────────────────────────────────────
+.gd-mechanics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.gd-mechanic {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: $amber;
+  background: rgba($amber, 0.1);
+  border: 1px solid $amber-ring;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
 }
 
 // ── Tags ──────────────────────────────────────────────────────────

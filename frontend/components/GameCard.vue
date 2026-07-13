@@ -25,7 +25,6 @@
     </div>
 
     <div class="game-card__body">
-      <p v-if="game.category" class="game-card__cat">{{ game.category.name }}</p>
       <h3 class="game-card__title">{{ game.title }}</h3>
 
       <p v-if="game.short_description" class="game-card__short-desc">

@@ -1,24 +1,22 @@
 <template>
   <div class="admin-page">
-    <!-- ── Page Hero ────────────────────────────────────────────── -->
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <AdminBreadcrumb :label="$t('admin.breadcrumb.packages')" />
+        <AdminBreadcrumb :label="$t('admin.breadcrumb.mechanics')" />
         <div class="page-hero__row">
-          <h1 class="page-hero__title">{{ $t('admin.packages_admin.title') }}</h1>
+          <h1 class="page-hero__title">{{ $t('admin.mechanics.title') }}</h1>
           <button class="hero-btn" @click="openCreate">
             <span class="icon icon-add" aria-hidden="true" />
-            {{ $t('admin.packages_admin.add') }}
+            {{ $t('admin.actions.add_mechanic') }}
           </button>
         </div>
       </div>
     </section>
 
-    <!-- ── Content ──────────────────────────────────────────────── -->
     <div class="admin-content">
       <div class="admin-content__inner">
         <div v-if="loading" class="admin-state">
@@ -27,13 +25,13 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">{{ $t('admin.packages_admin.all') }}</h2>
-            <span class="dash-section__count">{{ packages.length }}</span>
+            <h2 class="dash-section__title">{{ $t('admin.mechanics.all') }}</h2>
+            <span class="dash-section__count">{{ mechanics.length }}</span>
           </header>
 
-          <div v-if="!packages.length" class="dash-empty">
-            <span class="icon icon-gift-outline dash-empty__icon" aria-hidden="true" />
-            <p class="dash-empty__text">{{ $t('admin.empty.packages') }}</p>
+          <div v-if="!mechanics.length" class="dash-empty">
+            <span class="icon icon-label dash-empty__icon" aria-hidden="true" />
+            <p class="dash-empty__text">{{ $t('admin.empty.mechanics') }}</p>
           </div>
 
           <div v-else class="table-wrap">
@@ -41,41 +39,22 @@
               <thead>
                 <tr>
                   <th>{{ $t('admin.table.name') }}</th>
-                  <th>{{ $t('pages.package.type') }}</th>
+                  <th>{{ $t('admin.table.slug') }}</th>
                   <th>{{ $t('admin.table.games') }}</th>
-                  <th>{{ $t('admin.table.status') }}</th>
                   <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="pkg in packages" :key="pkg.id">
-                  <td class="dash-table__primary">{{ pkg.name }}</td>
-                  <td>
-                    <span
-                      class="type-badge"
-                      :class="
-                        pkg.type === 'CURATED' ? 'type-badge--curated' : 'type-badge--category'
-                      "
-                    >
-                      {{
-                        pkg.type === 'CURATED'
-                          ? $t('pages.package.type_curated')
-                          : $t('pages.package.type_category')
-                      }}
-                    </span>
-                  </td>
-                  <td>{{ pkg.games_count ?? 0 }}</td>
-                  <td>
-                    <span class="badge" :class="pkg.is_active ? 'badge-success' : ''">
-                      {{ pkg.is_active ? $t('common.badge.active') : $t('common.badge.inactive') }}
-                    </span>
-                  </td>
+                <tr v-for="mechanic in mechanics" :key="mechanic.id">
+                  <td class="dash-table__primary">{{ mechanic.name }}</td>
+                  <td class="text-mono">{{ mechanic.slug }}</td>
+                  <td>{{ mechanic.games_count ?? 0 }}</td>
                   <td>
                     <div class="action-row">
-                      <button class="action-btn" @click="openEdit(pkg)">
-                        {{ $t('admin.actions.edit') }}
+                      <button class="action-btn" @click="openEdit(mechanic)">
+                        {{ $t('admin.actions.rename') }}
                       </button>
-                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">
+                      <button class="action-btn action-btn--danger" @click="remove(mechanic)">
                         {{ $t('admin.actions.delete') }}
                       </button>
                     </div>
@@ -88,92 +67,28 @@
       </div>
     </div>
 
-    <!-- ── Formular Modal ───────────────────────────────────────── -->
+    <!-- ── Formular Modal ─────────────────────────────────────────── -->
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="form.open" class="modal-overlay" @click.self="closeForm">
-          <div class="dialog dialog--wide">
+          <div class="dialog">
             <div class="dialog__header">
               <h3 class="dialog__title">
-                {{ form.id ? $t('admin.packages_admin.edit') : $t('admin.packages_admin.add') }}
+                {{ form.id ? $t('admin.mechanics.rename') : $t('admin.mechanics.add') }}
               </h3>
               <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
                 <span class="icon icon-close" aria-hidden="true" />
               </button>
             </div>
-
             <div class="dialog__body">
-              <div class="form-grid">
-                <div class="form-grid__full">
-                  <UiInput v-model="form.name" :label="$t('admin.form.name')" required />
-                </div>
-                <div class="form-grid__full">
-                  <UiInput v-model="form.slug" :label="$t('admin.form.slug')" />
-                </div>
-                <div class="form-grid__full">
-                  <UiInput v-model="form.description" :label="$t('admin.form.description')" />
-                </div>
-
-                <div>
-                  <label class="form-label">{{ $t('pages.package.type') }}</label>
-                  <UiVirtualDropdown
-                    v-model="form.type"
-                    class="form-select"
-                    :options="[
-                      { label: $t('pages.package.type_curated'), value: 'CURATED' },
-                      { label: $t('pages.package.type_category'), value: 'CATEGORY' },
-                    ]"
-                  />
-                </div>
-
-                <!-- Spielauswahl -->
-                <div class="form-grid__full">
-                  <label class="form-label">
-                    {{ $t('admin.table.games') }}
-                    <span v-if="form.game_ids.length" class="form-label__count">{{
-                      $t('admin.packages_admin.games_selected', { n: form.game_ids.length })
-                    }}</span>
-                  </label>
-                  <div class="game-search">
-                    <input
-                      v-model="gameSearch"
-                      type="text"
-                      class="game-search__input"
-                      :placeholder="$t('admin.packages_admin.games_search')"
-                    />
-                  </div>
-                  <div class="game-picker">
-                    <label
-                      v-for="game in filteredGames"
-                      :key="game.id"
-                      class="game-chip"
-                      :class="{ 'game-chip--selected': form.game_ids.includes(game.id) }"
-                    >
-                      <input
-                        v-model="form.game_ids"
-                        type="checkbox"
-                        :value="game.id"
-                        class="game-chip__input"
-                      />
-                      {{ game.title }}
-                    </label>
-                    <p v-if="!filteredGames.length" class="game-picker__empty">
-                      {{ $t('admin.packages_admin.games_none') }}
-                    </p>
-                  </div>
-                </div>
-
-                <div class="form-grid__full">
-                  <label class="form-check">
-                    <input v-model="form.is_active" type="checkbox" />
-                    <span>{{ $t('admin.packages_admin.active') }}</span>
-                  </label>
-                </div>
-              </div>
-
+              <UiInput
+                v-model="form.name"
+                :label="$t('admin.form.name')"
+                required
+                @keydown.enter="save"
+              />
               <div v-if="formError" class="form-error">{{ formError }}</div>
             </div>
-
             <div class="dialog__actions">
               <UiButton :loading="saving" @click="save">{{ $t('admin.form.save') }}</UiButton>
               <button class="action-btn" @click="closeForm">{{ $t('admin.form.cancel') }}</button>
@@ -183,7 +98,6 @@
       </Transition>
     </Teleport>
 
-    <!-- ── Footer ──────────────────────────────────────────────── -->
     <footer class="l-footer">
       <div class="l-footer__inner">
         <div class="l-footer__brand">
@@ -197,98 +111,47 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
-const { fetchAdminPackages, createPackage, updatePackage, deletePackage, fetchAdminGames } =
-  useAdmin()
+const { fetchAdminMechanics, createMechanic, updateMechanic, deleteMechanic } = useAdmin()
 
-interface PackageItem {
+interface MechanicItem {
   id: number
   name: string
   slug: string
-  description: string | null
-  type: 'CATEGORY' | 'CURATED'
   games_count: number
-  games: { id: number; title: string }[]
-  is_active: boolean
-}
-
-interface GameOption {
-  id: number
-  title: string
 }
 
 const year = new Date().getFullYear()
 const loading = ref(true)
 const saving = ref(false)
 const formError = ref('')
-const packages = ref<PackageItem[]>([])
-const allGames = ref<GameOption[]>([])
-const gameSearch = ref('')
+const mechanics = ref<MechanicItem[]>([])
 
-const filteredGames = computed(() => {
-  const q = gameSearch.value.trim().toLowerCase()
-  if (!q) return allGames.value
-  return allGames.value.filter((g) => g.title.toLowerCase().includes(q))
-})
+const form = reactive({ open: false, id: null as number | null, name: '' })
 
-const form = reactive({
-  open: false,
-  id: null as number | null,
-  name: '',
-  slug: '',
-  description: '',
-  type: 'CURATED' as 'CATEGORY' | 'CURATED',
-  game_ids: [] as number[],
-  is_active: true,
-})
-
-onMounted(async () => {
-  await load()
-  const gameData = await fetchAdminGames()
-  allGames.value = (gameData.data as GameOption[]).map((g) => ({ id: g.id, title: g.title }))
-})
+onMounted(load)
 
 async function load() {
   loading.value = true
   try {
-    const data = await fetchAdminPackages()
-    packages.value = data.data as PackageItem[]
+    const data = await fetchAdminMechanics()
+    mechanics.value = data.data as MechanicItem[]
   } finally {
     loading.value = false
   }
 }
 
 function openCreate() {
-  Object.assign(form, {
-    open: true,
-    id: null,
-    name: '',
-    slug: '',
-    description: '',
-    type: 'CURATED',
-    game_ids: [],
-    is_active: true,
-  })
-  gameSearch.value = ''
+  Object.assign(form, { open: true, id: null, name: '' })
   formError.value = ''
 }
 
-function openEdit(pkg: PackageItem) {
-  Object.assign(form, {
-    open: true,
-    id: pkg.id,
-    name: pkg.name,
-    slug: pkg.slug,
-    description: pkg.description ?? '',
-    type: pkg.type,
-    game_ids: pkg.games?.map((g) => g.id) ?? [],
-    is_active: pkg.is_active,
-  })
-  gameSearch.value = ''
+function openEdit(mechanic: MechanicItem) {
+  Object.assign(form, { open: true, id: mechanic.id, name: mechanic.name })
   formError.value = ''
 }
 
@@ -297,19 +160,11 @@ function closeForm() {
 }
 
 async function save() {
+  if (!form.name.trim()) return
   saving.value = true
   formError.value = ''
   try {
-    const payload: Record<string, unknown> = {
-      name: form.name,
-      type: form.type,
-      game_ids: form.game_ids,
-      is_active: form.is_active,
-    }
-    if (form.slug) payload.slug = form.slug
-    if (form.description) payload.description = form.description
-
-    form.id ? await updatePackage(form.id, payload) : await createPackage(payload)
+    form.id ? await updateMechanic(form.id, form.name) : await createMechanic(form.name)
     await load()
     closeForm()
   } catch (err: unknown) {
@@ -319,8 +174,8 @@ async function save() {
   }
 }
 
-async function remove(id: number) {
-  await deletePackage(id)
+async function remove(mechanic: MechanicItem) {
+  await deleteMechanic(mechanic.id)
   await load()
 }
 </script>
@@ -412,6 +267,10 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   }
   &:hover {
     opacity: 0.88;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
@@ -526,23 +385,10 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   }
 }
 
-.type-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-.type-badge--curated {
-  background: $amber-08;
-  color: $amber;
-  border: 1px solid $amber-25;
-}
-.type-badge--category {
-  background: rgba(99, 102, 241, 0.1);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+.text-mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--secondary-text);
 }
 
 .action-row {
@@ -568,6 +414,9 @@ $hero-divider: rgba(238, 232, 223, 0.1);
     border-color 0.2s,
     color 0.2s;
   white-space: nowrap;
+  .icon {
+    font-size: 0.875rem;
+  }
   &:hover {
     border-color: var(--accent-color);
     color: var(--accent-text);
@@ -580,6 +429,10 @@ $hero-divider: rgba(238, 232, 223, 0.1);
       border-color: rgba(239, 68, 68, 0.5);
       color: #fca5a5;
     }
+  }
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 }
 
@@ -601,11 +454,8 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   border-radius: 16px;
   padding: 1.75rem;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
-  &--wide {
-    max-width: 660px;
-  }
   &__header {
     display: flex;
     align-items: flex-start;
@@ -642,8 +492,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   }
   &__body {
     margin-bottom: 1.5rem;
-    max-height: 65vh;
-    overflow-y: auto;
   }
   &__actions {
     display: flex;
@@ -669,135 +517,14 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   }
 }
 
-// ─── Form Elements ────────────────────────────────────────────────
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem 1rem;
-  @media (max-width: 500px) {
-    grid-template-columns: 1fr;
-  }
-  &__full {
-    grid-column: 1 / -1;
-  }
-}
-
-.form-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--secondary-text);
-  margin-bottom: 0.4rem;
-  letter-spacing: 0.03em;
-
-  &__count {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: $amber;
-    background: $amber-08;
-    border: 1px solid $amber-25;
-    border-radius: 999px;
-    padding: 0.1rem 0.45rem;
-  }
-}
-
-.form-select {
-  display: block;
-  width: 100%;
-}
-
-.form-check {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--primary-text);
-  cursor: pointer;
-  user-select: none;
-  input {
-    accent-color: var(--accent-color);
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-  }
-}
-
 .form-error {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   padding: 0.75rem 1rem;
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
   color: #f87171;
   font-size: 0.875rem;
-}
-
-// ─── Game Picker ──────────────────────────────────────────────────
-.game-search {
-  margin-bottom: 0.5rem;
-
-  &__input {
-    display: block;
-    width: 100%;
-    height: 36px;
-    padding: 0 0.75rem;
-    border: 1px solid var(--divider);
-    border-radius: 8px;
-    background: var(--background);
-    color: var(--primary-text);
-    font-size: 0.875rem;
-    font-family: inherit;
-    transition: border-color 0.2s;
-    &:focus {
-      outline: none;
-      border-color: var(--accent-color);
-    }
-  }
-}
-
-.game-picker {
-  max-height: 200px;
-  overflow-y: auto;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0.6rem;
-  border: 1px solid var(--divider);
-  border-radius: 8px;
-  background: var(--background);
-
-  &__empty {
-    font-size: 0.82rem;
-    color: var(--secondary-text);
-    padding-bottom: 0;
-    width: 100%;
-  }
-}
-
-.game-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.6rem;
-  border: 1px solid var(--divider);
-  border-radius: 999px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  user-select: none;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-
-  &--selected {
-    border-color: var(--accent-color);
-    background: var(--accent-color-muted);
-    color: var(--accent-text);
-  }
-  &__input {
-    display: none;
-  }
 }
 
 // ─── Footer ───────────────────────────────────────────────────────

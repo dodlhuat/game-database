@@ -108,231 +108,31 @@
                 }
             }
         },
-        "/categories": {
+        "/cookies": {
             "get": {
-                "operationId": "category.index",
+                "operationId": "cookie.show",
                 "tags": [
-                    "Category"
+                    "Cookie"
                 ],
                 "responses": {
                     "200": {
-                        "description": "Array of `CategoryResource`",
+                        "description": "",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CategoryResource"
-                                            }
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/CookieVersion"
+                                        },
+                                        {
+                                            "type": "null"
                                         }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/categories": {
-            "get": {
-                "operationId": "categories.index",
-                "tags": [
-                    "Category"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Array of `CategoryResource`",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/components/schemas/CategoryResource"
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            },
-            "post": {
-                "operationId": "categories.store",
-                "tags": [
-                    "Category"
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CategoryRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "`CategoryResource`",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/CategoryResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    }
-                }
-            }
-        },
-        "/admin/categories/{category}": {
-            "get": {
-                "operationId": "categories.show",
-                "tags": [
-                    "Category"
-                ],
-                "parameters": [
-                    {
-                        "name": "category",
-                        "in": "path",
-                        "required": true,
-                        "description": "The category ID",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "`CategoryResource`",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/CategoryResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
                                     ]
                                 }
                             }
                         }
                     },
                     "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            },
-            "put": {
-                "operationId": "categories.update",
-                "tags": [
-                    "Category"
-                ],
-                "parameters": [
-                    {
-                        "name": "category",
-                        "in": "path",
-                        "required": true,
-                        "description": "The category ID",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CategoryRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "`CategoryResource`",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/CategoryResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "categories.destroy",
-                "tags": [
-                    "Category"
-                ],
-                "parameters": [
-                    {
-                        "name": "category",
-                        "in": "path",
-                        "required": true,
-                        "description": "The category ID",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
                         "description": "",
                         "content": {
                             "application/json": {
@@ -341,7 +141,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "const": "Kategorie gel\u00f6scht."
+                                            "const": "Keine Cookie-Richtlinie gefunden."
                                         }
                                     },
                                     "required": [
@@ -350,98 +150,6 @@
                                 }
                             }
                         }
-                    },
-                    "404": {
-                        "$ref": "#/components/responses/ModelNotFoundException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
-        "/admin/categories/import": {
-            "post": {
-                "operationId": "categoryImportExport.import",
-                "tags": [
-                    "CategoryImportExport"
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "file": {
-                                        "type": "string",
-                                        "format": "binary",
-                                        "contentMediaType": "application/octet-stream",
-                                        "maxLength": 10240
-                                    }
-                                },
-                                "required": [
-                                    "file"
-                                ]
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "new": {
-                                            "type": "integer"
-                                        },
-                                        "updated": {
-                                            "type": "integer"
-                                        },
-                                        "total": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "new",
-                                        "updated",
-                                        "total"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
-        "/admin/categories/export": {
-            "get": {
-                "operationId": "categoryImportExport.export",
-                "tags": [
-                    "CategoryImportExport"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -1656,6 +1364,25 @@
                 "tags": [
                     "EmailVerification"
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    }
+                                },
+                                "required": [
+                                    "email"
+                                ]
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -1677,26 +1404,7 @@
                         }
                     },
                     "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "E-Mail-Adresse bereits best\u00e4tigt."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -1971,44 +1679,7 @@
                         }
                     },
                     "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Eine aktive Mitgliedschaft ist erforderlich."
-                                                },
-                                                "reason": {
-                                                    "type": "string",
-                                                    "const": "membership_required"
-                                                }
-                                            },
-                                            "required": [
-                                                "message",
-                                                "reason"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Keine Berechtigung."
-                                                }
-                                            },
-                                            "required": [
-                                                "message"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -2492,8 +2163,7 @@
                         "name": "sort",
                         "in": "query",
                         "schema": {
-                            "type": "string",
-                            "default": "title"
+                            "type": "string"
                         }
                     }
                 ],
@@ -3247,6 +2917,84 @@
                 }
             }
         },
+        "/games/smart-search": {
+            "get": {
+                "operationId": "gameSearch.index",
+                "tags": [
+                    "GameSearch"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/GameResource"
+                                                    }
+                                                },
+                                                "meta": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "intent": {
+                                                            "type": "string",
+                                                            "const": "FULLTEXT"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "intent"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "data",
+                                                "meta"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    },
+                                                    "minItems": 0,
+                                                    "maxItems": 0,
+                                                    "additionalItems": false
+                                                },
+                                                "meta": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "intent": {
+                                                            "type": "string",
+                                                            "const": "EMPTY"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "intent"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "data",
+                                                "meta"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/languages": {
             "get": {
                 "operationId": "language.index",
@@ -3486,9 +3234,6 @@
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
                     "403": {
                         "description": "",
                         "content": {
@@ -3518,6 +3263,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -3559,23 +3307,7 @@
                         }
                     },
                     "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Keine Berechtigung."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -3636,23 +3368,7 @@
                         "$ref": "#/components/responses/ValidationException"
                     },
                     "403": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Keine Berechtigung."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/AuthorizationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -3861,6 +3577,70 @@
                                         "message": {
                                             "type": "string",
                                             "const": "Ausleihe kann nicht als \u00fcberf\u00e4llig markiert werden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/loans/{loan}/remind": {
+            "post": {
+                "operationId": "loan.sendOverdueReminder",
+                "tags": [
+                    "Loan"
+                ],
+                "parameters": [
+                    {
+                        "name": "loan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`LoanResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/LoanResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Nur \u00fcberf\u00e4llige Ausleihen k\u00f6nnen erinnert werden."
                                         }
                                     },
                                     "required": [
@@ -4282,6 +4062,233 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/mechanics": {
+            "get": {
+                "operationId": "mechanic.index",
+                "tags": [
+                    "Mechanic"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `MechanicResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MechanicResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/mechanics": {
+            "get": {
+                "operationId": "mechanics.index",
+                "tags": [
+                    "Mechanic"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `MechanicResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/MechanicResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "mechanics.store",
+                "tags": [
+                    "Mechanic"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`MechanicResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MechanicResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/mechanics/{mechanic}": {
+            "put": {
+                "operationId": "mechanics.update",
+                "tags": [
+                    "Mechanic"
+                ],
+                "parameters": [
+                    {
+                        "name": "mechanic",
+                        "in": "path",
+                        "required": true,
+                        "description": "The mechanic ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 100
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`MechanicResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/MechanicResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "mechanics.destroy",
+                "tags": [
+                    "Mechanic"
+                ],
+                "parameters": [
+                    {
+                        "name": "mechanic",
+                        "in": "path",
+                        "required": true,
+                        "description": "The mechanic ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Mechanik gel\u00f6scht."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -4755,12 +4762,6 @@
                                             "CURATED"
                                         ]
                                     },
-                                    "category_id": {
-                                        "type": [
-                                            "integer",
-                                            "null"
-                                        ]
-                                    },
                                     "is_active": {
                                         "type": "boolean"
                                     },
@@ -4895,12 +4896,6 @@
                                         "enum": [
                                             "CATEGORY",
                                             "CURATED"
-                                        ]
-                                    },
-                                    "category_id": {
-                                        "type": [
-                                            "integer",
-                                            "null"
                                         ]
                                     },
                                     "is_active": {
@@ -5513,6 +5508,52 @@
                 }
             }
         },
+        "/privacy": {
+            "get": {
+                "operationId": "privacy.show",
+                "tags": [
+                    "Privacy"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "$ref": "#/components/schemas/PrivacyVersion"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Keine Datenschutzerkl\u00e4rung gefunden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "operationId": "register.store",
@@ -5541,12 +5582,16 @@
                                             "type": "string",
                                             "const": "Registrierung erfolgreich. Bitte best\u00e4tige deine E-Mail-Adresse."
                                         },
+                                        "token": {
+                                            "type": "string"
+                                        },
                                         "user": {
                                             "$ref": "#/components/schemas/UserResource"
                                         }
                                     },
                                     "required": [
                                         "message",
+                                        "token",
                                         "user"
                                     ]
                                 }
@@ -7111,94 +7156,46 @@
     },
     "components": {
         "schemas": {
-            "CategoryRequest": {
-                "type": "object",
-                "properties": {
-                    "name": {
-                        "type": "string",
-                        "maxLength": 255
-                    },
-                    "slug": {
-                        "type": "string",
-                        "maxLength": 255
-                    },
-                    "icon_url": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "maxLength": 500
-                    },
-                    "sort_order": {
-                        "type": "integer",
-                        "minimum": 0
-                    },
-                    "parent_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
-                    "is_active": {
-                        "type": "boolean"
-                    }
-                },
-                "required": [
-                    "name",
-                    "slug"
-                ],
-                "title": "CategoryRequest"
-            },
-            "CategoryResource": {
+            "CookieVersion": {
                 "type": "object",
                 "properties": {
                     "id": {
                         "type": "integer"
                     },
-                    "name": {
+                    "version": {
                         "type": "string"
                     },
-                    "slug": {
+                    "content": {
                         "type": "string"
                     },
-                    "icon_url": {
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
                         "type": [
                             "string",
                             "null"
-                        ]
+                        ],
+                        "format": "date-time"
                     },
-                    "sort_order": {
-                        "type": "integer"
-                    },
-                    "parent_id": {
+                    "updated_at": {
                         "type": [
-                            "integer",
+                            "string",
                             "null"
-                        ]
-                    },
-                    "is_active": {
-                        "type": "boolean"
-                    },
-                    "games_count": {
-                        "type": "integer"
-                    },
-                    "children": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/CategoryResource"
-                        }
+                        ],
+                        "format": "date-time"
                     }
                 },
                 "required": [
                     "id",
-                    "name",
-                    "slug",
-                    "icon_url",
-                    "sort_order",
-                    "parent_id",
-                    "is_active"
+                    "version",
+                    "content",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
                 ],
-                "title": "CategoryResource"
+                "title": "CookieVersion"
             },
             "CopyRequest": {
                 "type": "object",
@@ -7591,12 +7588,6 @@
                         ],
                         "maxLength": 500
                     },
-                    "category_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
                     "min_players": {
                         "type": [
                             "integer",
@@ -7697,6 +7688,15 @@
                         "items": {
                             "type": "integer"
                         }
+                    },
+                    "mechanic_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
                     }
                 },
                 "required": [
@@ -7729,13 +7729,16 @@
                             "null"
                         ]
                     },
-                    "category": {
-                        "$ref": "#/components/schemas/CategoryResource"
-                    },
                     "tags": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/TagResource"
+                        }
+                    },
+                    "mechanics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MechanicResource"
                         }
                     },
                     "min_players": {
@@ -7775,7 +7778,22 @@
                         ]
                     },
                     "languages": {
-                        "type": "string"
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name"
+                            ]
+                        }
                     },
                     "year": {
                         "type": [
@@ -7873,7 +7891,9 @@
                             "$ref": "#/components/schemas/CopyResource"
                         }
                     },
-                    "earliest_available_at": {},
+                    "earliest_available_at": {
+                        "type": "string"
+                    },
                     "created_at": {
                         "type": [
                             "string",
@@ -7899,7 +7919,6 @@
                     "deposit_tokens",
                     "cover_image_url",
                     "is_active",
-                    "earliest_available_at",
                     "created_at"
                 ],
                 "title": "GameResource"
@@ -7988,6 +8007,13 @@
                     "is_overdue": {
                         "type": "string"
                     },
+                    "overdue_reminder_sent_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "extensions": {
                         "type": "array",
                         "items": {
@@ -8011,6 +8037,7 @@
                     "deposit_tokens",
                     "status",
                     "is_overdue",
+                    "overdue_reminder_sent_at",
                     "created_at"
                 ],
                 "title": "LoanResource"
@@ -8034,6 +8061,20 @@
                     "loan_duration_weeks": {
                         "type": "integer"
                     },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "max_extensions": {
                         "type": "integer"
                     },
@@ -8051,20 +8092,6 @@
                     },
                     "deposit_pct_good": {
                         "type": "integer"
-                    },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
                     }
                 },
                 "required": [
@@ -8073,14 +8100,14 @@
                     "interval_days",
                     "grace_days",
                     "loan_duration_weeks",
+                    "created_at",
+                    "updated_at",
                     "max_extensions",
                     "loan_cost",
                     "condition_very_good_after",
                     "condition_good_after",
                     "deposit_pct_very_good",
-                    "deposit_pct_good",
-                    "created_at",
-                    "updated_at"
+                    "deposit_pct_good"
                 ],
                 "title": "LoanSetting"
             },
@@ -8100,6 +8127,29 @@
                     "password"
                 ],
                 "title": "LoginRequest"
+            },
+            "MechanicResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "games_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "slug"
+                ],
+                "title": "MechanicResource"
             },
             "Newsletter": {
                 "type": "object",
@@ -8177,12 +8227,6 @@
                     "type": {
                         "type": "string"
                     },
-                    "category_id": {
-                        "type": [
-                            "integer",
-                            "null"
-                        ]
-                    },
                     "is_active": {
                         "type": "boolean"
                     },
@@ -8207,7 +8251,6 @@
                     "slug",
                     "description",
                     "type",
-                    "category_id",
                     "is_active",
                     "created_at",
                     "updated_at"
@@ -8287,6 +8330,47 @@
                     "created_at"
                 ],
                 "title": "PackageLoanResource"
+            },
+            "PrivacyVersion": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "version": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "version",
+                    "content",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                ],
+                "title": "PrivacyVersion"
             },
             "RegisterRequest": {
                 "type": "object",
@@ -8759,6 +8843,25 @@
             },
             "AuthenticationException": {
                 "description": "Unauthenticated",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "message": {
+                                    "type": "string",
+                                    "description": "Error overview."
+                                }
+                            },
+                            "required": [
+                                "message"
+                            ]
+                        }
+                    }
+                }
+            },
+            "AuthorizationException": {
+                "description": "Authorization error",
                 "content": {
                     "application/json": {
                         "schema": {

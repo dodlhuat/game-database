@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Controllers\AccountController;
-use App\Http\Controllers\Admin\CategoryImportExportController;
 use App\Http\Controllers\Admin\CopyController;
 use App\Http\Controllers\Admin\EmailLogController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\GameImageController;
 use App\Http\Controllers\Admin\GameImportExportController;
+use App\Http\Controllers\Admin\MechanicController as AdminMechanicController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
@@ -15,7 +15,6 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CookieController;
 use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
@@ -27,6 +26,7 @@ use App\Http\Controllers\GameSearchController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanSettingController;
+use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
@@ -66,7 +66,7 @@ Route::get('/loan-settings', [LoanSettingController::class, 'show']);
 Route::get('/games', [GameController::class, 'index']);
 Route::get('/games/smart-search', [GameSearchController::class, 'index']);
 Route::get('/games/{game:slug}', [GameController::class, 'show']);
-Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/mechanics', [MechanicController::class, 'index']);
 Route::get('/packages', [PackageController::class, 'index']);
 Route::get('/packages/{package:slug}', [PackageController::class, 'show']);
 Route::get('/terms', [TermsController::class, 'show']);
@@ -147,10 +147,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::apiResource('games', App\Http\Controllers\Admin\GameController::class);
     Route::post('/games/{game}/images', [GameImageController::class, 'store']);
     Route::delete('/games/{game}/images/{image}', [GameImageController::class, 'destroy']);
-    Route::post('/categories/import', [CategoryImportExportController::class, 'import']);
-    Route::get('/categories/export', [CategoryImportExportController::class, 'export']);
-    Route::apiResource('categories', App\Http\Controllers\Admin\CategoryController::class);
     Route::apiResource('tags', TagController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::apiResource('mechanics', AdminMechanicController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Kopienverwaltung
     Route::apiResource('copies', CopyController::class);

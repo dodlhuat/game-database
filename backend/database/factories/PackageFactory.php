@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Category;
 use App\Models\Package;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -19,7 +18,6 @@ class PackageFactory extends Factory
             'slug' => Str::slug($name).'-'.fake()->randomNumber(4),
             'description' => fake()->paragraph(),
             'type' => 'CURATED',
-            'category_id' => Category::factory(),
             'is_active' => true,
         ];
     }

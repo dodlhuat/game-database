@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Category;
 use App\Models\Game;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -19,7 +18,6 @@ class GameFactory extends Factory
             'slug' => Str::slug($title).'-'.fake()->randomNumber(5),
             'description' => fake()->paragraph(),
             'short_description' => fake()->sentence(),
-            'category_id' => Category::factory(),
             'min_players' => 2,
             'max_players' => 4,
             'min_age' => 10,

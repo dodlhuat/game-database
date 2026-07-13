@@ -20,78 +20,14 @@ export interface paths {
     patch: operations['account.update']
     trace?: never
   }
-  '/categories': {
+  '/cookies': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    get: operations['category.index']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admin/categories': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get: operations['categories.index']
-    put?: never
-    post: operations['categories.store']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admin/categories/{category}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get: operations['categories.show']
-    put: operations['categories.update']
-    post?: never
-    delete: operations['categories.destroy']
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admin/categories/import': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post: operations['categoryImportExport.import']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admin/categories/export': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get: operations['categoryImportExport.export']
+    get: operations['cookie.show']
     put?: never
     post?: never
     delete?: never
@@ -612,6 +548,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/games/smart-search': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['gameSearch.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/languages': {
     parameters: {
       query?: never
@@ -708,6 +660,22 @@ export interface paths {
     patch: operations['loan.markOverdue']
     trace?: never
   }
+  '/admin/loans/{loan}/remind': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['loan.sendOverdueReminder']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/loans/{loan}/return': {
     parameters: {
       query?: never
@@ -799,6 +767,54 @@ export interface paths {
     put?: never
     post?: never
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/mechanics': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['mechanic.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/mechanics': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['mechanics.index']
+    put?: never
+    post: operations['mechanics.store']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/mechanics/{mechanic}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['mechanics.update']
+    post?: never
+    delete: operations['mechanics.destroy']
     options?: never
     head?: never
     patch?: never
@@ -956,6 +972,22 @@ export interface paths {
       cookie?: never
     }
     get: operations['admin.packageLoan.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/privacy': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['privacy.show']
     put?: never
     post?: never
     delete?: never
@@ -1240,26 +1272,17 @@ export interface paths {
 export type webhooks = Record<string, never>
 export interface components {
   schemas: {
-    /** CategoryRequest */
-    CategoryRequest: {
-      name: string
-      slug: string
-      icon_url?: string | null
-      sort_order?: number
-      parent_id?: number | null
-      is_active?: boolean
-    }
-    /** CategoryResource */
-    CategoryResource: {
+    /** CookieVersion */
+    CookieVersion: {
       id: number
-      name: string
-      slug: string
-      icon_url: string | null
-      sort_order: number
-      parent_id: number | null
-      is_active: boolean
-      games_count?: number
-      children?: components['schemas']['CategoryResource'][]
+      version: string
+      content: string
+      /** Format: date-time */
+      published_at: string
+      /** Format: date-time */
+      created_at: string | null
+      /** Format: date-time */
+      updated_at: string | null
     }
     /** CopyRequest */
     CopyRequest: {
@@ -1360,7 +1383,6 @@ export interface components {
       slug: string
       description?: string | null
       short_description?: string | null
-      category_id?: number | null
       min_players?: number | null
       max_players?: number | null
       min_age?: number | null
@@ -1377,6 +1399,7 @@ export interface components {
       cover_image?: string | null
       language_ids?: number[] | null
       tag_ids?: number[] | null
+      mechanic_ids?: number[] | null
     }
     /** GameResource */
     GameResource: {
@@ -1385,15 +1408,18 @@ export interface components {
       slug: string
       description: string | null
       short_description: string | null
-      category?: components['schemas']['CategoryResource']
       tags?: components['schemas']['TagResource'][]
+      mechanics?: components['schemas']['MechanicResource'][]
       min_players: number | null
       max_players: number | null
       min_age: number | null
       duration_min: number | null
       duration_max: number | null
       difficulty: string | null
-      languages?: string
+      languages?: {
+        id: number
+        name: string
+      }[]
       year: number | null
       instagram_url: string | null
       deposit_tokens: number
@@ -1410,7 +1436,7 @@ export interface components {
         url: string
       }[]
       copies?: components['schemas']['CopyResource'][]
-      earliest_available_at: unknown
+      earliest_available_at?: string
       /** Format: date-time */
       created_at: string | null
     }
@@ -1439,6 +1465,8 @@ export interface components {
       deposit_tokens: number
       status: string
       is_overdue: string
+      /** Format: date-time */
+      overdue_reminder_sent_at: string | null
       extensions?: components['schemas']['ExtensionResource'][]
       /** Format: date-time */
       created_at: string | null
@@ -1451,22 +1479,29 @@ export interface components {
       interval_days: number
       grace_days: number
       loan_duration_weeks: number
+      /** Format: date-time */
+      created_at: string | null
+      /** Format: date-time */
+      updated_at: string | null
       max_extensions: number
       loan_cost: number
       condition_very_good_after: number
       condition_good_after: number
       deposit_pct_very_good: number
       deposit_pct_good: number
-      /** Format: date-time */
-      created_at: string | null
-      /** Format: date-time */
-      updated_at: string | null
     }
     /** LoginRequest */
     LoginRequest: {
       /** Format: email */
       email: string
       password: string
+    }
+    /** MechanicResource */
+    MechanicResource: {
+      id: number
+      name: string
+      slug: string
+      games_count?: number
     }
     /** Newsletter */
     Newsletter: {
@@ -1489,7 +1524,6 @@ export interface components {
       slug: string
       description: string | null
       type: string
-      category_id: number | null
       is_active: boolean
       /** Format: date-time */
       created_at: string | null
@@ -1516,6 +1550,18 @@ export interface components {
       loans?: components['schemas']['LoanResource'][]
       /** Format: date-time */
       created_at: string | null
+    }
+    /** PrivacyVersion */
+    PrivacyVersion: {
+      id: number
+      version: string
+      content: string
+      /** Format: date-time */
+      published_at: string
+      /** Format: date-time */
+      created_at: string | null
+      /** Format: date-time */
+      updated_at: string | null
     }
     /** RegisterRequest */
     RegisterRequest: {
@@ -1670,6 +1716,18 @@ export interface components {
         }
       }
     }
+    /** @description Authorization error */
+    AuthorizationException: {
+      headers: {
+        [name: string]: unknown
+      }
+      content: {
+        'application/json': {
+          /** @description Error overview. */
+          message: string
+        }
+      }
+    }
   }
   parameters: never
   requestBodies: never
@@ -1719,7 +1777,7 @@ export interface operations {
       422: components['responses']['ValidationException']
     }
   }
-  'category.index': {
+  'cookie.show': {
     parameters: {
       query?: never
       header?: never
@@ -1728,206 +1786,25 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      /** @description Array of `CategoryResource` */
       200: {
         headers: {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            data: components['schemas']['CategoryResource'][]
-          }
+          'application/json': components['schemas']['CookieVersion'] | null
         }
       }
-    }
-  }
-  'categories.index': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Array of `CategoryResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['CategoryResource'][]
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-    }
-  }
-  'categories.store': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CategoryRequest']
-      }
-    }
-    responses: {
-      /** @description `CategoryResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['CategoryResource']
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      422: components['responses']['ValidationException']
-    }
-  }
-  'categories.show': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The category ID */
-        category: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description `CategoryResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['CategoryResource']
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: components['responses']['ModelNotFoundException']
-    }
-  }
-  'categories.update': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The category ID */
-        category: number
-      }
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CategoryRequest']
-      }
-    }
-    responses: {
-      /** @description `CategoryResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['CategoryResource']
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: components['responses']['ModelNotFoundException']
-      422: components['responses']['ValidationException']
-    }
-  }
-  'categories.destroy': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The category ID */
-        category: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
+      404: {
         headers: {
           [name: string]: unknown
         }
         content: {
           'application/json': {
             /** @constant */
-            message: 'Kategorie gelöscht.'
+            message: 'Keine Cookie-Richtlinie gefunden.'
           }
         }
       }
-      401: components['responses']['AuthenticationException']
-      404: components['responses']['ModelNotFoundException']
-    }
-  }
-  'categoryImportExport.import': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody: {
-      content: {
-        'multipart/form-data': {
-          /** Format: binary */
-          file: string
-        }
-      }
-    }
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            new: number
-            updated: number
-            total: string
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      422: components['responses']['ValidationException']
-    }
-  }
-  'categoryImportExport.export': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': Record<string, never>
-        }
-      }
-      401: components['responses']['AuthenticationException']
     }
   }
   'copies.index': {
@@ -2479,7 +2356,14 @@ export interface operations {
       path?: never
       cookie?: never
     }
-    requestBody?: never
+    requestBody: {
+      content: {
+        'application/json': {
+          /** Format: email */
+          email: string
+        }
+      }
+    }
     responses: {
       200: {
         headers: {
@@ -2492,18 +2376,7 @@ export interface operations {
           }
         }
       }
-      401: components['responses']['AuthenticationException']
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'E-Mail-Adresse bereits bestätigt.'
-          }
-        }
-      }
+      422: components['responses']['ValidationException']
     }
   }
   'event.index': {
@@ -2676,24 +2549,7 @@ export interface operations {
           }
         }
       }
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json':
-            | {
-                /** @constant */
-                message: 'Eine aktive Mitgliedschaft ist erforderlich.'
-                /** @constant */
-                reason: 'membership_required'
-              }
-            | {
-                /** @constant */
-                message: 'Keine Berechtigung.'
-              }
-        }
-      }
+      403: components['responses']['AuthorizationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
     }
@@ -3286,6 +3142,39 @@ export interface operations {
       401: components['responses']['AuthenticationException']
     }
   }
+  'gameSearch.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | {
+                data: components['schemas']['GameResource'][]
+                meta: {
+                  /** @constant */
+                  intent: 'FULLTEXT'
+                }
+              }
+            | {
+                data: string[]
+                meta: {
+                  /** @constant */
+                  intent: 'EMPTY'
+                }
+              }
+        }
+      }
+    }
+  }
   'language.index': {
     parameters: {
       query?: never
@@ -3433,17 +3322,7 @@ export interface operations {
         }
       }
       401: components['responses']['AuthenticationException']
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Keine Berechtigung.'
-          }
-        }
-      }
+      403: components['responses']['AuthorizationException']
       404: components['responses']['ModelNotFoundException']
     }
   }
@@ -3475,17 +3354,7 @@ export interface operations {
         }
       }
       401: components['responses']['AuthenticationException']
-      403: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Keine Berechtigung.'
-          }
-        }
-      }
+      403: components['responses']['AuthorizationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
     }
@@ -3571,6 +3440,44 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Ausleihe kann nicht als überfällig markiert werden.'
+          }
+        }
+      }
+    }
+  }
+  'loan.sendOverdueReminder': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The loan ID */
+        loan: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `LoanResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['LoanResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Nur überfällige Ausleihen können erinnert werden.'
           }
         }
       }
@@ -3803,6 +3710,142 @@ export interface operations {
       401: components['responses']['AuthenticationException']
     }
   }
+  'mechanic.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `MechanicResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['MechanicResource'][]
+          }
+        }
+      }
+    }
+  }
+  'mechanics.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `MechanicResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['MechanicResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'mechanics.store': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string
+        }
+      }
+    }
+    responses: {
+      /** @description `MechanicResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['MechanicResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'mechanics.update': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The mechanic ID */
+        mechanic: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          name: string
+        }
+      }
+    }
+    responses: {
+      /** @description `MechanicResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['MechanicResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'mechanics.destroy': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The mechanic ID */
+        mechanic: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Mechanik gelöscht.'
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
   'membership.upgrade': {
     parameters: {
       query?: never
@@ -4032,7 +4075,6 @@ export interface operations {
           description?: string | null
           /** @enum {string} */
           type: 'CATEGORY' | 'CURATED'
-          category_id?: number | null
           is_active?: boolean
           game_ids?: number[] | null
         }
@@ -4097,7 +4139,6 @@ export interface operations {
           description?: string | null
           /** @enum {string} */
           type?: 'CATEGORY' | 'CURATED'
-          category_id?: number | null
           is_active?: boolean
           game_ids?: number[] | null
         }
@@ -4361,6 +4402,36 @@ export interface operations {
       401: components['responses']['AuthenticationException']
     }
   }
+  'privacy.show': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PrivacyVersion'] | null
+        }
+      }
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Keine Datenschutzerklärung gefunden.'
+          }
+        }
+      }
+    }
+  }
   'register.store': {
     parameters: {
       query?: never
@@ -4382,6 +4453,7 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Registrierung erfolgreich. Bitte bestätige deine E-Mail-Adresse.'
+            token: string
             user: components['schemas']['UserResource']
           }
         }

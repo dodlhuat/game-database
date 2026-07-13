@@ -12,13 +12,14 @@ interface Option {
 }
 
 const props = defineProps<{
-  modelValue?: string | number | null
+  modelValue?: string | number | null | (string | number)[]
   options: Option[]
   placeholder?: string
+  multiple?: boolean
 }>()
 
 const emit = defineEmits<{
-  'update:modelValue': [value: string | number | null]
+  'update:modelValue': [value: string | number | null | (string | number)[]]
   change: []
 }>()
 
@@ -58,9 +59,17 @@ async function init() {
     container: containerRef.value,
     options: props.options.map((o) => ({ label: o.label, value: encode(o.value) })),
     placeholder: props.placeholder ?? 'Auswählen...',
+    multiSelect: props.multiple ?? false,
     onSelect: (vals: Array<string | number>) => {
-      const val = vals.length > 0 ? decode(vals[0]!) : null
-      emit('update:modelValue', val)
+      if (props.multiple) {
+        emit(
+          'update:modelValue',
+          vals.map(decode).filter((v): v is string | number => v !== null)
+        )
+      } else {
+        const val = vals.length > 0 ? decode(vals[0]!) : null
+        emit('update:modelValue', val)
+      }
       emit('change')
     },
   })
@@ -68,10 +77,14 @@ async function init() {
   syncValue(props.modelValue)
 }
 
-function syncValue(val: string | number | null | undefined) {
+function syncValue(val: string | number | null | (string | number)[] | undefined) {
   if (!dropdown) return
   if (val === undefined) {
     dropdown.clearSelection()
+    return
+  }
+  if (Array.isArray(val)) {
+    dropdown.setValue(val.map(encode))
     return
   }
   dropdown.setValue([encode(val)])

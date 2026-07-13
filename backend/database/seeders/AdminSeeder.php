@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
 use App\Models\Package;
 use App\Models\Tag;
 use Illuminate\Database\Seeder;
@@ -12,19 +11,6 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // Kategorien
-        $categoryNames = [
-            'Strategiespiele', 'Familienspiele', 'Kartenspiele', 'Kooperationsspiele',
-            'Partyspiele', 'Lernspiele', 'Trinkspiele', 'Großgruppenspiele',
-        ];
-
-        foreach ($categoryNames as $name) {
-            Category::firstOrCreate(
-                ['name' => $name],
-                ['slug' => Str::slug($name)]
-            );
-        }
-
         // Tags
         $tagNames = [
             'ab 8', 'ab 12', 'ab 16', '2 Spieler', '2-4 Spieler', '2-6 Spieler', '4+ Spieler',
@@ -39,28 +25,22 @@ class AdminSeeder extends Seeder
         }
 
         // Pakete
-        $grossgruppe = Category::where('name', 'Großgruppenspiele')->first();
-        $trinkspiele = Category::where('name', 'Trinkspiele')->first();
-
         Package::firstOrCreate(['slug' => 'gruppenspiele-paket'], [
             'name' => 'Gruppenspiele',
             'description' => 'Ein Paket mit Spielen für die große Gruppe (8+ Personen) aus dem Bereich Großgruppenspiele.',
             'type' => 'CATEGORY',
-            'category_id' => $grossgruppe?->id,
         ]);
 
         Package::firstOrCreate(['slug' => 'trinkspiele-paket'], [
             'name' => 'Trinkspiele',
             'description' => 'Ein Paket mit Trinkspielen aus der Kategorie.',
             'type' => 'CATEGORY',
-            'category_id' => $trinkspiele?->id,
         ]);
 
         Package::firstOrCreate(['slug' => 'ueberraschungspaket-des-monats'], [
             'name' => 'Überraschungspaket des Monats',
             'description' => '3 ausgewählte Spieleempfehlungen – jeden Monat neu zusammengestellt.',
             'type' => 'CURATED',
-            'category_id' => null,
         ]);
     }
 }

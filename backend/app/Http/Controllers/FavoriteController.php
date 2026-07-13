@@ -17,7 +17,7 @@ class FavoriteController extends Controller
         /** @var User $user */
         $user = $request->user();
         $games = Game::whereHas('favorites', fn ($q) => $q->where('user_id', $user->id))
-            ->with(['category', 'tags'])
+            ->with(['tags', 'mechanics'])
             ->withCount('copies')
             ->withCount(['copies as available_copies_count' => fn ($q) => $q->where('condition', '!=', 'LOCKED')->whereDoesntHave('activeLoans'),
             ])

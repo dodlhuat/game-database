@@ -9,8 +9,7 @@ class PackageController extends Controller
 {
     public function index(): JsonResponse
     {
-        $packages = Package::with(['category'])
-            ->withCount('games')
+        $packages = Package::withCount('games')
             ->where('is_active', true)
             ->orderBy('name')
             ->get();
@@ -26,7 +25,6 @@ class PackageController extends Controller
             return response()->json(['message' => 'Paket nicht gefunden.'], 404);
         }
 
-        $package->load(['category']);
         $package->loadCount('games');
 
         $games = $package->games()

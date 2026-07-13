@@ -24,7 +24,6 @@ class GameRequest extends FormRequest
             'slug' => ['required', 'string', 'max:255', Rule::unique('games', 'slug')->ignore($gameId)],
             'description' => ['nullable', 'string'],
             'short_description' => ['nullable', 'string', 'max:500'],
-            'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'min_players' => ['nullable', 'integer', 'min:1'],
             'max_players' => ['nullable', 'integer', 'min:1', 'gte:min_players'],
             'min_age' => ['nullable', 'integer', 'min:0', 'max:99'],
@@ -40,6 +39,8 @@ class GameRequest extends FormRequest
             'cover_image' => ['nullable', 'image', 'max:5120'],
             'tag_ids' => ['nullable', 'array'],
             'tag_ids.*' => ['integer', 'exists:tags,id'],
+            'mechanic_ids' => ['nullable', 'array'],
+            'mechanic_ids.*' => ['integer', 'exists:mechanics,id'],
         ];
     }
 }

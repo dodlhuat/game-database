@@ -30,7 +30,7 @@ class GameSearchController extends Controller
 
         $baseQuery = Game::query()
             ->where('is_active', true)
-            ->with(['category', 'tags', 'languages'])
+            ->with(['tags', 'mechanics', 'languages'])
             ->withCount('copies')
             ->withCount(['copies as available_copies_count' => function ($q): void {
                 $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])
@@ -53,7 +53,7 @@ class GameSearchController extends Controller
                     $meta = ['intent' => 'FULLTEXT', 'query' => $term];
                 } else {
                     $reference = Game::where('is_active', true)
-                        ->with('tags')
+                        ->with(['tags', 'mechanics'])
                         ->findOrFail($ref->id);
                     $all = $baseQuery->get();
                     $games = $this->scorer->score($reference, $all);
@@ -65,14 +65,13 @@ class GameSearchController extends Controller
                 }
                 break;
 
-            case 'CATEGORY':
+            case 'MECHANIC':
                 $slug = $parsed['slug'] ?? '';
                 $games = $baseQuery
-                    ->whereHas('category', fn ($q) => $q->where('slug', $slug)
-                        ->orWhereHas('parent', fn ($q) => $q->where('slug', $slug)))
+                    ->whereHas('mechanics', fn ($q) => $q->where('slug', $slug))
                     ->orderBy('title')
                     ->get();
-                $meta = ['intent' => 'CATEGORY', 'slug' => $slug];
+                $meta = ['intent' => 'MECHANIC', 'slug' => $slug];
                 break;
 
             case 'TAG':

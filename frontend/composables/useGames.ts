@@ -4,8 +4,8 @@ export interface Game {
   slug: string
   description: string | null
   short_description: string | null
-  category: { id: number; name: string; slug: string } | null
   tags: { id: number; name: string; slug: string }[]
+  mechanics: { id: number; name: string; slug: string }[]
   min_players: number | null
   max_players: number | null
   min_age: number | null
@@ -27,7 +27,7 @@ export interface Game {
   earliest_available_at?: string | null
 }
 
-export type SmartSearchIntent = 'SIMILARITY' | 'CATEGORY' | 'TAG' | 'FULLTEXT' | 'EMPTY'
+export type SmartSearchIntent = 'SIMILARITY' | 'MECHANIC' | 'TAG' | 'FULLTEXT' | 'EMPTY'
 
 export interface SmartSearchMeta {
   intent: SmartSearchIntent
@@ -44,7 +44,7 @@ export interface SmartSearchResult {
 
 export interface GameFilters {
   search?: string
-  category?: string
+  mechanic?: string
   tag?: string
   difficulty?: string
   players?: number | string
@@ -62,7 +62,6 @@ export interface Package {
   slug: string
   description: string | null
   type: 'CATEGORY' | 'CURATED'
-  category: { id: number; name: string; slug: string } | null
   is_active: boolean
   games?: { id: number; title: string; slug: string; available_copies_count?: number }[]
   games_count?: number
@@ -94,16 +93,10 @@ export function useGames() {
     return api.get<{ data: Game }>(`/games/${slug}`)
   }
 
-  function fetchCategories() {
+  function fetchMechanics() {
     return api.get<{
-      data: {
-        id: number
-        name: string
-        slug: string
-        games_count: number
-        children: { id: number; name: string; slug: string; games_count: number }[]
-      }[]
-    }>('/categories')
+      data: { id: number; name: string; slug: string; games_count?: number }[]
+    }>('/mechanics')
   }
 
   function fetchPackages() {
@@ -125,7 +118,7 @@ export function useGames() {
   return {
     fetchGames,
     fetchGame,
-    fetchCategories,
+    fetchMechanics,
     fetchLanguages,
     fetchPackages,
     fetchPackage,

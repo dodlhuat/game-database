@@ -2,9 +2,9 @@
 
 namespace App\Imports;
 
-use App\Models\Category;
 use App\Models\Game;
 use App\Models\Language;
+use App\Models\Mechanic;
 use App\Models\Tag;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -29,16 +29,6 @@ class GameImport implements ToModel, WithHeadingRow
             $slug = Str::slug($title);
         }
 
-        // Kategorie per Name auflösen
-        $categoryId = null;
-        if (! empty($row['category'])) {
-            $category = Category::firstOrCreate(
-                ['name' => trim($row['category'])],
-                ['slug' => Str::slug(trim($row['category']))]
-            );
-            $categoryId = $category->id;
-        }
-
         // ID vorhanden → Update, sonst → Neu
         $id = isset($row['id']) && $row['id'] !== '' ? (int) $row['id'] : null;
         $existing = $id ? Game::find($id) : null;
@@ -49,7 +39,6 @@ class GameImport implements ToModel, WithHeadingRow
             'slug' => $slug,
             'short_description' => isset($row['short_description']) && $row['short_description'] !== '' ? substr(trim($row['short_description']), 0, 500) : null,
             'description' => isset($row['description']) && $row['description'] !== '' ? trim($row['description']) : null,
-            'category_id' => $categoryId,
             'min_players' => isset($row['min_players']) && $row['min_players'] !== '' ? (int) $row['min_players'] : null,
             'max_players' => isset($row['max_players']) && $row['max_players'] !== '' ? (int) $row['max_players'] : null,
             'min_age' => isset($row['min_age']) && $row['min_age'] !== '' ? (int) $row['min_age'] : null,
@@ -92,6 +81,20 @@ class GameImport implements ToModel, WithHeadingRow
                 $tagIds[] = $tag->id;
             }
             $game->tags()->sync($tagIds);
+        }
+
+        // Mechaniken synchronisieren (kommagetrennt)
+        if (! empty($row['mechanics'])) {
+            $mechanicNames = array_filter(array_map('trim', explode(',', $row['mechanics'])));
+            $mechanicIds = [];
+            foreach ($mechanicNames as $mechanicName) {
+                $mechanic = Mechanic::firstOrCreate(
+                    ['name' => $mechanicName],
+                    ['slug' => Str::slug($mechanicName)]
+                );
+                $mechanicIds[] = $mechanic->id;
+            }
+            $game->mechanics()->sync($mechanicIds);
         }
 
         return null; // Model selbst gespeichert

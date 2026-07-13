@@ -58,7 +58,7 @@
               <thead>
                 <tr>
                   <th>{{ $t('admin.table.title') }}</th>
-                  <th>{{ $t('admin.table.category') }}</th>
+                  <th>{{ $t('admin.form.mechanics') }}</th>
                   <th>{{ $t('admin.table.copies') }}</th>
                   <th>{{ $t('admin.table.status') }}</th>
                   <th>{{ $t('admin.table.actions') }}</th>
@@ -67,7 +67,7 @@
               <tbody>
                 <tr v-for="game in games" :key="game.id">
                   <td class="dash-table__primary">{{ game.title }}</td>
-                  <td>{{ game.category?.name ?? '—' }}</td>
+                  <td>{{ game.mechanics?.map((m) => m.name).join(', ') || '—' }}</td>
                   <td>{{ game.copies_count }}</td>
                   <td>
                     <span class="badge" :class="game.is_active ? 'badge-success' : ''">
@@ -128,14 +128,12 @@
                 </div>
 
                 <div class="form-grid__full">
-                  <label class="form-label">{{ $t('admin.table.category') }}</label>
+                  <label class="form-label">{{ $t('admin.form.mechanics') }}</label>
                   <UiVirtualDropdown
-                    v-model="form.category_id"
+                    v-model="form.mechanic_ids"
                     class="form-select"
-                    :options="[
-                      { label: $t('admin.form.no_category'), value: null },
-                      ...categories.map((c) => ({ label: c.name, value: c.id })),
-                    ]"
+                    multiple
+                    :options="allMechanics.map((m) => ({ label: m.name, value: m.id }))"
                   />
                 </div>
 
@@ -181,7 +179,7 @@
                     v-model="form.difficulty"
                     class="form-select"
                     :options="[
-                      { label: $t('admin.form.no_category'), value: '' },
+                      { label: $t('admin.form.no_selection'), value: '' },
                       { label: $t('admin.form.difficulty_easy'), value: 'EASY' },
                       { label: $t('admin.form.difficulty_medium'), value: 'MEDIUM' },
                       { label: $t('admin.form.difficulty_hard'), value: 'HARD' },
@@ -661,7 +659,7 @@ const {
   createGame,
   updateGame,
   deleteGame,
-  fetchAdminCategories,
+  fetchAdminMechanics,
   fetchAdminTags,
   createTag,
   importGames,
@@ -680,7 +678,7 @@ interface Game {
   slug: string
   description: string | null
   short_description: string | null
-  category: { id: number; name: string } | null
+  mechanics: { id: number; name: string }[]
   copies_count: number
   is_active: boolean
   min_players: number | null
@@ -729,23 +727,7 @@ const tagError = ref('')
 const imageInputRef = ref<HTMLInputElement | null>(null)
 const imageUploading = ref(false)
 const games = ref<Game[]>([])
-interface CategoryItem {
-  id: number
-  name: string
-  is_active: boolean
-  children: CategoryItem[]
-}
-const rawCategories = ref<CategoryItem[]>([])
-const categories = computed(() => {
-  const flat: { id: number; name: string }[] = []
-  for (const cat of rawCategories.value) {
-    if (cat.is_active) flat.push({ id: cat.id, name: cat.name })
-    for (const child of cat.children ?? []) {
-      if (child.is_active) flat.push({ id: child.id, name: `${cat.name} › ${child.name}` })
-    }
-  }
-  return flat
-})
+const allMechanics = ref<{ id: number; name: string; slug: string }[]>([])
 const allTags = ref<{ id: number; name: string; slug: string }[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const newTagName = ref('')
@@ -758,7 +740,7 @@ const form = reactive({
   slug: '',
   description: '',
   short_description: '',
-  category_id: null as number | null,
+  mechanic_ids: [] as number[],
   min_players: '',
   max_players: '',
   min_age: '',
@@ -808,12 +790,12 @@ const damagedForm = reactive({
 onMounted(async () => {
   await load()
   const { fetchLanguages } = useGames()
-  const [catData, tagData, langData] = await Promise.all([
-    fetchAdminCategories(),
+  const [mechanicData, tagData, langData] = await Promise.all([
+    fetchAdminMechanics(),
     fetchAdminTags(),
     fetchLanguages(),
   ])
-  rawCategories.value = catData.data as CategoryItem[]
+  allMechanics.value = mechanicData.data
   allTags.value = tagData.data
   allLanguages.value = langData as { id: number; name: string }[]
 })
@@ -836,7 +818,7 @@ function openCreate() {
     slug: '',
     description: '',
     short_description: '',
-    category_id: null,
+    mechanic_ids: [],
     min_players: '',
     max_players: '',
     min_age: '',
@@ -864,7 +846,7 @@ async function openEdit(game: Game) {
     slug: game.slug,
     description: game.description ?? '',
     short_description: game.short_description ?? '',
-    category_id: game.category?.id ?? null,
+    mechanic_ids: game.mechanics?.map((m) => m.id) ?? [],
     min_players: game.min_players ?? '',
     max_players: game.max_players ?? '',
     min_age: game.min_age ?? '',
@@ -941,7 +923,6 @@ async function save() {
       'slug',
       'description',
       'short_description',
-      'category_id',
       'min_players',
       'max_players',
       'min_age',
@@ -957,6 +938,7 @@ async function save() {
     })
     fd.append('is_active', form.is_active ? '1' : '0')
     form.tag_ids.forEach((id) => fd.append('tag_ids[]', String(id)))
+    form.mechanic_ids.forEach((id) => fd.append('mechanic_ids[]', String(id)))
     form.language_ids.forEach((id) => fd.append('language_ids[]', String(id)))
     if (form.coverFile) fd.append('cover_image', form.coverFile)
     form.id ? await updateGame(form.id, fd) : await createGame(fd)

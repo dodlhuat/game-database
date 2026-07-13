@@ -21,7 +21,9 @@ declare module '@dodlhuat/basix/js/push-menu' {
     function init(): void
     function destroy(): void
     function openPanel(el: HTMLElement): void
+    function open(): void
     function close(): void
+    function isOpen(): boolean
   }
 }
 

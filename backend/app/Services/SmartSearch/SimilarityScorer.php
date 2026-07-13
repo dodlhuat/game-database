@@ -19,15 +19,15 @@ class SimilarityScorer
     {
         /** @var array<int> $refTagIds */
         $refTagIds = $reference->tags->pluck('id')->toArray();
+        /** @var array<int> $refMechanicIds */
+        $refMechanicIds = $reference->mechanics->pluck('id')->toArray();
 
         return $candidates
             ->filter(fn (Game $game): bool => $game->id !== $reference->id)
-            ->map(function (Game $game) use ($reference, $refTagIds): Game {
+            ->map(function (Game $game) use ($reference, $refTagIds, $refMechanicIds): Game {
                 $s = 0;
 
-                if ($reference->category_id !== null && $game->category_id === $reference->category_id) {
-                    $s += 5;
-                }
+                $s += $game->mechanics->pluck('id')->intersect($refMechanicIds)->count() * 4;
 
                 $s += $game->tags->pluck('id')->intersect($refTagIds)->count() * 3;
 

@@ -52,7 +52,6 @@
             <h2 class="package-card__title">{{ pkg.name }}</h2>
             <p v-if="pkg.description" class="package-card__desc">{{ pkg.description }}</p>
             <div class="package-card__meta">
-              <span v-if="pkg.category" class="package-card__cat">{{ pkg.category.name }}</span>
               <span class="package-card__count">{{
                 $t('pages.packages.games_count', { n: pkg.games_count ?? 0 })
               }}</span>

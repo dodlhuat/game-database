@@ -2,8 +2,8 @@
 
 namespace App\Services\SmartSearch;
 
-use App\Models\Category;
 use App\Models\Game;
+use App\Models\Mechanic;
 use App\Models\Tag;
 
 class QueryParser
@@ -19,9 +19,9 @@ class QueryParser
 
         $normalized = $this->normalize($query);
 
-        $catSlug = $this->bestCategoryMatch($normalized);
-        if ($catSlug !== null) {
-            return ['intent' => 'CATEGORY', 'slug' => $catSlug];
+        $mechanicSlug = $this->bestMechanicMatch($normalized);
+        if ($mechanicSlug !== null) {
+            return ['intent' => 'MECHANIC', 'slug' => $mechanicSlug];
         }
 
         $tagSlug = $this->bestTagMatch($normalized);
@@ -51,17 +51,17 @@ class QueryParser
         return $best;
     }
 
-    private function bestCategoryMatch(string $normalized): ?string
+    private function bestMechanicMatch(string $normalized): ?string
     {
         $best = null;
         $bestScore = 0.0;
 
-        Category::all(['name', 'slug'])->each(
-            function (Category $cat) use ($normalized, &$best, &$bestScore): void {
-                $score = $this->similarity($normalized, $this->normalize($cat->name));
+        Mechanic::all(['name', 'slug'])->each(
+            function (Mechanic $mechanic) use ($normalized, &$best, &$bestScore): void {
+                $score = $this->similarity($normalized, $this->normalize($mechanic->name));
                 if ($score > $bestScore && $score >= 0.75) {
                     $bestScore = $score;
-                    $best = $cat->slug;
+                    $best = $mechanic->slug;
                 }
             }
         );

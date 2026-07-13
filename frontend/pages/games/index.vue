@@ -46,9 +46,9 @@
                 {{ smartMeta.reference_title }}
               </NuxtLink>
             </template>
-            <template v-else-if="smartMeta.intent === 'CATEGORY'">
-              <span class="icon icon-category intent-badge__icon" aria-hidden="true" />
-              {{ $t('pages.games.intent_category') }}
+            <template v-else-if="smartMeta.intent === 'MECHANIC'">
+              <span class="icon icon-extension intent-badge__icon" aria-hidden="true" />
+              {{ $t('pages.games.intent_mechanic') }}
             </template>
             <template v-else-if="smartMeta.intent === 'TAG'">
               <span class="icon icon-label intent-badge__icon" aria-hidden="true" />
@@ -86,8 +86,8 @@
         <!-- Active filter pills (only when panel is closed) -->
         <div v-if="hasActiveFilters && !filterPanelOpen" class="active-pills-wrap">
           <div class="active-pills">
-            <button v-if="filters.category" class="active-pill" @click.stop="clearPill('category')">
-              <span class="active-pill__text">{{ categoryLabel }}</span>
+            <button v-if="filters.mechanic" class="active-pill" @click.stop="clearPill('mechanic')">
+              <span class="active-pill__text">{{ mechanicLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
             <button
@@ -163,10 +163,20 @@
       <!-- ── Expandable filter panel ──────────────────────────── -->
       <div class="filter-panel" :class="{ 'filter-panel--open': filterPanelOpen }">
         <div class="filter-panel__inner">
-          <!-- Category -->
-          <div class="filter-section filter-section--category">
-            <h4 class="filter-section__title">{{ $t('pages.games.filter_category') }}</h4>
-            <div ref="catPickerEl" class="cat-picker-host" />
+          <!-- Mechanik -->
+          <div class="filter-section filter-section--mechanic">
+            <h4 class="filter-section__title">{{ $t('pages.games.filter_mechanic') }}</h4>
+            <div class="option-chips" role="group" :aria-label="$t('pages.games.filter_mechanic')">
+              <button
+                v-for="m in allMechanics"
+                :key="m.id"
+                class="option-chip"
+                :class="{ 'option-chip--active': selectedMechanicIds.includes(m.id) }"
+                @click="toggleMechanic(m.id)"
+              >
+                {{ m.name }}
+              </button>
+            </div>
           </div>
 
           <!-- Difficulty -->
@@ -317,26 +327,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
 import type { Game, SmartSearchMeta } from '~/composables/useGames'
-import { GroupPicker } from '@dodlhuat/basix/js/group-picker'
 
-const { fetchGames, fetchCategories, fetchLanguages, smartSearch } = useGames()
+const { fetchGames, fetchMechanics, fetchLanguages, smartSearch } = useGames()
 const { t } = useI18n()
 
-type CategoryItem = {
+type MechanicItem = {
   id: number
   slug: string
   name: string
-  games_count: number
-  children: CategoryItem[]
 }
 
 const loading = ref(true)
 const games = ref<Game[]>([])
 const meta = ref({ current_page: 1, last_page: 1, per_page: 24, total: 0 })
 const smartMeta = ref<SmartSearchMeta | null>(null)
-const categories = ref<CategoryItem[]>([])
+const allMechanics = ref<MechanicItem[]>([])
 const allLanguages = ref<{ id: number; name: string }[]>([])
 const searchFocused = ref(false)
 const filterPanelOpen = ref(false)
@@ -376,67 +383,20 @@ const ageOptions = computed(() => [
   { label: t('pages.games.filter_age_from', { n: 18 }), value: '18' },
 ])
 
-// ── Category picker ────────────────────────────────────────────────
-const catPickerEl = ref<HTMLElement | null>(null)
-let catPicker: InstanceType<typeof GroupPicker> | null = null
-let isInitializingPicker = false
+// ── Mechanik-Filter (Mehrfachauswahl) ────────────────────────────────
+const selectedMechanicIds = computed(() =>
+  filters.mechanic
+    .split(',')
+    .filter(Boolean)
+    .map((v) => Number(v))
+)
 
-function initCatPicker() {
-  if (!catPickerEl.value) return
-  catPicker?.destroy()
-
-  const data = categories.value.map((cat) => {
-    const subs = (cat.children ?? []).map((c) => ({ id: c.slug, label: c.name }))
-    return subs.length
-      ? { id: cat.slug, label: cat.name, subgroups: subs }
-      : { id: cat.slug, label: cat.name }
-  })
-
-  catPicker = new GroupPicker(catPickerEl.value, data, {
-    searchPlaceholder: t('pages.games.category_search'),
-    selectAllLabel: t('pages.games.category_select_all'),
-    deselectLabel: t('pages.games.category_deselect'),
-    emptyLabel: t('pages.games.category_empty'),
-    onSelectionChange: (sel: {
-      parentGroups: string[]
-      subgroups: { groupId: string; subgroupId: string }[]
-    }) => {
-      if (isInitializingPicker) return
-      const slugs = [...sel.parentGroups, ...sel.subgroups.map((s) => s.subgroupId)]
-      filters.category = slugs.join(',')
-      resetPage()
-    },
-  })
-
-  // Restore current selection without triggering the handler
-  if (filters.category) {
-    isInitializingPicker = true
-    const slugs = filters.category.split(',').filter(Boolean)
-    const parentGroups: string[] = []
-    const subgroups: { groupId: string; subgroupId: string }[] = []
-    for (const slug of slugs) {
-      if (categories.value.some((c) => c.slug === slug)) {
-        parentGroups.push(slug)
-      } else {
-        for (const parent of categories.value) {
-          if ((parent.children ?? []).some((c) => c.slug === slug)) {
-            subgroups.push({ groupId: parent.slug, subgroupId: slug })
-            break
-          }
-        }
-      }
-    }
-    catPicker.setSelection({ parentGroups, subgroups })
-    isInitializingPicker = false
-  }
+function toggleMechanic(id: number) {
+  const ids = selectedMechanicIds.value
+  const next = ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]
+  filters.mechanic = next.join(',')
+  resetPage()
 }
-
-// Init/re-init picker when panel opens and categories are ready
-watch([filterPanelOpen, categories], ([open, cats]) => {
-  if (open && cats.length > 0) {
-    nextTick(() => initCatPicker())
-  }
-})
 
 function onEscapeKey(e: KeyboardEvent) {
   if (e.key === 'Escape' && filterPanelOpen.value) filterPanelOpen.value = false
@@ -445,7 +405,7 @@ function onEscapeKey(e: KeyboardEvent) {
 // ── Filters ────────────────────────────────────────────────────────
 const filters = reactive({
   search: '',
-  category: '',
+  mechanic: '',
   difficulty: '',
   players: '',
   duration: '' as '' | 'short' | 'medium' | 'long',
@@ -457,18 +417,11 @@ const filters = reactive({
 })
 
 // ── Active filter labels ───────────────────────────────────────────
-const categoryLabel = computed(() => {
-  if (!filters.category) return t('pages.games.filter_category')
-  const slugs = filters.category.split(',').filter(Boolean)
-  if (slugs.length === 0) return t('pages.games.filter_category')
-  if (slugs.length > 1) return `${slugs.length} ${t('pages.games.filter_category')}`
-  const slug = slugs[0]
-  for (const cat of categories.value) {
-    if (cat.slug === slug) return cat.name
-    const child = (cat.children ?? []).find((c) => c.slug === slug)
-    if (child) return child.name
-  }
-  return t('pages.games.filter_category')
+const mechanicLabel = computed(() => {
+  const ids = selectedMechanicIds.value
+  if (ids.length === 0) return t('pages.games.filter_mechanic')
+  if (ids.length > 1) return `${ids.length} ${t('pages.games.filter_mechanic')}`
+  return allMechanics.value.find((m) => m.id === ids[0])?.name ?? t('pages.games.filter_mechanic')
 })
 
 const difficultyLabel = computed(() => {
@@ -497,7 +450,7 @@ const hasActiveFilters = computed(
   () =>
     !!(
       filters.search ||
-      filters.category ||
+      filters.mechanic ||
       filters.difficulty ||
       filters.players ||
       filters.duration ||
@@ -511,7 +464,7 @@ const activeFilterCount = computed(
   () =>
     [
       filters.search,
-      filters.category,
+      filters.mechanic,
       filters.difficulty,
       filters.players,
       filters.duration,
@@ -544,14 +497,13 @@ function clearPill(key: keyof typeof filters) {
 
 function clearFilters() {
   filters.search = ''
-  filters.category = ''
+  filters.mechanic = ''
   filters.difficulty = ''
   filters.players = ''
   filters.duration = ''
   filters.language = ''
   filters.min_age = ''
   filters.available = false
-  catPicker?.setSelection({ parentGroups: [], subgroups: [] })
   resetPage()
 }
 
@@ -603,8 +555,8 @@ watch(
 useAsyncData(
   'games-init',
   async () => {
-    const [, cats, langs] = await Promise.all([load(), fetchCategories(), fetchLanguages()])
-    categories.value = cats.data as CategoryItem[]
+    const [, mechs, langs] = await Promise.all([load(), fetchMechanics(), fetchLanguages()])
+    allMechanics.value = mechs.data as MechanicItem[]
     allLanguages.value = langs
   },
   { server: false }
@@ -616,7 +568,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   document.removeEventListener('keydown', onEscapeKey)
-  catPicker?.destroy()
 })
 </script>
 
@@ -1223,7 +1174,7 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
       grid-template-columns: repeat(2, 1fr);
       column-gap: 0.4375rem;
 
-      .filter-section--category {
+      .filter-section--mechanic {
         grid-column: 1 / -1;
       }
     }
@@ -1311,7 +1262,7 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
     }
   }
 
-  &--category {
+  &--mechanic {
     background: rgba(255, 255, 255, 0.032);
   }
 }
@@ -1551,47 +1502,6 @@ $hero-input-border: rgba(255, 255, 255, 0.12);
   &__info {
     font-size: 0.875rem;
     color: var(--secondary-text);
-  }
-}
-</style>
-
-<!-- Global (non-scoped) styles for the inline GroupPicker in the filter panel -->
-<style lang="scss">
-// GroupPicker inside the filter panel — stripped back to match dark aesthetic
-.cat-picker-host {
-  .group-picker {
-    display: flex;
-    flex-direction: column;
-    max-height: 280px;
-    overflow: hidden;
-  }
-
-  .group-picker__search {
-    margin-bottom: 0.5rem;
-  }
-
-  .group-picker__list {
-    flex: 1;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
-
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 999px;
-    }
-  }
-
-  .group-picker__selection {
-    min-height: unset;
-    margin-bottom: 0.5rem;
-
-    &:empty {
-      display: none;
-    }
   }
 }
 </style>

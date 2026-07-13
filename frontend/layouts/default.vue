@@ -36,10 +36,10 @@
             <NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/categories">{{ $t('admin.categories.title') }}</NuxtLink>
+            <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
           </li>
           <li>
-            <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
+            <NuxtLink to="/admin/mechanics">{{ $t('admin.mechanics.title') }}</NuxtLink>
           </li>
           <li>
             <NuxtLink to="/admin/users">{{ $t('admin.users.title') }}</NuxtLink>
@@ -145,15 +145,26 @@ onUnmounted(() => {
   PushMenuClass = null
 })
 
+// Closing via PushMenu.close() only toggles CSS classes — it doesn't click the
+// underlying checkbox, so the checkbox stays "checked" and the stale
+// click-anywhere-to-close listener stays attached. The next click anywhere in
+// the page (often the search field) then retriggers that listener and
+// re-opens the menu. Closing through the checkbox keeps everything in sync.
+function closeMenu() {
+  if (PushMenuClass?.isOpen()) {
+    checkboxEl?.click()
+  }
+}
+
 watch(
   () => route.path,
   () => {
-    PushMenuClass?.close()
+    closeMenu()
   }
 )
 
 async function handleLogout() {
-  PushMenuClass?.close()
+  closeMenu()
   await logout()
 }
 </script>

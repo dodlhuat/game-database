@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Category;
 use App\Models\Game;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,7 +24,6 @@ class GameTest extends TestCase
             'title' => 'Test Game',
             'slug' => $slug,
             'is_active' => true,
-            'category_id' => Category::factory()->create()->id,
         ], $overrides);
     }
 

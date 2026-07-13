@@ -12,7 +12,7 @@ class PackageController extends Controller
 {
     public function index(): JsonResponse
     {
-        $packages = Package::with(['category', 'games:id,title'])
+        $packages = Package::with(['games:id,title'])
             ->withCount('games')
             ->orderBy('name')
             ->get();
@@ -27,7 +27,6 @@ class PackageController extends Controller
             'slug' => 'nullable|string|max:255|unique:packages,slug',
             'description' => 'nullable|string',
             'type' => 'required|in:CATEGORY,CURATED',
-            'category_id' => 'nullable|exists:categories,id',
             'game_ids' => 'nullable|array',
             'game_ids.*' => 'exists:games,id',
             'is_active' => 'boolean',
@@ -38,7 +37,7 @@ class PackageController extends Controller
         $package = Package::create($data);
         $package->games()->sync($data['game_ids'] ?? []);
 
-        $package->load(['category', 'games:id,title']);
+        $package->load(['games:id,title']);
         $package->loadCount('games');
 
         return response()->json(['data' => $package], 201);
@@ -46,7 +45,7 @@ class PackageController extends Controller
 
     public function show(Package $package): JsonResponse
     {
-        $package->load(['category', 'games:id,title']);
+        $package->load(['games:id,title']);
 
         return response()->json(['data' => $package]);
     }
@@ -58,7 +57,6 @@ class PackageController extends Controller
             'slug' => 'sometimes|string|max:255|unique:packages,slug,'.$package->id,
             'description' => 'nullable|string',
             'type' => 'sometimes|in:CATEGORY,CURATED',
-            'category_id' => 'nullable|exists:categories,id',
             'game_ids' => 'nullable|array',
             'game_ids.*' => 'exists:games,id',
             'is_active' => 'boolean',
@@ -70,7 +68,7 @@ class PackageController extends Controller
             $package->games()->sync($data['game_ids'] ?? []);
         }
 
-        $package->load(['category', 'games:id,title']);
+        $package->load(['games:id,title']);
         $package->loadCount('games');
 
         return response()->json(['data' => $package]);

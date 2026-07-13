@@ -2,34 +2,24 @@
 
 namespace App\Models;
 
-use Database\Factories\PackageFactory;
+use Database\Factories\MechanicFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Package extends Model
+class Mechanic extends Model
 {
-    /** @use HasFactory<PackageFactory> */
+    /** @use HasFactory<MechanicFactory> */
     use HasFactory;
 
     protected $fillable = [
         'name',
         'slug',
-        'description',
-        'type',
-        'is_active',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'is_active' => 'boolean',
-        ];
-    }
 
     /** @return BelongsToMany<Game, $this> */
     public function games(): BelongsToMany
     {
-        return $this->belongsToMany(Game::class, 'package_game');
+        return $this->belongsToMany(Game::class, 'game_mechanics');
     }
 }

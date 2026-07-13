@@ -182,11 +182,11 @@
                 /></span>
                 <span class="nav-tile__label">Spiele</span>
               </NuxtLink>
-              <NuxtLink to="/admin/categories" class="nav-tile">
+              <NuxtLink to="/admin/mechanics" class="nav-tile">
                 <span class="nav-tile__icon"
                   ><span class="icon icon-label" aria-hidden="true"
                 /></span>
-                <span class="nav-tile__label">Kategorien</span>
+                <span class="nav-tile__label">Mechaniken</span>
               </NuxtLink>
               <NuxtLink to="/admin/tags" class="nav-tile">
                 <span class="nav-tile__icon"

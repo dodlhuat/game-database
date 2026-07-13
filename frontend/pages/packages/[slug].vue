@@ -31,7 +31,6 @@
                   : $t('pages.package.type_category')
               }}
             </span>
-            <span v-if="pkg.category" class="page-hero__cat">{{ pkg.category.name }}</span>
           </div>
           <h1 class="page-hero__title">{{ pkg.name }}</h1>
           <p v-if="pkg.description" class="page-hero__desc">{{ pkg.description }}</p>
@@ -47,10 +46,6 @@
               <span class="detail__stat-value">{{
                 pkg.games_count ?? pkg.games?.length ?? 0
               }}</span>
-            </div>
-            <div v-if="pkg.category" class="detail__stat">
-              <span class="detail__stat-label">{{ $t('pages.package.type') }}</span>
-              <span class="detail__stat-value">{{ pkg.category.name }}</span>
             </div>
             <div class="detail__stat">
               <span class="detail__stat-label">{{ $t('pages.package.type') }}</span>

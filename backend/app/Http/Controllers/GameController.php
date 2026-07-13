@@ -18,19 +18,16 @@ class GameController extends Controller
 
         $games = Game::query()
             ->where('is_active', true)
-            ->with(['category', 'tags', 'languages'])
+            ->with(['tags', 'mechanics', 'languages'])
             ->withCount('copies')
             ->withCount(['copies as available_copies_count' => function ($q) {
                 $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])
                     ->whereDoesntHave('activeLoans');
             }])
             ->withCount('reviews')
-            ->when($request->category, function ($q, $value) {
+            ->when($request->mechanic, function ($q, $value) {
                 $slugs = array_filter(explode(',', $value));
-                $q->whereHas('category', function ($q) use ($slugs) {
-                    $q->whereIn('slug', $slugs)
-                        ->orWhereHas('parent', fn ($q) => $q->whereIn('slug', $slugs));
-                });
+                $q->whereHas('mechanics', fn ($q) => $q->whereIn('slug', $slugs));
             })
             ->when($request->tag, fn ($q, $slug) => $q->whereHas('tags', fn ($q) => $q->where('slug', $slug))
             )
@@ -93,7 +90,7 @@ class GameController extends Controller
 
         $userId = auth('sanctum')->id();
 
-        $game->load(['category', 'tags', 'languages', 'reviews.user', 'images']);
+        $game->load(['tags', 'mechanics', 'languages', 'reviews.user', 'images']);
         $game->loadCount('copies');
         $game->loadCount(['copies as available_copies_count' => function ($q) {
             $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])

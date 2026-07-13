@@ -218,7 +218,7 @@
       "title": "Spielesammlung",
       "search_placeholder": "Suchen, z.B. „Spiele wie Everdell“ oder „Kartenspiele“…",
       "search_clear": "Suche leeren",
-      "filter_category": "Kategorie",
+      "filter_mechanic": "Mechanik",
       "filter_difficulty": "Schwierigkeit",
       "filter_difficulty_easy": "Leicht",
       "filter_difficulty_medium": "Mittel",
@@ -243,10 +243,6 @@
       "sort_newest": "Neueste",
       "empty_title": "Keine Spiele gefunden",
       "empty_sub": "Versuche andere Filter oder Suchbegriffe.",
-      "category_search": "Kategorie suchen…",
-      "category_select_all": "Alle",
-      "category_deselect": "Abwählen",
-      "category_empty": "Keine Ergebnisse",
       "filter_clear": "Alle Filter zurücksetzen",
       "count": "{n} Spiele entdecken",
       "pagination_prev": "← Zurück",
@@ -256,7 +252,7 @@
       "players_label_plus": "{n}+ Spieler",
       "age_label": "Ab {n} J.",
       "intent_similar_to": "Ähnlich wie",
-      "intent_category": "Kategorie erkannt",
+      "intent_mechanic": "Mechanik erkannt",
       "intent_tag": "Tag erkannt"
     },
     "game": {
@@ -363,7 +359,6 @@
     "management": "Verwaltung",
     "users": "Mitglieder",
     "games": "Spiele",
-    "categories": "Kategorien",
     "tags": "Tags",
     "loans": "Ausleihen",
     "extensions": "Verlängerungsanträge",
@@ -385,8 +380,8 @@
     },
     "breadcrumb": {
       "games": "Spiele",
-      "categories": "Kategorien",
       "tags": "Tags",
+      "mechanics": "Mechaniken",
       "users": "Mitglieder",
       "loans": "Ausleihen",
       "extensions": "Verlängerungsanträge",
@@ -405,7 +400,6 @@
       "status": "Status",
       "actions": "Aktionen",
       "title": "Titel",
-      "category": "Kategorie",
       "copies": "Kopien",
       "sent_at": "Versandt am",
       "recipients": "Empfänger",
@@ -419,8 +413,8 @@
     "actions": {
       "add_user": "Benutzer anlegen",
       "add_game": "Spiel hinzufügen",
-      "add_category": "Kategorie hinzufügen",
       "add_tag": "Tag hinzufügen",
+      "add_mechanic": "Mechanik hinzufügen",
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "activate": "Aktivieren",
@@ -433,8 +427,8 @@
     },
     "empty": {
       "games": "Noch keine Spiele vorhanden.",
-      "categories": "Noch keine Kategorien vorhanden.",
       "tags": "Noch keine Tags vorhanden.",
+      "mechanics": "Noch keine Mechaniken vorhanden.",
       "newsletters": "Noch keine Newsletter versandt.",
       "damage_reports": "Keine Schadensmeldungen vorhanden.",
       "loans": "Keine Ausleihen vorhanden.",
@@ -449,15 +443,10 @@
       "close": "Schließen",
       "name": "Name",
       "slug": "Slug",
-      "parent_category": "Übergeordnete Kategorie",
-      "no_parent": "Keine (Hauptkategorie)",
-      "icon_url": "Icon-URL (optional)",
-      "sort_order": "Reihenfolge",
-      "active_category": "Kategorie aktiv",
       "title": "Titel",
       "short_desc": "Kurzbeschreibung (max. 500 Zeichen)",
       "description": "Beschreibung (lang)",
-      "no_category": "Keine",
+      "no_selection": "Keine",
       "min_players": "Min. Spieler",
       "max_players": "Max. Spieler",
       "min_age": "Ab Alter",
@@ -473,6 +462,7 @@
       "instagram": "Instagram-Link (optional)",
       "tags": "Tags",
       "new_tag": "Neuer Tag…",
+      "mechanics": "Mechanik",
       "cover_image": "Coverbild",
       "cover_current": "Aktuelles Coverbild",
       "other_images": "Weitere Bilder",
@@ -505,11 +495,11 @@
       "mark_damaged_title": "Kopie als beschädigt markieren",
       "mark_damaged_hint": "Die Kaution wird einbehalten. Bitte Begründung angeben."
     },
-    "categories": {
-      "title": "Kategorien verwalten",
-      "all": "Alle Kategorien",
-      "add": "Kategorie hinzufügen",
-      "edit": "Kategorie bearbeiten"
+    "mechanics": {
+      "title": "Mechaniken verwalten",
+      "all": "Alle Mechaniken",
+      "add": "Mechanik hinzufügen",
+      "rename": "Mechanik umbenennen"
     },
     "packages_admin": {
       "title": "Pakete verwalten",
@@ -594,8 +584,6 @@
       "title": "Import abgeschlossen",
       "new_games": "Neue Spiele",
       "updated_games": "Aktualisierte Spiele",
-      "new_categories": "Neue Kategorien",
-      "updated_categories": "Aktualisierte Kategorien",
       "total": "Gesamt verarbeitet"
     },
     "loan_settings": {
