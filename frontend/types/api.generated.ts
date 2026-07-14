@@ -164,6 +164,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/donations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['donation.store']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/email-logs': {
     parameters: {
       query?: never
@@ -1318,6 +1334,14 @@ export interface components {
       /** Format: date-time */
       updated_at: string | null
     }
+    /** DonationRequest */
+    DonationRequest: {
+      confirmed_complete: string
+      website?: string
+      form_loaded_at: number
+      games: string[]
+      images?: string[] | null
+    }
     /** EmailLog */
     EmailLog: {
       id: number
@@ -2205,6 +2229,34 @@ export interface operations {
         }
       }
       401: components['responses']['AuthenticationException']
+    }
+  }
+  'donation.store': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['DonationRequest']
+      }
+    }
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Danke für deine Spende! Wir melden uns bei dir.'
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
     }
   }
   'emailLog.index': {

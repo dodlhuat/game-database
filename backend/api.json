@@ -1038,6 +1038,51 @@
                 }
             }
         },
+        "/donations": {
+            "post": {
+                "operationId": "donation.store",
+                "tags": [
+                    "Donation"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DonationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Danke f\u00fcr deine Spende! Wir melden uns bei dir."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
         "/admin/email-logs": {
             "get": {
                 "operationId": "emailLog.index",
@@ -7336,6 +7381,48 @@
                     "updated_at"
                 ],
                 "title": "DamageReport"
+            },
+            "DonationRequest": {
+                "type": "object",
+                "properties": {
+                    "confirmed_complete": {
+                        "type": "string"
+                    },
+                    "website": {
+                        "type": "string"
+                    },
+                    "form_loaded_at": {
+                        "type": "integer"
+                    },
+                    "games": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 120
+                        },
+                        "minItems": 1,
+                        "maxItems": 20
+                    },
+                    "images": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "string",
+                            "format": "binary",
+                            "contentMediaType": "application/octet-stream",
+                            "maxLength": 5120
+                        },
+                        "maxItems": 3
+                    }
+                },
+                "required": [
+                    "confirmed_complete",
+                    "form_loaded_at",
+                    "games"
+                ],
+                "title": "DonationRequest"
             },
             "EmailLog": {
                 "type": "object",

@@ -15,6 +15,7 @@
     "privacy": "Datenschutzerklärung",
     "cookies": "Cookie-Richtlinien",
     "collection": "Spielesammlung",
+    "donations": "Sachspenden",
     "menu_open": "Menü öffnen",
     "menu_close": "Menü schließen",
     "theme_toggle": "Theme wechseln"
@@ -299,6 +300,20 @@
       "not_available": "Nicht verfügbar",
       "details": "Details →",
       "games_count": "{n} Spiele"
+    },
+    "donations": {
+      "eyebrow": "Sachspenden",
+      "title": "Schenke uns Spiele",
+      "subtitle": "Verstaubt in deinem Regal ein Spiel, das seit Jahren nur noch Deko ist? Gib ihm ein zweites Leben bei uns — wir freuen uns über jeden Neuzugang, dein Regal freut sich über den Platz.",
+      "rules_title": "Die Spielregeln für Spenden",
+      "rules_text": "Wir nehmen nur vollständige Spiele in einem annehmbaren Zustand — mit allen Karten, Steinen und der Anleitung. Ein Spiel ohne alle Teile ist wie eine Pizza ohne Käse: theoretisch denkbar, aber niemand will das wirklich.",
+      "form_games_label": "Welche Spiele verschenkst du?",
+      "form_games_placeholder": "Titel eintippen und Enter drücken…",
+      "form_games_hint": "Mehrere Spiele? Einfach nacheinander eintippen, mit Enter oder Komma bestätigen.",
+      "form_confirm_label": "Ich bestätige, dass alle genannten Spiele vollständig (alle Karten, Steine, Anleitungen etc.) und in einem annehmbaren Zustand sind.",
+      "form_images_label": "Fotos (optional, aber hilfreich)",
+      "form_images_hint": "PNG, JPG, WEBP — max. 3 Bilder, je max. 5 MB",
+      "form_submit": "Spende abschicken"
     },
     "package": {
       "not_found": "Paket nicht gefunden",

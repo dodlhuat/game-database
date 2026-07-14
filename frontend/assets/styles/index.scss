@@ -40,3 +40,10 @@ nav {
   left: calc(0px + 0.5rem);
   top: calc(3px + 0.5rem);
 }
+
+// basix styled-checkbox (used on register/donations/admin forms): same
+// checkmark-centering issue as .checkbox above, different markup/selector.
+.styled-checkbox:checked + label::after {
+  left: calc(0px + 0.5rem);
+  top: calc(2px + 0.5rem);
+}

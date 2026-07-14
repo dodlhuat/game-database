@@ -37,7 +37,7 @@ services:
       - backend_storage_framework:/var/www/backend/storage/framework
       - backend_storage_logs:/var/www/backend/storage/logs
       - backend_bootstrap_cache:/var/www/backend/bootstrap/cache
-    environment:
+    environment: &backend-env
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:8000
@@ -55,6 +55,31 @@ services:
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
       MAIL_ENCRYPTION: "null"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # ----------------------------------------------------------------
+  # Queue Worker (verarbeitet z.B. Mail::queue() — QUEUE_CONNECTION=database
+  # liefert sonst nie aus, da kein Worker die jobs-Tabelle abarbeitet)
+  # ----------------------------------------------------------------
+  queue-worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: game-db-queue-worker
+    restart: unless-stopped
+    working_dir: /var/www/backend
+    entrypoint: []
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=3"]
+    volumes:
+      - ./backend:/var/www/backend
+      - backend_storage_framework:/var/www/backend/storage/framework
+      - backend_storage_logs:/var/www/backend/storage/logs
+      - backend_bootstrap_cache:/var/www/backend/bootstrap/cache
+    environment: *backend-env
     depends_on:
       mariadb:
         condition: service_healthy

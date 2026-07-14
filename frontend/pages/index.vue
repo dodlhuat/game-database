@@ -30,14 +30,24 @@
           </NuxtLink>
         </div>
 
-        <Transition name="fade">
-          <div v-if="auth.isLoggedIn && auth.isAdmin" class="hero__admin-chip">
-            <NuxtLink to="/admin">
-              <span class="icon icon-settings" aria-hidden="true" />
-              {{ $t('nav.admin') }}
-            </NuxtLink>
-          </div>
-        </Transition>
+        <div class="hero__chip-row">
+          <Transition name="fade">
+            <div v-if="auth.isLoggedIn" class="hero__admin-chip">
+              <NuxtLink to="/donations">
+                <span class="icon icon-gift-outline" aria-hidden="true" />
+                {{ $t('nav.donations') }}
+              </NuxtLink>
+            </div>
+          </Transition>
+          <Transition name="fade">
+            <div v-if="auth.isLoggedIn && auth.isAdmin" class="hero__admin-chip">
+              <NuxtLink to="/admin">
+                <span class="icon icon-settings" aria-hidden="true" />
+                {{ $t('nav.admin') }}
+              </NuxtLink>
+            </div>
+          </Transition>
+        </div>
       </div>
 
       <div class="hero__scroll-hint" aria-hidden="true">
@@ -307,9 +317,14 @@ $indigo-glow: rgba(44, 40, 32, 0.6);
     }
   }
 
-  &__admin-chip {
+  &__chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
     margin-top: 1.75rem;
+  }
 
+  &__admin-chip {
     a {
       display: inline-flex;
       align-items: center;

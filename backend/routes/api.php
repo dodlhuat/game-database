@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CookieController;
 use App\Http\Controllers\DamageReportController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DonationController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\ExtensionController;
 use App\Http\Controllers\FavoriteController;
@@ -107,6 +108,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Schadensmeldungen
     Route::post('/damage-reports', [DamageReportController::class, 'store']);
+
+    // Sachspenden
+    Route::post('/donations', [DonationController::class, 'store']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);

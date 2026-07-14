@@ -6,6 +6,17 @@
         <span class="l-nav__brand-name">AUA</span>
       </NuxtLink>
 
+      <!-- Push-menu toggle: label IS .navigation so navigation.click() toggles the checkbox.
+           Placed on the left, next to the panel it opens (basix push-menu slides in from the left). -->
+      <label
+        for="push-nav-toggle"
+        class="l-nav__trigger navigation navigation-controls"
+        :aria-label="$t('nav.menu_open')"
+      >
+        <input id="push-nav-toggle" type="checkbox" />
+        <span class="icon icon-menu" aria-hidden="true" />
+      </label>
+
       <nav class="l-nav__links" aria-label="Hauptnavigation">
         <NuxtLink to="/games" class="l-nav__link">{{ $t('nav.games') }}</NuxtLink>
         <NuxtLink to="/packages" class="l-nav__link">{{ $t('nav.packages') }}</NuxtLink>
@@ -31,16 +42,6 @@
       <button class="l-nav__theme-btn" :aria-label="$t('nav.theme_toggle')" @click="toggleTheme">
         <span class="icon" :class="isDark ? 'icon-light' : 'icon-dark'" aria-hidden="true" />
       </button>
-
-      <!-- Push-menu toggle: label IS .navigation so navigation.click() toggles the checkbox -->
-      <label
-        for="push-nav-toggle"
-        class="l-nav__trigger navigation navigation-controls"
-        :aria-label="$t('nav.menu_open')"
-      >
-        <input id="push-nav-toggle" type="checkbox" />
-        <span class="icon icon-menu" aria-hidden="true" />
-      </label>
     </div>
   </header>
 </template>
