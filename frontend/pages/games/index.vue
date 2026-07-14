@@ -63,6 +63,7 @@
     <div
       v-show="!isSmartSearch"
       class="filter-bar"
+      data-theme="dark"
       :class="{ 'filter-bar--active': hasActiveFilters, 'filter-bar--open': filterPanelOpen }"
     >
       <!-- Top row -->
