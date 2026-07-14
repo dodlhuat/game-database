@@ -1350,8 +1350,9 @@ export interface components {
       title: string
       /** Format: date */
       date: string
-      time?: string | null
       is_all_day?: boolean
+      time?: string | null
+      end_time?: string | null
       description?: string | null
       /** Format: binary */
       image?: string | null
@@ -1362,6 +1363,7 @@ export interface components {
       title: string
       date: string
       time: string | null
+      end_time: string | null
       is_all_day: boolean
       description: string | null
       image_url: string | null
@@ -1479,16 +1481,16 @@ export interface components {
       interval_days: number
       grace_days: number
       loan_duration_weeks: number
-      /** Format: date-time */
-      created_at: string | null
-      /** Format: date-time */
-      updated_at: string | null
       max_extensions: number
       loan_cost: number
       condition_very_good_after: number
       condition_good_after: number
       deposit_pct_very_good: number
       deposit_pct_good: number
+      /** Format: date-time */
+      created_at: string | null
+      /** Format: date-time */
+      updated_at: string | null
     }
     /** LoginRequest */
     LoginRequest: {

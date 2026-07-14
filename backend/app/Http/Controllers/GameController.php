@@ -58,10 +58,20 @@ class GameController extends Controller
             })
             ->when($request->language, fn ($q, $langId) => $q->whereHas('languages', fn ($q) => $q->where('languages.id', (int) $langId))
             )
-            ->when($request->min_age, fn ($q, $age) => $q->where(function ($q) use ($age) {
-                $q->whereNull('min_age')->orWhere('min_age', '<=', (int) $age);
+            ->when($request->filled('min_age_from') || $request->filled('min_age_to'), function ($q) use ($request) {
+                $from = $request->filled('min_age_from') ? (int) $request->min_age_from : null;
+                $to = $request->filled('min_age_to') ? (int) $request->min_age_to : null;
+                $q->where(function ($q) use ($from, $to) {
+                    $q->whereNull('min_age')->orWhere(function ($q) use ($from, $to) {
+                        if ($from !== null) {
+                            $q->where('min_age', '>=', $from);
+                        }
+                        if ($to !== null) {
+                            $q->where('min_age', '<=', $to);
+                        }
+                    });
+                });
             })
-            )
             ->when($request->available, fn ($q) => $q->whereHas('copies', fn ($q) => $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])->whereDoesntHave('activeLoans')
             )
             )

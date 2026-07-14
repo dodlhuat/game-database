@@ -7451,14 +7451,20 @@
                         "type": "string",
                         "format": "date"
                     },
+                    "is_all_day": {
+                        "type": "boolean"
+                    },
                     "time": {
                         "type": [
                             "string",
                             "null"
                         ]
                     },
-                    "is_all_day": {
-                        "type": "boolean"
+                    "end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "description": {
                         "type": [
@@ -7500,6 +7506,12 @@
                             "null"
                         ]
                     },
+                    "end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "is_all_day": {
                         "type": "boolean"
                     },
@@ -7521,6 +7533,7 @@
                     "title",
                     "date",
                     "time",
+                    "end_time",
                     "is_all_day",
                     "description",
                     "image_url"
@@ -8061,20 +8074,6 @@
                     "loan_duration_weeks": {
                         "type": "integer"
                     },
-                    "created_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
-                    },
                     "max_extensions": {
                         "type": "integer"
                     },
@@ -8092,6 +8091,20 @@
                     },
                     "deposit_pct_good": {
                         "type": "integer"
+                    },
+                    "created_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
                     }
                 },
                 "required": [
@@ -8100,14 +8113,14 @@
                     "interval_days",
                     "grace_days",
                     "loan_duration_weeks",
-                    "created_at",
-                    "updated_at",
                     "max_extensions",
                     "loan_cost",
                     "condition_very_good_after",
                     "condition_good_after",
                     "deposit_pct_very_good",
-                    "deposit_pct_good"
+                    "deposit_pct_good",
+                    "created_at",
+                    "updated_at"
                 ],
                 "title": "LoanSetting"
             },

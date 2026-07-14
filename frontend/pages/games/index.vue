@@ -107,7 +107,11 @@
               <span class="active-pill__text">{{ durationLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
-            <button v-if="filters.min_age" class="active-pill" @click.stop="clearPill('min_age')">
+            <button
+              v-if="filters.min_age_from || filters.min_age_to"
+              class="active-pill"
+              @click.stop="clearAgeFilter"
+            >
               <span class="active-pill__text">{{ ageLabel }}</span>
               <span class="icon icon-close active-pill__x" aria-hidden="true" />
             </button>
@@ -236,17 +240,15 @@
           <!-- Age -->
           <div class="filter-section">
             <h4 class="filter-section__title">{{ $t('pages.games.filter_age') }}</h4>
-            <div class="option-chips" role="group" :aria-label="$t('pages.games.filter_age')">
-              <button
-                v-for="a in ageOptions"
-                :key="a.value"
-                class="option-chip"
-                :class="{ 'option-chip--active': filters.min_age === a.value }"
-                @click="selectFilter('min_age', a.value)"
-              >
-                {{ a.label }}
-              </button>
-            </div>
+            <UiRangeSlider
+              v-model="ageRange"
+              :min="AGE_MIN"
+              :max="AGE_MAX"
+              :format-label="(v) => `${v}`"
+              :start-label="$t('pages.games.filter_age_from', { n: ageRange[0] })"
+              :end-label="$t('pages.games.filter_age_to', { n: ageRange[1] })"
+              @change="onAgeRangeChange"
+            />
           </div>
 
           <!-- Language -->
@@ -374,15 +376,9 @@ const durationOptions = computed(() => [
   { label: t('pages.games.filter_duration_long'), value: 'long' },
 ])
 
-const ageOptions = computed(() => [
-  { label: t('pages.games.filter_age_from', { n: 6 }), value: '6' },
-  { label: t('pages.games.filter_age_from', { n: 8 }), value: '8' },
-  { label: t('pages.games.filter_age_from', { n: 10 }), value: '10' },
-  { label: t('pages.games.filter_age_from', { n: 12 }), value: '12' },
-  { label: t('pages.games.filter_age_from', { n: 14 }), value: '14' },
-  { label: t('pages.games.filter_age_from', { n: 16 }), value: '16' },
-  { label: t('pages.games.filter_age_from', { n: 18 }), value: '18' },
-])
+const AGE_MIN = 0
+const AGE_MAX = 18
+const ageRange = ref<[number, number]>([AGE_MIN, AGE_MAX])
 
 // ── Mechanik-Filter (Mehrfachauswahl) ────────────────────────────────
 const selectedMechanicIds = computed(() =>
@@ -411,7 +407,8 @@ const filters = reactive({
   players: '',
   duration: '' as '' | 'short' | 'medium' | 'long',
   language: '' as string | number,
-  min_age: '',
+  min_age_from: '' as number | string,
+  min_age_to: '' as number | string,
   available: false,
   sort: 'title',
   page: 1,
@@ -438,7 +435,12 @@ const durationLabel = computed(() => {
 })
 
 const ageLabel = computed(() => {
-  return ageOptions.value.find((o) => o.value === filters.min_age)?.label ?? ''
+  const from = filters.min_age_from
+  const to = filters.min_age_to
+  if (from && to) return t('pages.games.filter_age_range', { from, to })
+  if (from) return t('pages.games.filter_age_from', { n: from })
+  if (to) return t('pages.games.filter_age_to', { n: to })
+  return ''
 })
 
 const languageLabel = computed(() => {
@@ -456,7 +458,8 @@ const hasActiveFilters = computed(
       filters.players ||
       filters.duration ||
       filters.language ||
-      filters.min_age ||
+      filters.min_age_from ||
+      filters.min_age_to ||
       filters.available
     )
 )
@@ -470,14 +473,27 @@ const activeFilterCount = computed(
       filters.players,
       filters.duration,
       filters.language,
-      filters.min_age,
+      filters.min_age_from || filters.min_age_to,
       filters.available,
     ].filter(Boolean).length
 )
 
 // ── Filter actions ─────────────────────────────────────────────────
-function selectFilter(key: 'difficulty' | 'players' | 'duration' | 'min_age', value: string) {
+function selectFilter(key: 'difficulty' | 'players' | 'duration', value: string) {
   filters[key] = filters[key] === value ? '' : (value as never)
+  resetPage()
+}
+
+function onAgeRangeChange([from, to]: [number, number]) {
+  filters.min_age_from = from > AGE_MIN ? from : ''
+  filters.min_age_to = to < AGE_MAX ? to : ''
+  resetPage()
+}
+
+function clearAgeFilter() {
+  ageRange.value = [AGE_MIN, AGE_MAX]
+  filters.min_age_from = ''
+  filters.min_age_to = ''
   resetPage()
 }
 
@@ -503,7 +519,9 @@ function clearFilters() {
   filters.players = ''
   filters.duration = ''
   filters.language = ''
-  filters.min_age = ''
+  filters.min_age_from = ''
+  filters.min_age_to = ''
+  ageRange.value = [AGE_MIN, AGE_MAX]
   filters.available = false
   resetPage()
 }

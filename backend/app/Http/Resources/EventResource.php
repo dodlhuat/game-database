@@ -17,6 +17,7 @@ class EventResource extends JsonResource
             'title' => $this->title,
             'date' => $this->date->format('Y-m-d'),
             'time' => $this->time,
+            'end_time' => $this->end_time,
             'is_all_day' => $this->is_all_day,
             'description' => $this->description,
             'image_url' => $this->image_url,

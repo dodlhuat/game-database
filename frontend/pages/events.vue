@@ -45,7 +45,11 @@
               </span>
               <span class="event-modal__time">
                 <span class="icon icon-schedule" aria-hidden="true" />
-                {{ selected.is_all_day ? $t('events.all_day') : formatTime(selected.time) }}
+                {{
+                  selected.is_all_day
+                    ? $t('events.all_day')
+                    : formatTimeSpan(selected.time, selected.end_time)
+                }}
               </span>
             </div>
 
@@ -90,7 +94,12 @@ function toCalendarEvent(e: ApiEvent) {
     start = new Date(`${dateStr}T00:00:00`)
     start.setHours(h ?? 0, m, 0, 0)
     end = new Date(start)
-    end.setHours((h ?? 0) + 1, m, 0, 0)
+    if (e.end_time) {
+      const [eh, em] = e.end_time.split(':').map(Number)
+      end.setHours(eh ?? 0, em, 0, 0)
+    } else {
+      end.setHours((h ?? 0) + 1, m, 0, 0)
+    }
   }
 
   return {
@@ -107,10 +116,12 @@ function formatDate(iso: string) {
   return `${d}.${m}.${y}`
 }
 
-function formatTime(time: string | null) {
+function formatTimeSpan(time: string | null, endTime: string | null) {
   if (!time) return ''
   const [h, m] = time.split(':')
-  return `${h}:${m} Uhr`
+  if (!endTime) return `${h}:${m} Uhr`
+  const [eh, em] = endTime.split(':')
+  return `${h}:${m}–${eh}:${em} Uhr`
 }
 
 onMounted(async () => {

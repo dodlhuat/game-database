@@ -52,7 +52,13 @@
                 <tr v-for="event in events" :key="event.id">
                   <td class="dash-table__primary">{{ event.title }}</td>
                   <td>{{ formatDate(event.date) }}</td>
-                  <td>{{ event.is_all_day ? $t('events.all_day') : formatTime(event.time) }}</td>
+                  <td>
+                    {{
+                      event.is_all_day
+                        ? $t('events.all_day')
+                        : formatTimeSpan(event.time, event.end_time)
+                    }}
+                  </td>
                   <td>
                     <div class="action-row">
                       <button class="action-btn" @click="openEdit(event)">
@@ -103,8 +109,14 @@
                   <UiSwitch v-model="form.is_all_day" :label="$t('events.all_day')" />
                 </div>
 
-                <div v-if="!form.is_all_day">
-                  <UiInput v-model="form.time" :label="$t('admin.events.form.time')" type="time" />
+                <div v-if="!form.is_all_day" class="form-grid__full">
+                  <UiTimeSpanPicker
+                    v-model:start="form.time"
+                    v-model:end="form.end_time"
+                    :label="$t('admin.events.form.time_span')"
+                    :from-label="$t('admin.events.form.time_from')"
+                    :to-label="$t('admin.events.form.time_to')"
+                  />
                 </div>
 
                 <div class="form-grid__full">
@@ -210,6 +222,7 @@ const form = reactive({
   title: '',
   date: '',
   time: '',
+  end_time: '',
   is_all_day: false,
   description: '',
   imageFile: null as File | null,
@@ -226,10 +239,12 @@ function formatDate(iso: string) {
   return `${d}.${m}.${y}`
 }
 
-function formatTime(time: string | null) {
+function formatTimeSpan(time: string | null, endTime: string | null) {
   if (!time) return '—'
   const [h, m] = time.split(':')
-  return `${h}:${m} Uhr`
+  if (!endTime) return `${h}:${m} Uhr`
+  const [eh, em] = endTime.split(':')
+  return `${h}:${m}–${eh}:${em} Uhr`
 }
 
 function formatFileSize(bytes: number) {
@@ -245,6 +260,7 @@ function openCreate() {
     title: '',
     date: '',
     time: '',
+    end_time: '',
     is_all_day: false,
     description: '',
     imageFile: null,
@@ -261,6 +277,7 @@ function openEdit(event: ApiEvent) {
     title: event.title,
     date: event.date,
     time: event.time ? event.time.substring(0, 5) : '',
+    end_time: event.end_time ? event.end_time.substring(0, 5) : '',
     is_all_day: event.is_all_day,
     description: event.description ?? '',
     imageFile: null,
@@ -306,6 +323,7 @@ function buildFormData() {
   fd.append('date', form.date)
   fd.append('is_all_day', form.is_all_day ? '1' : '0')
   if (!form.is_all_day && form.time) fd.append('time', form.time)
+  if (!form.is_all_day && form.end_time) fd.append('end_time', form.end_time)
   if (form.description) fd.append('description', form.description)
   if (form.imageFile) fd.append('image', form.imageFile)
   if (form.removeImage) fd.append('remove_image', '1')
@@ -315,6 +333,14 @@ function buildFormData() {
 async function save() {
   if (!form.title || !form.date) {
     formError.value = 'Titel und Datum sind erforderlich.'
+    return
+  }
+  if (!form.is_all_day && (!form.time || !form.end_time)) {
+    formError.value = 'Start- und Endzeit sind erforderlich, wenn das Event nicht ganztägig ist.'
+    return
+  }
+  if (!form.is_all_day && form.time >= form.end_time) {
+    formError.value = 'Die Endzeit muss nach der Startzeit liegen.'
     return
   }
   formError.value = ''

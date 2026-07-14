@@ -27,6 +27,7 @@ class EventController extends Controller
         $data['is_all_day'] = $request->boolean('is_all_day');
         if ($data['is_all_day']) {
             $data['time'] = null;
+            $data['end_time'] = null;
         }
 
         if ($request->hasFile('image')) {
@@ -42,6 +43,7 @@ class EventController extends Controller
         $data['is_all_day'] = $request->boolean('is_all_day');
         if ($data['is_all_day']) {
             $data['time'] = null;
+            $data['end_time'] = null;
         }
 
         if ($request->hasFile('image')) {

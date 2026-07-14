@@ -50,7 +50,8 @@ export interface GameFilters {
   players?: number | string
   duration?: 'short' | 'medium' | 'long' | ''
   language?: number | string
-  min_age?: number | string
+  min_age_from?: number | string
+  min_age_to?: number | string
   available?: boolean
   sort?: string
   page?: number

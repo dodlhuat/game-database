@@ -105,3 +105,27 @@ declare module '@dodlhuat/basix/js/calendar' {
     destroy(): void
   }
 }
+
+declare module '@dodlhuat/basix/js/timepicker' {
+  export interface TimeSpan {
+    start: string
+    end: string
+  }
+  export class TimeSpanPicker {
+    constructor(
+      elementOrSelector: string | HTMLElement,
+      options?: {
+        onChange?: (start: string, end: string) => void
+        defaultStart?: string
+        defaultEnd?: string
+        fromString?: string
+        toLabel?: string
+      }
+    )
+    getValue(): TimeSpan
+    setValue(start: string, end: string): void
+    reset(): void
+    isValid(): boolean
+    destroy(): void
+  }
+}

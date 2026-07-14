@@ -14,6 +14,7 @@ class EventFactory extends Factory
             'title' => fake()->sentence(4),
             'date' => now()->addDays(7)->toDateString(),
             'time' => '18:00',
+            'end_time' => '20:00',
             'is_all_day' => false,
             'description' => fake()->paragraph(),
         ];

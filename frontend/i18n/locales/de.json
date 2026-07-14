@@ -231,8 +231,10 @@
       "filter_duration_short": "Kurz (≤ 30 Min.)",
       "filter_duration_medium": "Mittel (31–90 Min.)",
       "filter_duration_long": "Lang (> 90 Min.)",
-      "filter_age": "Mindestalter",
+      "filter_age": "Alter",
       "filter_age_from": "Ab {n} Jahren",
+      "filter_age_to": "Bis {n} Jahren",
+      "filter_age_range": "{from}–{to} Jahre",
       "filter_language": "Sprache",
       "filter_language_de": "Deutsch",
       "filter_language_en": "Englisch",
@@ -668,7 +670,9 @@
       "form": {
         "title": "Titel",
         "date": "Datum",
-        "time": "Uhrzeit",
+        "time_span": "Uhrzeit",
+        "time_from": "Von",
+        "time_to": "Bis",
         "description": "Beschreibung (optional)",
         "image": "Bild (optional)",
         "image_current": "Aktuelles Bild"
