@@ -852,6 +852,38 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/membership/upgrade-supporter': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['membership.upgradeSupporter']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/membership/activate-full': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['membership.activateFullMembership']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/membership/renew': {
     parameters: {
       query?: never
@@ -2251,7 +2283,7 @@ export interface operations {
         content: {
           'application/json': {
             /** @constant */
-            message: 'Danke für deine Spende! Wir melden uns bei dir.'
+            message: 'Danke, du Legende! Wir melden uns bei dir, um die Übergabe zu organisieren.'
           }
         }
       }
@@ -3931,7 +3963,38 @@ export interface operations {
       422: components['responses']['ValidationException']
     }
   }
-  'membership.renew': {
+  'membership.upgradeSupporter': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          address: string
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Danke für deine Unterstützung als außerordentliches Mitglied!'
+            user: components['schemas']['UserResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'membership.activateFullMembership': {
     parameters: {
       query?: never
       header?: never
@@ -3947,7 +4010,43 @@ export interface operations {
         content: {
           'application/json': {
             /** @constant */
-            message: 'Mitgliedschaft verlängert! Du hast 20 Token erhalten.'
+            message: 'Willkommen als Vollmitglied! Du hast 20 Token erhalten.'
+            user: components['schemas']['UserResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Nur außerordentliche Mitglieder können auf ein Vollmitglied upgraden.'
+          }
+        }
+      }
+    }
+  }
+  'membership.renew': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            message:
+              'Mitgliedschaft verlängert! Du hast 20 Token erhalten.' | 'Mitgliedschaft verlängert!'
             user: components['schemas']['UserResource']
           }
         }
@@ -5090,7 +5189,7 @@ export interface operations {
           email: string
           password: string
           /** @enum {string} */
-          role: 'USER' | 'MEMBER' | 'ADMIN'
+          role: 'USER' | 'SUPPORTER' | 'MEMBER' | 'ADMIN'
           /** @enum {string} */
           status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
         }
@@ -5156,7 +5255,7 @@ export interface operations {
           /** Format: email */
           email: string
           /** @enum {string} */
-          role: 'USER' | 'MEMBER' | 'ADMIN'
+          role: 'USER' | 'SUPPORTER' | 'MEMBER' | 'ADMIN'
           password?: string | null
         }
       }

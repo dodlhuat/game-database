@@ -50,6 +50,16 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function supporter(): static
+    {
+        return $this->state(fn () => [
+            'role' => 'SUPPORTER',
+            'status' => 'ACTIVE',
+            'membership_expires_at' => now()->addYear(),
+            'tokens' => 0,
+        ]);
+    }
+
     public function suspended(): static
     {
         return $this->state(fn () => ['status' => 'SUSPENDED']);

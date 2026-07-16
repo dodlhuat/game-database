@@ -14,7 +14,7 @@ class SendMembershipRenewalReminders extends Command
 
     public function handle(): int
     {
-        $users = User::where('role', 'MEMBER')
+        $users = User::whereIn('role', ['MEMBER', 'SUPPORTER'])
             ->whereNotNull('membership_expires_at')
             ->whereBetween('membership_expires_at', [now(), now()->addDays(90)])
             ->where(function ($q) {

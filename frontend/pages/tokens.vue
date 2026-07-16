@@ -33,7 +33,13 @@
     <div class="tokens-content">
       <div class="tokens-content__inner">
         <div v-if="!auth.isMember" class="no-member">
-          <p>{{ $t('pages.tokens.not_member') }}</p>
+          <p>
+            {{
+              auth.isSupporter
+                ? $t('pages.tokens.not_member_supporter')
+                : $t('pages.tokens.not_member')
+            }}
+          </p>
           <NuxtLink to="/upgrade">{{ $t('btn.upgrade') }} →</NuxtLink>
         </div>
 

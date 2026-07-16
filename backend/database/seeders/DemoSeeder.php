@@ -65,6 +65,25 @@ class DemoSeeder extends Seeder
             ]);
         }
 
+        $supporters = [
+            ['name' => 'Karin Fischer',  'email' => 'karin.fischer@example.at'],
+            ['name' => 'Peter Wolf',     'email' => 'peter.wolf@example.at'],
+        ];
+
+        foreach ($supporters as $data) {
+            User::firstOrCreate(['email' => $data['email']], [
+                'name' => $data['name'],
+                'password' => Hash::make('password'),
+                'role' => 'SUPPORTER',
+                'status' => 'ACTIVE',
+                'email_verified_at' => now(),
+                'terms_accepted_at' => now(),
+                'terms_version' => '1.0',
+                'tokens' => 0,
+                'membership_expires_at' => now()->addMonths(rand(1, 12)),
+            ]);
+        }
+
         $regularUsers = [
             ['name' => 'Klaus Schuster',  'email' => 'klaus.schuster@example.at'],
             ['name' => 'Eva Steiner',     'email' => 'eva.steiner@example.at'],

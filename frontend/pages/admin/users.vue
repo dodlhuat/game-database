@@ -138,6 +138,7 @@
                 class="form-input"
                 :options="[
                   { label: $t('admin.users.role_user'), value: 'USER' },
+                  { label: $t('admin.users.role_supporter'), value: 'SUPPORTER' },
                   { label: $t('admin.users.role_member'), value: 'MEMBER' },
                   { label: $t('admin.users.role_admin'), value: 'ADMIN' },
                 ]"
@@ -202,6 +203,7 @@
                 class="form-input"
                 :options="[
                   { label: $t('admin.users.role_user'), value: 'USER' },
+                  { label: $t('admin.users.role_supporter'), value: 'SUPPORTER' },
                   { label: $t('admin.users.role_member'), value: 'MEMBER' },
                   { label: $t('admin.users.role_admin'), value: 'ADMIN' },
                 ]"
@@ -492,6 +494,7 @@ function statusClass(s: string) {
 function roleLabel(r: string) {
   const m: Record<string, string> = {
     USER: t('admin.users.role_label_user'),
+    SUPPORTER: t('admin.users.role_label_supporter'),
     MEMBER: t('admin.users.role_label_member'),
     ADMIN: 'Admin',
   }

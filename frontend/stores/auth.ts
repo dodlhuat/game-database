@@ -7,7 +7,7 @@ interface User {
   address: string | null
   phone: string | null
   date_of_birth: string | null
-  role: 'USER' | 'MEMBER' | 'ADMIN'
+  role: 'USER' | 'SUPPORTER' | 'MEMBER' | 'ADMIN'
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'
   newsletter_opt_in: boolean
   tokens: number
@@ -34,6 +34,11 @@ export const useAuthStore = defineStore('auth', {
     isActive: (state) => state.user?.status === 'ACTIVE',
     isMember: (state) => {
       if (!state.user || state.user.role !== 'MEMBER') return false
+      if (!state.user.membership_expires_at) return false
+      return new Date(state.user.membership_expires_at) > new Date()
+    },
+    isSupporter: (state) => {
+      if (!state.user || state.user.role !== 'SUPPORTER') return false
       if (!state.user.membership_expires_at) return false
       return new Date(state.user.membership_expires_at) > new Date()
     },

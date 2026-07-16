@@ -120,6 +120,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Mitgliedschaft & Token
     Route::post('/membership/upgrade', [MembershipController::class, 'upgrade']);
+    Route::post('/membership/upgrade-supporter', [MembershipController::class, 'upgradeSupporter']);
+    Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
     Route::post('/membership/renew', [MembershipController::class, 'renew']);
     Route::post('/tokens/add', [TokenController::class, 'add']);
 

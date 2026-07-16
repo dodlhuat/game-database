@@ -34,7 +34,10 @@
           }}</NuxtLink>
         </template>
         <template v-else>
-          <span class="l-nav__user">{{ firstName }}</span>
+          <NuxtLink to="/account" class="l-nav__user">
+            <span class="icon icon-person" aria-hidden="true" />
+            <span class="l-nav__user-name">{{ firstName }}</span>
+          </NuxtLink>
           <button class="button l-nav__btn" @click="handleLogout">{{ $t('nav.logout') }}</button>
         </template>
       </div>
@@ -218,9 +221,21 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   }
 
   &__user {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     font-size: 0.9rem;
-    font-weight: 500;
-    color: $hero-muted;
+    padding: 0.3rem 0.55rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+
+    .icon {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      background: $hero-text-08;
+    }
   }
 
   // ── Theme toggle ────────────────────────────────────────────

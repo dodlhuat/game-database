@@ -25,63 +25,144 @@
           <NuxtLink to="/dashboard" class="btn-secondary">Zum Dashboard</NuxtLink>
         </div>
 
+        <div v-else-if="auth.isSupporter" class="already-member">
+          <div class="already-member__icon">
+            <span class="icon icon-support" />
+          </div>
+          <h2 class="already-member__title">{{ $t('pages.upgrade.already_supporter_title') }}</h2>
+          <p class="already-member__text">
+            {{ $t('pages.upgrade.already_supporter_text') }}
+            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong
+            >.
+          </p>
+
+          <div class="activate-full-card">
+            <h3 class="activate-full-card__title">{{ $t('pages.upgrade.activate_full_title') }}</h3>
+            <p class="activate-full-card__text">{{ $t('pages.upgrade.activate_full_text') }}</p>
+            <div v-if="activateError" class="alert alert-error">{{ activateError }}</div>
+            <UiButton :loading="activateLoading" @click="activateFull">{{
+              $t('pages.upgrade.activate_full_btn')
+            }}</UiButton>
+            <p class="activate-full-card__note">{{ $t('pages.upgrade.activate_full_note') }}</p>
+          </div>
+        </div>
+
         <div v-else class="upgrade-layout">
-          <!-- Benefits -->
-          <div class="benefits-panel">
-            <h2 class="benefits-panel__title">{{ $t('pages.upgrade.benefits_title') }}</h2>
-
-            <ul class="benefit-list">
-              <li class="benefit-list__item">
-                <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
-                  >◈</span
-                >
-                <div>{{ $t('pages.upgrade.benefit_tokens') }}</div>
-              </li>
-              <li class="benefit-list__item">
-                <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-article" />
-                </span>
-                <div>{{ $t('pages.upgrade.benefit_access') }}</div>
-              </li>
-              <li class="benefit-list__item">
-                <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-calendar_today" />
-                </span>
-                <div>{{ $t('pages.upgrade.benefit_events') }}</div>
-              </li>
-              <li class="benefit-list__item">
-                <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-mail" />
-                </span>
-                <div>{{ $t('pages.upgrade.benefit_newsletter') }}</div>
-              </li>
-              <li class="benefit-list__item">
-                <span class="benefit-list__icon" aria-hidden="true">
-                  <span class="icon icon-refresh" />
-                </span>
-                <div>{{ $t('pages.upgrade.benefit_duration') }}</div>
-              </li>
-            </ul>
-
-            <p class="benefits-panel__note">{{ $t('pages.upgrade.payment_note') }}</p>
+          <!-- Tier selector -->
+          <div class="tier-selector">
+            <p class="tier-selector__label">{{ $t('pages.upgrade.select_tier') }}</p>
+            <div class="tier-cards">
+              <button
+                type="button"
+                class="tier-card"
+                :class="{ 'tier-card--active': tier === 'MEMBER' }"
+                @click="tier = 'MEMBER'"
+              >
+                <span class="tier-card__icon"><span class="icon icon-cases" /></span>
+                <span class="tier-card__name">{{ $t('pages.upgrade.tier_member_name') }}</span>
+                <span class="tier-card__tagline">{{
+                  $t('pages.upgrade.tier_member_tagline')
+                }}</span>
+              </button>
+              <button
+                type="button"
+                class="tier-card"
+                :class="{ 'tier-card--active': tier === 'SUPPORTER' }"
+                @click="tier = 'SUPPORTER'"
+              >
+                <span class="tier-card__icon"><span class="icon icon-support" /></span>
+                <span class="tier-card__name">{{ $t('pages.upgrade.tier_supporter_name') }}</span>
+                <span class="tier-card__tagline">{{
+                  $t('pages.upgrade.tier_supporter_tagline')
+                }}</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Form -->
-          <div class="upgrade-form">
-            <h2 class="upgrade-form__title">{{ $t('pages.upgrade.form_title') }}</h2>
-            <p class="upgrade-form__sub">{{ $t('pages.upgrade.form_sub') }}</p>
+          <div class="upgrade-columns">
+            <!-- Benefits -->
+            <div class="benefits-panel">
+              <h2 class="benefits-panel__title">{{ $t('pages.upgrade.benefits_title') }}</h2>
 
-            <div v-if="error" class="alert alert-error">{{ error }}</div>
+              <ul class="benefit-list">
+                <template v-if="tier === 'MEMBER'">
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
+                      >◈</span
+                    >
+                    <div>{{ $t('pages.upgrade.tier_member_benefit_tokens') }}</div>
+                  </li>
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon" aria-hidden="true">
+                      <span class="icon icon-article" />
+                    </span>
+                    <div>{{ $t('pages.upgrade.tier_member_benefit_access') }}</div>
+                  </li>
+                </template>
+                <template v-else>
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon" aria-hidden="true">
+                      <span class="icon icon-support" />
+                    </span>
+                    <div>{{ $t('pages.upgrade.tier_supporter_benefit_support') }}</div>
+                  </li>
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon" aria-hidden="true">
+                      <span class="icon icon-block" />
+                    </span>
+                    <div>{{ $t('pages.upgrade.tier_supporter_benefit_no_tokens') }}</div>
+                  </li>
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon" aria-hidden="true">
+                      <span class="icon icon-sync" />
+                    </span>
+                    <div>{{ $t('pages.upgrade.tier_supporter_benefit_upgrade') }}</div>
+                  </li>
+                </template>
+                <li class="benefit-list__item">
+                  <span class="benefit-list__icon" aria-hidden="true">
+                    <span class="icon icon-calendar_today" />
+                  </span>
+                  <div>{{ $t('pages.upgrade.benefit_events') }}</div>
+                </li>
+                <li class="benefit-list__item">
+                  <span class="benefit-list__icon" aria-hidden="true">
+                    <span class="icon icon-mail" />
+                  </span>
+                  <div>{{ $t('pages.upgrade.benefit_newsletter') }}</div>
+                </li>
+                <li class="benefit-list__item">
+                  <span class="benefit-list__icon" aria-hidden="true">
+                    <span class="icon icon-refresh" />
+                  </span>
+                  <div>{{ $t('pages.upgrade.benefit_duration') }}</div>
+                </li>
+              </ul>
 
-            <UiInput
-              v-model="address"
-              :label="$t('pages.upgrade.address_label')"
-              :error="addressError"
-              :placeholder="$t('pages.upgrade.address_placeholder')"
-              autocomplete="street-address"
-            />
+              <p class="benefits-panel__note">{{ $t('pages.upgrade.payment_note') }}</p>
+            </div>
 
-            <UiButton :loading="loading" @click="upgrade">{{ $t('btn.upgrade') }}</UiButton>
+            <!-- Form -->
+            <div class="upgrade-form">
+              <h2 class="upgrade-form__title">{{ $t('pages.upgrade.form_title') }}</h2>
+              <p class="upgrade-form__sub">{{ $t('pages.upgrade.form_sub') }}</p>
+
+              <div v-if="error" class="alert alert-error">{{ error }}</div>
+
+              <UiInput
+                v-model="address"
+                :label="$t('pages.upgrade.address_label')"
+                :error="addressError"
+                :placeholder="$t('pages.upgrade.address_placeholder')"
+                autocomplete="street-address"
+              />
+
+              <UiButton :loading="loading" @click="upgrade">{{
+                tier === 'MEMBER'
+                  ? $t('pages.upgrade.submit_member')
+                  : $t('pages.upgrade.submit_supporter')
+              }}</UiButton>
+            </div>
           </div>
         </div>
       </div>
@@ -100,6 +181,9 @@ const loading = ref(false)
 const error = ref('')
 const address = ref('')
 const addressError = ref('')
+const tier = ref<'MEMBER' | 'SUPPORTER'>('MEMBER')
+const activateLoading = ref(false)
+const activateError = ref('')
 
 // Admins cannot become members
 if (auth.isAdmin) {
@@ -126,7 +210,9 @@ async function upgrade() {
 
   loading.value = true
   try {
-    const data = await api.post<{ user: typeof auth.user }>('/membership/upgrade', {
+    const endpoint =
+      tier.value === 'MEMBER' ? '/membership/upgrade' : '/membership/upgrade-supporter'
+    const data = await api.post<{ user: typeof auth.user }>(endpoint, {
       address: address.value,
     })
     if (data.user) auth.setUser(data.user)
@@ -140,6 +226,21 @@ async function upgrade() {
     }
   } finally {
     loading.value = false
+  }
+}
+
+async function activateFull() {
+  activateError.value = ''
+  activateLoading.value = true
+  try {
+    const data = await api.post<{ user: typeof auth.user }>('/membership/activate-full')
+    if (data.user) auth.setUser(data.user)
+    await navigateTo('/dashboard')
+  } catch (err: unknown) {
+    const e = err as { message?: string }
+    activateError.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+  } finally {
+    activateLoading.value = false
   }
 }
 </script>
@@ -245,7 +346,107 @@ $border: rgba(238, 232, 223, 0.1);
   }
 }
 
+.activate-full-card {
+  background: rgba(212, 146, 30, 0.06);
+  border: 1px solid rgba(212, 146, 30, 0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: left;
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $hero-text;
+    margin: 0 0 0.4rem;
+  }
+  &__text {
+    font-size: 0.875rem;
+    color: $hero-muted;
+    margin: 0 0 1rem;
+  }
+  &__note {
+    font-size: 0.78rem;
+    color: rgba(238, 232, 223, 0.5);
+    margin: 0.75rem 0 0;
+  }
+}
+
 .upgrade-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tier-selector {
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(238, 232, 223, 0.5);
+    text-transform: uppercase;
+    margin: 0 0 0.75rem;
+  }
+}
+
+.tier-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 680px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tier-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  text-align: left;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 14px;
+  padding: 1.25rem 1.35rem;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition:
+    border-color 0.18s,
+    background 0.18s,
+    transform 0.18s;
+
+  &:hover {
+    border-color: rgba(212, 146, 30, 0.4);
+    transform: translateY(-2px);
+  }
+
+  &__icon {
+    color: $amber;
+    font-size: 1.15rem;
+    margin-bottom: 0.15rem;
+  }
+  &__name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: $hero-text;
+  }
+  &__tagline {
+    font-size: 0.8rem;
+    color: $hero-muted;
+  }
+
+  &--active {
+    background: rgba(212, 146, 30, 0.08);
+    border-color: $amber;
+
+    .tier-card__icon {
+      color: $amber;
+    }
+  }
+}
+
+.upgrade-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
@@ -337,6 +538,10 @@ $border: rgba(238, 232, 223, 0.1);
     font-size: 0.85rem;
     color: $hero-muted;
     margin-bottom: 1.5rem;
+  }
+
+  :deep(.input-wrapper) {
+    margin-bottom: 1.25rem;
   }
 }
 

@@ -83,6 +83,31 @@
               </NuxtLink>
             </div>
           </div>
+          <div v-else-if="auth.isSupporter" class="membership-bar__supporter">
+            <div class="supporter-badge">
+              <span class="supporter-badge__icon"><span class="icon icon-support" /></span>
+              <span class="supporter-badge__label">{{
+                $t('dashboard.membership.supporter_label')
+              }}</span>
+            </div>
+            <div class="membership-expiry" :class="expiryClass">
+              <span class="membership-expiry__label">{{ $t('dashboard.membership.label') }}</span>
+              <span class="membership-expiry__date">{{
+                formatDate(auth.user?.membership_expires_at)
+              }}</span>
+              <NuxtLink
+                v-if="canRenew"
+                to="/dashboard"
+                class="membership-expiry__renew"
+                @click.prevent="renew"
+              >
+                {{ $t('btn.renew') }}
+              </NuxtLink>
+            </div>
+            <NuxtLink to="/upgrade" class="membership-bar__cta">{{
+              $t('dashboard.membership.activate_full')
+            }}</NuxtLink>
+          </div>
           <div v-else-if="auth.isRegisteredUser" class="membership-bar__upgrade">
             <span class="membership-bar__text">{{ $t('dashboard.membership.not_member') }}</span>
             <NuxtLink to="/upgrade" class="membership-bar__cta">{{
@@ -1156,6 +1181,13 @@ $hero-divider-20: rgba(238, 232, 223, 0.2);
     flex-wrap: wrap;
   }
 
+  &__supporter {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+  }
+
   &__upgrade {
     display: flex;
     align-items: center;
@@ -1221,6 +1253,27 @@ $hero-divider-20: rgba(238, 232, 223, 0.2);
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.supporter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(238, 232, 223, 0.05);
+  border: 1px solid $hero-muted-20;
+  border-radius: 20px;
+  padding: 0.3rem 0.85rem;
+
+  &__icon {
+    color: $hero-muted;
+    font-size: 0.9rem;
+    display: flex;
+  }
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $hero-text;
   }
 }
 

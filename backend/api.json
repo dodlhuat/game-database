@@ -1064,7 +1064,7 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "const": "Danke f\u00fcr deine Spende! Wir melden uns bei dir."
+                                            "const": "Danke, du Legende! Wir melden uns bei dir, um die \u00dcbergabe zu organisieren."
                                         }
                                     },
                                     "required": [
@@ -4399,6 +4399,119 @@
                 }
             }
         },
+        "/membership/upgrade-supporter": {
+            "post": {
+                "operationId": "membership.upgradeSupporter",
+                "tags": [
+                    "Membership"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "address": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "required": [
+                                    "address"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Danke f\u00fcr deine Unterst\u00fctzung als au\u00dferordentliches Mitglied!"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership/activate-full": {
+            "post": {
+                "operationId": "membership.activateFullMembership",
+                "tags": [
+                    "Membership"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Willkommen als Vollmitglied! Du hast 20 Token erhalten."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Nur au\u00dferordentliche Mitglieder k\u00f6nnen auf ein Vollmitglied upgraden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/membership/renew": {
             "post": {
                 "operationId": "membership.renew",
@@ -4415,7 +4528,10 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "const": "Mitgliedschaft verl\u00e4ngert! Du hast 20 Token erhalten."
+                                            "enum": [
+                                                "Mitgliedschaft verl\u00e4ngert! Du hast 20 Token erhalten.",
+                                                "Mitgliedschaft verl\u00e4ngert!"
+                                            ]
                                         },
                                         "user": {
                                             "$ref": "#/components/schemas/UserResource"
@@ -6843,6 +6959,7 @@
                                         "type": "string",
                                         "enum": [
                                             "USER",
+                                            "SUPPORTER",
                                             "MEMBER",
                                             "ADMIN"
                                         ]
@@ -6975,6 +7092,7 @@
                                         "type": "string",
                                         "enum": [
                                             "USER",
+                                            "SUPPORTER",
                                             "MEMBER",
                                             "ADMIN"
                                         ]

@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * @property 'USER'|'MEMBER'|'ADMIN' $role
+ * @property 'USER'|'SUPPORTER'|'MEMBER'|'ADMIN' $role
  * @property Carbon|null $membership_expires_at
  * @property Carbon|null $date_of_birth
  */
@@ -84,6 +84,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isMember(): bool
     {
         return $this->role === 'MEMBER'
+            && $this->membership_expires_at !== null
+            && $this->membership_expires_at->isFuture();
+    }
+
+    public function isSupporter(): bool
+    {
+        return $this->role === 'SUPPORTER'
             && $this->membership_expires_at !== null
             && $this->membership_expires_at->isFuture();
     }

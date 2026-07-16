@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Notifications\WelcomeMemberNotification;
+use App\Notifications\WelcomeSupporterNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -37,12 +38,59 @@ class MembershipController extends Controller
         ]);
     }
 
+    public function upgradeSupporter(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->role !== 'USER') {
+            return response()->json(['message' => 'Nur registrierte User können außerordentliches Mitglied werden.'], 422);
+        }
+
+        $validated = $request->validate([
+            'address' => ['required', 'string', 'max:255'],
+        ]);
+
+        $user->role = 'SUPPORTER';
+        $user->membership_expires_at = now()->addYear();
+        $user->address = $validated['address'];
+        $user->save();
+
+        $user->notify(new WelcomeSupporterNotification);
+
+        return response()->json([
+            'message' => 'Danke für deine Unterstützung als außerordentliches Mitglied!',
+            'user' => new UserResource($user),
+        ]);
+    }
+
+    public function activateFullMembership(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->role !== 'SUPPORTER') {
+            return response()->json(['message' => 'Nur außerordentliche Mitglieder können auf ein Vollmitglied upgraden.'], 422);
+        }
+
+        $user->role = 'MEMBER';
+        $user->tokens += 20;
+        $user->save();
+
+        $user->notify(new WelcomeMemberNotification);
+
+        return response()->json([
+            'message' => 'Willkommen als Vollmitglied! Du hast 20 Token erhalten.',
+            'user' => new UserResource($user),
+        ]);
+    }
+
     public function renew(Request $request): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
 
-        if ($user->role !== 'MEMBER') {
+        if (! in_array($user->role, ['MEMBER', 'SUPPORTER'], true)) {
             return response()->json(['message' => 'Nur Mitglieder können verlängern.'], 422);
         }
 
@@ -63,12 +111,16 @@ class MembershipController extends Controller
             : now();
 
         $user->membership_expires_at = $base->addYear();
-        $user->tokens += 20;
+        if ($user->role === 'MEMBER') {
+            $user->tokens += 20;
+        }
         $user->renewal_reminder_sent_at = null; // allow reminder to be sent again next cycle
         $user->save();
 
         return response()->json([
-            'message' => 'Mitgliedschaft verlängert! Du hast 20 Token erhalten.',
+            'message' => $user->role === 'MEMBER'
+                ? 'Mitgliedschaft verlängert! Du hast 20 Token erhalten.'
+                : 'Mitgliedschaft verlängert!',
             'user' => new UserResource($user),
         ]);
     }
