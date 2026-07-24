@@ -11,7 +11,7 @@
           {{ $t('common.back_to_home') }}
         </NuxtLink>
         <div class="legal-hero__tag">
-          <span class="icon icon-article" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#article" /></svg>
           Rechtliches
         </div>
         <h1 class="legal-hero__title">{{ $t('legal.terms.title') }}</h1>
@@ -35,7 +35,9 @@
 
         <!-- Unavailable -->
         <div v-else-if="!terms" class="legal-empty">
-          <span class="icon icon-article legal-empty__icon" aria-hidden="true" />
+          <svg class="icon-svg legal-empty__icon" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#article" />
+          </svg>
           <p class="legal-empty__text">{{ $t('legal.terms.unavailable') }}</p>
         </div>
 

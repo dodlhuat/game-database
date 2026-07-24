@@ -1,4 +1,9 @@
-// Ambient declarations for @dodlhuat/basix JS modules (no bundled type definitions)
+// Ambient declarations for @dodlhuat/basix JS modules.
+// basix ships real .d.ts files, but its package.json "exports" map
+// ("./js/*": "./js/*") is extensionless, which TypeScript's own module
+// resolution can't match (Vite's bundler resolver is more lenient and
+// resolves it fine at runtime/build time). This shim exists solely to
+// satisfy `nuxt typecheck` for the basix modules this project imports.
 
 declare module '@dodlhuat/basix/js/virtual-dropdown' {
   export class VirtualDropdown {
@@ -18,7 +23,7 @@ declare module '@dodlhuat/basix/js/virtual-dropdown' {
 
 declare module '@dodlhuat/basix/js/push-menu' {
   export namespace PushMenu {
-    function init(): void
+    function init(options?: { iconBasePath?: string }): void
     function destroy(): void
     function openPanel(el: HTMLElement): void
     function open(): void

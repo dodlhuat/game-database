@@ -9,7 +9,7 @@
         loading="lazy"
       />
       <div v-else class="game-card__placeholder">
-        <span class="icon icon-layers" aria-hidden="true" />
+        <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#layers" /></svg>
       </div>
       <span
         v-if="auth.isLoggedIn && game.copies_count > 0"

@@ -29,7 +29,9 @@
           <div class="dialog__header">
             <h3 class="dialog__title">{{ selected.title }}</h3>
             <button class="dialog__close" :aria-label="$t('btn.close')" @click="selected = null">
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
 
@@ -40,11 +42,15 @@
 
             <div class="event-modal__meta">
               <span class="event-modal__date">
-                <span class="icon icon-calendar_today" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#calendar_today" />
+                </svg>
                 {{ formatDate(selected.date) }}
               </span>
               <span class="event-modal__time">
-                <span class="icon icon-schedule" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#schedule" />
+                </svg>
                 {{
                   selected.is_all_day
                     ? $t('events.all_day')

@@ -10,7 +10,7 @@
         <div class="page-hero__row">
           <h1 class="page-hero__title">{{ $t('admin.mechanics.title') }}</h1>
           <button class="hero-btn" @click="openCreate">
-            <span class="icon icon-add" aria-hidden="true" />
+            <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#add" /></svg>
             {{ $t('admin.actions.add_mechanic') }}
           </button>
         </div>
@@ -30,7 +30,9 @@
           </header>
 
           <div v-if="!mechanics.length" class="dash-empty">
-            <span class="icon icon-label dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#label" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.mechanics') }}</p>
           </div>
 
@@ -77,7 +79,9 @@
                 {{ form.id ? $t('admin.mechanics.rename') : $t('admin.mechanics.add') }}
               </h3>
               <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
             <div class="dialog__body">

@@ -15,7 +15,9 @@
 
         <!-- ── Search ── -->
         <div class="hero-search" :class="{ 'hero-search--active': searchFocused }">
-          <span class="icon icon-search hero-search__icon" aria-hidden="true" />
+          <svg class="icon-svg hero-search__icon" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#search" />
+          </svg>
           <input
             v-model="filters.search"
             type="text"
@@ -31,7 +33,9 @@
               :aria-label="$t('pages.games.search_clear')"
               @click="filters.search = ''"
             >
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </Transition>
         </div>
@@ -40,18 +44,24 @@
         <Transition name="intent-slide">
           <div v-if="smartMeta && smartMeta.intent !== 'FULLTEXT'" class="intent-badge">
             <template v-if="smartMeta.intent === 'SIMILARITY'">
-              <span class="icon icon-sync_alt intent-badge__icon" aria-hidden="true" />
+              <svg class="icon-svg intent-badge__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#sync_alt" />
+              </svg>
               {{ $t('pages.games.intent_similar_to') }}
               <NuxtLink :to="`/games/${smartMeta.reference_slug}`" class="intent-badge__link">
                 {{ smartMeta.reference_title }}
               </NuxtLink>
             </template>
             <template v-else-if="smartMeta.intent === 'MECHANIC'">
-              <span class="icon icon-extension intent-badge__icon" aria-hidden="true" />
+              <svg class="icon-svg intent-badge__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#extension" />
+              </svg>
               {{ $t('pages.games.intent_mechanic') }}
             </template>
             <template v-else-if="smartMeta.intent === 'TAG'">
-              <span class="icon icon-label intent-badge__icon" aria-hidden="true" />
+              <svg class="icon-svg intent-badge__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#label" />
+              </svg>
               {{ $t('pages.games.intent_tag') }}
             </template>
           </div>
@@ -75,7 +85,9 @@
           :aria-expanded="filterPanelOpen"
           @click="filterPanelOpen = !filterPanelOpen"
         >
-          <span class="icon icon-tune filter-toggle__icon" aria-hidden="true" />
+          <svg class="icon-svg filter-toggle__icon" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#tune" />
+          </svg>
           <span class="filter-toggle__label">{{ $t('pages.games.filter_open') }}</span>
           <Transition name="badge-pop">
             <span v-if="activeFilterCount" class="filter-toggle__badge">{{
@@ -89,7 +101,9 @@
           <div class="active-pills">
             <button v-if="filters.mechanic" class="active-pill" @click.stop="clearPill('mechanic')">
               <span class="active-pill__text">{{ mechanicLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button
               v-if="filters.difficulty"
@@ -97,15 +111,21 @@
               @click.stop="clearPill('difficulty')"
             >
               <span class="active-pill__text">{{ difficultyLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button v-if="filters.players" class="active-pill" @click.stop="clearPill('players')">
               <span class="active-pill__text">{{ playersLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button v-if="filters.duration" class="active-pill" @click.stop="clearPill('duration')">
               <span class="active-pill__text">{{ durationLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button
               v-if="filters.min_age_from || filters.min_age_to"
@@ -113,11 +133,15 @@
               @click.stop="clearAgeFilter"
             >
               <span class="active-pill__text">{{ ageLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button v-if="filters.language" class="active-pill" @click.stop="clearPill('language')">
               <span class="active-pill__text">{{ languageLabel }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
             <button
               v-if="filters.available"
@@ -125,7 +149,9 @@
               @click.stop="clearPill('available')"
             >
               <span class="active-pill__text">{{ $t('pages.games.filter_available') }}</span>
-              <span class="icon icon-close active-pill__x" aria-hidden="true" />
+              <svg class="icon-svg active-pill__x" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
         </div>
@@ -159,7 +185,9 @@
               :aria-label="$t('pages.games.filter_clear')"
               @click="clearFilters"
             >
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </Transition>
         </div>

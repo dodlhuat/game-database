@@ -34,59 +34,16 @@
   --primary-dark: #0f0e0c;
 }
 
-// ─── Icon font + font-size override ──────────────────────────────
-// Prefer the Basix-bundled local subset ("Material Symbols Outlined 24pt")
-// so icons render immediately without FOIT. The full Google Fonts variable
-// font ('Material Symbols Outlined') is the fallback for glyphs not in
-// the local subset (our custom aliases: arrow_back, extension, etc.).
-// font-size: 1em lets icons inherit their context size instead of 24px.
-
-.icon {
-  font-family: 'Material Symbols Outlined 24pt', 'Material Symbols Outlined', serif;
-  font-size: 1em;
-  line-height: 1;
+// ─── Icon SVG sizing ──────────────────────────────────────────────
+// basix 1.5.0 replaced the font-icon system with an SVG sprite
+// (svg-icons/icons.svg). Its base .icon-svg is fixed at 24×24px;
+// this app has always sized icons via font-size (empty-state icons,
+// badges, arrows, …), so switch to em-based sizing — every existing
+// font-size rule targeting an icon element keeps working unchanged.
+.icon-svg {
+  width: 1em;
+  height: 1em;
 }
-
-// ─── Missing icons (not in basix subset) ─────────────────────────
-.icon-alert-triangle-outline::before {
-  content: '\e002';
-} // warning
-.icon-clock-outline::before {
-  content: '\e8b5';
-} // schedule
-.icon-cube-outline::before {
-  content: '\e97b';
-} // inventory_2
-.icon-download-outline::before {
-  content: '\f090';
-} // download
-.icon-gift-outline::before {
-  content: '\e8f6';
-} // card_giftcard
-.icon-strikethrough::before {
-  content: '\e257';
-} // strikethrough_s
-.icon-arrow_back::before {
-  content: '\e5c4';
-} // arrow_back
-.icon-extension::before {
-  content: '\e87b';
-} // extension
-.icon-login::before {
-  content: '\ea77';
-} // login
-.icon-toll::before {
-  content: '\e197';
-} // toll
-.icon-bookmark_add::before {
-  content: '\e598';
-} // bookmark_add
-.icon-zoom_in::before {
-  content: '\e8ff';
-} // zoom_in
-.icon-open_in_new::before {
-  content: '\e89e';
-} // open_in_new
 
 // Restore intentionally large display icons (empty states).
 .dash-empty__icon {
@@ -94,10 +51,10 @@
 }
 
 // ─── File uploader icon ───────────────────────────────────────────
-// Global .icon override sets font-size: 1em, which is too small for the
+// Icon-svg inherits font-size (see above), which is too small for the
 // 40×40 icon-container in the drop zone. Restore an appropriate size.
 
-.file-uploader .icon-container .icon {
+.file-uploader .icon-container .icon-svg {
   font-size: 1.375rem;
 }
 

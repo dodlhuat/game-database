@@ -17,7 +17,9 @@
     <section class="donations-content">
       <div class="donations-content__inner">
         <div class="rules-card">
-          <span class="icon icon-info rules-card__icon" aria-hidden="true" />
+          <svg class="icon-svg rules-card__icon" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#info" />
+          </svg>
           <div>
             <h2 class="rules-card__title">{{ $t('pages.donations.rules_title') }}</h2>
             <p class="rules-card__text">{{ $t('pages.donations.rules_text') }}</p>
@@ -72,7 +74,9 @@
                 />
                 <div class="drop-zone-content">
                   <div class="icon-container">
-                    <span class="icon icon-add_photo_alternate" />
+                    <svg class="icon-svg">
+                      <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                    </svg>
                   </div>
                   <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
                   <span class="secondary-text">{{ $t('pages.donations.form_images_hint') }}</span>
@@ -100,7 +104,7 @@
                       </div>
                     </div>
                     <button type="button" class="remove-btn" @click.stop="removeImage(i)">
-                      <span class="icon icon-close" />
+                      <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
                     </button>
                   </div>
                 </div>

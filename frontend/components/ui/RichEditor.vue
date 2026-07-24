@@ -3,16 +3,24 @@
     <div class="editor-toolbar" role="toolbar" aria-label="Editor tools">
       <div class="toolbar-group">
         <button type="button" data-cmd="bold" title="Bold (Ctrl+B)">
-          <span class="icon icon-format_bold" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#format_bold" />
+          </svg>
         </button>
         <button type="button" data-cmd="italic" title="Italic (Ctrl+I)">
-          <span class="icon icon-format_italic" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#format_italic" />
+          </svg>
         </button>
         <button type="button" data-cmd="underline" title="Underline (Ctrl+U)">
-          <span class="icon icon-format_underlined" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#format_underlined" />
+          </svg>
         </button>
         <button type="button" data-cmd="strikeThrough" title="Strikethrough">
-          <span class="icon icon-strikethrough" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#strikethrough_s" />
+          </svg>
         </button>
       </div>
 
@@ -30,10 +38,14 @@
 
       <div class="toolbar-group">
         <button type="button" data-cmd="insertUnorderedList" title="Bullet list">
-          <span class="icon icon-format_list_bulleted" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#format_list_bulleted" />
+          </svg>
         </button>
         <button type="button" data-cmd="insertOrderedList" title="Numbered list">
-          <span class="icon icon-format_list_numbered" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#format_list_numbered" />
+          </svg>
         </button>
       </div>
 
@@ -41,10 +53,12 @@
 
       <div class="toolbar-group">
         <button type="button" data-editor-action="link" title="Insert link (Ctrl+K)">
-          <span class="icon icon-add" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#add" /></svg>
         </button>
         <button type="button" data-editor-action="image" title="Insert image" style="display: none">
-          <span class="icon icon-add_photo_alternate" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#add_photo_alternate" />
+          </svg>
         </button>
         <input type="file" data-editor="image-file" accept="image/*" hidden />
       </div>

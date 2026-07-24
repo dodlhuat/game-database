@@ -9,7 +9,7 @@
         <li v-for="(item, i) in modelValue" :key="i" class="chip chip-accent closeable">
           {{ item }}
           <button type="button" :aria-label="`${item} entfernen`" @click.stop="remove(i)">
-            <span class="icon icon-close" aria-hidden="true" />
+            <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#close" /></svg>
           </button>
         </li>
       </ul>

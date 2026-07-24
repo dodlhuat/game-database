@@ -14,7 +14,7 @@
         :aria-label="$t('nav.menu_open')"
       >
         <input id="push-nav-toggle" type="checkbox" />
-        <span class="icon icon-menu" aria-hidden="true" />
+        <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#menu" /></svg>
       </label>
 
       <nav class="l-nav__links" aria-label="Hauptnavigation">
@@ -35,7 +35,9 @@
         </template>
         <template v-else>
           <NuxtLink to="/account" class="l-nav__user">
-            <span class="icon icon-person" aria-hidden="true" />
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#person" />
+            </svg>
             <span class="l-nav__user-name">{{ firstName }}</span>
           </NuxtLink>
           <button class="button l-nav__btn" @click="handleLogout">{{ $t('nav.logout') }}</button>
@@ -43,7 +45,9 @@
       </div>
 
       <button class="l-nav__theme-btn" :aria-label="$t('nav.theme_toggle')" @click="toggleTheme">
-        <span class="icon" :class="isDark ? 'icon-light' : 'icon-dark'" aria-hidden="true" />
+        <svg class="icon-svg" aria-hidden="true">
+          <use :href="`/svg-icons/icons.svg#${isDark ? 'light_mode' : 'dark_mode'}`" />
+        </svg>
       </button>
     </div>
   </header>

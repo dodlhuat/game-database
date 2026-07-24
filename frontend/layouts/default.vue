@@ -133,7 +133,7 @@ function onCheckboxChange(e: Event) {
 onMounted(async () => {
   const { PushMenu } = await import('@dodlhuat/basix/js/push-menu')
   PushMenuClass = PushMenu
-  PushMenu.init()
+  PushMenu.init({ iconBasePath: '/svg-icons/' })
 
   checkboxEl = document.getElementById('push-nav-toggle') as HTMLInputElement
   checkboxEl?.addEventListener('change', onCheckboxChange)

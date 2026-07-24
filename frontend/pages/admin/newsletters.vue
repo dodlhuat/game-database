@@ -26,7 +26,9 @@
             </div>
             <Transition name="fade">
               <div v-if="successMsg" class="success-banner">
-                <span class="icon icon-check_circle" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#check_circle" />
+                </svg>
                 {{ successMsg }}
               </div>
             </Transition>
@@ -36,7 +38,9 @@
                 :disabled="sending || !form.subject || !form.body"
                 @click="send"
               >
-                <span class="icon icon-send" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#send" />
+                </svg>
                 {{ sending ? $t('admin.newsletters.sending') : $t('admin.newsletters.send') }}
               </button>
             </div>
@@ -53,7 +57,9 @@
           <div v-if="loading" class="admin-state"><div class="spinner" /></div>
 
           <div v-else-if="!newsletters.length" class="dash-empty">
-            <span class="icon icon-mail dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#mail" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.newsletters') }}</p>
           </div>
 

@@ -22,7 +22,9 @@
           </header>
 
           <div v-if="!reports.length" class="dash-empty">
-            <span class="icon icon-alert-triangle-outline dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#warning" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.damage_reports') }}</p>
           </div>
 
@@ -50,7 +52,9 @@
                       rel="noopener"
                       class="photo-link"
                     >
-                      <span class="icon icon-add_photo_alternate" aria-hidden="true" />
+                      <svg class="icon-svg" aria-hidden="true">
+                        <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                      </svg>
                       {{ $t('admin.damage_reports.view_photo') }}
                     </a>
                     <span v-else class="text-muted">—</span>

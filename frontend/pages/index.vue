@@ -19,7 +19,9 @@
 
         <div class="hero__cta-row">
           <NuxtLink to="/games" class="button button-primary hero__cta-primary">
-            <span class="icon icon-article" aria-hidden="true" />
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#article" />
+            </svg>
             {{ $t('btn.to_collection') }}
           </NuxtLink>
           <NuxtLink v-if="!auth.isLoggedIn" to="/register" class="hero__cta-ghost">
@@ -34,7 +36,9 @@
           <Transition name="fade">
             <div v-if="auth.isLoggedIn" class="hero__admin-chip">
               <NuxtLink to="/donations">
-                <span class="icon icon-gift-outline" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#redeem" />
+                </svg>
                 {{ $t('nav.donations') }}
               </NuxtLink>
             </div>
@@ -42,7 +46,9 @@
           <Transition name="fade">
             <div v-if="auth.isLoggedIn && auth.isAdmin" class="hero__admin-chip">
               <NuxtLink to="/admin">
-                <span class="icon icon-settings" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#settings" />
+                </svg>
                 {{ $t('nav.admin') }}
               </NuxtLink>
             </div>
@@ -69,7 +75,9 @@
             <div class="feat-card__glow" aria-hidden="true" />
             <span class="feat-card__ghost-num" aria-hidden="true">01</span>
             <div class="feat-card__icon-wrap">
-              <span class="icon icon-article" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#article" />
+              </svg>
             </div>
             <div class="feat-card__body">
               <h3 class="feat-card__title">{{ $t('pages.home.feature_variety_title') }}</h3>
@@ -81,7 +89,7 @@
           <article class="feat-card feat-card--sat" style="--idx: 1">
             <div class="feat-card__sat-inner">
               <div class="feat-icon feat-icon--blue" aria-hidden="true">
-                <span class="icon icon-calendar_today" />
+                <svg class="icon-svg"><use href="/svg-icons/icons.svg#calendar_today" /></svg>
               </div>
               <div class="feat-card__sat-content">
                 <span class="feat-card__sat-num" aria-hidden="true">02</span>
@@ -95,7 +103,7 @@
           <article class="feat-card feat-card--sat" style="--idx: 2">
             <div class="feat-card__sat-inner">
               <div class="feat-icon feat-icon--green" aria-hidden="true">
-                <span class="icon icon-stars" />
+                <svg class="icon-svg"><use href="/svg-icons/icons.svg#stars" /></svg>
               </div>
               <div class="feat-card__sat-content">
                 <span class="feat-card__sat-num" aria-hidden="true">03</span>

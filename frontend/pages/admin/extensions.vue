@@ -22,7 +22,9 @@
           </header>
 
           <div v-if="!extensions.length" class="dash-empty">
-            <span class="icon icon-calendar_today dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#calendar_today" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.extensions') }}</p>
           </div>
 
@@ -75,7 +77,9 @@
                 :aria-label="$t('admin.form.close')"
                 @click="rejectTarget = null"
               >
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
             <p class="dialog__game">{{ rejectTarget.loan?.copy?.game?.title }}</p>

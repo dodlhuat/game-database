@@ -38,7 +38,9 @@
           </header>
 
           <div v-if="!loans.length" class="dash-empty">
-            <span class="icon icon-sync dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#sync" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.loans.empty') }}</p>
           </div>
 
@@ -86,7 +88,9 @@
                             @click="remind(loan.id)"
                           >
                             <span v-if="remindingId === loan.id" class="spinner spinner--sm" />
-                            <span v-else class="icon icon-mail" />
+                            <svg v-else class="icon-svg">
+                              <use href="/svg-icons/icons.svg#mail" />
+                            </svg>
                             {{ $t('admin.loans.send_reminder') }}
                           </button>
                           <span v-if="loan.overdue_reminder_sent_at" class="remind-sent">

@@ -35,7 +35,9 @@
           </header>
 
           <div v-if="!loans.length" class="dash-empty">
-            <span class="icon icon-cube-outline dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#inventory_2" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.package_loans.empty') }}</p>
           </div>
 

@@ -46,7 +46,9 @@
                 <span class="attention-item__text">
                   <strong>{{ stats.loans.overdue }}</strong> überfällige Ausleihen
                 </span>
-                <span class="icon icon-navigate_next attention-item__arrow" aria-hidden="true" />
+                <svg class="icon-svg attention-item__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink
                 v-if="stats.users.pending > 0"
@@ -57,7 +59,9 @@
                 <span class="attention-item__text">
                   <strong>{{ stats.users.pending }}</strong> ausstehende Mitglieder
                 </span>
-                <span class="icon icon-navigate_next attention-item__arrow" aria-hidden="true" />
+                <svg class="icon-svg attention-item__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink
                 v-if="stats.extensions.pending > 0"
@@ -68,7 +72,9 @@
                 <span class="attention-item__text">
                   <strong>{{ stats.extensions.pending }}</strong> offene Verlängerungsanträge
                 </span>
-                <span class="icon icon-navigate_next attention-item__arrow" aria-hidden="true" />
+                <svg class="icon-svg attention-item__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink
                 v-if="stats.copies.to_review > 0"
@@ -79,7 +85,9 @@
                 <span class="attention-item__text">
                   <strong>{{ stats.copies.to_review }}</strong> Kopien nach Rückgabe zu prüfen
                 </span>
-                <span class="icon icon-navigate_next attention-item__arrow" aria-hidden="true" />
+                <svg class="icon-svg attention-item__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
             </div>
           </div>
@@ -93,7 +101,9 @@
             >
               <div class="ops-card__top">
                 <span class="ops-card__icon">
-                  <span class="icon icon-sync" aria-hidden="true" />
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#sync" />
+                  </svg>
                 </span>
                 <span v-if="stats.loans.overdue > 0" class="ops-card__badge ops-card__badge--red">{{
                   stats.loans.overdue
@@ -116,7 +126,9 @@
             >
               <div class="ops-card__top">
                 <span class="ops-card__icon">
-                  <span class="icon icon-calendar_today" aria-hidden="true" />
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#calendar_today" />
+                  </svg>
                 </span>
                 <span v-if="stats.extensions.pending > 0" class="ops-card__badge">{{
                   stats.extensions.pending
@@ -136,7 +148,9 @@
             >
               <div class="ops-card__top">
                 <span class="ops-card__icon">
-                  <span class="icon icon-person" aria-hidden="true" />
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#person" />
+                  </svg>
                 </span>
                 <span v-if="stats.users.pending > 0" class="ops-card__badge">{{
                   stats.users.pending
@@ -160,7 +174,9 @@
             >
               <div class="ops-card__top">
                 <span class="ops-card__icon">
-                  <span class="icon icon-fact_check" aria-hidden="true" />
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#fact_check" />
+                  </svg>
                 </span>
                 <span v-if="stats.copies.to_review > 0" class="ops-card__badge">{{
                   stats.copies.to_review
@@ -178,32 +194,37 @@
             <div class="nav-tiles">
               <NuxtLink to="/admin/games" class="nav-tile">
                 <span class="nav-tile__icon"
-                  ><span class="icon icon-article" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#article" /></svg
+                ></span>
                 <span class="nav-tile__label">Spiele</span>
               </NuxtLink>
               <NuxtLink to="/admin/mechanics" class="nav-tile">
                 <span class="nav-tile__icon"
-                  ><span class="icon icon-label" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#label" /></svg
+                ></span>
                 <span class="nav-tile__label">Mechaniken</span>
               </NuxtLink>
               <NuxtLink to="/admin/tags" class="nav-tile">
                 <span class="nav-tile__icon"
-                  ><span class="icon icon-bookmark" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#bookmark" /></svg
+                ></span>
                 <span class="nav-tile__label">Tags</span>
               </NuxtLink>
               <NuxtLink to="/admin/packages" class="nav-tile">
                 <span class="nav-tile__icon"
-                  ><span class="icon icon-gift-outline" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#redeem" /></svg
+                ></span>
                 <span class="nav-tile__label">Pakete</span>
               </NuxtLink>
               <NuxtLink to="/admin/events" class="nav-tile">
                 <span class="nav-tile__icon"
-                  ><span class="icon icon-calendar_today" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#calendar_today" /></svg
+                ></span>
                 <span class="nav-tile__label">Events</span>
               </NuxtLink>
             </div>
@@ -215,24 +236,33 @@
             <div class="nav-list">
               <NuxtLink to="/admin/package-loans" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-cube-outline" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#inventory_2" /></svg
+                ></span>
                 <span class="nav-row__label">Paket-Ausleihen</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink to="/admin/damage-reports" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-alert-triangle-outline" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#warning" /></svg
+                ></span>
                 <span class="nav-row__label">Schadensmeldungen</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink to="/admin/newsletters" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-mail" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#mail" /></svg
+                ></span>
                 <span class="nav-row__label">Newsletter</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
             </div>
           </section>
@@ -243,24 +273,33 @@
             <div class="nav-list">
               <NuxtLink to="/admin/loan-settings" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-settings" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#settings" /></svg
+                ></span>
                 <span class="nav-row__label">Ausleih-Einstellungen</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink to="/admin/emails" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-mail" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#mail" /></svg
+                ></span>
                 <span class="nav-row__label">E-Mail-Vorlagen</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
               <NuxtLink to="/admin/email-logs" class="nav-row">
                 <span class="nav-row__icon"
-                  ><span class="icon icon-format_list_bulleted" aria-hidden="true"
-                /></span>
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#format_list_bulleted" /></svg
+                ></span>
                 <span class="nav-row__label">E-Mail-Protokoll</span>
-                <span class="icon icon-navigate_next nav-row__arrow" aria-hidden="true" />
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
               </NuxtLink>
             </div>
           </section>

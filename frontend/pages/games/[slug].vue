@@ -40,7 +40,9 @@
         </div>
 
         <NuxtLink to="/games" class="gd-back">
-          <span class="icon icon-arrow_back" aria-hidden="true" />{{ $t('btn.to_collection') }}
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#arrow_back" /></svg
+          >{{ $t('btn.to_collection') }}
         </NuxtLink>
 
         <div class="gd-hero__stage">
@@ -53,7 +55,9 @@
               class="gd-hero__poster"
             />
             <div v-else class="gd-hero__poster-empty">
-              <span class="icon icon-extension" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#extension" />
+              </svg>
             </div>
           </div>
         </div>
@@ -78,7 +82,7 @@
         </div>
 
         <div class="gd-hero__cue" aria-hidden="true">
-          <span class="icon icon-expand_more" />
+          <svg class="icon-svg"><use href="/svg-icons/icons.svg#keyboard_arrow_down" /></svg>
         </div>
       </section>
 
@@ -146,9 +150,9 @@
         <div class="gd-actions">
           <template v-if="!auth.isLoggedIn">
             <NuxtLink to="/login" class="gd-btn gd-btn--primary">
-              <span class="icon icon-login" aria-hidden="true" />{{
-                $t('pages.game.login_to_borrow')
-              }}
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#login" /></svg
+              >{{ $t('pages.game.login_to_borrow') }}
             </NuxtLink>
           </template>
           <template v-else-if="auth.isActive && !auth.isMember">
@@ -158,9 +162,9 @@
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
             <span class="gd-btn gd-btn--done">
-              <span class="icon icon-check_circle" aria-hidden="true" />{{
-                $t('pages.game.already_borrowed')
-              }}
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#check_circle" /></svg
+              >{{ $t('pages.game.already_borrowed') }}
             </span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
@@ -169,17 +173,19 @@
               class="gd-btn gd-btn--primary"
               @click="openLoanModal"
             >
-              <span class="icon icon-send" aria-hidden="true" />{{ $t('btn.borrow_game') }}
+              <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#send" /></svg
+              >{{ $t('btn.borrow_game') }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
-              <span class="icon icon-toll" aria-hidden="true" />{{ $t('btn.load_tokens') }}
+              <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#toll" /></svg
+              >{{ $t('btn.load_tokens') }}
             </NuxtLink>
           </template>
           <template v-else-if="auth.isMember">
             <button class="gd-btn gd-btn--secondary" :disabled="reserving" @click="handleReserve">
-              <span class="icon icon-bookmark_add" aria-hidden="true" />{{
-                reserving ? $t('common.loading') : $t('btn.reserve')
-              }}
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#bookmark_add" /></svg
+              >{{ reserving ? $t('common.loading') : $t('btn.reserve') }}
             </button>
             <span v-if="game.earliest_available_at" class="gd-avail-note">
               Wieder verfügbar ab
@@ -225,8 +231,8 @@
             >
               <img :src="img.url" :alt="game.title" class="gd-gallery__img" loading="lazy" />
               <span class="gd-gallery__zoom" aria-hidden="true"
-                ><span class="icon icon-zoom_in"
-              /></span>
+                ><svg class="icon-svg"><use href="/svg-icons/icons.svg#zoom_in" /></svg
+              ></span>
             </button>
           </div>
         </div>
@@ -244,11 +250,9 @@
             />
           </svg>
           {{ $t('pages.game.instagram_view') }}
-          <span
-            class="icon icon-open_in_new"
-            style="font-size: 0.8rem; opacity: 0.5"
-            aria-hidden="true"
-          />
+          <svg class="icon-svg" style="font-size: 0.8rem; opacity: 0.5" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#open_in_new" />
+          </svg>
         </a>
       </main>
 
@@ -258,7 +262,8 @@
           <div class="gd-bar__left">
             <span class="gd-bar__name">{{ game.title }}</span>
             <span v-if="auth.isLoggedIn && auth.isMember" class="gd-bar__tokens">
-              <span class="icon" style="font-size: 0.85rem">toll</span
+              <svg class="icon-svg" style="font-size: 0.85rem">
+                <use href="/svg-icons/icons.svg#toll" /></svg
               >{{ auth.user?.tokens ?? 0 }} Token
             </span>
           </div>
@@ -274,8 +279,9 @@
           </template>
           <template v-else-if="auth.isMember && game.already_borrowed">
             <span class="gd-bar__btn gd-bar__btn--done"
-              ><span class="icon icon-check_circle" aria-hidden="true"
-            /></span>
+              ><svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#check_circle" /></svg
+            ></span>
           </template>
           <template v-else-if="auth.isMember && game.available_copies_count > 0">
             <button
@@ -374,6 +380,7 @@ function openLightbox(i: number) {
   new Lightbox({
     images: game.value.images.map((img) => ({ src: img.url, alt: game.value!.title })),
     startIndex: i,
+    iconBasePath: '/svg-icons/',
   }).show()
 }
 
@@ -446,6 +453,7 @@ async function openLoanModal() {
     header: t('pages.game.confirm_borrow_title'),
     footer,
     closeable: true,
+    iconBasePath: '/svg-icons/',
   })
   modal.show()
 

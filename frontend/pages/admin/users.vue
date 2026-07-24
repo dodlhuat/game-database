@@ -10,7 +10,7 @@
         <div class="page-hero__row">
           <h1 class="page-hero__title">{{ $t('admin.users.title') }}</h1>
           <button class="hero-btn" @click="openCreate">
-            <span class="icon icon-add" aria-hidden="true" />
+            <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#add" /></svg>
             {{ $t('admin.actions.add_user') }}
           </button>
         </div>
@@ -28,7 +28,9 @@
           </header>
 
           <div v-if="!users.length" class="dash-empty">
-            <span class="icon icon-person dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#person" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.users') }}</p>
           </div>
 
@@ -109,7 +111,7 @@
               :aria-label="$t('admin.form.close')"
               @click="showCreate = false"
             >
-              <span class="icon icon-close" />
+              <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
             </button>
           </header>
           <form class="modal-box__body" @submit.prevent="submitCreate">
@@ -184,7 +186,7 @@
               :aria-label="$t('admin.form.close')"
               @click="showEdit = false"
             >
-              <span class="icon icon-close" />
+              <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
             </button>
           </header>
           <form class="modal-box__body" @submit.prevent="submitEdit">
@@ -241,7 +243,9 @@
               :aria-label="$t('admin.form.close')"
               @click="txPanel.open = false"
             >
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
           <div v-if="txPanel.loading" class="modal-box__body"><div class="spinner" /></div>

@@ -12,7 +12,7 @@
           <h1 class="page-hero__title">{{ $t('admin.events.title') }}</h1>
           <div class="hero-actions">
             <button class="hero-btn" @click="openCreate">
-              <span class="icon icon-add" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#add" /></svg>
               {{ $t('admin.events.add') }}
             </button>
           </div>
@@ -34,7 +34,9 @@
           </header>
 
           <div v-if="!events.length" class="dash-empty">
-            <span class="icon icon-calendar_today dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#calendar_today" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.events.empty') }}</p>
           </div>
 
@@ -87,7 +89,9 @@
                 {{ form.id ? $t('admin.events.edit') : $t('admin.events.add') }}
               </h3>
               <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
 
@@ -144,7 +148,9 @@
                       />
                       <div class="drop-zone-content">
                         <div class="icon-container">
-                          <span class="icon icon-add_photo_alternate" />
+                          <svg class="icon-svg">
+                            <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                          </svg>
                         </div>
                         <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
                         <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
@@ -178,7 +184,7 @@
                             </div>
                           </div>
                           <button type="button" class="remove-btn" @click.stop="removeImage">
-                            <span class="icon icon-close" />
+                            <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
                           </button>
                         </div>
                       </div>

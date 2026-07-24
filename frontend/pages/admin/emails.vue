@@ -27,11 +27,9 @@
             >
               <div class="tpl-card__header">
                 <div class="tpl-card__icon">
-                  <span
-                    class="icon"
-                    :class="meta[tpl.key]?.icon ?? 'icon-mail'"
-                    aria-hidden="true"
-                  />
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use :href="`/svg-icons/icons.svg#${meta[tpl.key]?.icon ?? 'mail'}`" />
+                  </svg>
                 </div>
                 <div class="tpl-card__meta">
                   <span class="tpl-card__label">{{ meta[tpl.key]?.label ?? tpl.key }}</span>
@@ -61,7 +59,9 @@
                 <h3 class="dialog__title">{{ meta[form.key]?.label ?? form.key }}</h3>
               </div>
               <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
 
@@ -146,49 +146,49 @@ const meta: Record<string, TemplateMeta> = {
   user_approved: {
     label: 'Konto freigeschaltet',
     recipient: 'Mitglied',
-    icon: 'icon-check_circle',
+    icon: 'check_circle',
     vars: ['name'],
   },
   user_rejected: {
     label: 'Registrierung abgelehnt',
     recipient: 'Mitglied',
-    icon: 'icon-close',
+    icon: 'close',
     vars: ['name'],
   },
   new_user_registered: {
     label: 'Neue Registrierung',
     recipient: 'Admin',
-    icon: 'icon-person',
+    icon: 'person',
     vars: ['name', 'email'],
   },
   loan_due_soon: {
     label: 'Rückgabe-Erinnerung',
     recipient: 'Mitglied',
-    icon: 'icon-clock-outline',
+    icon: 'schedule',
     vars: ['name', 'game', 'due_date'],
   },
   reservation_available: {
     label: 'Spiel wieder verfügbar',
     recipient: 'Mitglied',
-    icon: 'icon-notifications_active',
+    icon: 'notifications_active',
     vars: ['name', 'game'],
   },
   email_verification: {
     label: 'E-Mail-Verifizierung',
     recipient: 'Neuer User',
-    icon: 'icon-check_circle',
+    icon: 'check_circle',
     vars: ['name', 'verification_link'],
   },
   welcome_member: {
     label: 'Willkommen als Mitglied',
     recipient: 'Neues Mitglied',
-    icon: 'icon-stars',
+    icon: 'stars',
     vars: ['name'],
   },
   membership_renewal_reminder: {
     label: 'Ablauf-Erinnerung',
     recipient: 'Mitglied',
-    icon: 'icon-calendar_today',
+    icon: 'calendar_today',
     vars: ['name', 'expiry_date', 'renewal_link'],
   },
 }

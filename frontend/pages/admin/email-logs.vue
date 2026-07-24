@@ -47,7 +47,9 @@
           </header>
 
           <div v-if="!logs.length" class="dash-empty">
-            <span class="icon icon-mail dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#mail" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.email_logs.no_emails') }}</p>
           </div>
 

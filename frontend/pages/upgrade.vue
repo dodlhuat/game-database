@@ -27,7 +27,7 @@
 
         <div v-else-if="auth.isSupporter" class="already-member">
           <div class="already-member__icon">
-            <span class="icon icon-support" />
+            <svg class="icon-svg"><use href="/svg-icons/icons.svg#support" /></svg>
           </div>
           <h2 class="already-member__title">{{ $t('pages.upgrade.already_supporter_title') }}</h2>
           <p class="already-member__text">
@@ -58,7 +58,9 @@
                 :class="{ 'tier-card--active': tier === 'MEMBER' }"
                 @click="tier = 'MEMBER'"
               >
-                <span class="tier-card__icon"><span class="icon icon-cases" /></span>
+                <span class="tier-card__icon"
+                  ><svg class="icon-svg"><use href="/svg-icons/icons.svg#cases" /></svg
+                ></span>
                 <span class="tier-card__name">{{ $t('pages.upgrade.tier_member_name') }}</span>
                 <span class="tier-card__tagline">{{
                   $t('pages.upgrade.tier_member_tagline')
@@ -70,7 +72,9 @@
                 :class="{ 'tier-card--active': tier === 'SUPPORTER' }"
                 @click="tier = 'SUPPORTER'"
               >
-                <span class="tier-card__icon"><span class="icon icon-support" /></span>
+                <span class="tier-card__icon"
+                  ><svg class="icon-svg"><use href="/svg-icons/icons.svg#support" /></svg
+                ></span>
                 <span class="tier-card__name">{{ $t('pages.upgrade.tier_supporter_name') }}</span>
                 <span class="tier-card__tagline">{{
                   $t('pages.upgrade.tier_supporter_tagline')
@@ -94,7 +98,7 @@
                   </li>
                   <li class="benefit-list__item">
                     <span class="benefit-list__icon" aria-hidden="true">
-                      <span class="icon icon-article" />
+                      <svg class="icon-svg"><use href="/svg-icons/icons.svg#article" /></svg>
                     </span>
                     <div>{{ $t('pages.upgrade.tier_member_benefit_access') }}</div>
                   </li>
@@ -102,38 +106,38 @@
                 <template v-else>
                   <li class="benefit-list__item">
                     <span class="benefit-list__icon" aria-hidden="true">
-                      <span class="icon icon-support" />
+                      <svg class="icon-svg"><use href="/svg-icons/icons.svg#support" /></svg>
                     </span>
                     <div>{{ $t('pages.upgrade.tier_supporter_benefit_support') }}</div>
                   </li>
                   <li class="benefit-list__item">
                     <span class="benefit-list__icon" aria-hidden="true">
-                      <span class="icon icon-block" />
+                      <svg class="icon-svg"><use href="/svg-icons/icons.svg#block" /></svg>
                     </span>
                     <div>{{ $t('pages.upgrade.tier_supporter_benefit_no_tokens') }}</div>
                   </li>
                   <li class="benefit-list__item">
                     <span class="benefit-list__icon" aria-hidden="true">
-                      <span class="icon icon-sync" />
+                      <svg class="icon-svg"><use href="/svg-icons/icons.svg#sync" /></svg>
                     </span>
                     <div>{{ $t('pages.upgrade.tier_supporter_benefit_upgrade') }}</div>
                   </li>
                 </template>
                 <li class="benefit-list__item">
                   <span class="benefit-list__icon" aria-hidden="true">
-                    <span class="icon icon-calendar_today" />
+                    <svg class="icon-svg"><use href="/svg-icons/icons.svg#calendar_today" /></svg>
                   </span>
                   <div>{{ $t('pages.upgrade.benefit_events') }}</div>
                 </li>
                 <li class="benefit-list__item">
                   <span class="benefit-list__icon" aria-hidden="true">
-                    <span class="icon icon-mail" />
+                    <svg class="icon-svg"><use href="/svg-icons/icons.svg#mail" /></svg>
                   </span>
                   <div>{{ $t('pages.upgrade.benefit_newsletter') }}</div>
                 </li>
                 <li class="benefit-list__item">
                   <span class="benefit-list__icon" aria-hidden="true">
-                    <span class="icon icon-refresh" />
+                    <svg class="icon-svg"><use href="/svg-icons/icons.svg#refresh" /></svg>
                   </span>
                   <div>{{ $t('pages.upgrade.benefit_duration') }}</div>
                 </li>

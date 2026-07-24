@@ -12,11 +12,15 @@
           <h1 class="page-hero__title">{{ $t('admin.games.title') }}</h1>
           <div class="hero-actions">
             <button class="hero-btn hero-btn--secondary" :disabled="exporting" @click="doExport">
-              <span class="icon icon-download-outline" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#download" />
+              </svg>
               {{ exporting ? $t('btn.exporting') : $t('btn.export') }}
             </button>
             <label class="hero-btn hero-btn--secondary" :class="{ 'hero-btn--loading': importing }">
-              <span class="icon icon-cloud" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#cloud" />
+              </svg>
               {{ importing ? $t('btn.importing') : $t('btn.import') }}
               <input
                 type="file"
@@ -27,7 +31,7 @@
               />
             </label>
             <button class="hero-btn" @click="openCreate">
-              <span class="icon icon-add" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#add" /></svg>
               {{ $t('admin.actions.add_game') }}
             </button>
           </div>
@@ -49,7 +53,9 @@
           </header>
 
           <div v-if="!games.length" class="dash-empty">
-            <span class="icon icon-article dash-empty__icon" aria-hidden="true" />
+            <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#article" />
+            </svg>
             <p class="dash-empty__text">{{ $t('admin.empty.games') }}</p>
           </div>
 
@@ -80,7 +86,9 @@
                         {{ $t('admin.actions.edit') }}
                       </button>
                       <button class="action-btn" @click="openCopies(game)">
-                        <span class="icon icon-layers" aria-hidden="true" />
+                        <svg class="icon-svg" aria-hidden="true">
+                          <use href="/svg-icons/icons.svg#layers" />
+                        </svg>
                         {{ $t('admin.actions.copies_manage') }}
                         <span class="action-btn__badge">{{ game.copies_count }}</span>
                       </button>
@@ -107,7 +115,9 @@
                 {{ form.id ? $t('admin.games.edit_game') : $t('admin.games.add_game') }}
               </h3>
               <button class="dialog__close" :aria-label="$t('admin.form.close')" @click="closeForm">
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
 
@@ -277,7 +287,9 @@
                       />
                       <div class="drop-zone-content">
                         <div class="icon-container">
-                          <span class="icon icon-add_photo_alternate" />
+                          <svg class="icon-svg">
+                            <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                          </svg>
                         </div>
                         <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
                         <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
@@ -311,7 +323,7 @@
                             </div>
                           </div>
                           <button type="button" class="remove-btn" @click.stop="removeCover">
-                            <span class="icon icon-close" />
+                            <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
                           </button>
                         </div>
                       </div>
@@ -335,7 +347,7 @@
                           title="Bild löschen"
                           @click="removeGameImage(img)"
                         >
-                          <span class="icon icon-close" />
+                          <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
                         </button>
                       </div>
                     </div>
@@ -352,7 +364,9 @@
                         :disabled="imageUploading"
                         @change="onImagesChange"
                       />
-                      <span class="icon icon-add_photo_alternate" />
+                      <svg class="icon-svg">
+                        <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                      </svg>
                       <span>{{
                         imageUploading ? $t('btn.importing') : $t('admin.form.add_images')
                       }}</span>
@@ -395,7 +409,9 @@
                 :aria-label="$t('admin.form.close')"
                 @click="closeCopies"
               >
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
 
@@ -412,13 +428,17 @@
                     }}</span
                   >
                   <button class="action-btn" @click="openCopyCreate">
-                    <span class="icon icon-add" aria-hidden="true" />
+                    <svg class="icon-svg" aria-hidden="true">
+                      <use href="/svg-icons/icons.svg#add" />
+                    </svg>
                     {{ $t('admin.games.add_copy') }}
                   </button>
                 </div>
 
                 <div v-if="!copiesPanel.copies.length" class="dash-empty">
-                  <span class="icon icon-layers dash-empty__icon" aria-hidden="true" />
+                  <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#layers" />
+                  </svg>
                   <p class="dash-empty__text">{{ $t('admin.empty.copies') }}</p>
                 </div>
 
@@ -514,7 +534,9 @@
                 :aria-label="$t('admin.form.close')"
                 @click="copyForm.open = false"
               >
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
 
@@ -567,7 +589,9 @@
                 :aria-label="$t('admin.form.close')"
                 @click="damagedForm.open = false"
               >
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
             <div class="dialog__body">
@@ -600,7 +624,9 @@
                 :aria-label="$t('admin.form.close')"
                 @click="importResult = null"
               >
-                <span class="icon icon-close" aria-hidden="true" />
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#close" />
+                </svg>
               </button>
             </div>
             <div class="dialog__body">

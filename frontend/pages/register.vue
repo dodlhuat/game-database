@@ -99,7 +99,7 @@
           :aria-label="$t('btn.close')"
           @click="closeTerms"
         >
-          <span class="icon icon-close" aria-hidden="true" />
+          <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#close" /></svg>
         </button>
       </div>
       <div class="terms-modal__body">

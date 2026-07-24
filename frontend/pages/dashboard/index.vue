@@ -16,7 +16,9 @@
         <div v-if="!loading" class="stats-grid">
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-article" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#article" />
+              </svg>
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.active_loans_count ?? 0 }}</span>
@@ -25,7 +27,9 @@
           </div>
           <div class="stat-card stat-card--warn">
             <span class="stat-card__icon">
-              <span class="icon icon-alert-triangle-outline" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#warning" />
+              </svg>
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.overdue_count ?? 0 }}</span>
@@ -34,7 +38,9 @@
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-calendar_today" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#calendar_today" />
+              </svg>
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.reservations_count ?? 0 }}</span>
@@ -43,7 +49,9 @@
           </div>
           <div class="stat-card">
             <span class="stat-card__icon">
-              <span class="icon icon-cases" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#cases" />
+              </svg>
             </span>
             <div class="stat-card__body">
               <span class="stat-card__value">{{ data?.stats.total_loans ?? 0 }}</span>
@@ -85,7 +93,9 @@
           </div>
           <div v-else-if="auth.isSupporter" class="membership-bar__supporter">
             <div class="supporter-badge">
-              <span class="supporter-badge__icon"><span class="icon icon-support" /></span>
+              <span class="supporter-badge__icon"
+                ><svg class="icon-svg"><use href="/svg-icons/icons.svg#support" /></svg
+              ></span>
               <span class="supporter-badge__label">{{
                 $t('dashboard.membership.supporter_label')
               }}</span>
@@ -134,7 +144,9 @@
             </header>
 
             <div v-if="!activeLoans.length" class="dash-empty">
-              <span class="icon icon-mail dash-empty__icon" aria-hidden="true" />
+              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#mail" />
+              </svg>
               <p class="dash-empty__text">{{ $t('common.empty.no_active_loans') }}</p>
             </div>
 
@@ -197,7 +209,9 @@
             </header>
 
             <div v-if="!reservations.length" class="dash-empty">
-              <span class="icon icon-bookmark dash-empty__icon" aria-hidden="true" />
+              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#bookmark" />
+              </svg>
               <p class="dash-empty__text">{{ $t('common.empty.no_reservations') }}</p>
             </div>
 
@@ -238,7 +252,9 @@
             </header>
 
             <div v-if="!loanHistory.length" class="dash-empty">
-              <span class="icon icon-clock-outline dash-empty__icon" aria-hidden="true" />
+              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#schedule" />
+              </svg>
               <p class="dash-empty__text">{{ $t('common.empty.no_loan_history') }}</p>
             </div>
 
@@ -265,11 +281,15 @@
           <!-- Konto-Link ─────────────────────────────────────────── -->
           <div class="dash-footer-actions">
             <NuxtLink to="/account" class="dash-link">
-              <span class="icon icon-settings" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#settings" />
+              </svg>
               {{ $t('dashboard.footer_settings') }}
             </NuxtLink>
             <button class="action-btn action-btn--ghost" @click="handleLogout">
-              <span class="icon icon-power_settings_new" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#power_settings_new" />
+              </svg>
               {{ $t('dashboard.footer_logout') }}
             </button>
           </div>
@@ -284,7 +304,9 @@
           <div class="dialog__header">
             <h3 class="dialog__title">{{ $t('dashboard.return_title') }}</h3>
             <button class="dialog__close" :aria-label="$t('btn.close')" @click="returnLoan = null">
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
           <p class="dialog__game">{{ returnLoan.game?.title }}</p>
@@ -313,7 +335,9 @@
           <div class="dialog__header">
             <h3 class="dialog__title">{{ $t('dashboard.damage_title') }}</h3>
             <button class="dialog__close" :aria-label="$t('btn.close')" @click="damageLoan = null">
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
           <p class="dialog__game">{{ damageLoan.game?.title }}</p>
@@ -340,7 +364,9 @@
               :aria-label="$t('btn.close')"
               @click="extensionLoan = null"
             >
-              <span class="icon icon-close" aria-hidden="true" />
+              <svg class="icon-svg" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#close" />
+              </svg>
             </button>
           </div>
           <p class="dialog__game">{{ extensionLoan.game?.title }}</p>
