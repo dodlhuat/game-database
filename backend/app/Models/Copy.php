@@ -22,6 +22,7 @@ class Copy extends Model
         'condition',
         'borrow_count',
         'qr_code',
+        'owner',
         'notes',
     ];
 

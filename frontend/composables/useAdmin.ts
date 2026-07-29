@@ -12,6 +12,7 @@ export interface AdminCopy {
   condition: string
   borrow_count: number
   qr_code: string | null
+  owner?: string | null
   notes: string | null
   is_available?: boolean
   last_return?: {

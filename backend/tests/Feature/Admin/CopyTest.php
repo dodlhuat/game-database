@@ -30,6 +30,30 @@ class CopyTest extends TestCase
             ->assertJsonStructure(['data', 'meta']);
     }
 
+    public function test_index_includes_owner_for_admin(): void
+    {
+        Copy::factory()->create(['owner' => 'Familie Huber']);
+
+        $this->actingAs($this->admin())
+            ->getJson('/api/admin/copies')
+            ->assertOk()
+            ->assertJsonPath('data.0.owner', 'Familie Huber');
+    }
+
+    public function test_update_sets_owner(): void
+    {
+        $copy = Copy::factory()->create(['owner' => null]);
+
+        $this->actingAs($this->admin())
+            ->putJson("/api/admin/copies/{$copy->id}", [
+                'game_id' => $copy->game_id,
+                'condition' => $copy->condition,
+                'owner' => 'Verein',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.owner', 'Verein');
+    }
+
     public function test_store_creates_copy(): void
     {
         $game = Game::factory()->create();

@@ -521,6 +521,7 @@
       "condition_locked": "Gesperrt",
       "deposit_tokens": "Kaution (Token)",
       "qr_code": "QR-Code (optional)",
+      "owner": "Besitzer (optional)",
       "notes": "Notizen",
       "subject": "Betreff",
       "content": "Inhalt",

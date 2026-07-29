@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\CookieVersion;
+use App\Models\Copy;
 use App\Models\Event;
 use App\Models\Game;
 use App\Models\Language;
@@ -46,6 +47,17 @@ class PublicTest extends TestCase
         $this->getJson('/api/games/my-game')
             ->assertOk()
             ->assertJsonPath('data.slug', 'my-game');
+    }
+
+    public function test_game_show_does_not_expose_copy_owner(): void
+    {
+        $game = Game::factory()->create(['slug' => 'owned-game']);
+        Copy::factory()->create(['game_id' => $game->id, 'owner' => 'Familie Huber']);
+
+        $response = $this->getJson('/api/games/owned-game')->assertOk();
+
+        $response->assertJsonPath('data.copies.0.condition', 'NEW');
+        $response->assertJsonMissingPath('data.copies.0.owner');
     }
 
     public function test_game_show_returns_404_for_inactive(): void

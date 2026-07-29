@@ -29,6 +29,7 @@ class CopyResource extends JsonResource
             'condition' => $this->condition,
             'borrow_count' => $this->borrow_count,
             'qr_code' => $this->qr_code,
+            'owner' => $this->when($request->user()?->isAdmin() ?? false, $this->owner),
             'notes' => $this->notes,
             'last_return' => $this->whenLoaded('lastReturnedLoan', function () {
                 /** @var Loan|null $loan */

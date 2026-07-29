@@ -448,6 +448,7 @@
                       <tr>
                         <th>{{ $t('admin.form.condition') }}</th>
                         <th>{{ $t('admin.form.qr_code') }}</th>
+                        <th>{{ $t('admin.form.owner') }}</th>
                         <th>{{ $t('admin.table.status') }}</th>
                         <th>{{ $t('admin.table.actions') }}</th>
                       </tr>
@@ -460,6 +461,7 @@
                           </span>
                         </td>
                         <td class="text-mono">{{ copy.qr_code ?? '—' }}</td>
+                        <td>{{ copy.owner ?? '—' }}</td>
                         <td>
                           <span
                             class="badge"
@@ -567,6 +569,7 @@
                   </svg>
                 </button>
               </div>
+              <UiInput v-model="copyForm.owner" :label="$t('admin.form.owner')" />
               <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />
               <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
             </div>
@@ -705,6 +708,7 @@ interface Copy {
   condition: string
   borrow_count: number
   qr_code: string | null
+  owner?: string | null
   notes: string | null
   is_available: boolean
 }
@@ -772,6 +776,7 @@ const copyForm = reactive({
   id: null as number | null,
   condition: 'NEW',
   qr_code: '',
+  owner: '',
   notes: '',
   saving: false,
   error: '',
@@ -970,6 +975,7 @@ function openCopyCreate() {
     id: null,
     condition: 'NEW',
     qr_code: '',
+    owner: '',
     notes: '',
     error: '',
   })
@@ -981,6 +987,7 @@ function openCopyEdit(copy: Copy) {
     id: copy.id,
     condition: copy.condition,
     qr_code: copy.qr_code ?? '',
+    owner: copy.owner ?? '',
     notes: copy.notes ?? '',
     error: '',
   })
@@ -1032,6 +1039,7 @@ async function saveCopy() {
       game_id: copiesPanel.gameId,
       condition: copyForm.condition,
       qr_code: copyForm.qr_code || undefined,
+      owner: copyForm.owner || undefined,
       notes: copyForm.notes || undefined,
     }
     copyForm.id ? await updateCopy(copyForm.id, payload) : await createCopy(payload)
