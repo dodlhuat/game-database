@@ -47,6 +47,7 @@ class LoanController extends Controller
 
         // Vorzeitige Token-Prüfung außerhalb der Transaktion, damit wir früh abbrechen können
         if (! $user->isAdmin()) {
+            /** @var Copy $copy */
             $copy = Copy::with('game')->findOrFail($request->copy_id);
             /** @var Game $game */
             $game = $copy->game;
@@ -173,7 +174,9 @@ class LoanController extends Controller
             'return_condition' => $request->return_condition,
         ]);
 
-        $loan->copy->update(['condition' => 'REVIEW']);
+        /** @var Copy $copy */
+        $copy = $loan->copy;
+        $copy->update(['condition' => 'REVIEW']);
 
         $loan->load(['copy.game', 'extensions']);
 

@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\CopyRequest;
 use App\Http\Resources\CopyResource;
 use App\Models\Copy;
 use App\Models\Game;
+use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Reservation;
 use App\Models\TokenTransaction;
@@ -24,11 +25,23 @@ class CopyController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
-        $copies = Copy::with(['game', 'activeLoans'])
+        $copies = Copy::with(['game', 'activeLoans', 'lastReturnedLoan.user'])
             ->when($request->game_id, fn ($q, $id) => $q->where('game_id', $id))
             ->when($request->condition, fn ($q, $c) => $q->where('condition', $c))
-            ->orderBy('game_id')
-            ->paginate(50);
+            ->when(
+                $request->condition === 'REVIEW',
+                fn ($q) => $q
+                    ->addSelect(['last_returned_at' => Loan::select('returned_at')
+                        ->whereColumn('copy_id', 'copies.id')
+                        ->where('status', 'RETURNED')
+                        ->latest('returned_at')
+                        ->limit(1),
+                    ])
+                    ->orderByRaw('last_returned_at IS NULL')
+                    ->orderBy('last_returned_at'),
+                fn ($q) => $q->orderBy('game_id')
+            )
+            ->paginate(min(max((int) $request->per_page ?: 50, 1), 200));
 
         return CopyResource::collection($copies);
     }
@@ -49,6 +62,23 @@ class CopyController extends Controller
         return new CopyResource($copy->load(['game', 'activeLoans']));
     }
 
+    public function lookup(Request $request): JsonResponse|CopyResource
+    {
+        $request->validate([
+            'qr_code' => ['required', 'string'],
+        ]);
+
+        $copy = Copy::with(['game', 'activeLoans', 'lastReturnedLoan.user'])
+            ->where('qr_code', strtoupper(trim((string) $request->qr_code)))
+            ->first();
+
+        if (! $copy) {
+            return response()->json(['message' => 'Kein Spiel mit diesem Code gefunden.'], 404);
+        }
+
+        return new CopyResource($copy);
+    }
+
     public function update(CopyRequest $request, Copy $copy): CopyResource
     {
         $copy->update($request->validated());
@@ -67,16 +97,20 @@ class CopyController extends Controller
         return response()->json(['message' => 'Kopie gelöscht.']);
     }
 
-    public function approve(Copy $copy): JsonResponse
+    public function approve(Request $request, Copy $copy): JsonResponse
     {
+        $request->validate([
+            'condition' => ['nullable', 'in:NEW,VERY_GOOD,GOOD,WORN'],
+        ]);
+
         if ($copy->condition !== 'REVIEW') {
             return response()->json(['message' => 'Kopie ist nicht im Status "Überprüfen".'], 422);
         }
 
         $setting = LoanSetting::instance();
 
-        ['depositLoan' => $depositLoan, 'reservationUser' => $reservationUser, 'reservationGame' => $reservationGame] = DB::transaction(function () use ($copy, $setting) {
-            $newCondition = $copy->resolveConditionFromBorrowCount($setting);
+        ['depositLoan' => $depositLoan, 'reservationUser' => $reservationUser, 'reservationGame' => $reservationGame] = DB::transaction(function () use ($copy, $setting, $request) {
+            $newCondition = $request->condition ?? $copy->resolveConditionFromBorrowCount($setting);
             $copy->update(['condition' => $newCondition]);
 
             $loan = $copy->loans()
@@ -124,7 +158,9 @@ class CopyController extends Controller
         });
 
         if ($depositLoan) {
-            $depositLoan->user->notify(new DepositReleased($depositLoan));
+            /** @var User $depositUser */
+            $depositUser = $depositLoan->user;
+            $depositUser->notify(new DepositReleased($depositLoan));
         }
 
         if ($reservationUser && $reservationGame) {
@@ -185,9 +221,14 @@ class CopyController extends Controller
         });
 
         if ($depositLoan) {
-            $depositLoan->user->notify(new DepositForfeited($depositLoan, $notes));
+            /** @var User $depositUser */
+            $depositUser = $depositLoan->user;
+            $depositUser->notify(new DepositForfeited($depositLoan, $notes));
         }
 
-        return response()->json(['message' => 'Kopie als beschädigt markiert.']);
+        return response()->json([
+            'message' => 'Kopie als beschädigt markiert.',
+            'copy' => new CopyResource($copy->load(['game', 'activeLoans'])),
+        ]);
     }
 }

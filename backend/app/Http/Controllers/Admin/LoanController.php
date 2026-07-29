@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\LoanResource;
 use App\Models\Copy;
 use App\Models\Loan;
+use App\Models\User;
 use App\Notifications\LoanOverdueReminder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -46,7 +47,9 @@ class LoanController extends Controller
 
         $loan->load(['copy.game', 'user', 'extensions']);
 
-        $loan->user->notify(new LoanOverdueReminder($loan));
+        /** @var User $loanUser */
+        $loanUser = $loan->user;
+        $loanUser->notify(new LoanOverdueReminder($loan));
 
         $loan->update(['overdue_reminder_sent_at' => now()]);
 

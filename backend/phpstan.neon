@@ -10,5 +10,3 @@ parameters:
     ignoreErrors:
         - identifier: nullsafe.neverNull
           path: app/Notifications/Concerns/UsesEmailTemplate.php
-        - identifier: missingType.iterableValue
-          path: app/Notifications/Concerns/UsesEmailTemplate.php

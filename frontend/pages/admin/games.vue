@@ -474,21 +474,18 @@
                         </td>
                         <td>
                           <div class="action-row">
-                            <template v-if="copy.condition === 'REVIEW'">
-                              <button
-                                class="action-btn action-btn--success"
-                                @click="approveCopy(copy.id)"
-                              >
-                                {{ $t('admin.actions.approve_copy') }}
-                              </button>
-                              <button
-                                class="action-btn action-btn--danger"
-                                @click="openMarkDamaged(copy.id)"
-                              >
-                                {{ $t('admin.actions.mark_damaged') }}
-                              </button>
-                            </template>
-                            <template v-else>
+                            <button
+                              v-if="copy.qr_code"
+                              class="action-btn"
+                              :title="$t('admin.actions.download_qr')"
+                              :aria-label="$t('admin.actions.download_qr')"
+                              @click="downloadQrCode(copy.qr_code)"
+                            >
+                              <svg class="icon-svg" aria-hidden="true">
+                                <use href="/svg-icons/icons.svg#qr_code_2" />
+                              </svg>
+                            </button>
+                            <template v-if="copy.condition !== 'REVIEW'">
                               <button class="action-btn" @click="openCopyEdit(copy)">
                                 {{ $t('admin.actions.edit') }}
                               </button>
@@ -555,7 +552,21 @@
                   ]"
                 />
               </div>
-              <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
+              <div class="form-field form-field--qr">
+                <UiInput v-model="copyForm.qr_code" :label="$t('admin.form.qr_code')" />
+                <button
+                  v-if="copyForm.qr_code"
+                  type="button"
+                  class="action-btn"
+                  :title="$t('admin.actions.download_qr')"
+                  :aria-label="$t('admin.actions.download_qr')"
+                  @click="downloadQrCode(copyForm.qr_code)"
+                >
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#qr_code_2" />
+                  </svg>
+                </button>
+              </div>
               <UiInput v-model="copyForm.notes" :label="$t('admin.form.notes')" />
               <div v-if="copyForm.error" class="form-error">{{ copyForm.error }}</div>
             </div>
@@ -565,45 +576,6 @@
                 $t('admin.form.save')
               }}</UiButton>
               <button class="action-btn" @click="copyForm.open = false">
-                {{ $t('admin.form.cancel') }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </Transition>
-    </Teleport>
-
-    <!-- ── Beschädigt-Markieren Modal ──────────────────────────── -->
-    <Teleport to="body">
-      <Transition name="modal">
-        <div
-          v-if="damagedForm.open"
-          class="modal-overlay modal-overlay--top"
-          @click.self="damagedForm.open = false"
-        >
-          <div class="dialog">
-            <div class="dialog__header">
-              <h3 class="dialog__title">{{ $t('admin.games.mark_damaged_title') }}</h3>
-              <button
-                class="dialog__close"
-                :aria-label="$t('admin.form.close')"
-                @click="damagedForm.open = false"
-              >
-                <svg class="icon-svg" aria-hidden="true">
-                  <use href="/svg-icons/icons.svg#close" />
-                </svg>
-              </button>
-            </div>
-            <div class="dialog__body">
-              <p class="form-hint">{{ $t('admin.games.mark_damaged_hint') }}</p>
-              <UiInput v-model="damagedForm.notes" :label="$t('admin.form.notes')" />
-              <div v-if="damagedForm.error" class="form-error">{{ damagedForm.error }}</div>
-            </div>
-            <div class="dialog__actions">
-              <UiButton variant="danger" :loading="damagedForm.saving" @click="saveMarkDamaged">{{
-                $t('admin.actions.mark_damaged')
-              }}</UiButton>
-              <button class="action-btn" @click="damagedForm.open = false">
                 {{ $t('admin.form.cancel') }}
               </button>
             </div>
@@ -676,6 +648,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import QRCode from 'qrcode'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
@@ -799,15 +772,6 @@ const copyForm = reactive({
   id: null as number | null,
   condition: 'NEW',
   qr_code: '',
-  notes: '',
-  saving: false,
-  error: '',
-})
-
-// ── Beschädigt-Markieren Dialog ───────────────────────────────────
-const damagedForm = reactive({
-  open: false,
-  copyId: null as number | null,
   notes: '',
   saving: false,
   error: '',
@@ -1022,6 +986,44 @@ function openCopyEdit(copy: Copy) {
   })
 }
 
+async function downloadQrCode(code: string | null) {
+  if (!code) return
+
+  const qrCanvas = document.createElement('canvas')
+  await QRCode.toCanvas(qrCanvas, code, {
+    width: 320,
+    margin: 1,
+    color: { dark: '#0F0E0C', light: '#FFFFFF' },
+  })
+
+  const padding = 24
+  const labelHeight = 44
+  const canvas = document.createElement('canvas')
+  canvas.width = qrCanvas.width + padding * 2
+  canvas.height = qrCanvas.height + padding * 2 + labelHeight
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  ctx.fillStyle = '#FFFFFF'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.drawImage(qrCanvas, padding, padding)
+  ctx.fillStyle = '#0F0E0C'
+  ctx.font = 'bold 22px monospace'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(code, canvas.width / 2, padding * 2 + qrCanvas.height + labelHeight / 2)
+
+  canvas.toBlob((blob) => {
+    if (!blob) return
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `qr-${code}.png`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, 'image/png')
+}
+
 async function saveCopy() {
   copyForm.saving = true
   copyForm.error = ''
@@ -1053,37 +1055,6 @@ async function removeCopy(id: number) {
     if (game) game.copies_count = copiesPanel.copies.length
   } catch (err: unknown) {
     alert((err as { message?: string }).message ?? t('common.error.generic'))
-  }
-}
-
-async function approveCopy(id: number) {
-  try {
-    await useApi().post(`/admin/copies/${id}/approve`, {})
-    const data = await fetchCopies({ game_id: copiesPanel.gameId! })
-    copiesPanel.copies = data.data as Copy[]
-  } catch (err: unknown) {
-    alert((err as { message?: string }).message ?? t('common.error.generic'))
-  }
-}
-
-function openMarkDamaged(id: number) {
-  Object.assign(damagedForm, { open: true, copyId: id, notes: '', error: '' })
-}
-
-async function saveMarkDamaged() {
-  damagedForm.saving = true
-  damagedForm.error = ''
-  try {
-    await useApi().post(`/admin/copies/${damagedForm.copyId}/mark-damaged`, {
-      notes: damagedForm.notes || undefined,
-    })
-    damagedForm.open = false
-    const data = await fetchCopies({ game_id: copiesPanel.gameId! })
-    copiesPanel.copies = data.data as Copy[]
-  } catch (err: unknown) {
-    damagedForm.error = (err as { message?: string }).message ?? t('common.error.save')
-  } finally {
-    damagedForm.saving = false
   }
 }
 
@@ -1618,6 +1589,20 @@ $hero-divider: rgba(238, 232, 223, 0.1);
 .form-select {
   display: block;
   width: 100%;
+}
+
+.form-field--qr {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.5rem;
+  > :first-child {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  .action-btn {
+    height: 2.5rem;
+    padding: 0 0.75rem;
+  }
 }
 
 .form-check {

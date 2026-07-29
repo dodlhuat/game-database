@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Copy;
 use App\Models\Game;
+use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -29,6 +30,16 @@ class CopyResource extends JsonResource
             'borrow_count' => $this->borrow_count,
             'qr_code' => $this->qr_code,
             'notes' => $this->notes,
+            'last_return' => $this->whenLoaded('lastReturnedLoan', function () {
+                /** @var Loan|null $loan */
+                $loan = $this->lastReturnedLoan;
+
+                return $loan ? [
+                    'return_condition' => $loan->return_condition,
+                    'returned_at' => $loan->returned_at,
+                    'user_name' => $loan->user?->name,
+                ] : null;
+            }),
             'is_available' => $this->when(
                 $this->relationLoaded('activeLoans'),
                 fn () => $this->activeLoans->isEmpty()

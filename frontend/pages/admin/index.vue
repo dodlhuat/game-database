@@ -78,7 +78,7 @@
               </NuxtLink>
               <NuxtLink
                 v-if="stats.copies.to_review > 0"
-                to="/admin/games?condition=REVIEW"
+                to="/admin/copy-review"
                 class="attention-item"
               >
                 <span class="attention-item__dot" />
@@ -168,7 +168,7 @@
             </NuxtLink>
 
             <NuxtLink
-              to="/admin/games?condition=REVIEW"
+              to="/admin/copy-review"
               class="ops-card"
               :class="stats.copies.to_review > 0 ? 'ops-card--amber' : ''"
             >

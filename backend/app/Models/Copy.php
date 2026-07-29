@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property 'NEW'|'VERY_GOOD'|'GOOD'|'WORN'|'DAMAGED'|'LOCKED'|'REVIEW' $condition
@@ -42,6 +43,15 @@ class Copy extends Model
         return $this->hasMany(Loan::class)->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE']);
     }
 
+    /** @return HasOne<Loan, $this> */
+    public function lastReturnedLoan(): HasOne
+    {
+        return $this->hasOne(Loan::class)->ofMany(
+            ['returned_at' => 'max'],
+            fn ($q) => $q->where('status', 'RETURNED')
+        );
+    }
+
     public function calculateDeposit(Game $game, LoanSetting $setting): int
     {
         if ($game->deposit_tokens <= 0) {
@@ -50,7 +60,7 @@ class Copy extends Model
 
         return match ($this->condition) {
             'VERY_GOOD' => (int) round($game->deposit_tokens * $setting->deposit_pct_very_good / 100),
-            'GOOD' => (int) round($game->deposit_tokens * $setting->deposit_pct_good / 100),
+            'GOOD', 'WORN' => (int) round($game->deposit_tokens * $setting->deposit_pct_good / 100),
             default => $game->deposit_tokens, // NEW = 100%
         };
     }

@@ -157,6 +157,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::apiResource('mechanics', AdminMechanicController::class)->only(['index', 'store', 'update', 'destroy']);
 
     // Kopienverwaltung
+    Route::get('/copies/lookup', [CopyController::class, 'lookup']);
     Route::apiResource('copies', CopyController::class);
     Route::post('/copies/{copy}/approve', [CopyController::class, 'approve']);
     Route::post('/copies/{copy}/mark-damaged', [CopyController::class, 'markDamaged']);

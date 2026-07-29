@@ -110,3 +110,7 @@ prod-shell:
 ## Artisan-Befehl auf Prod: make prod-artisan CMD="migrate:status"
 prod-artisan:
 	docker compose -f docker-compose.prod.yml exec backend php artisan $(CMD)
+
+## phpstan
+phpstan:
+	cd backend && php -d memory_limit=1G vendor/bin/phpstan analyse > phpstan-report.txt

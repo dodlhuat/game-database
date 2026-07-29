@@ -74,6 +74,7 @@
       "condition_very_good": "Sehr gut",
       "condition_good": "Gut",
       "condition_review": "Wird geprüft",
+      "condition_worn": "Abgenutzt",
       "condition_damaged": "Beschädigt",
       "condition_locked": "Gesperrt"
     },
@@ -429,7 +430,8 @@
       "emails": "E-Mail-Vorlagen",
       "loan_settings": "Ausleih-Einstellungen",
       "email_logs": "E-Mail-Protokoll",
-      "package_loans": "Paket-Ausleihen"
+      "package_loans": "Paket-Ausleihen",
+      "copy_review": "Rückgaben prüfen"
     },
     "table": {
       "name": "Name",
@@ -461,6 +463,7 @@
       "copies_manage": "Kopien",
       "approve_copy": "Freigeben",
       "mark_damaged": "Als beschädigt markieren",
+      "download_qr": "QR-Code herunterladen",
       "token_history": "Token-Verlauf"
     },
     "empty": {
@@ -473,7 +476,8 @@
       "extensions": "Keine Verlängerungsanträge vorhanden.",
       "packages": "Noch keine Pakete vorhanden.",
       "copies": "Noch keine Kopien für dieses Spiel.",
-      "users": "Keine Mitglieder gefunden."
+      "users": "Keine Mitglieder gefunden.",
+      "copy_review": "Aktuell stehen keine Rückgaben zur Prüfung an."
     },
     "form": {
       "save": "Speichern",
@@ -529,9 +533,38 @@
       "add_copy": "Kopie hinzufügen",
       "edit_copy": "Kopie bearbeiten",
       "add_game": "Spiel hinzufügen",
-      "edit_game": "Spiel bearbeiten",
+      "edit_game": "Spiel bearbeiten"
+    },
+    "copy_review": {
+      "title": "Rückgaben prüfen",
+      "subtitle": "Zurückgegebene Exemplare kontrollieren und wieder freigeben",
+      "queue": "Warteschlange",
+      "scan_hint": "QR-Code scannen oder den Code vom Aufkleber eintippen",
+      "scan_placeholder": "z. B. 7KD4M9QX",
+      "scan_start": "Kamera starten",
+      "scan_stop": "Kamera stoppen",
+      "scan_searching": "Exemplar wird gesucht …",
+      "scan_denied": "Kamerazugriff verweigert — bitte Code manuell eingeben.",
+      "scan_unavailable": "Keine Kamera verfügbar — bitte Code manuell eingeben.",
+      "scan_insecure": "Kamera benötigt eine sichere Verbindung (HTTPS).",
+      "not_found": "Kein Spiel mit diesem Code gefunden.",
+      "not_in_review": "Diese Kopie steht aktuell nicht zur Prüfung an.",
+      "state_on_loan": "Aktuell ausgeliehen an {name}.",
+      "state_available": "Bereits geprüft und verfügbar.",
+      "state_damaged": "Als beschädigt markiert.",
+      "state_locked": "Gesperrt.",
+      "target_condition": "Zustand nach Prüfung",
+      "condition_auto": "Automatisch",
+      "reported_condition": "Vom Mitglied gemeldet",
+      "returned_at": "Zurückgegeben am",
+      "borrower": "Mitglied",
+      "waiting_since": "wartet seit {days} Tagen",
+      "waiting_today": "heute zurückgegeben",
+      "deposit_blocked": "{count} Token Kaution blockiert",
       "mark_damaged_title": "Kopie als beschädigt markieren",
-      "mark_damaged_hint": "Die Kaution wird einbehalten. Bitte Begründung angeben."
+      "mark_damaged_hint": "Die Kaution wird einbehalten. Bitte Begründung angeben.",
+      "success_approved": "Exemplar {code} freigegeben.",
+      "success_damaged": "Exemplar {code} als beschädigt markiert."
     },
     "mechanics": {
       "title": "Mechaniken verwalten",

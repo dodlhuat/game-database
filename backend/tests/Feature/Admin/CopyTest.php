@@ -115,8 +115,75 @@ class CopyTest extends TestCase
 
         $this->actingAs($this->admin())
             ->postJson("/api/admin/copies/{$copy->id}/mark-damaged")
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonPath('copy.condition', 'DAMAGED');
 
         $this->assertDatabaseHas('copies', ['id' => $copy->id, 'condition' => 'DAMAGED']);
+    }
+
+    public function test_approve_accepts_explicit_condition(): void
+    {
+        Notification::fake();
+        LoanSetting::factory()->create();
+        $copy = Copy::factory()->create(['condition' => 'REVIEW', 'borrow_count' => 0]);
+
+        $this->actingAs($this->admin())
+            ->postJson("/api/admin/copies/{$copy->id}/approve", ['condition' => 'VERY_GOOD'])
+            ->assertOk()
+            ->assertJsonPath('copy.condition', 'VERY_GOOD');
+    }
+
+    public function test_lookup_finds_copy_by_qr_code(): void
+    {
+        $copy = Copy::factory()->create(['qr_code' => 'ABCD1234']);
+
+        $this->actingAs($this->admin())
+            ->getJson('/api/admin/copies/lookup?qr_code=ABCD1234')
+            ->assertOk()
+            ->assertJsonPath('data.id', $copy->id);
+    }
+
+    public function test_lookup_returns_404_for_unknown_code(): void
+    {
+        $this->actingAs($this->admin())
+            ->getJson('/api/admin/copies/lookup?qr_code=NOPE0000')
+            ->assertStatus(404);
+    }
+
+    public function test_lookup_trims_and_normalizes_case(): void
+    {
+        $copy = Copy::factory()->create(['qr_code' => 'ABCD1234']);
+
+        $this->actingAs($this->admin())
+            ->getJson('/api/admin/copies/lookup?qr_code='.urlencode('  abcd1234  '))
+            ->assertOk()
+            ->assertJsonPath('data.id', $copy->id);
+    }
+
+    public function test_index_review_orders_oldest_return_first(): void
+    {
+        $recent = Copy::factory()->create(['condition' => 'REVIEW']);
+        Loan::factory()->create([
+            'copy_id' => $recent->id,
+            'status' => 'RETURNED',
+            'returned_at' => now()->subDay(),
+        ]);
+
+        $oldest = Copy::factory()->create(['condition' => 'REVIEW']);
+        Loan::factory()->create([
+            'copy_id' => $oldest->id,
+            'status' => 'RETURNED',
+            'returned_at' => now()->subWeek(),
+        ]);
+
+        $noLoan = Copy::factory()->create(['condition' => 'REVIEW']);
+
+        $response = $this->actingAs($this->admin())
+            ->getJson('/api/admin/copies?condition=REVIEW')
+            ->assertOk();
+
+        $ids = collect($response->json('data'))->pluck('id')->all();
+
+        $this->assertSame([$oldest->id, $recent->id, $noLoan->id], $ids);
     }
 }

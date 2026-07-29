@@ -30,6 +30,9 @@
             <NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink>
           </li>
           <li>
+            <NuxtLink to="/admin/copy-review">{{ $t('admin.copy_review.title') }}</NuxtLink>
+          </li>
+          <li>
             <NuxtLink to="/admin/events">{{ $t('admin.events.title') }}</NuxtLink>
           </li>
           <li>

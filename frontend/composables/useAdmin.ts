@@ -5,6 +5,22 @@ export interface AdminStats {
   copies: { to_review: number }
 }
 
+export interface AdminCopy {
+  id: number
+  game_id: number
+  game?: { id: number; title: string }
+  condition: string
+  borrow_count: number
+  qr_code: string | null
+  notes: string | null
+  is_available?: boolean
+  last_return?: {
+    return_condition: string
+    returned_at: string
+    user_name: string | null
+  } | null
+}
+
 export function useAdmin() {
   const api = useApi()
 
@@ -76,6 +92,15 @@ export function useAdmin() {
 
   const deleteCopy = (id: number) => api.delete(`/admin/copies/${id}`)
 
+  const lookupCopy = (qrCode: string) =>
+    api.get<{ data: AdminCopy }>('/admin/copies/lookup', { params: { qr_code: qrCode } })
+
+  const approveCopy = (id: number, condition?: string) =>
+    api.post<{ message: string; copy: AdminCopy }>(`/admin/copies/${id}/approve`, { condition })
+
+  const markCopyDamaged = (id: number, notes?: string) =>
+    api.post<{ message: string; copy: AdminCopy }>(`/admin/copies/${id}/mark-damaged`, { notes })
+
   // Loans
   const fetchAdminLoans = (params?: Record<string, string | number>) =>
     api.get<{ data: unknown[]; meta: unknown }>('/admin/loans', { params })
@@ -143,6 +168,9 @@ export function useAdmin() {
     createCopy,
     updateCopy,
     deleteCopy,
+    lookupCopy,
+    approveCopy,
+    markCopyDamaged,
     fetchAdminLoans,
     markOverdue,
     sendOverdueReminder,
