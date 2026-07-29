@@ -450,7 +450,7 @@
                         <th>{{ $t('admin.form.qr_code') }}</th>
                         <th>{{ $t('admin.form.owner') }}</th>
                         <th>{{ $t('admin.table.status') }}</th>
-                        <th>{{ $t('admin.table.actions') }}</th>
+                        <th class="actions-cell">{{ $t('admin.table.actions') }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -474,31 +474,19 @@
                             }}
                           </span>
                         </td>
-                        <td>
-                          <div class="action-row">
-                            <button
-                              v-if="copy.qr_code"
-                              class="action-btn"
-                              :title="$t('admin.actions.download_qr')"
-                              :aria-label="$t('admin.actions.download_qr')"
-                              @click="downloadQrCode(copy.qr_code)"
-                            >
-                              <svg class="icon-svg" aria-hidden="true">
-                                <use href="/svg-icons/icons.svg#qr_code_2" />
-                              </svg>
-                            </button>
-                            <template v-if="copy.condition !== 'REVIEW'">
-                              <button class="action-btn" @click="openCopyEdit(copy)">
-                                {{ $t('admin.actions.edit') }}
-                              </button>
-                              <button
-                                class="action-btn action-btn--danger"
-                                @click="removeCopy(copy.id)"
-                              >
-                                {{ $t('admin.actions.delete') }}
-                              </button>
-                            </template>
-                          </div>
+                        <td class="actions-cell">
+                          <button
+                            v-if="copy.qr_code || copy.condition !== 'REVIEW'"
+                            class="action-btn action-btn--icon"
+                            :class="{ 'action-btn--active': openActionsFor === copy.id }"
+                            :aria-label="$t('admin.table.actions')"
+                            @click="toggleActions(copy, $event)"
+                          >
+                            <svg class="icon-svg" aria-hidden="true">
+                              <use href="/svg-icons/icons.svg#more_vert" />
+                            </svg>
+                          </button>
+                          <span v-else class="text-muted">—</span>
                         </td>
                       </tr>
                     </tbody>
@@ -513,6 +501,41 @@
           </div>
         </div>
       </Transition>
+    </Teleport>
+
+    <!-- ── Kopien-Aktionsmenü ───────────────────────────────────── -->
+    <Teleport to="body">
+      <div v-if="openActionsFor !== null" class="actions-menu-backdrop" @click="closeActions" />
+      <div
+        v-if="activeActionsCopy"
+        class="actions-menu"
+        :style="{ top: `${actionsMenuPos.top}px`, left: `${actionsMenuPos.left}px` }"
+      >
+        <button
+          v-if="activeActionsCopy.qr_code"
+          class="actions-menu__item"
+          @click="handleDownloadQr"
+        >
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#qr_code_2" />
+          </svg>
+          {{ $t('admin.actions.download_qr') }}
+        </button>
+        <template v-if="activeActionsCopy.condition !== 'REVIEW'">
+          <button class="actions-menu__item" @click="handleEditCopy">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#edit" />
+            </svg>
+            {{ $t('admin.actions.edit') }}
+          </button>
+          <button class="actions-menu__item actions-menu__item--danger" @click="handleDeleteCopy">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#delete" />
+            </svg>
+            {{ $t('admin.actions.delete') }}
+          </button>
+        </template>
+      </div>
     </Teleport>
 
     <!-- ── Kopie-Formular Modal ──────────────────────────────────── -->
@@ -967,6 +990,7 @@ async function openCopies(game: Game) {
 
 function closeCopies() {
   copiesPanel.open = false
+  closeActions()
 }
 
 function openCopyCreate() {
@@ -1064,6 +1088,45 @@ async function removeCopy(id: number) {
   } catch (err: unknown) {
     alert((err as { message?: string }).message ?? t('common.error.generic'))
   }
+}
+
+// ── Kopien-Aktionsmenü (Dot-Menu) ───────────────────────────────────
+const openActionsFor = ref<number | null>(null)
+const actionsMenuPos = reactive({ top: 0, left: 0 })
+
+const activeActionsCopy = computed(
+  () => copiesPanel.copies.find((c) => c.id === openActionsFor.value) ?? null
+)
+
+function toggleActions(copy: Copy, event: MouseEvent) {
+  if (openActionsFor.value === copy.id) {
+    openActionsFor.value = null
+    return
+  }
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
+  const menuWidth = 200
+  actionsMenuPos.top = rect.bottom + 4
+  actionsMenuPos.left = Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8)
+  openActionsFor.value = copy.id
+}
+
+function closeActions() {
+  openActionsFor.value = null
+}
+
+function handleDownloadQr() {
+  downloadQrCode(activeActionsCopy.value?.qr_code ?? null)
+  closeActions()
+}
+
+function handleEditCopy() {
+  if (activeActionsCopy.value) openCopyEdit(activeActionsCopy.value)
+  closeActions()
+}
+
+function handleDeleteCopy() {
+  if (activeActionsCopy.value) removeCopy(activeActionsCopy.value.id)
+  closeActions()
 }
 
 // ── Bilder ────────────────────────────────────────────────────────
@@ -1346,6 +1409,27 @@ $hero-divider: rgba(238, 232, 223, 0.1);
   border-radius: 8px;
   border: 1px solid var(--divider);
   margin-top: 0.75rem;
+
+  // Scrollbar-Spur bleibt immer reserviert (kein Layout-Sprung),
+  // der Thumb ist aber standardmäßig unsichtbar und erscheint erst bei Hover.
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 4px;
+  }
+  &:hover {
+    scrollbar-width: thin;
+    scrollbar-color: var(--divider) transparent;
+    &::-webkit-scrollbar-thumb {
+      background: var(--divider);
+    }
+  }
 }
 
 .dash-table {
@@ -1387,6 +1471,10 @@ $hero-divider: rgba(238, 232, 223, 0.1);
 .text-mono {
   font-family: monospace;
   font-size: 0.8rem;
+  color: var(--secondary-text);
+}
+
+.text-muted {
   color: var(--secondary-text);
 }
 
@@ -1433,6 +1521,14 @@ $hero-divider: rgba(238, 232, 223, 0.1);
     opacity: 0.4;
     cursor: not-allowed;
   }
+  &--icon {
+    padding: 0.4rem;
+  }
+  &--active {
+    border-color: var(--accent-color);
+    color: var(--accent-text);
+    background: var(--accent-color-muted);
+  }
   &__badge {
     display: inline-flex;
     align-items: center;
@@ -1466,6 +1562,75 @@ $hero-divider: rgba(238, 232, 223, 0.1);
     backdrop-filter: none;
   }
 }
+
+.actions-cell {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  position: sticky;
+  right: 0;
+  box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.25);
+}
+td.actions-cell {
+  background: var(--secondary-background);
+}
+
+.actions-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+}
+.actions-menu {
+  position: fixed;
+  z-index: 221;
+  min-width: 200px;
+  padding: 0.35rem;
+  background: var(--secondary-background);
+  border: 1px solid var(--divider);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  animation: actions-menu-in 0.12s ease;
+}
+.actions-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--primary-text);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  &:hover {
+    background: var(--background);
+  }
+  &--danger {
+    color: #f87171;
+    &:hover {
+      background: rgba(239, 68, 68, 0.08);
+    }
+  }
+}
+
+@keyframes actions-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dialog {
   background: var(--secondary-background);
   border: 1px solid var(--divider);
