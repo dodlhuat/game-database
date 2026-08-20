@@ -89,8 +89,13 @@ export function useLoans() {
 
   const removeReservation = (reservationId: number) => api.delete(`/reservations/${reservationId}`)
 
-  const reportDamage = (loanId: number, description: string, photoUrl?: string) =>
-    api.post('/damage-reports', { loan_id: loanId, description, photo_url: photoUrl || undefined })
+  const reportDamage = (loanId: number, description: string, photo?: File | null) => {
+    const fd = new FormData()
+    fd.append('loan_id', String(loanId))
+    fd.append('description', description)
+    if (photo) fd.append('photo', photo)
+    return api.post('/damage-reports', fd)
+  }
 
   const fetchTokenTransactions = (page = 1) =>
     api.get<{

@@ -43,6 +43,8 @@ onMounted(async () => {
   picker = new DatePicker(inputRef.value, {
     mode: 'single',
     startDay: 1,
+    min: props.minDate,
+    max: props.maxDate,
     locales: {
       days: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
       months: [
@@ -68,16 +70,8 @@ onMounted(async () => {
     onSelect: (date: Date | { start: Date | null; end: Date | null }) => {
       const d = date instanceof Date ? date : date.start
       if (!d) return
-      if (props.maxDate && d > props.maxDate) {
-        if (inputRef.value) inputRef.value.value = ''
-        emit('update:modelValue', '')
-        return
-      }
-      if (props.minDate && d < props.minDate) {
-        if (inputRef.value) inputRef.value.value = ''
-        emit('update:modelValue', '')
-        return
-      }
+      // basix disables out-of-range days/months/years itself (min/max above)
+      // — a disabled day can't be clicked, so no post-hoc validation needed.
       const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       emit('update:modelValue', iso)
     },

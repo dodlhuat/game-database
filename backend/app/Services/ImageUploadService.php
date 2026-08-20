@@ -52,6 +52,20 @@ class ImageUploadService
         return Storage::disk('public')->url($filename);
     }
 
+    /**
+     * Member-submitted damage photos come straight from phone cameras
+     * (often several MB), so — unlike the other upload* methods — this one
+     * downscales/recompresses before storing.
+     */
+    public function uploadDamagePhoto(UploadedFile $file): string
+    {
+        $contents = $this->resizeAndCompress($file, maxDimension: 1600, quality: 82);
+        $filename = 'damage-photos/'.Str::uuid().'.jpg';
+        Storage::disk('public')->put($filename, $contents);
+
+        return Storage::disk('public')->url($filename);
+    }
+
     public function deleteByUrl(string $url): void
     {
         // Pfad relativ zum public-Disk extrahieren
@@ -72,17 +86,41 @@ class ImageUploadService
      */
     public function compressForAttachment(UploadedFile $file, int $maxDimension = 1600, int $quality = 80): array
     {
-        $raw = (string) file_get_contents((string) $file->getRealPath());
-        $source = @imagecreatefromstring($raw);
-
-        if (! $source instanceof \GdImage) {
+        try {
+            $contents = $this->resizeAndCompress($file, $maxDimension, $quality);
+        } catch (\RuntimeException) {
             // Not a format GD can decode — attach the original bytes untouched
             // rather than fail the whole submission over one odd file.
             return [
                 'filename' => $file->getClientOriginalName(),
                 'mime' => $file->getMimeType() ?? 'application/octet-stream',
-                'contents' => base64_encode($raw),
+                'contents' => base64_encode((string) file_get_contents((string) $file->getRealPath())),
             ];
+        }
+
+        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'.jpg';
+
+        return [
+            'filename' => $name,
+            'mime' => 'image/jpeg',
+            'contents' => base64_encode($contents),
+        ];
+    }
+
+    /**
+     * Downscale + recompress into a JPEG. Also corrects EXIF orientation
+     * (common on phone photos) since GD otherwise ignores it and the photo
+     * would render sideways/upside-down.
+     *
+     * @throws \RuntimeException if the file isn't a format GD can decode
+     */
+    private function resizeAndCompress(UploadedFile $file, int $maxDimension, int $quality): string
+    {
+        $raw = (string) file_get_contents((string) $file->getRealPath());
+        $source = @imagecreatefromstring($raw);
+
+        if (! $source instanceof \GdImage) {
+            throw new \RuntimeException('Uploaded file is not a decodable image.');
         }
 
         $source = $this->fixOrientation($source, $file);
@@ -105,13 +143,7 @@ class ImageUploadService
         $contents = (string) ob_get_clean();
         imagedestroy($source);
 
-        $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'.jpg';
-
-        return [
-            'filename' => $name,
-            'mime' => 'image/jpeg',
-            'contents' => base64_encode($contents),
-        ];
+        return $contents;
     }
 
     private function fixOrientation(\GdImage $image, UploadedFile $file): \GdImage

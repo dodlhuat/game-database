@@ -1,5 +1,5 @@
 <template>
-  <div class="upgrade-page" data-theme="dark">
+  <div class="upgrade-page">
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />
@@ -255,8 +255,8 @@ $nav-height: 64px;
 $amber-glow: rgba(212, 146, 30, 0.15);
 $hero-text: var(--primary-text);
 $hero-muted: var(--secondary-text);
-$surface: rgba(255, 255, 255, 0.04);
-$border: rgba(238, 232, 223, 0.1);
+$surface: color-mix(in srgb, var(--primary-text) 4%, transparent);
+$border: var(--divider);
 
 .page-hero {
   position: relative;
@@ -370,7 +370,7 @@ $border: rgba(238, 232, 223, 0.1);
   }
   &__note {
     font-size: 0.78rem;
-    color: rgba(238, 232, 223, 0.5);
+    color: color-mix(in srgb, var(--secondary-text) 80%, transparent);
     margin: 0.75rem 0 0;
   }
 }
@@ -386,7 +386,7 @@ $border: rgba(238, 232, 223, 0.1);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: rgba(238, 232, 223, 0.5);
+    color: color-mix(in srgb, var(--secondary-text) 80%, transparent);
     text-transform: uppercase;
     margin: 0 0 0.75rem;
   }
@@ -477,7 +477,7 @@ $border: rgba(238, 232, 223, 0.1);
 
   &__note {
     font-size: 0.78rem;
-    color: rgba(238, 232, 223, 0.35);
+    color: color-mix(in srgb, var(--secondary-text) 55%, transparent);
     margin-top: 1.5rem;
     text-align: center;
   }

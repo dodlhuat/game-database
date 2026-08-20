@@ -84,8 +84,26 @@ declare module '@dodlhuat/basix/js/group-picker' {
 }
 
 declare module '@dodlhuat/basix/js/datepicker' {
+  export interface DatePickerLocales {
+    days: string[]
+    months: string[]
+  }
+  export interface DateRange {
+    start: Date | null
+    end: Date | null
+  }
+  export interface DatePickerOptions {
+    mode?: 'single' | 'range'
+    startDay?: number
+    timePicker?: boolean
+    min?: Date
+    max?: Date
+    locales?: DatePickerLocales
+    format?: (date: Date) => string
+    onSelect?: (date: Date | DateRange) => void
+  }
   export class Datepicker {
-    constructor(el: HTMLElement, options?: Record<string, unknown>)
+    constructor(elementOrSelector: string | HTMLInputElement, options?: DatePickerOptions)
     destroy(): void
   }
   export { Datepicker as DatePicker }

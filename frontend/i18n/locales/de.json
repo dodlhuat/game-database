@@ -190,7 +190,7 @@
     "return_condition": "Zustand",
     "damage_title": "Schaden melden",
     "damage_description": "Beschreibung",
-    "damage_photo_url": "Foto-URL (optional)",
+    "damage_photo": "Foto (optional)",
     "damage_report": "Melden",
     "extension_title": "Verlängerung beantragen",
     "extension_new_due_date": "Neues Rückgabedatum",

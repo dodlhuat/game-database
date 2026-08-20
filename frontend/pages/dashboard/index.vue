@@ -342,7 +342,62 @@
           </div>
           <p class="dialog__game">{{ damageLoan.game?.title }}</p>
           <UiInput v-model="damageDescription" :label="$t('dashboard.damage_description')" />
-          <UiInput v-model="damagePhotoUrl" :label="$t('dashboard.damage_photo_url')" />
+
+          <label class="dialog__label">{{ $t('dashboard.damage_photo') }}</label>
+          <div class="file-uploader">
+            <div
+              class="drop-zone"
+              :class="{ 'drag-over': isDraggingDamagePhoto }"
+              @dragover.prevent="isDraggingDamagePhoto = true"
+              @dragleave.prevent="isDraggingDamagePhoto = false"
+              @drop.prevent="onDamagePhotoDrop"
+              @click="damagePhotoInputRef?.click()"
+            >
+              <input
+                ref="damagePhotoInputRef"
+                type="file"
+                accept="image/*"
+                style="display: none"
+                @change="onDamagePhotoChange"
+              />
+              <div class="drop-zone-content">
+                <div class="icon-container">
+                  <svg class="icon-svg">
+                    <use href="/svg-icons/icons.svg#add_photo_alternate" />
+                  </svg>
+                </div>
+                <span class="primary-text">{{ $t('admin.form.image_hint') }}</span>
+                <span class="secondary-text">{{ $t('admin.form.image_formats') }}</span>
+              </div>
+            </div>
+
+            <div v-if="damagePhotoFile" class="file-list">
+              <div class="file-item">
+                <div class="file-item-header">
+                  <div class="file-info">
+                    <img
+                      :src="damagePhotoPreviewUrl!"
+                      :alt="$t('admin.form.preview')"
+                      style="
+                        width: 40px;
+                        height: 40px;
+                        object-fit: cover;
+                        border-radius: 4px;
+                        flex-shrink: 0;
+                      "
+                    />
+                    <div class="file-details">
+                      <span class="file-name">{{ damagePhotoFile.name }}</span>
+                      <span class="file-size">{{ formatFileSize(damagePhotoFile.size) }}</span>
+                    </div>
+                  </div>
+                  <button type="button" class="remove-btn" @click.stop="removeDamagePhoto">
+                    <svg class="icon-svg"><use href="/svg-icons/icons.svg#close" /></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="dialog__actions">
             <UiButton :loading="reporting" @click="submitDamage">{{
               $t('dashboard.damage_report')
@@ -373,6 +428,7 @@
           <UiDatePicker
             v-model="extensionDate"
             :label="$t('dashboard.extension_new_due_date')"
+            :min-date="minExtensionDate"
             :max-date="maxExtensionDate"
           />
           <div class="dialog__actions">
@@ -417,11 +473,43 @@ const extending = ref(false)
 
 const damageLoan = ref<Loan | null>(null)
 const damageDescription = ref('')
-const damagePhotoUrl = ref('')
+const damagePhotoFile = ref<File | null>(null)
+const damagePhotoInputRef = ref<HTMLInputElement | null>(null)
+const isDraggingDamagePhoto = ref(false)
+const damagePhotoPreviewUrl = computed(() =>
+  damagePhotoFile.value ? URL.createObjectURL(damagePhotoFile.value) : null
+)
 const reporting = ref(false)
 
-const maxExtensionDate = new Date()
-maxExtensionDate.setDate(maxExtensionDate.getDate() + 14)
+// Both bounds are offsets from the same floor — whichever is later, "today"
+// or the loan's current due date — so min (floor+1) is always exactly 13
+// days before max (floor+14) and can never end up past it. Anchoring max to
+// "today+14" alone (regardless of the loan) could put it *before* min
+// whenever a loan's due date is already more than ~13 days out, disabling
+// every day in the picker.
+const extensionFloor = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  if (!extensionLoan.value) return today
+
+  const due = new Date(extensionLoan.value.due_date)
+  due.setHours(0, 0, 0, 0)
+
+  return due > today ? due : today
+})
+
+const minExtensionDate = computed(() => {
+  const d = new Date(extensionFloor.value)
+  d.setDate(d.getDate() + 1)
+  return d
+})
+
+const maxExtensionDate = computed(() => {
+  const d = new Date(extensionFloor.value)
+  d.setDate(d.getDate() + 14)
+  return d
+})
 
 const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
 const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
@@ -477,18 +565,32 @@ async function submitExtension() {
 function openDamage(loan: Loan) {
   damageLoan.value = loan
   damageDescription.value = ''
-  damagePhotoUrl.value = ''
+  damagePhotoFile.value = null
+}
+
+function onDamagePhotoChange(e: Event) {
+  damagePhotoFile.value = (e.target as HTMLInputElement).files?.[0] ?? null
+}
+function onDamagePhotoDrop(e: DragEvent) {
+  isDraggingDamagePhoto.value = false
+  const file = e.dataTransfer?.files?.[0]
+  if (file && file.type.startsWith('image/')) damagePhotoFile.value = file
+}
+function removeDamagePhoto() {
+  damagePhotoFile.value = null
+  if (damagePhotoInputRef.value) damagePhotoInputRef.value.value = ''
+}
+function formatFileSize(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 async function submitDamage() {
   if (!damageLoan.value || !damageDescription.value) return
   reporting.value = true
   try {
-    await reportDamage(
-      damageLoan.value.id,
-      damageDescription.value,
-      damagePhotoUrl.value || undefined
-    )
+    await reportDamage(damageLoan.value.id, damageDescription.value, damagePhotoFile.value)
     damageLoan.value = null
   } finally {
     reporting.value = false
@@ -1150,25 +1252,12 @@ $hero-divider-20: var(--divider);
     letter-spacing: 0.03em;
   }
 
+  // UiVirtualDropdown draws its own complete box (background/border/
+  // shadow) — unlike a plain <select>, this must NOT add a second one.
   &__select {
     display: block;
     width: 100%;
-    height: 40px;
-    padding: 0 0.75rem;
-    border: 1px solid var(--divider);
-    border-radius: 8px;
-    background: var(--background);
-    color: var(--primary-text);
-    font-size: 0.875rem;
-    font-family: inherit;
-    cursor: pointer;
     margin-bottom: 1.5rem;
-    transition: border-color 0.2s;
-
-    &:focus {
-      outline: none;
-      border-color: var(--accent-color);
-    }
   }
 
   &__actions {
