@@ -1,5 +1,6 @@
 <template>
-  <nav class="push-menu">
+  <div id="flyoutOverlay" class="flyout-overlay" />
+  <div id="flyoutMenu" class="flyout-menu">
     <ul>
       <li>
         <NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink>
@@ -16,12 +17,11 @@
         <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
       </li>
 
-      <!-- Admin sub-panel — the <a> text becomes the panel title -->
-      <li
-        v-show="auth.isLoggedIn && auth.isAdmin"
-        :class="{ 'push-nav__admin-active': isAdminRoute }"
-      >
-        <NuxtLink to="/admin">{{ $t('nav.admin') }}</NuxtLink>
+      <!-- Admin submenu — FlyoutMenu turns a bare text label + nested <ul>
+           into an accordion toggle; it must NOT be a link itself (basix
+           hydration only picks up a loose text node as the toggle label). -->
+      <li v-show="auth.isLoggedIn && auth.isAdmin" ref="adminMenuItem">
+        {{ $t('nav.admin') }}
         <ul>
           <li>
             <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
@@ -94,9 +94,7 @@
         <NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink>
       </li>
     </ul>
-  </nav>
-
-  <div class="push-menu-backdrop" />
+  </div>
 
   <div class="push-content">
     <AppNav />
@@ -105,59 +103,54 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import type { FlyoutMenu as FlyoutMenuType } from '@dodlhuat/basix/js/flyout-menu'
 import { useAuthStore } from '~/stores/auth'
 import { useAuth } from '~/composables/useAuth'
 
 const auth = useAuthStore()
 const { logout } = useAuth()
 const route = useRoute()
+const { t } = useI18n()
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
+const adminMenuItem = ref<HTMLLIElement | null>(null)
 
-let PushMenuClass: typeof import('@dodlhuat/basix/js/push-menu').PushMenu | null = null
-let checkboxEl: HTMLInputElement | null = null
+let flyout: FlyoutMenuType | null = null
 
-function openAdminPanelIfNeeded() {
-  if (!isAdminRoute.value) return
-  const adminPanel = document.querySelector(
-    '.push-menu-panel[data-level="1"]'
-  ) as HTMLElement | null
-  if (adminPanel) PushMenuClass?.openPanel(adminPanel)
+// FlyoutMenu's submenu is an in-place accordion (not a separate panel like
+// PushMenu), so "already on an admin route" just means pre-expanding it.
+function openAdminSubmenuIfNeeded() {
+  if (!isAdminRoute.value || !adminMenuItem.value) return
+  adminMenuItem.value
+    .querySelector<HTMLElement>(':scope > .submenu-toggle')
+    ?.classList.add('active')
+  adminMenuItem.value.querySelector<HTMLElement>(':scope > .submenu')?.classList.add('is-open')
 }
 
-function onCheckboxChange(e: Event) {
-  if ((e.target as HTMLInputElement).checked) {
-    // Menu is opening — let PushMenu's handler run first, then navigate
-    setTimeout(openAdminPanelIfNeeded, 0)
-  }
+function closeMenu() {
+  flyout?.close()
 }
 
 onMounted(async () => {
-  const { PushMenu } = await import('@dodlhuat/basix/js/push-menu')
-  PushMenuClass = PushMenu
-  PushMenu.init({ iconBasePath: '/svg-icons/' })
-
-  checkboxEl = document.getElementById('push-nav-toggle') as HTMLInputElement
-  checkboxEl?.addEventListener('change', onCheckboxChange)
+  const { FlyoutMenu } = await import('@dodlhuat/basix/js/flyout-menu')
+  flyout = new FlyoutMenu({
+    triggerSelector: '.menu-trigger',
+    direction: 'left',
+    title: t('nav.menu_title'),
+    enableFooter: false,
+  })
+  openAdminSubmenuIfNeeded()
 })
 
 onUnmounted(() => {
-  checkboxEl?.removeEventListener('change', onCheckboxChange)
-  PushMenuClass?.destroy()
-  PushMenuClass = null
+  flyout?.destroy()
+  flyout = null
 })
 
-// Closing via PushMenu.close() only toggles CSS classes — it doesn't click the
-// underlying checkbox, so the checkbox stays "checked" and the stale
-// click-anywhere-to-close listener stays attached. The next click anywhere in
-// the page (often the search field) then retriggers that listener and
-// re-opens the menu. Closing through the checkbox keeps everything in sync.
-function closeMenu() {
-  if (PushMenuClass?.isOpen()) {
-    checkboxEl?.click()
-  }
-}
+watch(isAdminRoute, (active) => {
+  if (active) openAdminSubmenuIfNeeded()
+})
 
 watch(
   () => route.path,
@@ -177,62 +170,101 @@ async function handleLogout() {
   position: relative;
 }
 
-nav.push-menu a,
-nav.push-menu .push-menu-item {
-  color: rgba(238, 232, 223, 0.85) !important;
-  font-size: 1rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.01em !important;
-  text-transform: none !important;
+/* Un-scoped: FlyoutMenu builds its header/close-button/submenu-toggles by
+   injecting raw DOM nodes at runtime, which never receive this component's
+   scoped data-v attribute. --accent-color-text is repurposed project-wide
+   as "text on an orange surface" (near-black, see _theme.scss), not the
+   light muted-text tone basix's own component CSS expects it to be, so
+   every text color here needs an explicit override — an ID selector on
+   #flyoutMenu already out-specifies basix's own class-based rules without
+   needing !important. */
+/* basix's FlyoutMenu has no internal scroll container at all — content
+   taller than the viewport (our admin submenu alone is 15 links) just
+   overflows silently, and since body scroll is locked while open, nothing
+   scrolls. Let the link list scroll while the header stays put; min-height:0
+   is required for a flex child to actually be allowed to scroll. */
+#flyoutMenu {
+  overflow: hidden;
 }
-nav.push-menu a:hover,
-nav.push-menu .push-menu-item:hover {
-  color: #f7963d !important;
-  background: rgba(247, 150, 61, 0.07) !important;
+#flyoutMenu .flyout-links {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-nav.push-menu a.router-link-active {
-  color: #f7963d !important;
+
+/* basix's default is 2rem/1.25rem — too large once the admin submenu (15
+   links) is in the mix. Scale both tiers down. */
+#flyoutMenu .flyout-links > li > a,
+#flyoutMenu .flyout-links > li > .submenu-toggle {
+  font-size: 1.35rem;
 }
-nav.push-menu .push-nav__admin-active > .push-menu-item {
-  color: #f7963d !important;
+#flyoutMenu .submenu a,
+#flyoutMenu .submenu .submenu-toggle {
+  font-size: 1rem;
 }
-nav.push-menu ul {
-  padding-left: 0;
-  margin-left: 0;
+#flyoutMenu .flyout-links li {
+  margin-bottom: 1.1rem;
+}
+#flyoutMenu .submenu li {
+  margin-bottom: 0.4rem;
+}
+
+#flyoutMenu a,
+#flyoutMenu .submenu-toggle {
+  color: rgba(238, 232, 223, 0.85);
+}
+#flyoutMenu a:hover,
+#flyoutMenu .submenu-toggle:hover {
+  color: #f7963d;
+}
+#flyoutMenu a.router-link-active {
+  color: #f7963d;
+}
+#flyoutMenu .submenu-toggle.active {
+  color: #f7963d;
+}
+/* basix's own .flyout-menu button { font-size: inherit; font-weight: inherit }
+   reset (for the close-button) is more specific than its .submenu-toggle
+   { font-weight: 600 } rule, so a top-level toggle like "Admin-Bereich"
+   collapses back to browser-default weight (the font-size override above
+   already out-specifies it the same way). Scoped to a direct .flyout-links
+   child so nested (deliberately lighter) submenu toggles are untouched. */
+#flyoutMenu .flyout-links > li > .submenu-toggle {
+  font-weight: 600;
+}
+#flyoutMenu .flyout-title {
+  color: rgba(238, 232, 223, 0.55);
+}
+#flyoutMenu .close-menu {
+  color: rgba(238, 232, 223, 0.65);
 }
 </style>
 
 <style scoped>
-.push-nav__admin {
-  color: #f7963d !important;
-}
-
 .push-nav__logout {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   width: 100%;
   background: none;
   border: none;
-  padding: 0.85rem 1.5rem;
-  font-size: 1rem;
+  padding: 0;
+  font-size: 1.35rem;
   font-weight: 600;
-  color: rgba(238, 232, 223, 0.55);
+  color: rgba(238, 232, 223, 0.75);
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition:
-    color 0.2s,
-    background 0.2s;
+  transition: color 0.2s;
 }
 .push-nav__logout:hover {
-  color: rgba(238, 232, 223, 0.85);
-  background: rgba(255, 255, 255, 0.06);
+  color: #f7963d;
 }
 
 .push-nav__divider {
   height: 1px;
   background: rgba(238, 232, 223, 0.08);
-  margin: 0.5rem 0;
+  margin: 1.1rem 0;
   pointer-events: none;
   list-style: none;
 }

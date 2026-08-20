@@ -6,16 +6,16 @@
         <span class="l-nav__brand-name">AUA</span>
       </NuxtLink>
 
-      <!-- Push-menu toggle: label IS .navigation so navigation.click() toggles the checkbox.
-           Placed on the left, next to the panel it opens (basix push-menu slides in from the left). -->
-      <label
-        for="push-nav-toggle"
-        class="l-nav__trigger navigation navigation-controls"
+      <!-- Opens the basix FlyoutMenu (#flyoutMenu), which slides in from the left. -->
+      <button
+        type="button"
+        class="l-nav__trigger menu-trigger"
         :aria-label="$t('nav.menu_open')"
+        aria-haspopup="true"
+        aria-controls="flyoutMenu"
       >
-        <input id="push-nav-toggle" type="checkbox" />
         <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#menu" /></svg>
-      </label>
+      </button>
 
       <nav class="l-nav__links" aria-label="Hauptnavigation">
         <NuxtLink to="/games" class="l-nav__link">{{ $t('nav.games') }}</NuxtLink>
@@ -270,13 +270,14 @@ $hero-divider: rgba(238, 232, 223, 0.1);
     }
   }
 
-  // Push-menu trigger
+  // Flyout-menu trigger
   &__trigger {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 38px;
     height: 38px;
+    padding: 0;
     flex-shrink: 0;
     background: $hero-text-08;
     border: 1px solid $hero-text-08;
@@ -291,9 +292,6 @@ $hero-divider: rgba(238, 232, 223, 0.1);
       color: $hero-text;
     }
 
-    input {
-      display: none;
-    }
     .icon {
       font-size: 1.25rem;
     }

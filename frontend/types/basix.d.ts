@@ -32,6 +32,29 @@ declare module '@dodlhuat/basix/js/push-menu' {
   }
 }
 
+declare module '@dodlhuat/basix/js/flyout-menu' {
+  export interface FlyoutMenuOptions {
+    triggerSelector?: string
+    menuSelector?: string
+    overlaySelector?: string
+    closeSelector?: string
+    submenuToggleSelector?: string
+    linkSelector?: string
+    direction?: 'right' | 'left'
+    title?: string
+    footerText?: string
+    enableHeader?: boolean
+    enableFooter?: boolean
+  }
+  export class FlyoutMenu {
+    constructor(options?: FlyoutMenuOptions)
+    open(): void
+    close(): void
+    setDirection(direction: 'left' | 'right'): void
+    destroy(): void
+  }
+}
+
 declare module '@dodlhuat/basix/js/group-picker' {
   export class GroupPicker {
     constructor(
