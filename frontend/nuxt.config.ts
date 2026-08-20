@@ -22,7 +22,12 @@ export default defineNuxtConfig({
   app: {
     pageTransition: { name: 'page' },
     head: {
-      htmlAttrs: { 'data-theme': 'dark' },
+      // No static data-theme default here on purpose: Nuxt's head manager
+      // re-asserts a statically configured htmlAttrs value during client
+      // hydration, which was silently stomping whatever the inline script
+      // below (and the theme toggle) had already set — light mode could
+      // never actually stick. The inline script alone (sync, runs before
+      // first paint) is enough to avoid a flash of the wrong theme.
       script: [
         {
           // Reads saved theme from localStorage before first paint — prevents flash

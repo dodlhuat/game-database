@@ -223,11 +223,11 @@ onMounted(() => loadTx(1))
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
-$nav-height: 3.5rem;
+$hero-bg: var(--background);
+$nav-height: 64px;
 $amber-glow: rgba(212, 146, 30, 0.15);
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.72);
+$hero-text: var(--primary-text);
+$hero-muted: var(--secondary-text);
 $surface: rgba(255, 255, 255, 0.04);
 $surface-hover: rgba(255, 255, 255, 0.07);
 $border: rgba(238, 232, 223, 0.1);

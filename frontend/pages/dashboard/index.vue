@@ -564,7 +564,7 @@ async function renew() {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 
 $amber-08: rgba(212, 146, 30, 0.08);
@@ -574,12 +574,12 @@ $amber-40: rgba(212, 146, 30, 0.4);
 $amber-glow: rgba(212, 146, 30, 0.2);
 $warm-glow: rgba(44, 40, 32, 0.7);
 
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-muted-20: rgba(238, 232, 223, 0.2);
-$hero-divider: rgba(238, 232, 223, 0.1);
-$hero-divider-20: rgba(238, 232, 223, 0.2);
+$hero-text: var(--primary-text);
+$hero-muted: var(--secondary-text);
+$hero-muted-50: color-mix(in srgb, var(--secondary-text) 80%, transparent);
+$hero-muted-20: color-mix(in srgb, var(--secondary-text) 30%, transparent);
+$hero-divider: var(--divider);
+$hero-divider-20: var(--divider);
 
 // ─── Page Shell ───────────────────────────────────────────────────
 .dashboard-page {

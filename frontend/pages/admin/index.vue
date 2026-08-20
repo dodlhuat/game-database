@@ -357,7 +357,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 $amber-08: rgba(212, 146, 30, 0.08);
 $amber-12: rgba(212, 146, 30, 0.12);
@@ -367,9 +367,9 @@ $amber-glow: rgba(212, 146, 30, 0.16);
 $red-08: rgba(239, 68, 68, 0.08);
 $red-20: rgba(239, 68, 68, 0.2);
 $red-30: rgba(239, 68, 68, 0.3);
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.55);
-$hero-div: rgba(238, 232, 223, 0.1);
+$hero-text: var(--primary-text);
+$hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
+$hero-div: var(--divider);
 
 .admin-page {
   min-height: 100vh;

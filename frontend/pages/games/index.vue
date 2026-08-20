@@ -1,7 +1,7 @@
 <template>
   <div class="games-page">
     <!-- ── Page Header ─────────────────────────────────────────── -->
-    <section class="page-hero" data-theme="dark">
+    <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
         <div class="page-hero__glow" />
         <div class="page-hero__dots" />
@@ -619,7 +619,7 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 
 $amber-08: rgba($amber, 0.08);
@@ -629,12 +629,15 @@ $amber-25: rgba($amber, 0.25);
 $amber-35: rgba($amber, 0.35);
 $amber-glow: rgba($amber, 0.2);
 
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-muted-50: rgba(238, 232, 223, 0.55);
-$hero-divider: rgba(238, 232, 223, 0.1);
-$hero-input-bg: rgba(255, 255, 255, 0.06);
-$hero-input-border: rgba(255, 255, 255, 0.12);
+$hero-text: var(--primary-text);
+$hero-muted: var(--secondary-text);
+$hero-muted-50: color-mix(in srgb, var(--secondary-text) 80%, transparent);
+$hero-divider: var(--divider);
+// Was a flat white-at-low-opacity wash — only correct on a dark surface.
+// Mixing toward --primary-text instead goes the right direction in either
+// theme: a light wash on a dark hero, a dark wash on a light one.
+$hero-input-bg: color-mix(in srgb, var(--primary-text) 5%, var(--background));
+$hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
 
 // ─── Keyframes ────────────────────────────────────────────────────
 @keyframes searchGlow {

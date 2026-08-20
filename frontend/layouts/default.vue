@@ -96,7 +96,7 @@
     </ul>
   </div>
 
-  <div class="push-content">
+  <div class="app-shell">
     <AppNav />
     <slot />
   </div>
@@ -166,7 +166,13 @@ async function handleLogout() {
 </script>
 
 <style>
-.push-content {
+/* Not .push-content: that name collides with basix's own push-menu.scss,
+   still loaded globally, which applies `will-change: transform` to any
+   element with that class — a leftover of the old PushMenu (see the
+   FlyoutMenu migration). will-change: transform creates a new containing
+   block, which silently breaks position:fixed on AppNav's header once the
+   page scrolls. */
+.app-shell {
   position: relative;
 }
 

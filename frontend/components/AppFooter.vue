@@ -28,9 +28,11 @@ const year = new Date().getFullYear()
 </template>
 
 <style lang="scss" scoped>
-$_dim: rgba(238, 232, 223, 0.32);
-$_muted: rgba(238, 232, 223, 0.52);
-$_sep: rgba(238, 232, 223, 0.11);
+// Used to be hardcoded cream/off-white at low opacity — invisible once the
+// background actually switches light in light mode. Theme-token based now.
+$_dim: color-mix(in srgb, var(--secondary-text) 65%, transparent);
+$_muted: var(--secondary-text);
+$_sep: color-mix(in srgb, var(--secondary-text) 25%, transparent);
 
 .app-footer {
   background: var(--background);

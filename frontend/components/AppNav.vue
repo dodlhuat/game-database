@@ -114,14 +114,18 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+// These used to be hardcoded dark-mode-only hex/rgba values, which is why
+// the header stayed visually identical in light mode. Now theme-token
+// based, same as the rest of the app: color-mix against --primary-text
+// gives a hover/backdrop wash that goes the right direction in either
+// theme (a light wash on dark bg, a dark wash on light bg).
 $nav-height: 64px;
-$hero-bg-85: rgba(15, 14, 12, 0.85);
-$hero-text: #eee8df;
-$hero-text-08: rgba(238, 232, 223, 0.08);
-$hero-text-10: rgba(238, 232, 223, 0.1);
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-divider: rgba(238, 232, 223, 0.1);
+$hero-bg-85: color-mix(in srgb, var(--background) 85%, transparent);
+$hero-text: var(--primary-text);
+$hero-text-08: color-mix(in srgb, var(--primary-text) 8%, transparent);
+$hero-text-10: color-mix(in srgb, var(--primary-text) 10%, transparent);
+$hero-muted: var(--secondary-text);
+$hero-divider: var(--divider);
 
 .l-nav {
   position: fixed;

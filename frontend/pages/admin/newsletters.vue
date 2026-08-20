@@ -154,16 +154,16 @@ function formatDate(iso?: string) {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 $amber-08: rgba(212, 146, 30, 0.08);
 $amber-14: rgba(212, 146, 30, 0.14);
 $amber-25: rgba(212, 146, 30, 0.25);
 $amber-glow: rgba(212, 146, 30, 0.16);
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-divider: rgba(238, 232, 223, 0.1);
+$hero-text: var(--primary-text);
+$hero-muted: var(--secondary-text);
+$hero-muted-50: color-mix(in srgb, var(--secondary-text) 80%, transparent);
+$hero-divider: var(--divider);
 
 .admin-page {
   min-height: 100vh;

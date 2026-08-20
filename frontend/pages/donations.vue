@@ -247,15 +247,15 @@ useHead(() => ({ title: `${t('pages.donations.title')} — AUA` }))
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 
 $amber-08: rgba(212, 146, 30, 0.08);
 $amber-25: rgba(212, 146, 30, 0.25);
 $amber-glow: rgba(212, 146, 30, 0.18);
 
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.72);
+$hero-text: var(--primary-text);
+$hero-muted: var(--secondary-text);
 
 .donations-page {
   min-height: 100vh;

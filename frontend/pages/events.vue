@@ -162,11 +162,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 $amber-glow: rgba(212, 146, 30, 0.16);
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.55);
+$hero-text: var(--primary-text);
+$hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
 
 .events-page {
   min-height: 100vh;
