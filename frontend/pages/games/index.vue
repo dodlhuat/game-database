@@ -73,7 +73,6 @@
     <div
       v-show="!isSmartSearch"
       class="filter-bar"
-      data-theme="dark"
       :class="{ 'filter-bar--active': hasActiveFilters, 'filter-bar--open': filterPanelOpen }"
     >
       <!-- Top row -->
@@ -780,7 +779,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     background 0.25s;
 
   &--active {
-    background: rgba(255, 255, 255, 0.09);
+    background: color-mix(in srgb, var(--primary-text) 9%, transparent);
     border-color: rgba($amber, 0.5);
     animation: searchGlow 2.5s ease-in-out infinite;
   }
@@ -802,10 +801,21 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     background: transparent;
     border: none;
     outline: none;
+    // basix applies a box-shadow to every bare <input> by default (its
+    // own resting/hover/focus field styling) — redundant and visible as
+    // a stray extra shadow here, since .hero-search (the wrapper) already
+    // provides the full box treatment and this input is meant to be a
+    // borderless, transparent field inside it.
+    box-shadow: none;
     font-size: 1rem;
     font-family: inherit;
     color: $hero-text;
     caret-color: $amber;
+
+    &:hover,
+    &:focus {
+      box-shadow: none;
+    }
 
     &::placeholder {
       color: $hero-muted-50;
@@ -816,7 +826,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in srgb, var(--primary-text) 8%, transparent);
     border: none;
     border-radius: 6px;
     width: 28px;
@@ -831,7 +841,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
       font-size: 0.875rem;
     }
     &:hover {
-      background: rgba(255, 255, 255, 0.14);
+      background: color-mix(in srgb, var(--primary-text) 14%, transparent);
       color: $hero-text;
     }
   }
@@ -849,7 +859,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 500;
-  color: rgba($hero-text, 0.85);
+  color: color-mix(in srgb, $hero-text 85%, transparent);
 
   &__icon {
     font-size: 0.9em;
@@ -888,7 +898,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   position: sticky;
   top: $nav-height;
   z-index: 50;
-  background: rgba($hero-bg, 0.9);
+  background: color-mix(in srgb, $hero-bg 90%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
   border-bottom: 1px solid var(--divider);
@@ -954,8 +964,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   align-items: center;
   gap: 0.375rem;
   padding: 0.4375rem 0.8125rem 0.4375rem 0.625rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 9%, transparent);
   border-radius: 12px;
   cursor: pointer;
   font-family: inherit;
@@ -971,8 +981,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     box-shadow 0.25s;
 
   &:hover:not(&--open) {
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.07);
+    border-color: color-mix(in srgb, var(--primary-text) 18%, transparent);
+    background: color-mix(in srgb, var(--primary-text) 7%, transparent);
     color: var(--primary-text);
   }
 
@@ -1036,7 +1046,11 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     top: 0;
     bottom: 0;
     width: 36px;
-    background: linear-gradient(to right, transparent, rgba($hero-bg, 0.9));
+    background: linear-gradient(
+      to right,
+      transparent,
+      color-mix(in srgb, $hero-bg 90%, transparent)
+    );
     pointer-events: none;
   }
 }
@@ -1111,8 +1125,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   flex-shrink: 0;
   gap: 0;
   position: relative;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 8%, transparent);
   border-radius: 10px;
   padding: 0.1875rem;
 }
@@ -1135,7 +1149,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     box-shadow 0.2s;
 
   &--active {
-    background: rgba(255, 255, 255, 0.07);
+    background: color-mix(in srgb, var(--primary-text) 7%, transparent);
     color: $amber;
     font-weight: 600;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
@@ -1157,7 +1171,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
 
   &:hover:not(&--active) {
     color: var(--primary-text);
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, var(--primary-text) 4%, transparent);
   }
 
   &:focus-visible {
@@ -1175,8 +1189,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 8%, transparent);
   border-radius: 9px;
   cursor: pointer;
   color: var(--secondary-text);
@@ -1241,7 +1255,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
 .filter-section {
   padding: 0.75rem 0.875rem;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.024);
+  background: color-mix(in srgb, var(--primary-text) 2.4%, transparent);
   border: 1px solid transparent;
   opacity: 0;
   transform: translateY(-8px);
@@ -1252,8 +1266,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
     border-color 0.25s;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.042);
-    border-color: rgba(255, 255, 255, 0.055);
+    background: color-mix(in srgb, var(--primary-text) 4.2%, transparent);
+    border-color: color-mix(in srgb, var(--primary-text) 5.5%, transparent);
   }
 
   // Staggered reveal — only applies while panel is open
@@ -1313,7 +1327,7 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   }
 
   &--mechanic {
-    background: rgba(255, 255, 255, 0.032);
+    background: color-mix(in srgb, var(--primary-text) 3.2%, transparent);
   }
 }
 
@@ -1326,8 +1340,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
 
 .option-chip {
   padding: 0.375rem 0.8125rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 8%, transparent);
   border-radius: 999px;
   font-family: inherit;
   font-size: 0.8rem;
@@ -1354,9 +1368,9 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   }
 
   &:hover:not(&--active) {
-    border-color: rgba(255, 255, 255, 0.16);
+    border-color: color-mix(in srgb, var(--primary-text) 16%, transparent);
     color: var(--primary-text);
-    background: rgba(255, 255, 255, 0.07);
+    background: color-mix(in srgb, var(--primary-text) 7%, transparent);
     transform: translateY(-1px);
   }
 
@@ -1383,8 +1397,8 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary-text) 8%, transparent);
   border-radius: 50%;
   font-family: inherit;
   font-size: 0.9375rem;
@@ -1414,9 +1428,9 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   }
 
   &:hover:not(&--active) {
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: color-mix(in srgb, var(--primary-text) 20%, transparent);
     color: var(--primary-text);
-    background: rgba(255, 255, 255, 0.07);
+    background: color-mix(in srgb, var(--primary-text) 7%, transparent);
     transform: scale(1.1);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
   }

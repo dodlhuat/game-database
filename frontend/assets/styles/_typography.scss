@@ -85,7 +85,7 @@ code {
   border-radius: $radius-sm;
 }
 
-// Labels auf dunklem Hintergrund (z.B. Auth-Seiten)
+// Auth-page labels now follow the theme (auth.vue used to be dark-only)
 .auth-page label {
-  color: $color-gray-100;
+  color: var(--primary-text);
 }

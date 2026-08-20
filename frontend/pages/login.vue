@@ -159,7 +159,7 @@ async function resendVerification() {
 
 .resend-success {
   font-size: 0.8rem;
-  color: rgba(238, 232, 223, 0.72);
+  color: var(--secondary-text);
   margin-left: 0.4rem;
 }
 

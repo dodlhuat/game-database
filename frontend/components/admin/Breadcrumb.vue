@@ -16,15 +16,18 @@ defineProps<{ label: string }>()
 </script>
 
 <style lang="scss" scoped>
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-text: #eee8df;
+// Used to be hardcoded cream/white, assuming the admin hero was always
+// dark — that hero is theme-adaptive now (see .page-hero), so this must
+// follow the theme too.
+$hero-muted: var(--secondary-text);
+$hero-text: var(--primary-text);
 
-// Override basix breadcrumb colors for the dark admin hero background
+// Override basix breadcrumb colors for the admin hero
 .breadcrumb {
   margin-bottom: 0.75rem;
 
   :deep(li + li::before) {
-    color: rgba(238, 232, 223, 0.2);
+    color: color-mix(in srgb, var(--secondary-text) 30%, transparent);
   }
 
   :deep(a) {
@@ -32,7 +35,7 @@ $hero-text: #eee8df;
 
     &:hover {
       color: $hero-text;
-      background: rgba(255, 255, 255, 0.06);
+      background: color-mix(in srgb, var(--primary-text) 6%, transparent);
     }
   }
 

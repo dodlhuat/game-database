@@ -1,5 +1,5 @@
 <template>
-  <header class="l-nav" :class="{ 'l-nav--solid': scrolled }">
+  <header class="l-nav">
     <div class="l-nav__inner">
       <NuxtLink to="/" class="l-nav__brand">
         <span class="l-nav__brand-hex" aria-hidden="true">⬡</span>
@@ -61,7 +61,6 @@ import { useAuth } from '~/composables/useAuth'
 const auth = useAuthStore()
 const { logout } = useAuth()
 
-const scrolled = ref(false)
 const isDark = ref(false)
 
 const firstName = computed(() => auth.user?.name?.split(' ')[0] ?? '')
@@ -93,22 +92,16 @@ function onKeydown(e: KeyboardEvent) {
   }
 }
 
-function onScroll() {
-  scrolled.value = window.scrollY > 40
-}
-
 async function handleLogout() {
   await logout()
 }
 
 onMounted(() => {
   initTheme()
-  window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', onScroll)
   window.removeEventListener('keydown', onKeydown)
 })
 </script>
@@ -127,6 +120,12 @@ $hero-text-10: color-mix(in srgb, var(--primary-text) 10%, transparent);
 $hero-muted: var(--secondary-text);
 $hero-divider: var(--divider);
 
+// Always a solid, theme-matched backdrop — never transparent. A transparent
+// header floats over whatever the page underneath happens to render (some
+// heroes are photo backdrops with a fixed dark veil, independent of theme —
+// see pages/games/[slug].vue), so the header's own theme-matched text can't
+// guarantee contrast against arbitrary page content. A solid backdrop always
+// renders on top of its own background, so contrast is guaranteed.
 .l-nav {
   position: fixed;
   top: 0;
@@ -134,18 +133,10 @@ $hero-divider: var(--divider);
   right: 0;
   z-index: 100;
   height: $nav-height;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease,
-    backdrop-filter 0.3s ease;
-  border-bottom: 1px solid transparent;
-
-  &--solid {
-    background: $hero-bg-85;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom-color: $hero-divider;
-  }
+  background: $hero-bg-85;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid $hero-divider;
 
   &__inner {
     max-width: 1200px;

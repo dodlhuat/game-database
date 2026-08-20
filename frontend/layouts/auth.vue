@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-page" data-theme="dark">
+  <div class="auth-page">
     <div class="auth-page__backdrop" aria-hidden="true">
       <div class="auth-page__glow" />
       <div class="auth-page__dots" />
@@ -17,10 +17,10 @@
 </template>
 
 <style lang="scss">
-$_a-bg: #0f0e0c;
+$_a-bg: var(--background);
 $_a-glow: rgba(212, 146, 30, 0.18);
-$_a-text: #eee8df;
-$_a-muted: rgba(238, 232, 223, 0.65);
+$_a-text: var(--primary-text);
+$_a-muted: color-mix(in srgb, var(--secondary-text) 90%, transparent);
 
 @keyframes authIn {
   from {
@@ -117,8 +117,8 @@ $_a-muted: rgba(238, 232, 223, 0.65);
 }
 
 .auth-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(238, 232, 223, 0.1);
+  background: color-mix(in srgb, var(--primary-text) 4%, transparent);
+  border: 1px solid var(--divider);
   border-radius: 16px;
   padding: 2rem;
   backdrop-filter: blur(8px);

@@ -52,6 +52,8 @@
         </template>
       </div>
     </div>
+
+    <AppFooter />
   </div>
 </template>
 
@@ -86,10 +88,10 @@ function formatDate(iso: string) {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $amber-glow: rgba(212, 146, 30, 0.18);
-$hero-text: #eee8df;
-$hero-muted: rgba(238, 232, 223, 0.5);
+$hero-text: var(--primary-text);
+$hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
 
 // ─── Page ─────────────────────────────────────────────────────────
 .legal-page {

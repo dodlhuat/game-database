@@ -91,7 +91,9 @@
         <div class="gd-stats__track">
           <template v-if="game.min_players">
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">group</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#group" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.players') }}</span>
               <span class="gd-stat__val"
                 >{{ game.min_players }}{{ game.max_players ? `–${game.max_players}` : '+' }}</span
@@ -101,7 +103,9 @@
           <template v-if="game.duration_min">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">schedule</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#schedule" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.duration') }}</span>
               <span class="gd-stat__val"
                 >{{ game.duration_min
@@ -112,7 +116,9 @@
           <template v-if="game.min_age">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">child_care</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#child_care" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.age') }}</span>
               <span class="gd-stat__val">ab {{ game.min_age }} J.</span>
             </div>
@@ -120,7 +126,9 @@
           <template v-if="game.difficulty">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">psychology</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#psychology" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.difficulty') }}</span>
               <span class="gd-stat__val">{{ difficultyLabel(game.difficulty!) }}</span>
             </div>
@@ -128,7 +136,9 @@
           <template v-if="game.languages?.length">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">translate</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#translate" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.language') }}</span>
               <span class="gd-stat__val">{{ game.languages.map((l) => l.name).join(', ') }}</span>
             </div>
@@ -136,7 +146,9 @@
           <template v-if="game.year">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
-              <span class="icon gd-stat__ico">event</span>
+              <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#event" />
+              </svg>
               <span class="gd-stat__lbl">{{ $t('pages.game.stats.year') }}</span>
               <span class="gd-stat__val">{{ game.year }}</span>
             </div>

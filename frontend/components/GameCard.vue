@@ -159,14 +159,31 @@ $amber-30: rgba(212, 146, 30, 0.3);
     padding: 0.2rem 0.55rem;
     border-radius: 999px;
 
+    // This sits on top of an arbitrary, unpredictable cover image — not
+    // the page background — so a translucent tint (--success-tint, a 12%
+    // color-mix) lets the artwork show through and can't guarantee
+    // contrast against every possible cover. Needs a fully opaque surface
+    // instead, like a chip over a photo. --success/--warning are already
+    // solid, theme-aware colors; only the text needs to flip per theme,
+    // since the dark-mode success/warning colors are much brighter than
+    // their light-mode counterparts (same contrast flip basix's own
+    // .badge-solid.badge-success does).
     &--avail {
-      background: var(--success-surface, #166534);
-      color: var(--success-text, #bbf7d0);
+      background: var(--success);
+      color: var(--on-accent);
     }
 
     &--out {
-      background: var(--warning-surface, #7c2d12);
-      color: var(--warning-text, #fed7aa);
+      background: var(--warning);
+      color: var(--on-accent);
+    }
+
+    // Dark mode's --success/--warning are much brighter (near-neon) than
+    // their light-mode counterparts, so white text no longer has enough
+    // contrast — flip to dark text, same as basix's own .badge-solid does.
+    [data-theme='dark'] &--avail,
+    [data-theme='dark'] &--out {
+      color: var(--background);
     }
   }
 

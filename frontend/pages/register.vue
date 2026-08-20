@@ -199,7 +199,7 @@ async function submit() {
 </script>
 
 <style lang="scss" scoped>
-$_muted: rgba(238, 232, 223, 0.65);
+$_muted: var(--secondary-text);
 
 .auth-card__checkboxes {
   margin: 0.5rem 0 1rem;
@@ -220,7 +220,7 @@ $_muted: rgba(238, 232, 223, 0.65);
   }
 
   :deep(.styled-checkbox + label::before) {
-    border-color: rgba(238, 232, 223, 0.25);
+    border-color: var(--divider);
   }
 }
 

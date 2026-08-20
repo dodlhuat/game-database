@@ -137,7 +137,7 @@
               <label class="form-label">{{ $t('admin.table.role') }}</label>
               <UiVirtualDropdown
                 v-model="createForm.role"
-                class="form-input"
+                class="form-select"
                 :options="[
                   { label: $t('admin.users.role_user'), value: 'USER' },
                   { label: $t('admin.users.role_supporter'), value: 'SUPPORTER' },
@@ -150,7 +150,7 @@
               <label class="form-label">{{ $t('admin.table.status') }}</label>
               <UiVirtualDropdown
                 v-model="createForm.status"
-                class="form-input"
+                class="form-select"
                 :options="[
                   { label: 'PENDING', value: 'PENDING' },
                   { label: 'ACTIVE', value: 'ACTIVE' },
@@ -202,7 +202,7 @@
               <label class="form-label">{{ $t('admin.table.role') }}</label>
               <UiVirtualDropdown
                 v-model="editForm.role"
-                class="form-input"
+                class="form-select"
                 :options="[
                   { label: $t('admin.users.role_user'), value: 'USER' },
                   { label: $t('admin.users.role_supporter'), value: 'SUPPORTER' },
@@ -863,6 +863,12 @@ $hero-divider: var(--divider);
   color: #f87171;
   margin: 0;
   padding-bottom: 0;
+}
+// UiVirtualDropdown draws its own complete box (background/border/shadow) —
+// unlike .form-input, this must NOT add a second one, just size it.
+.form-select {
+  display: block;
+  width: 100%;
 }
 
 .l-footer {

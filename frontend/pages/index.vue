@@ -165,7 +165,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: #0f0e0c;
+$hero-bg: var(--background);
 $nav-height: 64px;
 
 $amber-08: rgba(212, 146, 30, 0.08);
@@ -175,16 +175,16 @@ $amber-40: rgba(212, 146, 30, 0.4);
 $amber-65: rgba(212, 146, 30, 0.65);
 $amber-glow: rgba(212, 146, 30, 0.28);
 
-$hero-bg-85: rgba(15, 14, 12, 0.85);
+$hero-bg-85: color-mix(in srgb, var(--background) 85%, transparent);
 
-$hero-text: #eee8df;
-$hero-text-08: rgba(238, 232, 223, 0.08);
+$hero-text: var(--primary-text);
+$hero-text-08: color-mix(in srgb, var(--primary-text) 8%, transparent);
 
-$hero-muted: rgba(238, 232, 223, 0.72);
-$hero-muted-50: rgba(238, 232, 223, 0.65);
-$hero-muted-60: rgba(238, 232, 223, 0.6);
+$hero-muted: var(--secondary-text);
+$hero-muted-50: color-mix(in srgb, var(--secondary-text) 80%, transparent);
+$hero-muted-60: color-mix(in srgb, var(--secondary-text) 85%, transparent);
 
-$hero-divider: rgba(238, 232, 223, 0.1);
+$hero-divider: var(--divider);
 $indigo-glow: rgba(44, 40, 32, 0.6);
 
 // ─── Page ─────────────────────────────────────────────────────────

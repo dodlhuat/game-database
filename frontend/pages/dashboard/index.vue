@@ -572,7 +572,11 @@ $amber-14: rgba(212, 146, 30, 0.14);
 $amber-25: rgba(212, 146, 30, 0.25);
 $amber-40: rgba(212, 146, 30, 0.4);
 $amber-glow: rgba(212, 146, 30, 0.2);
-$warm-glow: rgba(44, 40, 32, 0.7);
+// Was 0.7 — nearly opaque, which recedes fine against a dark hero but
+// paints a visible muddy gray patch once the hero background can go
+// light. Matches the sibling $amber-glow's opacity, which already works
+// in both themes.
+$warm-glow: rgba(44, 40, 32, 0.2);
 
 $hero-text: var(--primary-text);
 $hero-muted: var(--secondary-text);
