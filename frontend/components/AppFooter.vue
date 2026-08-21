@@ -140,7 +140,15 @@ $_sep: color-mix(in srgb, var(--secondary-text) 25%, transparent);
   &__legal {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    // A wrapping flex container nested inside another flex container
+    // otherwise collapses to fit just one item at a time, even when
+    // there's plenty of room — this keeps it at its natural single-line
+    // width by default, and only lets it shrink (wrapping its own links
+    // onto multiple lines) when the surrounding layout actually runs out
+    // of space, at any viewport width, without a guessed breakpoint.
+    flex-basis: max-content;
+    gap: 0.5rem 0.75rem;
   }
 
   &__link {
