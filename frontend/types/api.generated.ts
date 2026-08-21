@@ -20,6 +20,22 @@ export interface paths {
     patch: operations['account.update']
     trace?: never
   }
+  '/address/validate': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['addressValidation.validate']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/cookies': {
     parameters: {
       query?: never
@@ -28,6 +44,22 @@ export interface paths {
       cookie?: never
     }
     get: operations['cookie.show']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/copies/lookup': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['copy.lookup']
     put?: never
     post?: never
     delete?: never
@@ -1338,6 +1370,7 @@ export interface components {
       /** @enum {string} */
       condition: 'NEW' | 'VERY_GOOD' | 'GOOD' | 'REVIEW' | 'DAMAGED' | 'LOCKED'
       qr_code?: string | null
+      owner?: string | null
       notes?: string | null
     }
     /** CopyResource */
@@ -1351,7 +1384,14 @@ export interface components {
       condition: string
       borrow_count: number
       qr_code: string | null
+      owner?: string | null
       notes: string | null
+      last_return?: {
+        return_condition: string | null
+        /** Format: date-time */
+        returned_at: string | null
+        user_name: string
+      } | null
       is_available?: string
     }
     /** DamageReport */
@@ -1368,11 +1408,12 @@ export interface components {
     }
     /** DonationRequest */
     DonationRequest: {
-      confirmed_complete: string
+      games: string[]
+      /** @enum {unknown} */
+      confirmed_complete: 'yes' | 'on' | '1' | 1 | 'true' | true
+      images?: string[] | null
       website?: string
       form_loaded_at: number
-      games: string[]
-      images?: string[] | null
     }
     /** EmailLog */
     EmailLog: {
@@ -1410,7 +1451,10 @@ export interface components {
       time?: string | null
       end_time?: string | null
       description?: string | null
-      /** Format: binary */
+      /**
+       * Format: binary
+       * @description Maximum file size: 5120 kilobytes.
+       */
       image?: string | null
     }
     /** EventResource */
@@ -1448,14 +1492,17 @@ export interface components {
       duration_max?: number | null
       /** @enum {string|null} */
       difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT' | null
+      language_ids?: number[] | null
       year?: number | null
       /** Format: uri */
       instagram_url?: string | null
       deposit_tokens?: number | null
       is_active?: boolean
-      /** Format: binary */
+      /**
+       * Format: binary
+       * @description Maximum file size: 5120 kilobytes.
+       */
       cover_image?: string | null
-      language_ids?: number[] | null
       tag_ids?: number[] | null
       mechanic_ids?: number[] | null
     }
@@ -1628,7 +1675,8 @@ export interface components {
       email: string
       password: string
       newsletter_opt_in?: boolean
-      terms_accepted: string
+      /** @enum {unknown} */
+      terms_accepted: 'yes' | 'on' | '1' | 1 | 'true' | true
       website?: string
       form_loaded_at: number
       password_confirmation: string
@@ -1714,8 +1762,10 @@ export interface components {
       name: string
       email: string
       address: string | null
-      phone: string | null
-      date_of_birth: string
+      street: string | null
+      postal_code: string | null
+      city: string | null
+      date_of_birth: string | null
       role: string
       status: string
       newsletter_opt_in: boolean
@@ -1807,8 +1857,9 @@ export interface operations {
           name?: string
           /** Format: email */
           email?: string
-          address?: string | null
-          phone?: string | null
+          street?: string | null
+          postal_code?: string | null
+          city?: string | null
           /** Format: date-time */
           date_of_birth?: string | null
           newsletter_opt_in?: boolean
@@ -1828,6 +1879,37 @@ export interface operations {
             /** @constant */
             message: 'Konto aktualisiert.'
             user: components['schemas']['UserResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'addressValidation.validate': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          street: string
+          postal_code: string
+          city: string
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            verified: boolean
           }
         }
       }
@@ -1863,6 +1945,43 @@ export interface operations {
           }
         }
       }
+    }
+  }
+  'copy.lookup': {
+    parameters: {
+      query: {
+        qr_code: string
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `CopyResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['CopyResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Kein Spiel mit diesem Code gefunden.'
+          }
+        }
+      }
+      422: components['responses']['ValidationException']
     }
   }
   'copies.index': {
@@ -2048,7 +2167,14 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: never
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @enum {string|null} */
+          condition?: 'NEW' | 'VERY_GOOD' | 'GOOD' | 'WORN' | null
+        }
+      }
+    }
     responses: {
       200: {
         headers: {
@@ -2064,17 +2190,7 @@ export interface operations {
       }
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Kopie ist nicht im Status "Überprüfen".'
-          }
-        }
-      }
+      422: components['responses']['ValidationException']
     }
   }
   'copy.markDamaged': {
@@ -2103,6 +2219,7 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Kopie als beschädigt markiert.'
+            copy: components['schemas']['CopyResource']
           }
         }
       }
@@ -2120,11 +2237,14 @@ export interface operations {
     }
     requestBody: {
       content: {
-        'application/json': {
+        'multipart/form-data': {
           loan_id: number
           description: string
-          /** Format: uri */
-          photo_url?: string | null
+          /**
+           * Format: binary
+           * @description Maximum file size: 8192 kilobytes.
+           */
+          photo?: string | null
         }
       }
     }
@@ -3186,7 +3306,10 @@ export interface operations {
     requestBody: {
       content: {
         'multipart/form-data': {
-          /** Format: binary */
+          /**
+           * Format: binary
+           * @description Maximum file size: 10240 kilobytes.
+           */
           file: string
         }
       }
@@ -3942,7 +4065,9 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          address: string
+          street: string
+          postal_code: string
+          city: string
         }
       }
     }
@@ -3973,7 +4098,9 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          address: string
+          street: string
+          postal_code: string
+          city: string
         }
       }
     }
@@ -4228,8 +4355,8 @@ export interface operations {
           description?: string | null
           /** @enum {string} */
           type: 'CATEGORY' | 'CURATED'
-          is_active?: boolean
           game_ids?: number[] | null
+          is_active?: boolean
         }
       }
     }
@@ -4292,8 +4419,8 @@ export interface operations {
           description?: string | null
           /** @enum {string} */
           type?: 'CATEGORY' | 'CURATED'
-          is_active?: boolean
           game_ids?: number[] | null
+          is_active?: boolean
         }
       }
     }

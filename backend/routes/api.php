@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AddressValidationController;
 use App\Http\Controllers\Admin\CopyController;
 use App\Http\Controllers\Admin\EmailLogController;
 use App\Http\Controllers\Admin\EmailTemplateController;
@@ -117,6 +118,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 
     // Konto
     Route::patch('/account', [AccountController::class, 'update']);
+    Route::post('/address/validate', [AddressValidationController::class, 'validate']);
 
     // Mitgliedschaft & Token
     Route::post('/membership/upgrade', [MembershipController::class, 'upgrade']);

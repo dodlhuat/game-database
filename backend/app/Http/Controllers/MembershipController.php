@@ -6,6 +6,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Notifications\WelcomeMemberNotification;
 use App\Notifications\WelcomeSupporterNotification;
+use App\Rules\AustrianPostalCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -21,13 +22,17 @@ class MembershipController extends Controller
         }
 
         $validated = $request->validate([
-            'address' => ['required', 'string', 'max:255'],
+            'street' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required', new AustrianPostalCode],
+            'city' => ['required', 'string', 'max:255'],
         ]);
 
         $user->role = 'MEMBER';
         $user->tokens += 20;
         $user->membership_expires_at = now()->addYear();
-        $user->address = $validated['address'];
+        $user->street = $validated['street'];
+        $user->postal_code = $validated['postal_code'];
+        $user->city = $validated['city'];
         $user->save();
 
         $user->notify(new WelcomeMemberNotification);
@@ -48,12 +53,16 @@ class MembershipController extends Controller
         }
 
         $validated = $request->validate([
-            'address' => ['required', 'string', 'max:255'],
+            'street' => ['required', 'string', 'max:255'],
+            'postal_code' => ['required', new AustrianPostalCode],
+            'city' => ['required', 'string', 'max:255'],
         ]);
 
         $user->role = 'SUPPORTER';
         $user->membership_expires_at = now()->addYear();
-        $user->address = $validated['address'];
+        $user->street = $validated['street'];
+        $user->postal_code = $validated['postal_code'];
+        $user->city = $validated['city'];
         $user->save();
 
         $user->notify(new WelcomeSupporterNotification);

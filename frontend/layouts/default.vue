@@ -8,6 +8,9 @@
       <li>
         <NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink>
       </li>
+      <li>
+        <NuxtLink to="/about">{{ $t('nav.about') }}</NuxtLink>
+      </li>
       <li v-show="auth.isLoggedIn">
         <NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink>
       </li>

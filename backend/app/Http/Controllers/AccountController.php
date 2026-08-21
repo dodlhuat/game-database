@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Rules\AustrianPostalCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -19,8 +20,9 @@ class AccountController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', 'unique:users,email,'.$user->id],
-            'address' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'phone' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'street' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'postal_code' => ['sometimes', 'nullable', new AustrianPostalCode],
+            'city' => ['sometimes', 'nullable', 'string', 'max:255'],
             'date_of_birth' => ['sometimes', 'nullable', 'date', 'before:today'],
             'newsletter_opt_in' => ['sometimes', 'boolean'],
             'current_password' => ['required_with:new_password', 'string'],
@@ -46,12 +48,16 @@ class AccountController extends Controller
             $user->email = $validated['email'];
         }
 
-        if (array_key_exists('address', $validated)) {
-            $user->address = $validated['address'];
+        if (array_key_exists('street', $validated)) {
+            $user->street = $validated['street'];
         }
 
-        if (array_key_exists('phone', $validated)) {
-            $user->phone = $validated['phone'];
+        if (array_key_exists('postal_code', $validated)) {
+            $user->postal_code = $validated['postal_code'];
+        }
+
+        if (array_key_exists('city', $validated)) {
+            $user->city = $validated['city'];
         }
 
         if (array_key_exists('date_of_birth', $validated)) {

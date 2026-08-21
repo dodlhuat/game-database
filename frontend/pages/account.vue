@@ -35,21 +35,14 @@
               :error="profileErrors.email"
               autocomplete="email"
             />
-            <UiInput
+            <UiAddressFields
               v-if="auth.isMember"
-              v-model="profileForm.address"
-              :label="$t('account.address')"
-              :error="profileErrors.address"
-              autocomplete="street-address"
-              :placeholder="$t('account.address_placeholder')"
-            />
-            <UiInput
-              v-if="auth.isMember"
-              v-model="profileForm.phone"
-              type="tel"
-              :label="$t('account.phone')"
-              autocomplete="tel"
-              :placeholder="$t('account.phone_placeholder')"
+              v-model:street="profileForm.street"
+              v-model:postal-code="profileForm.postal_code"
+              v-model:city="profileForm.city"
+              :street-error="profileErrors.street"
+              :postal-code-error="profileErrors.postal_code"
+              :city-error="profileErrors.city"
             />
             <UiDatePicker
               v-if="auth.isMember"
@@ -126,8 +119,22 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 // Profile
-const profileForm = reactive({ name: '', email: '', address: '', phone: '', date_of_birth: '' })
-const profileErrors = reactive({ name: '', email: '', address: '', phone: '', date_of_birth: '' })
+const profileForm = reactive({
+  name: '',
+  email: '',
+  street: '',
+  postal_code: '',
+  city: '',
+  date_of_birth: '',
+})
+const profileErrors = reactive({
+  name: '',
+  email: '',
+  street: '',
+  postal_code: '',
+  city: '',
+  date_of_birth: '',
+})
 const profileSuccess = ref('')
 const profileError = ref('')
 const savingProfile = ref(false)
@@ -146,8 +153,9 @@ const savingPw = ref(false)
 onMounted(() => {
   profileForm.name = auth.user?.name ?? ''
   profileForm.email = auth.user?.email ?? ''
-  profileForm.address = auth.user?.address ?? ''
-  profileForm.phone = auth.user?.phone ?? ''
+  profileForm.street = auth.user?.street ?? ''
+  profileForm.postal_code = auth.user?.postal_code ?? ''
+  profileForm.city = auth.user?.city ?? ''
   profileForm.date_of_birth = auth.user?.date_of_birth ?? ''
   newsletterOptIn.value = auth.user?.newsletter_opt_in ?? false
 })
@@ -164,8 +172,9 @@ async function saveProfile() {
       email: profileForm.email,
     }
     if (auth.isMember) {
-      payload.address = profileForm.address
-      payload.phone = profileForm.phone
+      payload.street = profileForm.street
+      payload.postal_code = profileForm.postal_code
+      payload.city = profileForm.city
       payload.date_of_birth = profileForm.date_of_birth
     }
 

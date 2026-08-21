@@ -31,19 +31,25 @@
                                         "format": "email",
                                         "maxLength": 255
                                     },
-                                    "address": {
+                                    "street": {
                                         "type": [
                                             "string",
                                             "null"
                                         ],
                                         "maxLength": 255
                                     },
-                                    "phone": {
+                                    "postal_code": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    },
+                                    "city": {
                                         "type": [
                                             "string",
                                             "null"
                                         ],
-                                        "maxLength": 30
+                                        "maxLength": 255
                                     },
                                     "date_of_birth": {
                                         "type": [
@@ -108,6 +114,68 @@
                 }
             }
         },
+        "/address/validate": {
+            "post": {
+                "operationId": "addressValidation.validate",
+                "tags": [
+                    "AddressValidation"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "street": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "postal_code": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    }
+                                },
+                                "required": [
+                                    "street",
+                                    "postal_code",
+                                    "city"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "verified": {
+                                            "type": "boolean"
+                                        }
+                                    },
+                                    "required": [
+                                        "verified"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/cookies": {
             "get": {
                 "operationId": "cookie.show",
@@ -150,6 +218,69 @@
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/admin/copies/lookup": {
+            "get": {
+                "operationId": "copy.lookup",
+                "tags": [
+                    "Copy"
+                ],
+                "parameters": [
+                    {
+                        "name": "qr_code",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`CopyResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/CopyResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Kein Spiel mit diesem Code gefunden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
                     }
                 }
             }
@@ -529,6 +660,30 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "condition": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "NEW",
+                                            "VERY_GOOD",
+                                            "GOOD",
+                                            "WORN",
+                                            null
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "",
@@ -554,23 +709,7 @@
                         }
                     },
                     "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Kopie ist nicht im Status \"\u00dcberpr\u00fcfen\"."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -627,10 +766,14 @@
                                         "message": {
                                             "type": "string",
                                             "const": "Kopie als besch\u00e4digt markiert."
+                                        },
+                                        "copy": {
+                                            "$ref": "#/components/schemas/CopyResource"
                                         }
                                     },
                                     "required": [
-                                        "message"
+                                        "message",
+                                        "copy"
                                     ]
                                 }
                             }
@@ -657,7 +800,7 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
@@ -668,12 +811,14 @@
                                         "type": "string",
                                         "maxLength": 1000
                                     },
-                                    "photo_url": {
+                                    "photo": {
                                         "type": [
                                             "string",
                                             "null"
                                         ],
-                                        "format": "uri"
+                                        "format": "binary",
+                                        "contentMediaType": "application/octet-stream",
+                                        "description": "Maximum file size: 8192 kilobytes."
                                     }
                                 },
                                 "required": [
@@ -2776,7 +2921,7 @@
                                             "type": "string",
                                             "format": "binary",
                                             "contentMediaType": "application/octet-stream",
-                                            "maxLength": 10240
+                                            "description": "Maximum file size: 10240 kilobytes."
                                         },
                                         "minItems": 1,
                                         "maxItems": 10
@@ -2893,7 +3038,7 @@
                                         "type": "string",
                                         "format": "binary",
                                         "contentMediaType": "application/octet-stream",
-                                        "maxLength": 10240
+                                        "description": "Maximum file size: 10240 kilobytes."
                                     }
                                 },
                                 "required": [
@@ -4354,13 +4499,22 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "address": {
+                                    "street": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "postal_code": {
+                                        "type": "string"
+                                    },
+                                    "city": {
                                         "type": "string",
                                         "maxLength": 255
                                     }
                                 },
                                 "required": [
-                                    "address"
+                                    "street",
+                                    "postal_code",
+                                    "city"
                                 ]
                             }
                         }
@@ -4412,13 +4566,22 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "address": {
+                                    "street": {
+                                        "type": "string",
+                                        "maxLength": 255
+                                    },
+                                    "postal_code": {
+                                        "type": "string"
+                                    },
+                                    "city": {
                                         "type": "string",
                                         "maxLength": 255
                                     }
                                 },
                                 "required": [
-                                    "address"
+                                    "street",
+                                    "postal_code",
+                                    "city"
                                 ]
                             }
                         }
@@ -4923,9 +5086,6 @@
                                             "CURATED"
                                         ]
                                     },
-                                    "is_active": {
-                                        "type": "boolean"
-                                    },
                                     "game_ids": {
                                         "type": [
                                             "array",
@@ -4934,6 +5094,9 @@
                                         "items": {
                                             "type": "integer"
                                         }
+                                    },
+                                    "is_active": {
+                                        "type": "boolean"
                                     }
                                 },
                                 "required": [
@@ -5059,9 +5222,6 @@
                                             "CURATED"
                                         ]
                                     },
-                                    "is_active": {
-                                        "type": "boolean"
-                                    },
                                     "game_ids": {
                                         "type": [
                                             "array",
@@ -5070,6 +5230,9 @@
                                         "items": {
                                             "type": "integer"
                                         }
+                                    },
+                                    "is_active": {
+                                        "type": "boolean"
                                     }
                                 }
                             }
@@ -7383,6 +7546,13 @@
                             "null"
                         ]
                     },
+                    "owner": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 255
+                    },
                     "notes": {
                         "type": [
                             "string",
@@ -7433,10 +7603,45 @@
                             "null"
                         ]
                     },
+                    "owner": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
                     "notes": {
                         "type": [
                             "string",
                             "null"
+                        ]
+                    },
+                    "last_return": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "properties": {
+                            "return_condition": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "returned_at": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "format": "date-time"
+                            },
+                            "user_name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "return_condition",
+                            "returned_at",
+                            "user_name"
                         ]
                     },
                     "is_available": {
@@ -7503,15 +7708,6 @@
             "DonationRequest": {
                 "type": "object",
                 "properties": {
-                    "confirmed_complete": {
-                        "type": "string"
-                    },
-                    "website": {
-                        "type": "string"
-                    },
-                    "form_loaded_at": {
-                        "type": "integer"
-                    },
                     "games": {
                         "type": "array",
                         "items": {
@@ -7520,6 +7716,16 @@
                         },
                         "minItems": 1,
                         "maxItems": 20
+                    },
+                    "confirmed_complete": {
+                        "enum": [
+                            "yes",
+                            "on",
+                            "1",
+                            1,
+                            "true",
+                            true
+                        ]
                     },
                     "images": {
                         "type": [
@@ -7530,15 +7736,21 @@
                             "type": "string",
                             "format": "binary",
                             "contentMediaType": "application/octet-stream",
-                            "maxLength": 5120
+                            "description": "Maximum file size: 5120 kilobytes."
                         },
                         "maxItems": 3
+                    },
+                    "website": {
+                        "type": "string"
+                    },
+                    "form_loaded_at": {
+                        "type": "integer"
                     }
                 },
                 "required": [
+                    "games",
                     "confirmed_complete",
-                    "form_loaded_at",
-                    "games"
+                    "form_loaded_at"
                 ],
                 "title": "DonationRequest"
             },
@@ -7684,7 +7896,7 @@
                         ],
                         "format": "binary",
                         "contentMediaType": "application/octet-stream",
-                        "maxLength": 5120
+                        "description": "Maximum file size: 5120 kilobytes."
                     }
                 },
                 "required": [
@@ -7851,8 +8063,18 @@
                             "EASY",
                             "MEDIUM",
                             "HARD",
-                            "EXPERT"
+                            "EXPERT",
+                            null
                         ]
+                    },
+                    "language_ids": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "items": {
+                            "type": "integer"
+                        }
                     },
                     "year": {
                         "type": [
@@ -7887,16 +8109,7 @@
                         ],
                         "format": "binary",
                         "contentMediaType": "application/octet-stream",
-                        "maxLength": 5120
-                    },
-                    "language_ids": {
-                        "type": [
-                            "array",
-                            "null"
-                        ],
-                        "items": {
-                            "type": "integer"
-                        }
+                        "description": "Maximum file size: 5120 kilobytes."
                     },
                     "tag_ids": {
                         "type": [
@@ -8610,7 +8823,14 @@
                         "type": "boolean"
                     },
                     "terms_accepted": {
-                        "type": "string"
+                        "enum": [
+                            "yes",
+                            "on",
+                            "1",
+                            1,
+                            "true",
+                            true
+                        ]
                     },
                     "website": {
                         "type": "string"
@@ -8925,14 +9145,29 @@
                             "null"
                         ]
                     },
-                    "phone": {
+                    "street": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "postal_code": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "city": {
                         "type": [
                             "string",
                             "null"
                         ]
                     },
                     "date_of_birth": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ]
                     },
                     "role": {
                         "type": "string"
@@ -8992,7 +9227,9 @@
                     "name",
                     "email",
                     "address",
-                    "phone",
+                    "street",
+                    "postal_code",
+                    "city",
                     "date_of_birth",
                     "role",
                     "status",

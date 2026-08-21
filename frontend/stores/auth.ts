@@ -5,7 +5,9 @@ interface User {
   name: string
   email: string
   address: string | null
-  phone: string | null
+  street: string | null
+  postal_code: string | null
+  city: string | null
   date_of_birth: string | null
   role: 'USER' | 'SUPPORTER' | 'MEMBER' | 'ADMIN'
   status: 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED'

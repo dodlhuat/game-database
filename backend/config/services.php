@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'nominatim' => [
+        // Public OpenStreetMap geocoding instance — used for best-effort
+        // address-existence checks (App\Services\AddressValidationService).
+        // No API key needed; overridable for a paid/self-hosted instance.
+        'base_url' => env('NOMINATIM_BASE_URL', 'https://nominatim.openstreetmap.org'),
+        // Required by Nominatim's usage policy — must identify the app.
+        'user_agent' => env('NOMINATIM_USER_AGENT', 'game-database/1.0 (address validation)'),
+    ],
+
 ];

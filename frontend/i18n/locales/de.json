@@ -11,6 +11,7 @@
     "login": "Anmelden",
     "register": "Registrieren",
     "logout": "Abmelden",
+    "about": "Über uns",
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzerklärung",
     "cookies": "Cookie-Richtlinien",
@@ -135,10 +136,13 @@
     "settings": "Einstellungen",
     "my_account": "Mein Konto",
     "profile_title": "Profil",
-    "address": "Adresse",
-    "address_placeholder": "z. B. Musterstraße 1, 1010 Wien",
-    "phone": "Telefonnummer",
-    "phone_placeholder": "z. B. +43 664 123 45 67",
+    "address_street": "Straße",
+    "address_street_placeholder": "z. B. Musterstraße 1",
+    "address_postal_code": "PLZ",
+    "address_city": "Ort",
+    "address_check_pending": "Adresse wird geprüft …",
+    "address_check_verified": "Adresse gefunden.",
+    "address_check_not_found": "Adresse konnte nicht gefunden werden — bitte prüfe deine Eingabe. Du kannst trotzdem fortfahren.",
     "date_of_birth": "Geburtsdatum",
     "profile_save": "Profil speichern",
     "profile_saved": "Profil gespeichert.",
@@ -347,8 +351,7 @@
       "benefit_duration": "Mitgliedschaft läuft 12 Monate — danach verlängerbar",
       "form_title": "Anmeldung",
       "form_sub": "Für die Mitgliedschaft benötigen wir deine Adresse.",
-      "address_label": "Adresse (Straße, PLZ, Ort)",
-      "address_placeholder": "z. B. Musterstraße 1, 1010 Wien",
+      "address_incomplete": "Bitte gib Straße, PLZ und Ort ein.",
       "payment_note": "Zahlungsabwicklung folgt in einer späteren Version.",
       "select_tier": "Wähle deine Mitgliedschaft",
       "tier_member_name": "Vollmitglied",
@@ -770,5 +773,10 @@
       "title": "Cookie-Richtlinien",
       "unavailable": "Die Cookie-Richtlinien werden in Kürze verfügbar sein."
     }
+  },
+  "about": {
+    "tag": "Über uns",
+    "title": "Wer wir sind",
+    "placeholder": "Diese Seite befindet sich noch im Aufbau. Hier stellen wir uns bald vor — wer hinter dieser Plattform steht und was uns antreibt."
   }
 }

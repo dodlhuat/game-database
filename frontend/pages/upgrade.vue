@@ -153,12 +153,13 @@
 
               <div v-if="error" class="alert alert-error">{{ error }}</div>
 
-              <UiInput
-                v-model="address"
-                :label="$t('pages.upgrade.address_label')"
-                :error="addressError"
-                :placeholder="$t('pages.upgrade.address_placeholder')"
-                autocomplete="street-address"
+              <UiAddressFields
+                v-model:street="street"
+                v-model:postal-code="postalCode"
+                v-model:city="city"
+                :street-error="streetError"
+                :postal-code-error="postalCodeError"
+                :city-error="cityError"
               />
 
               <UiButton :loading="loading" @click="upgrade">{{
@@ -181,10 +182,15 @@ definePageMeta({ middleware: ['auth'] })
 
 const auth = useAuthStore()
 const api = useApi()
+const { t } = useI18n()
 const loading = ref(false)
 const error = ref('')
-const address = ref('')
-const addressError = ref('')
+const street = ref('')
+const postalCode = ref('')
+const city = ref('')
+const streetError = ref('')
+const postalCodeError = ref('')
+const cityError = ref('')
 const tier = ref<'MEMBER' | 'SUPPORTER'>('MEMBER')
 const activateLoading = ref(false)
 const activateError = ref('')
@@ -204,11 +210,13 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 async function upgrade() {
-  addressError.value = ''
+  streetError.value = ''
+  postalCodeError.value = ''
+  cityError.value = ''
   error.value = ''
 
-  if (!address.value.trim()) {
-    addressError.value = 'Bitte gib deine Adresse ein.'
+  if (!street.value.trim() || !/^\d{4}$/.test(postalCode.value) || !city.value.trim()) {
+    error.value = t('pages.upgrade.address_incomplete')
     return
   }
 
@@ -217,14 +225,18 @@ async function upgrade() {
     const endpoint =
       tier.value === 'MEMBER' ? '/membership/upgrade' : '/membership/upgrade-supporter'
     const data = await api.post<{ user: typeof auth.user }>(endpoint, {
-      address: address.value,
+      street: street.value,
+      postal_code: postalCode.value,
+      city: city.value,
     })
     if (data.user) auth.setUser(data.user)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
     const e = err as { errors?: Record<string, string[]>; message?: string }
-    if (e.errors?.address) {
-      addressError.value = e.errors.address[0] ?? ''
+    if (e.errors?.street || e.errors?.postal_code || e.errors?.city) {
+      streetError.value = e.errors.street?.[0] ?? ''
+      postalCodeError.value = e.errors.postal_code?.[0] ?? ''
+      cityError.value = e.errors.city?.[0] ?? ''
     } else {
       error.value = e.message ?? 'Ein Fehler ist aufgetreten.'
     }
