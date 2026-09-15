@@ -47,7 +47,9 @@
           <div v-if="success" class="alert alert-success">{{ success }}</div>
           <div v-if="error" class="alert alert-error">{{ error }}</div>
 
-          <div class="token-grid">
+          <div v-if="packagesLoading" class="tx-state"><div class="spinner" /></div>
+
+          <div v-else class="token-grid">
             <div
               v-for="pkg in tokenPackages"
               :key="pkg.amount"
@@ -59,13 +61,12 @@
               </div>
               <div class="token-card__amount">{{ pkg.amount }}</div>
               <div class="token-card__label">Token</div>
-              <UiButton
-                :loading="loadingAmount === pkg.amount"
-                :disabled="!!loadingAmount"
-                @click="addTokens(pkg.amount)"
-              >
-                {{ $t('btn.add') }}
-              </UiButton>
+              <div class="token-card__price">{{ formatPrice(pkg) }}</div>
+              <PayPalButtons
+                :amount="pkg.amount"
+                @success="onPurchaseSuccess"
+                @error="onPurchaseError"
+              />
             </div>
           </div>
 
@@ -137,42 +138,59 @@ import type { TokenTransaction } from '~/composables/useLoans'
 
 definePageMeta({ middleware: ['auth'] })
 
+interface TokenPackage {
+  amount: number
+  price_cents: number
+  currency: string
+  featured: boolean
+}
+
 const auth = useAuthStore()
 const api = useApi()
 const { fetchTokenTransactions } = useLoans()
 const { t } = useI18n()
-const loadingAmount = ref<number | null>(null)
 const success = ref('')
 const error = ref('')
 
-const tokenPackages = [
-  { amount: 20, featured: false },
-  { amount: 30, featured: true },
-  { amount: 40, featured: false },
-]
+const tokenPackages = ref<TokenPackage[]>([])
+const packagesLoading = ref(true)
 
 const transactions = ref<TokenTransaction[]>([])
 const txLoading = ref(false)
 const txPage = ref(1)
 const txMeta = ref({ last_page: 1, total: 0 })
 
-async function addTokens(amount: number) {
-  loadingAmount.value = amount
-  success.value = ''
-  error.value = ''
+async function loadPackages() {
+  packagesLoading.value = true
   try {
-    const data = await api.post<{ user: typeof auth.user; message: string }>('/tokens/add', {
-      amount,
-    })
-    if (data.user) auth.setUser(data.user)
-    success.value = data.message
-    await loadTx(1)
-  } catch (err: unknown) {
-    const e = err as { message?: string }
-    error.value = e.message ?? 'Ein Fehler ist aufgetreten.'
+    const data = await api.get<{
+      data: Array<{ amount: number; price_cents: number; currency: string }>
+    }>('/tokens/packages')
+    const middle = Math.floor(data.data.length / 2)
+    tokenPackages.value = data.data.map((pkg, i) => ({ ...pkg, featured: i === middle }))
+  } catch {
+    error.value = 'Token-Pakete konnten nicht geladen werden.'
   } finally {
-    loadingAmount.value = null
+    packagesLoading.value = false
   }
+}
+
+function formatPrice(pkg: TokenPackage): string {
+  return new Intl.NumberFormat('de-AT', { style: 'currency', currency: pkg.currency }).format(
+    pkg.price_cents / 100
+  )
+}
+
+function onPurchaseSuccess(payload: { message: string; user: unknown }) {
+  if (payload.user) auth.setUser(payload.user as Parameters<typeof auth.setUser>[0])
+  success.value = payload.message
+  error.value = ''
+  loadTx(1)
+}
+
+function onPurchaseError(message: string) {
+  error.value = message
+  success.value = ''
 }
 
 async function loadTx(page: number) {
@@ -219,7 +237,10 @@ function txClass(type: string) {
   return TX_CLASSES[type] ?? ''
 }
 
-onMounted(() => loadTx(1))
+onMounted(() => {
+  loadPackages()
+  loadTx(1)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -368,6 +389,12 @@ $border-amber: rgba(212, 146, 30, 0.4);
     font-size: 0.8rem;
     color: var(--secondary-text);
     margin-bottom: 0.25rem;
+  }
+  &__price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: $amber;
+    margin-bottom: 0.5rem;
   }
 }
 

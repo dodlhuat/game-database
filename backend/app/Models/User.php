@@ -154,4 +154,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(TokenTransaction::class);
     }
+
+    /** @return HasMany<TokenPurchase, $this> */
+    public function tokenPurchases(): HasMany
+    {
+        return $this->hasMany(TokenPurchase::class);
+    }
 }

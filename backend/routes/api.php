@@ -32,6 +32,7 @@ use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
+use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
@@ -64,6 +65,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::get('/loan-settings', [LoanSettingController::class, 'show']);
+Route::get('/tokens/packages', [TokenController::class, 'packages']);
 
 Route::get('/games', [GameController::class, 'index']);
 Route::get('/games/smart-search', [GameSearchController::class, 'index']);
@@ -76,6 +78,10 @@ Route::get('/privacy', [PrivacyController::class, 'show']);
 Route::get('/cookies', [CookieController::class, 'show']);
 Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
+
+// PayPal ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
+// wird stattdessen über die Webhook-Signatur (siehe PayPalWebhookController) geprüft.
+Route::post('/webhooks/paypal', [PayPalWebhookController::class, 'handle']);
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -125,7 +131,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/membership/upgrade-supporter', [MembershipController::class, 'upgradeSupporter']);
     Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
     Route::post('/membership/renew', [MembershipController::class, 'renew']);
-    Route::post('/tokens/add', [TokenController::class, 'add']);
+    Route::post('/tokens/checkout', [TokenController::class, 'checkout']);
+    Route::post('/tokens/capture/{orderId}', [TokenController::class, 'capture']);
 
     // Paket-Ausleihen
     Route::get('/package-loans', [PackageLoanController::class, 'index']);

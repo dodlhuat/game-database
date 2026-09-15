@@ -10,6 +10,7 @@ class TokenTransaction extends Model
     protected $fillable = [
         'user_id',
         'loan_id',
+        'token_purchase_id',
         'type',
         'amount',
         'description',
@@ -25,5 +26,11 @@ class TokenTransaction extends Model
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
+    }
+
+    /** @return BelongsTo<TokenPurchase, $this> */
+    public function tokenPurchase(): BelongsTo
+    {
+        return $this->belongsTo(TokenPurchase::class);
     }
 }

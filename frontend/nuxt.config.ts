@@ -58,6 +58,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
+      // Client-ID ist per Design öffentlich (steht im JS-SDK-Script-Tag) —
+      // kein Secret. Sandbox-/Live-Umschaltung passiert rein über diesen Wert.
+      paypalClientId: process.env.NUXT_PUBLIC_PAYPAL_CLIENT_ID || '',
+      paypalCurrency: process.env.NUXT_PUBLIC_PAYPAL_CURRENCY || 'EUR',
     },
   },
 })
