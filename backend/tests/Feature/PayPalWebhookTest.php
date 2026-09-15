@@ -159,4 +159,54 @@ class PayPalWebhookTest extends TestCase
             'resource' => ['id' => 'whatever'],
         ], $this->headers)->assertOk();
     }
+
+    public function test_returns_bad_request_when_verification_call_itself_fails(): void
+    {
+        Http::fake([
+            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token']),
+            '*/v1/notifications/verify-webhook-signature' => Http::response(['error' => 'server_error'], 500),
+        ]);
+        $user = User::factory()->member()->create(['tokens' => 5]);
+        TokenPurchase::factory()->create([
+            'user_id' => $user->id,
+            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'token_amount' => 20,
+            'status' => 'CREATED',
+        ]);
+
+        $this->postJson('/api/webhooks/paypal', [
+            'event_type' => 'PAYMENT.CAPTURE.COMPLETED',
+            'resource' => [
+                'id' => 'CAPTURE-1',
+                'status' => 'COMPLETED',
+                'supplementary_data' => ['related_ids' => ['order_id' => 'PAYPAL-ORDER-1']],
+            ],
+        ], $this->headers)->assertStatus(400);
+
+        $this->assertEquals(5, $user->fresh()->tokens);
+    }
+
+    public function test_ignores_capture_completed_event_with_non_completed_status(): void
+    {
+        $this->fakeVerification();
+        $user = User::factory()->member()->create(['tokens' => 5]);
+        $purchase = TokenPurchase::factory()->create([
+            'user_id' => $user->id,
+            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'token_amount' => 20,
+            'status' => 'CREATED',
+        ]);
+
+        $this->postJson('/api/webhooks/paypal', [
+            'event_type' => 'PAYMENT.CAPTURE.COMPLETED',
+            'resource' => [
+                'id' => 'CAPTURE-1',
+                'status' => 'PENDING',
+                'supplementary_data' => ['related_ids' => ['order_id' => 'PAYPAL-ORDER-1']],
+            ],
+        ], $this->headers)->assertOk();
+
+        $this->assertDatabaseHas('token_purchases', ['id' => $purchase->id, 'status' => 'CREATED']);
+        $this->assertEquals(5, $user->fresh()->tokens);
+    }
 }
