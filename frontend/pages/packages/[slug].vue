@@ -94,7 +94,7 @@
             </template>
 
             <!-- Logged in, not a member -->
-            <template v-else-if="!auth.isMember">
+            <template v-else-if="!auth.canBorrow">
               <p class="detail__cta-text">{{ $t('pages.package.cta_not_member') }}</p>
               <NuxtLink to="/upgrade" class="detail__btn">{{ $t('btn.become_member') }}</NuxtLink>
             </template>

@@ -66,7 +66,7 @@
 
         <!-- Token & Mitgliedschaft ────────────────────────────────── -->
         <div class="membership-bar">
-          <div v-if="auth.isMember" class="membership-bar__member">
+          <div v-if="auth.canBorrow" class="membership-bar__member">
             <div class="token-bar">
               <span class="token-bar__icon">◈</span>
               <span class="token-bar__count"

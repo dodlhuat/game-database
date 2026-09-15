@@ -36,7 +36,7 @@
               autocomplete="email"
             />
             <UiAddressFields
-              v-if="auth.isMember"
+              v-if="auth.canBorrow"
               v-model:street="profileForm.street"
               v-model:postal-code="profileForm.postal_code"
               v-model:city="profileForm.city"
@@ -45,7 +45,7 @@
               :city-error="profileErrors.city"
             />
             <UiDatePicker
-              v-if="auth.isMember"
+              v-if="auth.canBorrow"
               v-model="profileForm.date_of_birth"
               :label="$t('account.date_of_birth')"
               :max-date="new Date()"
@@ -171,7 +171,7 @@ async function saveProfile() {
       name: profileForm.name,
       email: profileForm.email,
     }
-    if (auth.isMember) {
+    if (auth.canBorrow) {
       payload.street = profileForm.street
       payload.postal_code = profileForm.postal_code
       payload.city = profileForm.city

@@ -14,7 +14,7 @@
 
     <div class="upgrade-content">
       <div class="upgrade-content__inner">
-        <div v-if="auth.isMember" class="already-member">
+        <div v-if="auth.canBorrow" class="already-member">
           <div class="already-member__icon">✓</div>
           <h2 class="already-member__title">{{ $t('pages.upgrade.already_member') }}</h2>
           <p class="already-member__text">

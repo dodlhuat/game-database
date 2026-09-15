@@ -167,19 +167,19 @@
               >{{ $t('pages.game.login_to_borrow') }}
             </NuxtLink>
           </template>
-          <template v-else-if="auth.isActive && !auth.isMember">
+          <template v-else-if="auth.isActive && !auth.canBorrow">
             <NuxtLink to="/upgrade" class="gd-btn gd-btn--secondary">{{
               $t('pages.game.membership_required')
             }}</NuxtLink>
           </template>
-          <template v-else-if="auth.isMember && game.already_borrowed">
+          <template v-else-if="auth.canBorrow && game.already_borrowed">
             <span class="gd-btn gd-btn--done">
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#check_circle" /></svg
               >{{ $t('pages.game.already_borrowed') }}
             </span>
           </template>
-          <template v-else-if="auth.isMember && game.available_copies_count > 0">
+          <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
               v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-btn gd-btn--primary"
@@ -193,7 +193,7 @@
               >{{ $t('btn.load_tokens') }}
             </NuxtLink>
           </template>
-          <template v-else-if="auth.isMember">
+          <template v-else-if="auth.canBorrow">
             <button class="gd-btn gd-btn--secondary" :disabled="reserving" @click="handleReserve">
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#bookmark_add" /></svg
@@ -273,7 +273,7 @@
         <div class="gd-bar__inner">
           <div class="gd-bar__left">
             <span class="gd-bar__name">{{ game.title }}</span>
-            <span v-if="auth.isLoggedIn && auth.isMember" class="gd-bar__tokens">
+            <span v-if="auth.isLoggedIn && auth.canBorrow" class="gd-bar__tokens">
               <svg class="icon-svg" style="font-size: 0.85rem">
                 <use href="/svg-icons/icons.svg#toll" /></svg
               >{{ auth.user?.tokens ?? 0 }} Token
@@ -284,18 +284,18 @@
               $t('pages.game.login_to_borrow')
             }}</NuxtLink>
           </template>
-          <template v-else-if="auth.isActive && !auth.isMember">
+          <template v-else-if="auth.isActive && !auth.canBorrow">
             <NuxtLink to="/upgrade" class="gd-bar__btn gd-bar__btn--sec">{{
               $t('pages.game.membership_required')
             }}</NuxtLink>
           </template>
-          <template v-else-if="auth.isMember && game.already_borrowed">
+          <template v-else-if="auth.canBorrow && game.already_borrowed">
             <span class="gd-bar__btn gd-bar__btn--done"
               ><svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#check_circle" /></svg
             ></span>
           </template>
-          <template v-else-if="auth.isMember && game.available_copies_count > 0">
+          <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
               v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-bar__btn"
@@ -307,7 +307,7 @@
               $t('btn.load_tokens')
             }}</NuxtLink>
           </template>
-          <template v-else-if="auth.isMember">
+          <template v-else-if="auth.canBorrow">
             <button
               class="gd-bar__btn gd-bar__btn--sec"
               :disabled="reserving"

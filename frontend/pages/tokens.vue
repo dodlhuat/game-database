@@ -32,7 +32,7 @@
 
     <div class="tokens-content">
       <div class="tokens-content__inner">
-        <div v-if="!auth.isMember" class="no-member">
+        <div v-if="!auth.canBorrow" class="no-member">
           <p>
             {{
               auth.isSupporter

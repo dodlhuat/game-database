@@ -45,6 +45,9 @@ export const useAuthStore = defineStore('auth', {
       return new Date(state.user.membership_expires_at) > new Date()
     },
     isRegisteredUser: (state) => state.user?.role === 'USER',
+    canBorrow(): boolean {
+      return this.isMember || this.isAdmin
+    },
   },
 
   actions: {

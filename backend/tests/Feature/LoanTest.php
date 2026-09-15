@@ -47,6 +47,18 @@ class LoanTest extends TestCase
             ->assertJsonPath('data.status', 'ACTIVE');
     }
 
+    public function test_store_creates_loan_for_admin(): void
+    {
+        LoanSetting::factory()->create(['loan_cost' => 2, 'deposit_pct_very_good' => 0]);
+        $admin = User::factory()->admin()->create(['tokens' => 0]);
+        $copy = Copy::factory()->create(['condition' => 'NEW']);
+
+        $this->actingAs($admin)
+            ->postJson('/api/loans', ['copy_id' => $copy->id])
+            ->assertCreated()
+            ->assertJsonPath('data.status', 'ACTIVE');
+    }
+
     public function test_store_fails_for_non_member(): void
     {
         LoanSetting::factory()->create();
