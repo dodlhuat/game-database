@@ -8,17 +8,32 @@ use Illuminate\Support\Str;
 
 class ImageUploadService
 {
+    /**
+     * Game covers are shown as small grid thumbnails (~300px) and a hero
+     * background/poster, but admins often upload full-resolution box-art
+     * scans straight from a phone or scanner (several MB) — unlike
+     * uploadGameImage/uploadEventImage, downscale/recompress here so every
+     * page listing covers doesn't ship multi-MB images for a thumbnail.
+     */
     public function uploadGameCover(UploadedFile $file, ?string $oldUrl = null): string
     {
         if ($oldUrl) {
             $this->deleteByUrl($oldUrl);
         }
 
-        $filename = 'covers/'.Str::uuid().'.'.$file->getClientOriginalExtension();
-        $contents = file_get_contents((string) $file->getRealPath());
-        if ($contents === false) {
-            throw new \RuntimeException('Could not read uploaded file.');
+        try {
+            $contents = $this->resizeAndCompress($file, maxDimension: 1200, quality: 85);
+            $filename = 'covers/'.Str::uuid().'.jpg';
+        } catch (\RuntimeException) {
+            // Not a format GD can decode — store the original untouched
+            // rather than fail the whole upload over one odd file.
+            $contents = file_get_contents((string) $file->getRealPath());
+            if ($contents === false) {
+                throw new \RuntimeException('Could not read uploaded file.');
+            }
+            $filename = 'covers/'.Str::uuid().'.'.$file->getClientOriginalExtension();
         }
+
         Storage::disk('public')->put($filename, $contents);
 
         return Storage::disk('public')->url($filename);

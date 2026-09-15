@@ -1,12 +1,15 @@
 <template>
   <NuxtLink :to="`/games/${game.slug}`" class="game-card">
     <div class="game-card__media">
+      <div v-if="game.cover_image_url && !imgLoaded" class="game-card__media-skeleton skeleton" />
       <img
         v-if="game.cover_image_url"
         :src="game.cover_image_url"
         :alt="game.title"
         class="game-card__img"
+        :class="{ 'game-card__img--loaded': imgLoaded }"
         loading="lazy"
+        @load="imgLoaded = true"
       />
       <div v-else class="game-card__placeholder">
         <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#layers" /></svg>
@@ -51,11 +54,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { Game } from '~/composables/useGames'
 
 defineProps<{ game: Game }>()
 
 const auth = useAuthStore()
+const imgLoaded = ref(false)
 
 const { t } = useI18n()
 
@@ -123,11 +128,24 @@ $amber-30: rgba(212, 146, 30, 0.3);
     }
   }
 
+  &__media-skeleton {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+  }
+
   &__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.35s ease;
+    opacity: 0;
+    transition:
+      opacity 0.4s ease,
+      transform 0.35s ease;
+
+    &--loaded {
+      opacity: 1;
+    }
   }
 
   &:hover &__img {

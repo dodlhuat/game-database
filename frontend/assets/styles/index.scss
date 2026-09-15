@@ -29,6 +29,24 @@ nav {
   transition: none;
 }
 
+// basix push-menu.scss's `nav a` rule (display:flex, width:100%, padding,
+// uppercase, hover background) is meant only for the mobile push-menu's own
+// items, but the selector itself isn't scoped to `.push-menu` — it silently
+// applies to every <a> inside any <nav> in the app (e.g. AppFooter's legal
+// links block onto full-width rows, breadcrumb links get flyout padding).
+// Reset it for any nav that isn't the actual push-menu.
+nav:not(.push-menu) a {
+  display: revert;
+  width: auto;
+  padding: 0;
+  text-transform: none;
+
+  &:hover,
+  &:active {
+    background: none;
+  }
+}
+
 // basix card: body/content padding-top statt padding: 0
 .card .body,
 .card .content {

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\TokenTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -40,6 +41,19 @@ class UserTest extends TestCase
             ->getJson("/api/admin/users/{$target->id}")
             ->assertOk()
             ->assertJsonPath('data.id', $target->id);
+    }
+
+    public function test_token_transactions_returns_paginated_meta(): void
+    {
+        $target = User::factory()->create();
+        TokenTransaction::factory()->count(2)->create(['user_id' => $target->id]);
+
+        $this->actingAs($this->admin())
+            ->getJson("/api/admin/users/{$target->id}/token-transactions")
+            ->assertOk()
+            ->assertJsonPath('meta.total', 2)
+            ->assertJsonPath('meta.last_page', 1)
+            ->assertJsonCount(2, 'data');
     }
 
     public function test_store_creates_user(): void

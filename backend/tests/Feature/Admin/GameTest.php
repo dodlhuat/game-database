@@ -5,6 +5,8 @@ namespace Tests\Feature\Admin;
 use App\Models\Game;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class GameTest extends TestCase
@@ -50,6 +52,28 @@ class GameTest extends TestCase
             ->postJson('/api/admin/games', $this->gamePayload())
             ->assertCreated()
             ->assertJsonPath('data.title', 'Test Game');
+    }
+
+    public function test_store_downscales_large_cover_image(): void
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->admin())
+            ->post('/api/admin/games', array_merge($this->gamePayload(), [
+                'cover_image' => UploadedFile::fake()->image('cover.jpg', 3000, 4000),
+            ]))
+            ->assertCreated();
+
+        $url = $response->json('data.cover_image_url');
+        $this->assertStringEndsWith('.jpg', $url);
+
+        $path = 'covers/'.basename((string) $url);
+        Storage::disk('public')->assertExists($path);
+
+        $stored = Storage::disk('public')->get($path);
+        $size = getimagesizefromstring((string) $stored);
+        $this->assertNotFalse($size);
+        $this->assertLessThanOrEqual(1200, max($size[0], $size[1]));
     }
 
     public function test_store_requires_unique_slug(): void

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\TokenPurchase;
+use App\Models\TokenTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -212,5 +213,18 @@ class TokenControllerTest extends TestCase
             'status' => 'FAILED',
         ]);
         $this->assertEquals(5, $user->fresh()->tokens);
+    }
+
+    public function test_token_transactions_returns_paginated_meta(): void
+    {
+        $user = User::factory()->member()->create();
+        TokenTransaction::factory()->count(3)->create(['user_id' => $user->id]);
+
+        $this->actingAs($user)
+            ->getJson('/api/token-transactions')
+            ->assertOk()
+            ->assertJsonPath('meta.total', 3)
+            ->assertJsonPath('meta.last_page', 1)
+            ->assertJsonCount(3, 'data');
     }
 }

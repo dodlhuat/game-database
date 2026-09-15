@@ -310,8 +310,18 @@
     <!-- ── Catalog ─────────────────────────────────────────────── -->
     <section class="catalog">
       <div class="catalog__inner">
-        <div v-if="loading" class="catalog__state">
-          <div class="spinner" />
+        <div v-if="loading" class="game-grid" aria-hidden="true">
+          <div v-for="n in 8" :key="n" class="game-card-skeleton" :style="{ '--i': n }">
+            <div class="game-card-skeleton__media skeleton" />
+            <div class="game-card-skeleton__body">
+              <div class="game-card-skeleton__line skeleton" />
+              <div class="game-card-skeleton__line game-card-skeleton__line--sm skeleton" />
+              <div class="game-card-skeleton__chips">
+                <div class="game-card-skeleton__chip skeleton" />
+                <div class="game-card-skeleton__chip skeleton" />
+              </div>
+            </div>
+          </div>
         </div>
 
         <div v-else-if="!games.length" class="catalog__state">
@@ -1527,6 +1537,67 @@ $hero-input-border: color-mix(in srgb, var(--primary-text) 12%, transparent);
   }
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
+  }
+}
+
+// ─── Catalog skeleton ───────────────────────────────────────────────
+// Mirrors GameCard's box model exactly (same aspect-ratio, padding, gap)
+// so the grid doesn't jump in height once real cards replace it.
+.game-card-skeleton {
+  display: flex;
+  flex-direction: column;
+  background: var(--secondary-background);
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  overflow: hidden;
+  opacity: 0;
+  animation: skeletonIn 0.4s ease calc(min(var(--i, 0), 8) * 60ms) both;
+
+  &__media {
+    aspect-ratio: 3 / 4;
+    border-radius: 0;
+
+    @media (max-width: 480px) {
+      aspect-ratio: unset;
+      height: 200px;
+    }
+  }
+
+  &__body {
+    padding: 1rem 1.125rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  &__line {
+    height: 0.85rem;
+    width: 85%;
+
+    &--sm {
+      width: 55%;
+    }
+  }
+
+  &__chips {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.15rem;
+  }
+
+  &__chip {
+    height: 1.3rem;
+    width: 3.5rem;
+    border-radius: 999px;
+  }
+}
+
+@keyframes skeletonIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

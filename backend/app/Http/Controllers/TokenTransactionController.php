@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TokenTransactionResource;
 use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class TokenTransactionController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): AnonymousResourceCollection
     {
         /** @var User $user */
         $user = $request->user();
@@ -18,6 +19,6 @@ class TokenTransactionController extends Controller
             ->orderByDesc('created_at')
             ->paginate(25);
 
-        return response()->json($transactions);
+        return TokenTransactionResource::collection($transactions);
     }
 }
