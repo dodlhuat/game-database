@@ -59,9 +59,15 @@ class PayPalClient
      */
     private function request(string $method, string $path, array $body = []): array
     {
+        // PHP encodes an empty array as JSON `[]`, but PayPal's schema requires
+        // a JSON object (`{}`) for an empty POST body (e.g. the capture call,
+        // which takes no fields) — otherwise it rejects it as MALFORMED_REQUEST_JSON.
+        // GET requests use $body as query params, where an array is correct.
+        $payload = ($method !== 'get' && $body === []) ? (object) [] : $body;
+
         $response = Http::withToken($this->accessToken())
             ->acceptJson()
-            ->{$method}(config('services.paypal.base_url').$path, $body);
+            ->{$method}(config('services.paypal.base_url').$path, $payload);
 
         if ($response->failed()) {
             throw new RuntimeException("PayPal API error [{$method} {$path}] ({$response->status()}): {$response->body()}");
