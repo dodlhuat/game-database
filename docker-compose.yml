@@ -87,6 +87,33 @@ services:
         condition: service_started
 
   # ----------------------------------------------------------------
+  # Scheduler (führt Laravel's Cron-Scheduler aus — u.a. loans:mark-overdue,
+  # loans:send-due-soon-reminders, members:send-renewal-reminders, siehe
+  # routes/console.php. Ohne diesen Container laufen die dort definierten
+  # Schedule::command()-Jobs nie, da nichts `schedule:run` aufruft.)
+  # ----------------------------------------------------------------
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: game-db-scheduler
+    restart: unless-stopped
+    working_dir: /var/www/backend
+    entrypoint: []
+    command: ["sh", "-c", "while true; do php artisan schedule:run --no-interaction; sleep 60; done"]
+    volumes:
+      - ./backend:/var/www/backend
+      - backend_storage_framework:/var/www/backend/storage/framework
+      - backend_storage_logs:/var/www/backend/storage/logs
+      - backend_bootstrap_cache:/var/www/backend/bootstrap/cache
+    environment: *backend-env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  # ----------------------------------------------------------------
   # Nginx (Reverse Proxy für Laravel)
   # ----------------------------------------------------------------
   nginx:

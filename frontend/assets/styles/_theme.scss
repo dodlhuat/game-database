@@ -17,7 +17,14 @@
   --success-muted: rgba(46, 139, 87, 0.1);
 }
 
-[data-theme='dark'] {
+// Specificity note: basix also sets --accent-color inside
+// `@media (prefers-color-scheme: dark) { :root:not([data-theme=light]) {...} }`
+// (specificity 0,2,0). A plain `[data-theme='dark']` selector (0,1,0) loses
+// to that rule for any visitor whose OS is in dark mode, regardless of load
+// order — basix's blue (#1B7BB4) would leak through instead of our orange.
+// `:root[data-theme='dark']` matches basix's specificity (0,2,0) so our
+// later import wins the tie.
+:root[data-theme='dark'] {
   --accent-color: #f7963d;
   --accent-color-lighten: rgba(247, 150, 61, 0.22); // subtle orange wash in dark
   --accent-color-text: #1a0d00; // near-black: text ON orange in dark context

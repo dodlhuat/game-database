@@ -26,9 +26,12 @@
             </header>
             <form class="settings-form" @submit.prevent="save">
               <div class="settings-grid">
-                <div class="form-field">
-                  <label class="form-label">{{ $t('admin.loan_settings.start_date') }}</label>
-                  <input v-model="form.start_date" class="form-input" type="date" required />
+                <div class="form-field form-field--date">
+                  <UiDatePicker
+                    v-model="form.start_date"
+                    :label="$t('admin.loan_settings.start_date')"
+                    required
+                  />
                   <p class="form-hint">{{ $t('admin.loan_settings.start_date_hint') }}</p>
                 </div>
                 <div class="form-field">
@@ -456,6 +459,16 @@ $hero-divider: var(--divider);
   color: var(--secondary-text);
   margin: 0;
   padding-bottom: 0;
+}
+.form-field--date {
+  // UiDatePicker renders its own <label>/<input>, styled to match the
+  // plain .form-label/.form-input fields it sits next to in this grid.
+  :deep(.input-wrapper label) {
+    @extend .form-label;
+  }
+  :deep(.datepicker-trigger) {
+    @extend .form-input;
+  }
 }
 .settings-section-title {
   font-size: 0.85rem;
