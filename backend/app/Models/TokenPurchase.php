@@ -15,8 +15,8 @@ class TokenPurchase extends Model
 
     protected $fillable = [
         'user_id',
-        'paypal_order_id',
-        'paypal_capture_id',
+        'provider_payment_intent_id',
+        'provider_charge_id',
         'token_amount',
         'price_cents',
         'currency',

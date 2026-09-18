@@ -32,10 +32,10 @@ use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
-use App\Http\Controllers\PayPalWebhookController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\TokenTransactionController;
@@ -79,9 +79,9 @@ Route::get('/cookies', [CookieController::class, 'show']);
 Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
 
-// PayPal ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
-// wird stattdessen über die Webhook-Signatur (siehe PayPalWebhookController) geprüft.
-Route::post('/webhooks/paypal', [PayPalWebhookController::class, 'handle']);
+// Stripe ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
+// wird stattdessen über die Webhook-Signatur (siehe StripeWebhookController) geprüft.
+Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -132,7 +132,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
     Route::post('/membership/renew', [MembershipController::class, 'renew']);
     Route::post('/tokens/checkout', [TokenController::class, 'checkout']);
-    Route::post('/tokens/capture/{orderId}', [TokenController::class, 'capture']);
+    Route::post('/tokens/confirm/{paymentIntentId}', [TokenController::class, 'confirm']);
 
     // Paket-Ausleihen
     Route::get('/package-loans', [PackageLoanController::class, 'index']);

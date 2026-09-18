@@ -3,7 +3,8 @@
 # ============================================================
 
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
-        prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan
+        prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify
 
 ## Erster Start (einmalig)
 setup:
@@ -114,3 +115,35 @@ prod-artisan:
 ## phpstan
 phpstan:
 	cd backend && php -d memory_limit=1G vendor/bin/phpstan analyse > phpstan-report.txt
+
+# ============================================================
+# Deploy — echter Server (kein Docker, siehe DEPLOYMENT.md)
+# git pull + composer/artisan + npm build/pm2, alles per SSH.
+# Setzt funktionierenden Key-basierten SSH-Zugriff auf den Server voraus.
+# ============================================================
+DEPLOY_SERVER := hetzner-deploy
+DEPLOY_DIR    := /var/www/alle-unsere-abenteuer
+
+## Backend + Frontend auf dem Server aktualisieren (git pull, composer, migrate, npm build, pm2 restart)
+deploy: deploy-backend deploy-frontend
+
+## Nur git pull auf dem Server (Backend/Frontend-Targets hängen automatisch davon ab)
+deploy-pull:
+	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR) && git pull && git log -1 --oneline'
+
+## Backend-Schritte auf dem Server: composer install, migrate, config/route/view-cache
+deploy-backend: deploy-pull
+	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && composer install --no-dev --optimize-autoloader --no-interaction && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache'
+
+## Frontend-Schritte auf dem Server: npm ci, build, PM2-Neustart
+deploy-frontend: deploy-pull
+	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/frontend && npm ci && npm run build && pm2 restart alle-unsere-abenteuer-frontend && pm2 logs alle-unsere-abenteuer-frontend --lines 20 --nostream'
+
+## Fix für git pull-Konflikt durch lokale package-lock.json-Änderungen auf dem Server (siehe DEPLOYMENT.md 5.2)
+deploy-fix-pull:
+	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR) && git checkout -- . && git pull && git log -1 --oneline'
+
+## Nach dem Deploy: Backend-API und Frontend von außen erreichbar?
+deploy-verify:
+	curl -sf http://65.109.232.115/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
+	curl -sf http://65.109.232.115/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"

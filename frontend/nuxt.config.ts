@@ -58,10 +58,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
-      // Client-ID ist per Design öffentlich (steht im JS-SDK-Script-Tag) —
-      // kein Secret. Sandbox-/Live-Umschaltung passiert rein über diesen Wert.
-      paypalClientId: process.env.NUXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-      paypalCurrency: process.env.NUXT_PUBLIC_PAYPAL_CURRENCY || 'EUR',
+      // Publishable Key ist per Design öffentlich (wird an Stripe.js
+      // übergeben) — kein Secret. Test-/Live-Umschaltung passiert rein über
+      // diesen Wert (pk_test_... vs. pk_live_...).
+      stripePublishableKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
     },
   },
 })

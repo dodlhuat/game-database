@@ -87,11 +87,9 @@
               <div class="token-card__amount">{{ pkg.amount }}</div>
               <div class="token-card__label">Token</div>
               <div class="token-card__price">{{ formatPrice(pkg) }}</div>
-              <PayPalButtons
-                :amount="pkg.amount"
-                @success="onPurchaseSuccess"
-                @error="onPurchaseError"
-              />
+              <button class="button button-primary token-card__buy" @click="openCheckout(pkg)">
+                {{ $t('btn.buy') }}
+              </button>
             </div>
           </div>
 
@@ -175,6 +173,13 @@
         </template>
       </div>
     </div>
+
+    <StripeCheckoutModal
+      :pkg="checkoutPackage"
+      @success="onPurchaseSuccess"
+      @error="onPurchaseError"
+      @close="checkoutPackage = null"
+    />
   </div>
 </template>
 
@@ -203,6 +208,11 @@ const freeTokens = computed(() => (auth.user?.tokens ?? 0) - blockedTokens.value
 
 const tokenPackages = ref<TokenPackage[]>([])
 const packagesLoading = ref(true)
+const checkoutPackage = ref<TokenPackage | null>(null)
+
+function openCheckout(pkg: TokenPackage) {
+  checkoutPackage.value = pkg
+}
 
 const transactions = ref<TokenTransaction[]>([])
 const txLoading = ref(false)
@@ -234,6 +244,7 @@ function onPurchaseSuccess(payload: { message: string; user: unknown }) {
   if (payload.user) auth.setUser(payload.user as Parameters<typeof auth.setUser>[0])
   success.value = payload.message
   error.value = ''
+  checkoutPackage.value = null
   loadTx(1)
 }
 
@@ -574,6 +585,9 @@ $border-amber: rgba(212, 146, 30, 0.4);
     font-weight: 700;
     color: $amber;
     margin-bottom: 0.5rem;
+  }
+  &__buy {
+    width: 100%;
   }
 
   &--skeleton {

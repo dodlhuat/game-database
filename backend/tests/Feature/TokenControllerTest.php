@@ -26,11 +26,14 @@ class TokenControllerTest extends TestCase
             ]);
     }
 
-    public function test_checkout_creates_paypal_order(): void
+    public function test_checkout_creates_stripe_payment_intent(): void
     {
         Http::fake([
-            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token', 'expires_in' => 32000]),
-            '*/v2/checkout/orders' => Http::response(['id' => 'PAYPAL-ORDER-123', 'status' => 'CREATED']),
+            'api.stripe.com/v1/payment_intents' => Http::response([
+                'id' => 'pi_123',
+                'client_secret' => 'pi_123_secret_abc',
+                'status' => 'requires_payment_method',
+            ]),
         ]);
 
         $user = User::factory()->member()->create();
@@ -38,11 +41,11 @@ class TokenControllerTest extends TestCase
         $this->actingAs($user)
             ->postJson('/api/tokens/checkout', ['amount' => 20])
             ->assertOk()
-            ->assertJsonPath('orderID', 'PAYPAL-ORDER-123');
+            ->assertJsonPath('clientSecret', 'pi_123_secret_abc');
 
         $this->assertDatabaseHas('token_purchases', [
             'user_id' => $user->id,
-            'paypal_order_id' => 'PAYPAL-ORDER-123',
+            'provider_payment_intent_id' => 'pi_123',
             'token_amount' => 20,
             'price_cents' => 50,
             'currency' => 'EUR',
@@ -50,11 +53,14 @@ class TokenControllerTest extends TestCase
         ]);
     }
 
-    public function test_checkout_creates_paypal_order_for_admin(): void
+    public function test_checkout_creates_stripe_payment_intent_for_admin(): void
     {
         Http::fake([
-            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token']),
-            '*/v2/checkout/orders' => Http::response(['id' => 'PAYPAL-ORDER-456', 'status' => 'CREATED']),
+            'api.stripe.com/v1/payment_intents' => Http::response([
+                'id' => 'pi_456',
+                'client_secret' => 'pi_456_secret_abc',
+                'status' => 'requires_payment_method',
+            ]),
         ]);
 
         $admin = User::factory()->admin()->create();
@@ -62,7 +68,7 @@ class TokenControllerTest extends TestCase
         $this->actingAs($admin)
             ->postJson('/api/tokens/checkout', ['amount' => 40])
             ->assertOk()
-            ->assertJsonPath('orderID', 'PAYPAL-ORDER-456');
+            ->assertJsonPath('clientSecret', 'pi_456_secret_abc');
     }
 
     public function test_checkout_fails_for_non_member(): void
@@ -83,11 +89,10 @@ class TokenControllerTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function test_checkout_returns_bad_gateway_when_paypal_fails(): void
+    public function test_checkout_returns_bad_gateway_when_stripe_fails(): void
     {
         Http::fake([
-            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token']),
-            '*/v2/checkout/orders' => Http::response(['error' => 'server_error'], 500),
+            'api.stripe.com/v1/payment_intents' => Http::response(['error' => 'server_error'], 500),
         ]);
 
         $user = User::factory()->member()->create();
@@ -99,41 +104,39 @@ class TokenControllerTest extends TestCase
         $this->assertDatabaseCount('token_purchases', 0);
     }
 
-    public function test_capture_requires_auth(): void
+    public function test_confirm_requires_auth(): void
     {
-        $this->postJson('/api/tokens/capture/PAYPAL-ORDER-1')->assertUnauthorized();
+        $this->postJson('/api/tokens/confirm/pi_1')->assertUnauthorized();
     }
 
-    public function test_capture_credits_tokens_and_creates_transaction(): void
+    public function test_confirm_credits_tokens_and_creates_transaction(): void
     {
         Http::fake([
-            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token']),
-            '*/v2/checkout/orders/PAYPAL-ORDER-1/capture' => Http::response([
-                'status' => 'COMPLETED',
-                'purchase_units' => [[
-                    'payments' => ['captures' => [['id' => 'CAPTURE-1', 'status' => 'COMPLETED']]],
-                ]],
+            'api.stripe.com/v1/payment_intents/pi_1' => Http::response([
+                'id' => 'pi_1',
+                'status' => 'succeeded',
+                'latest_charge' => 'ch_1',
             ]),
         ]);
 
         $user = User::factory()->member()->create(['tokens' => 5]);
         $purchase = TokenPurchase::factory()->create([
             'user_id' => $user->id,
-            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'provider_payment_intent_id' => 'pi_1',
             'token_amount' => 20,
             'price_cents' => 50,
             'status' => 'CREATED',
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/capture/PAYPAL-ORDER-1')
+            ->postJson('/api/tokens/confirm/pi_1')
             ->assertOk()
             ->assertJsonPath('user.tokens', 25);
 
         $this->assertDatabaseHas('token_purchases', [
             'id' => $purchase->id,
             'status' => 'COMPLETED',
-            'paypal_capture_id' => 'CAPTURE-1',
+            'provider_charge_id' => 'ch_1',
         ]);
         $this->assertDatabaseHas('token_transactions', [
             'user_id' => $user->id,
@@ -143,19 +146,19 @@ class TokenControllerTest extends TestCase
         ]);
     }
 
-    public function test_capture_is_idempotent_when_already_completed(): void
+    public function test_confirm_is_idempotent_when_already_completed(): void
     {
         $user = User::factory()->member()->create(['tokens' => 25]);
         TokenPurchase::factory()->create([
             'user_id' => $user->id,
-            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'provider_payment_intent_id' => 'pi_1',
             'token_amount' => 20,
             'status' => 'COMPLETED',
-            'paypal_capture_id' => 'CAPTURE-1',
+            'provider_charge_id' => 'ch_1',
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/capture/PAYPAL-ORDER-1')
+            ->postJson('/api/tokens/confirm/pi_1')
             ->assertOk()
             ->assertJsonPath('user.tokens', 25);
 
@@ -163,53 +166,53 @@ class TokenControllerTest extends TestCase
         $this->assertEquals(25, $user->fresh()->tokens);
     }
 
-    public function test_capture_returns_404_for_unknown_order(): void
+    public function test_confirm_returns_404_for_unknown_payment_intent(): void
     {
         $user = User::factory()->member()->create();
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/capture/DOES-NOT-EXIST')
+            ->postJson('/api/tokens/confirm/pi_does-not-exist')
             ->assertStatus(404);
     }
 
-    public function test_capture_returns_404_for_other_users_order(): void
+    public function test_confirm_returns_404_for_other_users_payment_intent(): void
     {
         $owner = User::factory()->member()->create();
         $other = User::factory()->member()->create();
         TokenPurchase::factory()->create([
             'user_id' => $owner->id,
-            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'provider_payment_intent_id' => 'pi_1',
             'status' => 'CREATED',
         ]);
 
         $this->actingAs($other)
-            ->postJson('/api/tokens/capture/PAYPAL-ORDER-1')
+            ->postJson('/api/tokens/confirm/pi_1')
             ->assertStatus(404);
     }
 
-    public function test_capture_marks_failed_when_paypal_declines(): void
+    public function test_confirm_marks_failed_when_stripe_payment_not_succeeded(): void
     {
         Http::fake([
-            '*/v1/oauth2/token' => Http::response(['access_token' => 'fake-token']),
-            '*/v2/checkout/orders/PAYPAL-ORDER-1/capture' => Http::response([
-                'status' => 'DECLINED',
+            'api.stripe.com/v1/payment_intents/pi_1' => Http::response([
+                'id' => 'pi_1',
+                'status' => 'requires_payment_method',
             ]),
         ]);
 
         $user = User::factory()->member()->create(['tokens' => 5]);
         TokenPurchase::factory()->create([
             'user_id' => $user->id,
-            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'provider_payment_intent_id' => 'pi_1',
             'token_amount' => 20,
             'status' => 'CREATED',
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/capture/PAYPAL-ORDER-1')
+            ->postJson('/api/tokens/confirm/pi_1')
             ->assertStatus(422);
 
         $this->assertDatabaseHas('token_purchases', [
-            'paypal_order_id' => 'PAYPAL-ORDER-1',
+            'provider_payment_intent_id' => 'pi_1',
             'status' => 'FAILED',
         ]);
         $this->assertEquals(5, $user->fresh()->tokens);

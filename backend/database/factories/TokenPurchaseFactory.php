@@ -16,7 +16,7 @@ class TokenPurchaseFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'paypal_order_id' => 'PAYPAL-ORDER-'.Str::random(10),
+            'provider_payment_intent_id' => 'pi_'.Str::random(24),
             'token_amount' => 20,
             'price_cents' => 50,
             'currency' => 'EUR',

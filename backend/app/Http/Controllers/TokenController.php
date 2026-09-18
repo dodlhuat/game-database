@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\TokenPurchase;
 use App\Models\User;
-use App\Services\PayPalClient;
+use App\Services\StripeClient;
 use App\Services\TokenPurchaseCompleter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +15,7 @@ use Throwable;
 class TokenController extends Controller
 {
     public function __construct(
-        private PayPalClient $payPal,
+        private StripeClient $stripe,
         private TokenPurchaseCompleter $completer,
     ) {}
 
@@ -41,9 +41,9 @@ class TokenController extends Controller
     }
 
     /**
-     * Creates a PayPal order for a token package. The price is looked up
-     * server-side from config('tokens.packages') — the client only ever
-     * picks a token amount, never a price.
+     * Creates a Stripe PaymentIntent for a token package. The price is
+     * looked up server-side from config('tokens.packages') — the client only
+     * ever picks a token amount, never a price.
      */
     public function checkout(Request $request): JsonResponse
     {
@@ -65,37 +65,43 @@ class TokenController extends Controller
         $currency = config('tokens.currency');
 
         try {
-            $order = $this->payPal->createOrder($priceCents, $currency, "user-{$user->id}-tokens-{$amount}-".uniqid());
+            $intent = $this->stripe->createPaymentIntent($priceCents, $currency, [
+                'user_id' => (string) $user->id,
+                'token_amount' => (string) $amount,
+            ]);
         } catch (Throwable $e) {
             report($e);
 
-            return response()->json(['message' => 'PayPal-Bestellung konnte nicht erstellt werden.'], 502);
+            return response()->json(['message' => 'Zahlung konnte nicht vorbereitet werden.'], 502);
         }
 
-        $purchase = TokenPurchase::create([
+        TokenPurchase::create([
             'user_id' => $user->id,
-            'paypal_order_id' => $order['id'],
+            'provider_payment_intent_id' => $intent['id'],
             'token_amount' => $amount,
             'price_cents' => $priceCents,
             'currency' => $currency,
             'status' => 'CREATED',
-            'payload' => $order,
+            'payload' => $intent,
         ]);
 
-        return response()->json(['orderID' => $purchase->paypal_order_id]);
+        return response()->json(['clientSecret' => $intent['client_secret']]);
     }
 
     /**
-     * Captures a previously created PayPal order and credits the tokens.
-     * Idempotent: calling this again for an already-completed purchase just
-     * returns the current state instead of crediting twice.
+     * Confirms a previously created Stripe PaymentIntent and credits the
+     * tokens. Idempotent: calling this again for an already-completed
+     * purchase just returns the current state instead of crediting twice.
+     *
+     * The client only tells us which payment intent to check — the actual
+     * status is always re-fetched from Stripe, never trusted from the client.
      */
-    public function capture(Request $request, string $orderId): JsonResponse
+    public function confirm(Request $request, string $paymentIntentId): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
 
-        $purchase = TokenPurchase::where('paypal_order_id', $orderId)
+        $purchase = TokenPurchase::where('provider_payment_intent_id', $paymentIntentId)
             ->where('user_id', $user->id)
             ->first();
 
@@ -111,23 +117,22 @@ class TokenController extends Controller
         }
 
         try {
-            $result = $this->payPal->captureOrder($orderId);
+            $intent = $this->stripe->retrievePaymentIntent($paymentIntentId);
         } catch (Throwable $e) {
             report($e);
 
-            return response()->json(['message' => 'Zahlung konnte nicht abgeschlossen werden.'], 502);
+            return response()->json(['message' => 'Zahlung konnte nicht überprüft werden.'], 502);
         }
 
-        $capture = $result['purchase_units'][0]['payments']['captures'][0] ?? null;
-        $captureStatus = $capture['status'] ?? $result['status'] ?? null;
+        $chargeId = $intent['latest_charge'] ?? null;
 
-        if ($captureStatus !== 'COMPLETED' || ! isset($capture['id'])) {
-            $purchase->update(['status' => 'FAILED', 'payload' => $result]);
+        if (($intent['status'] ?? null) !== 'succeeded' || ! is_string($chargeId)) {
+            $purchase->update(['status' => 'FAILED', 'payload' => $intent]);
 
             return response()->json(['message' => 'Zahlung wurde nicht abgeschlossen.'], 422);
         }
 
-        $this->completer->complete($purchase, $capture['id'], $result);
+        $this->completer->complete($purchase, $chargeId, $intent);
 
         return response()->json([
             'message' => "{$purchase->token_amount} Token wurden deinem Konto hinzugefügt.",

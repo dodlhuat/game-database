@@ -4,7 +4,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { useApi } from '~/composables/useApi'
 import { useAuthStore } from '~/stores/auth'
 
-// See test/composables/usePayPalSdk.test.ts for why composable-only tests
+// See test/composables/useStripeSdk.test.ts for why composable-only tests
 // need a mounted host component in the "nuxt" vitest environment.
 const Host = defineComponent({
   setup(_, { expose }) {

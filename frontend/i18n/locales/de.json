@@ -35,6 +35,7 @@
     "borrow_package": "Paket ausleihen (3 Token)",
     "reserve": "Vormerken",
     "load_tokens": "Aufladen",
+    "buy": "Kaufen",
     "extend": "Verlängern",
     "return": "Zurückgeben",
     "damage": "Schaden",
