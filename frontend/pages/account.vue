@@ -104,8 +104,26 @@
             $t('account.password_save')
           }}</UiButton>
         </section>
+
+        <!-- Mitgliedschaft kündigen -->
+        <section
+          v-if="auth.user?.role === 'MEMBER' || auth.user?.role === 'SUPPORTER'"
+          class="account-section account-section--danger"
+        >
+          <h2 class="account-section__title">{{ $t('account.cancel.section_title') }}</h2>
+          <p class="account-section__text">{{ $t('account.cancel.section_text') }}</p>
+          <UiButton variant="secondary" @click="cancelOpen = true">{{
+            $t('account.cancel.open')
+          }}</UiButton>
+        </section>
       </div>
     </div>
+
+    <CancelMembershipModal
+      :open="cancelOpen"
+      @close="cancelOpen = false"
+      @cancelled="onCancelled"
+    />
   </div>
 </template>
 
@@ -142,6 +160,14 @@ const savingProfile = ref(false)
 // Newsletter
 const newsletterOptIn = ref(false)
 const newsletterMsg = ref('')
+
+// Cancel membership
+const cancelOpen = ref(false)
+async function onCancelled(user: unknown) {
+  cancelOpen.value = false
+  if (user) auth.setUser(user as NonNullable<typeof auth.user>)
+  await navigateTo('/dashboard')
+}
 
 // Password
 const pwForm = ref({ current_password: '', new_password: '', new_password_confirmation: '' })
@@ -339,6 +365,15 @@ $hero-muted: var(--secondary-text);
   border: 1px solid var(--divider);
   border-radius: 16px;
   padding: 1.75rem 2rem;
+
+  &--danger {
+    border-color: color-mix(in srgb, var(--error, #e06060) 35%, var(--divider));
+  }
+  &__text {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+  }
 
   &__title {
     font-size: 0.95rem;

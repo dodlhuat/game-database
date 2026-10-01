@@ -205,4 +205,22 @@ describe('account.vue — password', () => {
     expect(passwordSection(wrapper).find('.alert-success').exists()).toBe(true)
     expect((inputs[0]!.element as HTMLInputElement).value).toBe('')
   })
+
+  it('shows the cancel-membership section for members and opens the dialog', async () => {
+    setUser()
+    const wrapper = await mountAccountPage()
+
+    const section = wrapper.find('.account-section--danger')
+    expect(section.exists()).toBe(true)
+
+    await section.find('button').trigger('click')
+    expect(wrapper.findComponent({ name: 'CancelMembershipModal' }).props('open')).toBe(true)
+  })
+
+  it('hides the cancel-membership section for non-members', async () => {
+    setUser({ role: 'USER', is_member: false })
+    const wrapper = await mountAccountPage()
+
+    expect(wrapper.find('.account-section--danger').exists()).toBe(false)
+  })
 })

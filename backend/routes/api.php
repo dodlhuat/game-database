@@ -29,6 +29,7 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanSettingController;
 use App\Http\Controllers\MechanicController;
+use App\Http\Controllers\MembershipCancellationController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
@@ -130,6 +131,8 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     // Mitgliedschaft & Token
     Route::post('/membership/checkout', [MembershipController::class, 'checkout']);
     Route::post('/membership/confirm/{paymentIntentId}', [MembershipController::class, 'confirm']);
+    Route::get('/membership/cancel/preview', [MembershipCancellationController::class, 'preview']);
+    Route::post('/membership/cancel', [MembershipCancellationController::class, 'store']);
     Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
     Route::post('/tokens/checkout', [TokenController::class, 'checkout']);
     Route::post('/tokens/confirm/{paymentIntentId}', [TokenController::class, 'confirm']);
@@ -155,6 +158,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::patch('/users/{user}/approve', [UserController::class, 'approve']);
     Route::patch('/users/{user}/reject', [UserController::class, 'reject']);
     Route::patch('/users/{user}/suspend', [UserController::class, 'suspend']);
+
+    // Kündigungen
+    Route::get('/cancellations', [App\Http\Controllers\Admin\MembershipCancellationController::class, 'index']);
+    Route::patch('/cancellations/{cancellation}/refunded', [App\Http\Controllers\Admin\MembershipCancellationController::class, 'markRefunded']);
 
     // Spieleverwaltung
     Route::post('/games/import', [GameImportExportController::class, 'import']);

@@ -208,4 +208,61 @@ class TokenWallet
 
         return $count;
     }
+
+    /**
+     * Empties the wallet (membership cancellation): all bonus tokens expire,
+     * all normal tokens leave the balance as a REFUND transaction. The money
+     * side is handled by the caller.
+     *
+     * @return array{normal: int, bonus: int}
+     */
+    public function closeAccount(User $user): array
+    {
+        $result = DB::transaction(function () use ($user) {
+            /** @var User $locked */
+            $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+
+            $bonus = 0;
+            TokenLot::where('user_id', $locked->id)
+                ->where('kind', TokenLot::KIND_BONUS)
+                ->where('remaining', '>', 0)
+                ->whereNull('expired_at')
+                ->lockForUpdate()
+                ->get()
+                ->each(function (TokenLot $lot) use ($locked, &$bonus) {
+                    $bonus += $lot->remaining;
+                    TokenTransaction::create([
+                        'user_id' => $locked->id,
+                        'token_lot_id' => $lot->id,
+                        'type' => 'BONUS_EXPIRE',
+                        'amount' => -$lot->remaining,
+                        'description' => 'Bonus-Token verfallen (Kündigung)',
+                    ]);
+                    $lot->update(['remaining' => 0, 'expired_at' => now()]);
+                });
+
+            $normal = $locked->tokens;
+            TokenLot::where('user_id', $locked->id)
+                ->where('kind', TokenLot::KIND_NORMAL)
+                ->where('remaining', '>', 0)
+                ->update(['remaining' => 0]);
+
+            if ($normal > 0) {
+                TokenTransaction::create([
+                    'user_id' => $locked->id,
+                    'type' => 'REFUND',
+                    'amount' => -$normal,
+                    'description' => 'Rückerstattung bei Kündigung',
+                ]);
+            }
+
+            $locked->update(['tokens' => 0, 'bonus_tokens' => 0]);
+
+            return ['normal' => $normal, 'bonus' => $bonus];
+        });
+
+        $user->refresh();
+
+        return $result;
+    }
 }

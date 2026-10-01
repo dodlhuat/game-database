@@ -134,6 +134,28 @@
     "email_invalid_link_desc": "Dieser Bestätigungslink ist ungültig oder abgelaufen. Bitte registriere dich erneut oder fordere einen neuen Link an."
   },
   "account": {
+    "cancel": {
+      "section_title": "Mitgliedschaft kündigen",
+      "section_text": "Wenn du kündigst, bekommst du deine verbleibenden Token zurückerstattet. Geschenkte Bonus-Token verfallen.",
+      "open": "Mitgliedschaft kündigen",
+      "title": "Mitgliedschaft kündigen",
+      "refund_info": "Du bekommst {tokens} Token zurück: {amount}",
+      "fee_info": "nach Abzug einer Bearbeitungsgebühr; die Rücküberweisung erfolgt manuell",
+      "no_refund": "Es gibt keine Token, die zurückerstattet werden können.",
+      "bonus_forfeited": "{bonus} geschenkte Bonus-Token verfallen mit der Kündigung.",
+      "non_refundable": "{tokens} Token werden nicht erstattet (nicht bezahlt oder innerhalb von {days} Tagen nach dem Kauf).",
+      "account_holder": "Kontoinhaber",
+      "iban": "IBAN für die Rücküberweisung",
+      "reason": "Warum kündigst du? (optional)",
+      "confirm": "Ich möchte meine Mitgliedschaft verbindlich kündigen.",
+      "submit": "Jetzt kündigen",
+      "blocked": "Die Kündigung ist aktuell nicht möglich.",
+      "blocker_open_loans": "Du hast noch ausgeliehene Spiele oder Pakete. Bitte gib sie zuerst zurück.",
+      "blocker_blocked_tokens": "Es sind noch Token als Kaution blockiert. Sie werden nach der Rückgabeprüfung frei.",
+      "done": "Deine Mitgliedschaft wurde gekündigt. Eine Bestätigung ist per E-Mail unterwegs.",
+      "done_refund": "Wir überweisen dir {amount} für {tokens} Token.",
+      "close": "Schließen"
+    },
     "settings": "Einstellungen",
     "my_account": "Mein Konto",
     "profile_title": "Profil",
@@ -431,6 +453,7 @@
       "copies_to_review": "Kopien zu prüfen"
     },
     "breadcrumb": {
+      "cancellations": "Kündigungen",
       "games": "Spiele",
       "tags": "Tags",
       "mechanics": "Mechaniken",
@@ -732,6 +755,22 @@
     },
     "extensions": {
       "title": "Verlängerungsanträge"
+    },
+    "cancellations": {
+      "title": "Kündigungen",
+      "open": "Offene Rücküberweisungen",
+      "member": "Mitglied",
+      "refund": "Rückzahlung",
+      "bank": "Konto",
+      "reason": "Grund",
+      "date": "Gekündigt am",
+      "status_requested": "Offen",
+      "status_refunded": "Überwiesen",
+      "status_no_refund": "Keine Rückzahlung",
+      "mark_refunded": "Als überwiesen markieren",
+      "empty": "Keine Kündigungen vorhanden.",
+      "bonus_forfeited": "{bonus} Bonus verfallen",
+      "tokens_info": "{tokens} Token, Abzug {fee}"
     },
     "package_loans": {
       "title": "Paket-Ausleihen",
