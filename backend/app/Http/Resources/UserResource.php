@@ -27,6 +27,7 @@ class UserResource extends JsonResource
             'terms_accepted_at' => $this->terms_accepted_at,
             'terms_version' => $this->terms_version,
             'tokens' => $this->tokens,
+            'bonus_tokens' => $this->bonus_tokens,
             'tokens_blocked' => $this->tokens_blocked,
             'membership_expires_at' => $this->membership_expires_at,
             'is_member' => $this->isMember(),

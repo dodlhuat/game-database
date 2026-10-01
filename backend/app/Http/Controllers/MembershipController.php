@@ -7,11 +7,24 @@ use App\Models\User;
 use App\Notifications\WelcomeMemberNotification;
 use App\Notifications\WelcomeSupporterNotification;
 use App\Rules\AustrianPostalCode;
+use App\Services\TokenWallet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class MembershipController extends Controller
 {
+    public function __construct(private TokenWallet $wallet) {}
+
+    private function grantMembershipTokens(User $user): void
+    {
+        $this->wallet->grantTokens(
+            $user,
+            (int) config('membership.tokens'),
+            'MEMBERSHIP',
+            (int) config('tokens.token_value_cents'),
+        );
+    }
+
     public function upgrade(Request $request): JsonResponse
     {
         /** @var User $user */
@@ -28,12 +41,12 @@ class MembershipController extends Controller
         ]);
 
         $user->role = 'MEMBER';
-        $user->tokens += 20;
         $user->membership_expires_at = now()->addYear();
         $user->street = $validated['street'];
         $user->postal_code = $validated['postal_code'];
         $user->city = $validated['city'];
         $user->save();
+        $this->grantMembershipTokens($user);
 
         $user->notify(new WelcomeMemberNotification);
 
@@ -83,8 +96,8 @@ class MembershipController extends Controller
         }
 
         $user->role = 'MEMBER';
-        $user->tokens += 20;
         $user->save();
+        $this->grantMembershipTokens($user);
 
         $user->notify(new WelcomeMemberNotification);
 
@@ -120,11 +133,12 @@ class MembershipController extends Controller
             : now();
 
         $user->membership_expires_at = $base->addYear();
-        if ($user->role === 'MEMBER') {
-            $user->tokens += 20;
-        }
         $user->renewal_reminder_sent_at = null; // allow reminder to be sent again next cycle
         $user->save();
+
+        if ($user->role === 'MEMBER') {
+            $this->grantMembershipTokens($user);
+        }
 
         return response()->json([
             'message' => $user->role === 'MEMBER'

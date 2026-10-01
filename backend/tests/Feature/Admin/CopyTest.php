@@ -145,6 +145,26 @@ class CopyTest extends TestCase
         $this->assertDatabaseHas('copies', ['id' => $copy->id, 'condition' => 'DAMAGED']);
     }
 
+    public function test_mark_damaged_forfeits_deposit_from_balance(): void
+    {
+        Notification::fake();
+        $user = User::factory()->member()->create(['tokens' => 10, 'tokens_blocked' => 4]);
+        $copy = Copy::factory()->create(['condition' => 'REVIEW']);
+        Loan::factory()->returned()->create([
+            'copy_id' => $copy->id,
+            'user_id' => $user->id,
+            'deposit_tokens' => 4,
+        ]);
+
+        $this->actingAs($this->admin())
+            ->postJson("/api/admin/copies/{$copy->id}/mark-damaged")
+            ->assertOk();
+
+        $user->refresh();
+        $this->assertSame(0, $user->tokens_blocked);
+        $this->assertSame(6, $user->tokens);
+    }
+
     public function test_approve_accepts_explicit_condition(): void
     {
         Notification::fake();

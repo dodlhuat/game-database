@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Notifications\DepositForfeited;
 use App\Notifications\DepositReleased;
 use App\Notifications\ReservationAvailable;
+use App\Services\TokenWallet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -23,6 +24,8 @@ use Illuminate\Support\Str;
 
 class CopyController extends Controller
 {
+    public function __construct(private TokenWallet $wallet) {}
+
     public function index(Request $request): AnonymousResourceCollection
     {
         $copies = Copy::with(['game', 'activeLoans', 'lastReturnedLoan.user'])
@@ -207,6 +210,8 @@ class CopyController extends Controller
                 /** @var Game $loanGame */
                 $loanGame = $loanCopy->game;
                 $loanUser->decrement('tokens_blocked', $loan->deposit_tokens);
+                // Einbehaltene Kaution verlässt das Guthaben tatsächlich
+                $this->wallet->spend($loanUser, $loan->deposit_tokens);
                 TokenTransaction::create([
                     'user_id' => $loan->user_id,
                     'loan_id' => $loan->id,

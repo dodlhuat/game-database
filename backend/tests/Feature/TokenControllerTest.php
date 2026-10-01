@@ -19,9 +19,9 @@ class TokenControllerTest extends TestCase
             ->assertOk()
             ->assertJson([
                 'data' => [
-                    ['amount' => 20, 'price_cents' => 50, 'currency' => 'EUR'],
-                    ['amount' => 30, 'price_cents' => 100, 'currency' => 'EUR'],
-                    ['amount' => 40, 'price_cents' => 150, 'currency' => 'EUR'],
+                    ['amount' => 20, 'price_cents' => 1000, 'currency' => 'EUR'],
+                    ['amount' => 30, 'price_cents' => 1450, 'currency' => 'EUR'],
+                    ['amount' => 40, 'price_cents' => 1850, 'currency' => 'EUR'],
                 ],
             ]);
     }
@@ -47,7 +47,7 @@ class TokenControllerTest extends TestCase
             'user_id' => $user->id,
             'provider_payment_intent_id' => 'pi_123',
             'token_amount' => 20,
-            'price_cents' => 50,
+            'price_cents' => 1000,
             'currency' => 'EUR',
             'status' => 'CREATED',
         ]);
@@ -124,7 +124,7 @@ class TokenControllerTest extends TestCase
             'user_id' => $user->id,
             'provider_payment_intent_id' => 'pi_1',
             'token_amount' => 20,
-            'price_cents' => 50,
+            'price_cents' => 1000,
             'status' => 'CREATED',
         ]);
 

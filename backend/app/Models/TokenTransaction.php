@@ -14,6 +14,7 @@ class TokenTransaction extends Model
         'user_id',
         'loan_id',
         'token_purchase_id',
+        'token_lot_id',
         'type',
         'amount',
         'description',

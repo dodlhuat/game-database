@@ -11,6 +11,7 @@ use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\TokenTransaction;
 use App\Models\User;
+use App\Services\TokenWallet;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
+    public function __construct(private TokenWallet $wallet) {}
+
     public function index(Request $request): AnonymousResourceCollection
     {
         /** @var User $user */
@@ -104,7 +107,7 @@ class LoanController extends Controller
             ]);
 
             if (! $user->isAdmin()) {
-                $user->decrement('tokens', $loanCost);
+                $this->wallet->spend($user, $loanCost);
                 TokenTransaction::create([
                     'user_id' => $user->id,
                     'loan_id' => $loan->id,

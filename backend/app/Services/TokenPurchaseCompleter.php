@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\TokenPurchase;
 use App\Models\TokenTransaction;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\DB;
  */
 class TokenPurchaseCompleter
 {
+    public function __construct(private TokenWallet $wallet) {}
+
     /** @param  array<string, mixed>  $rawPayload */
     public function complete(TokenPurchase $purchase, string $chargeId, array $rawPayload): TokenPurchase
     {
@@ -32,7 +35,14 @@ class TokenPurchaseCompleter
                 'captured_at' => now(),
             ]);
 
-            $locked->user()->increment('tokens', $locked->token_amount);
+            // Floor, damit eine spätere Erstattung nie mehr als den Kaufpreis ergibt
+            $this->wallet->grantTokens(
+                User::findOrFail($locked->user_id),
+                $locked->token_amount,
+                'PURCHASE',
+                intdiv($locked->price_cents, $locked->token_amount),
+                now()->addDays((int) config('membership.purchase_refund_wait_days')),
+            );
 
             TokenTransaction::create([
                 'user_id' => $locked->user_id,
