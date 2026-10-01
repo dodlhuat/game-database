@@ -124,7 +124,9 @@ class MembershipPaymentTest extends TestCase
             ->assertOk()
             ->assertJsonPath('user.role', 'MEMBER')
             ->assertJsonPath('user.tokens', 20)
-            ->assertJsonPath('user.bonus_tokens', 20);
+            ->assertJsonPath('user.bonus_tokens', 20)
+            ->assertJsonPath('user.bonus_lots.0.remaining', 20)
+            ->assertJsonCount(1, 'user.bonus_lots');
 
         $user->refresh();
         $this->assertTrue($user->membership_expires_at->isFuture());

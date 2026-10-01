@@ -105,7 +105,7 @@
                 {{ loanError }}
               </div>
               <button
-                v-if="(auth.user?.tokens ?? 0) >= 3"
+                v-if="auth.totalTokens >= 3"
                 class="detail__btn detail__btn--primary"
                 :disabled="loaning"
                 @click="borrowPackage"
@@ -161,7 +161,7 @@ async function borrowPackage() {
   loanError.value = ''
   try {
     await api.post('/package-loans', { package_id: pkg.value.id })
-    if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 3) })
+    auth.spendTokens(3)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
     const e = err as { message?: string }

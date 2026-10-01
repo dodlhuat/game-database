@@ -65,3 +65,46 @@ describe('auth store — canBorrow', () => {
     expect(auth.canBorrow).toBe(false)
   })
 })
+
+describe('auth store — bonus tokens', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('adds bonus tokens to the total and subtracts blocked ones for free tokens', () => {
+    const auth = setUser({ tokens: 10, bonus_tokens: 5, tokens_blocked: 4 })
+    expect(auth.bonusTokens).toBe(5)
+    expect(auth.totalTokens).toBe(15)
+    expect(auth.freeTokens).toBe(11)
+  })
+
+  it('treats a missing bonus_tokens field as zero', () => {
+    const auth = setUser({ tokens: 3 })
+    expect(auth.totalTokens).toBe(3)
+  })
+
+  it('exposes the earliest bonus expiry', () => {
+    const auth = setUser({
+      bonus_tokens: 5,
+      bonus_lots: [
+        { remaining: 2, expires_at: future },
+        { remaining: 3, expires_at: '2099-01-01T00:00:00Z' },
+      ],
+    })
+    expect(auth.bonusExpiresAt).toBe(future)
+  })
+
+  it('spends bonus tokens before normal tokens', () => {
+    const auth = setUser({ tokens: 10, bonus_tokens: 3 })
+    auth.spendTokens(5)
+    expect(auth.user?.bonus_tokens).toBe(0)
+    expect(auth.user?.tokens).toBe(8)
+  })
+
+  it('spends only bonus tokens when they cover the cost', () => {
+    const auth = setUser({ tokens: 10, bonus_tokens: 4 })
+    auth.spendTokens(3)
+    expect(auth.user?.bonus_tokens).toBe(1)
+    expect(auth.user?.tokens).toBe(10)
+  })
+})

@@ -14,6 +14,7 @@ interface User {
   newsletter_opt_in: boolean
   tokens: number
   bonus_tokens: number
+  bonus_lots?: { remaining: number; expires_at: string }[]
   tokens_blocked: number
   membership_expires_at: string | null
   is_member: boolean
@@ -45,6 +46,14 @@ export const useAuthStore = defineStore('auth', {
       if (!state.user.membership_expires_at) return false
       return new Date(state.user.membership_expires_at) > new Date()
     },
+    bonusTokens: (state) => state.user?.bonus_tokens ?? 0,
+    // Normal plus bonus tokens
+    totalTokens: (state) => (state.user?.tokens ?? 0) + (state.user?.bonus_tokens ?? 0),
+    freeTokens(): number {
+      return Math.max(0, this.totalTokens - (this.user?.tokens_blocked ?? 0))
+    },
+    // Earliest expiry of any bonus lot, null if no bonus tokens
+    bonusExpiresAt: (state) => state.user?.bonus_lots?.[0]?.expires_at ?? null,
     isRegisteredUser: (state) => state.user?.role === 'USER',
     canBorrow(): boolean {
       return this.isMember || this.isAdmin
@@ -62,6 +71,17 @@ export const useAuthStore = defineStore('auth', {
     setUser(user: User) {
       this.user = user
       localStorage.setItem('auth_user', JSON.stringify(user))
+    },
+
+    // Optimistic local spend: bonus tokens go first, like on the server
+    spendTokens(amount: number) {
+      if (!this.user) return
+      const fromBonus = Math.min(this.user.bonus_tokens ?? 0, amount)
+      this.setUser({
+        ...this.user,
+        bonus_tokens: (this.user.bonus_tokens ?? 0) - fromBonus,
+        tokens: Math.max(0, this.user.tokens - (amount - fromBonus)),
+      })
     },
 
     logout() {

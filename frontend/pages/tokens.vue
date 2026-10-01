@@ -26,7 +26,16 @@
                 <use href="/svg-icons/icons.svg#wallet" />
               </svg>
               <span class="balance-chip__val">{{ auth.user?.tokens ?? 0 }}</span>
-              <span class="balance-chip__label">{{ $t('pages.tokens.balance_total') }}</span>
+              <span class="balance-chip__label">{{ $t('pages.tokens.balance_normal') }}</span>
+            </div>
+            <div v-if="auth.bonusTokens > 0" class="balance-chip balance-chip--bonus">
+              <svg class="icon-svg balance-chip__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#token" />
+              </svg>
+              <span class="balance-chip__val">{{ auth.bonusTokens }}</span>
+              <span class="balance-chip__label">{{
+                $t('pages.tokens.balance_bonus', { date: formatDate(auth.bonusExpiresAt) })
+              }}</span>
             </div>
             <div v-if="blockedTokens > 0" class="balance-chip balance-chip--locked">
               <svg class="icon-svg balance-chip__icon" aria-hidden="true">
@@ -204,7 +213,7 @@ const success = ref('')
 const error = ref('')
 
 const blockedTokens = computed(() => auth.user?.tokens_blocked ?? 0)
-const freeTokens = computed(() => (auth.user?.tokens ?? 0) - blockedTokens.value)
+const freeTokens = computed(() => auth.freeTokens)
 
 const tokenPackages = ref<TokenPackage[]>([])
 const packagesLoading = ref(true)
@@ -265,7 +274,8 @@ async function loadTx(page: number) {
   }
 }
 
-function formatDate(iso: string) {
+function formatDate(iso: string | null) {
+  if (!iso) return '—'
   return new Date(iso).toLocaleDateString('de-AT', {
     day: '2-digit',
     month: '2-digit',
@@ -280,6 +290,9 @@ const TX_LABELS: Record<string, string> = {
   DEPOSIT_FORFEIT: 'pages.tokens.tx_deposit_forfeit',
   PURCHASE: 'pages.tokens.tx_purchase',
   ADMIN_ADJUSTMENT: 'pages.tokens.tx_admin',
+  BONUS_GRANT: 'pages.tokens.tx_bonus_grant',
+  BONUS_EXPIRE: 'pages.tokens.tx_bonus_expire',
+  REFUND: 'pages.tokens.tx_refund',
 }
 const TX_CLASSES: Record<string, string> = {
   BORROW: 'badge-error',
@@ -288,6 +301,9 @@ const TX_CLASSES: Record<string, string> = {
   DEPOSIT_FORFEIT: 'badge-error badge-solid',
   PURCHASE: 'badge-success',
   ADMIN_ADJUSTMENT: '',
+  BONUS_GRANT: 'badge-success',
+  BONUS_EXPIRE: 'badge-warning',
+  REFUND: 'badge-success',
 }
 
 function txLabel(type: string) {
@@ -460,6 +476,14 @@ $border-amber: rgba(212, 146, 30, 0.4);
   &--locked {
     border-color: $border-amber;
     background: rgba($amber, 0.08);
+  }
+  &--bonus &__icon,
+  &--bonus &__val {
+    color: var(--success, #4caf7d);
+  }
+  &--bonus {
+    border-color: color-mix(in srgb, var(--success, #4caf7d) 40%, transparent);
+    background: color-mix(in srgb, var(--success, #4caf7d) 8%, transparent);
   }
 }
 

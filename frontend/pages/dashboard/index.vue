@@ -70,8 +70,14 @@
             <div class="token-bar">
               <span class="token-bar__icon">◈</span>
               <span class="token-bar__count"
-                >{{ auth.user?.tokens ?? 0 }} {{ $t('dashboard.tokens.label') }}</span
+                >{{ auth.totalTokens }} {{ $t('dashboard.tokens.label') }}</span
               >
+              <span v-if="auth.bonusTokens > 0" class="token-bar__bonus">{{
+                $t('dashboard.tokens.bonus_note', {
+                  bonus: auth.bonusTokens,
+                  date: formatDate(auth.bonusExpiresAt),
+                })
+              }}</span>
               <NuxtLink to="/tokens" class="token-bar__link">{{
                 $t('dashboard.tokens.charge')
               }}</NuxtLink>
@@ -564,7 +570,7 @@ async function submitExtension() {
   try {
     await requestExtension(extensionLoan.value.id, extensionDate.value)
     data.value = await fetchDashboard()
-    if (auth.user) auth.setUser({ ...auth.user, tokens: Math.max(0, auth.user.tokens - 1) })
+    auth.spendTokens(1)
     extensionLoan.value = null
   } finally {
     extending.value = false
@@ -1384,6 +1390,12 @@ $hero-divider-20: var(--divider);
     font-size: 0.875rem;
     font-weight: 700;
     color: $hero-text;
+  }
+  &__bonus {
+    font-size: 0.72rem;
+    color: var(--secondary-text);
+    border-left: 1px solid $amber-25;
+    padding-left: 0.5rem;
   }
   &__link {
     font-size: 0.75rem;

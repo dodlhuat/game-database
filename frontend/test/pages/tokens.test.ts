@@ -151,4 +151,28 @@ describe('tokens.vue', () => {
     expect(wrapper.find('.empty-state').exists()).toBe(true)
     expect(wrapper.findAll('.token-card')).toHaveLength(0)
   })
+
+  it('shows the bonus balance with its expiry date when the user has bonus tokens', async () => {
+    const auth = setMemberUser()
+    auth.user = {
+      ...auth.user!,
+      bonus_tokens: 20,
+      bonus_lots: [{ remaining: 20, expires_at: '2027-03-15T00:00:00Z' }],
+    }
+
+    const wrapper = await mountTokensPage()
+    await flushPromises()
+
+    const chip = wrapper.find('.balance-chip--bonus')
+    expect(chip.exists()).toBe(true)
+    expect(chip.text()).toContain('20')
+    expect(chip.text()).toContain('15.03.2027')
+  })
+
+  it('hides the bonus chip when there are no bonus tokens', async () => {
+    const wrapper = await mountTokensPage()
+    await flushPromises()
+
+    expect(wrapper.find('.balance-chip--bonus').exists()).toBe(false)
+  })
 })

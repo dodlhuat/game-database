@@ -181,7 +181,8 @@
     },
     "tokens": {
       "label": "Token",
-      "charge": "Aufladen"
+      "charge": "Aufladen",
+      "bonus_note": "davon {bonus} Bonus (gültig bis {date})"
     },
     "table": {
       "game": "Spiel",
@@ -383,6 +384,8 @@
       "popular": "Beliebt",
       "costs_title": "Token-Kosten",
       "balance_total": "Gesamt",
+      "balance_normal": "Normale Token",
+      "balance_bonus": "Bonus-Token · gültig bis {date}",
       "balance_blocked": "Blockiert (Kaution)",
       "balance_free": "Verfügbar",
       "cost_game": "2 Token: Spiel ausleihen",
@@ -396,7 +399,10 @@
       "tx_deposit_release": "Kaution freigegeben",
       "tx_deposit_forfeit": "Kaution einbehalten",
       "tx_purchase": "Kauf",
-      "tx_admin": "Admin-Anpassung"
+      "tx_admin": "Admin-Anpassung",
+      "tx_bonus_grant": "Bonus-Token erhalten",
+      "tx_bonus_expire": "Bonus-Token verfallen",
+      "tx_refund": "Rückerstattung"
     }
   },
   "admin": {
@@ -454,6 +460,7 @@
       "email": "E-Mail",
       "role": "Rolle",
       "tokens": "Token",
+      "bonus": "Bonus",
       "membership": "Mitgliedschaft",
       "registered": "Registriert"
     },

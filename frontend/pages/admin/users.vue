@@ -58,7 +58,12 @@
                       statusLabel(user.status)
                     }}</span>
                   </td>
-                  <td class="text-muted">{{ user.tokens ?? 0 }}</td>
+                  <td class="text-muted">
+                    {{ user.tokens ?? 0 }}
+                    <span v-if="user.bonus_tokens" class="text-muted">
+                      + {{ user.bonus_tokens }} {{ $t('admin.table.bonus') }}
+                    </span>
+                  </td>
                   <td class="text-muted">
                     <span
                       v-if="user.membership_expires_at"
@@ -316,6 +321,7 @@ interface User {
   status: string
   created_at: string
   tokens?: number
+  bonus_tokens?: number
   tokens_blocked?: number
   membership_expires_at?: string | null
 }

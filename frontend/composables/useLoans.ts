@@ -38,6 +38,9 @@ export interface TokenTransaction {
     | 'DEPOSIT_FORFEIT'
     | 'PURCHASE'
     | 'ADMIN_ADJUSTMENT'
+    | 'BONUS_GRANT'
+    | 'BONUS_EXPIRE'
+    | 'REFUND'
   amount: number
   description: string | null
   created_at: string

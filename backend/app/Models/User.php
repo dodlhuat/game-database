@@ -121,6 +121,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     // Relations
+
+    /** @return HasMany<TokenLot, $this> */
+    public function bonusLots(): HasMany
+    {
+        return $this->hasMany(TokenLot::class)
+            ->where('kind', TokenLot::KIND_BONUS)
+            ->where('remaining', '>', 0)
+            ->whereNull('expired_at')
+            ->orderBy('expires_at')
+            ->orderBy('id');
+    }
+
     /** @return HasMany<Loan, $this> */
     public function loans(): HasMany
     {

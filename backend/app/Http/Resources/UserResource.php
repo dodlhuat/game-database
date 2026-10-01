@@ -28,6 +28,13 @@ class UserResource extends JsonResource
             'terms_version' => $this->terms_version,
             'tokens' => $this->tokens,
             'bonus_tokens' => $this->bonus_tokens,
+            // Active bonus lots (earliest expiry first) — only queried when there is any bonus
+            'bonus_lots' => $this->bonus_tokens > 0
+                ? $this->bonusLots->map(fn ($lot) => [
+                    'remaining' => $lot->remaining,
+                    'expires_at' => $lot->expires_at,
+                ])->values()
+                : [],
             'tokens_blocked' => $this->tokens_blocked,
             'membership_expires_at' => $this->membership_expires_at,
             'is_member' => $this->isMember(),

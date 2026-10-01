@@ -181,7 +181,7 @@
           </template>
           <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
-              v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
+              v-if="auth.totalTokens >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-btn gd-btn--primary"
               @click="openLoanModal"
             >
@@ -276,7 +276,7 @@
             <span v-if="auth.isLoggedIn && auth.canBorrow" class="gd-bar__tokens">
               <svg class="icon-svg" style="font-size: 0.85rem">
                 <use href="/svg-icons/icons.svg#toll" /></svg
-              >{{ auth.user?.tokens ?? 0 }} Token
+              >{{ auth.totalTokens }} Token
             </span>
           </div>
           <template v-if="!auth.isLoggedIn">
@@ -297,7 +297,7 @@
           </template>
           <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
-              v-if="(auth.user?.tokens ?? 0) >= loanCost + (game?.deposit_tokens ?? 0)"
+              v-if="auth.totalTokens >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-bar__btn"
               @click="openLoanModal"
             >
@@ -516,9 +516,9 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     game.value.already_borrowed = true
     if (auth.user) {
       const deposit = game.value.deposit_tokens ?? 0
+      auth.spendTokens(loanCost.value)
       auth.setUser({
         ...auth.user,
-        tokens: Math.max(0, auth.user.tokens - loanCost.value),
         tokens_blocked: (auth.user.tokens_blocked ?? 0) + deposit,
       })
     }
