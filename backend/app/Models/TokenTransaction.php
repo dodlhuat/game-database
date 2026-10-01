@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\TokenTransactionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TokenTransaction extends Model
 {
+    /** @use HasFactory<TokenTransactionFactory> */
     use HasFactory;
 
     protected $fillable = [

@@ -868,23 +868,24 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/membership/upgrade': {
+  '/membership/pricing': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    get?: never
+    /** Public price and benefits of the membership, straight from config */
+    get: operations['membership.pricing']
     put?: never
-    post: operations['membership.upgrade']
+    post?: never
     delete?: never
     options?: never
     head?: never
     patch?: never
     trace?: never
   }
-  '/membership/upgrade-supporter': {
+  '/membership/checkout': {
     parameters: {
       query?: never
       header?: never
@@ -893,7 +894,33 @@ export interface paths {
     }
     get?: never
     put?: never
-    post: operations['membership.upgradeSupporter']
+    /**
+     * Creates a Stripe PaymentIntent for a membership (new member, new
+     *     supporter or renewal). The price always comes from config — the client
+     *     only picks the type. The membership itself is only activated once the
+     *     payment is confirmed (see confirm() and the Stripe webhook)
+     */
+    post: operations['membership.checkout']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/membership/confirm/{paymentIntentId}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirms a previously created PaymentIntent and activates the
+     *     membership. Idempotent. The status is always re-fetched from Stripe
+     */
+    post: operations['membership.confirm']
     delete?: never
     options?: never
     head?: never
@@ -909,6 +936,7 @@ export interface paths {
     }
     get?: never
     put?: never
+    /** Supporter who already paid the fee upgrades to a full membership */
     post: operations['membership.activateFullMembership']
     delete?: never
     options?: never
@@ -916,7 +944,24 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/membership/renew': {
+  '/membership/cancel/preview': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** What the user would get back if they cancelled now */
+    get: operations['membershipCancellation.preview']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/membership/cancel': {
     parameters: {
       query?: never
       header?: never
@@ -925,11 +970,43 @@ export interface paths {
     }
     get?: never
     put?: never
-    post: operations['membership.renew']
+    post: operations['membershipCancellation.store']
     delete?: never
     options?: never
     head?: never
     patch?: never
+    trace?: never
+  }
+  '/admin/cancellations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['membershipCancellation.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/cancellations/{cancellation}/refunded': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['membershipCancellation.markRefunded']
     trace?: never
   }
   '/admin/newsletters': {
@@ -1172,6 +1249,22 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/webhooks/stripe': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['stripeWebhook.handle']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/tags': {
     parameters: {
       query?: never
@@ -1220,7 +1313,28 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/tokens/add': {
+  '/tokens/packages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /**
+     * Public price list for the token packages — token amount + price, read
+     *     straight from config('tokens.packages') so the frontend never has to
+     *     hardcode prices
+     */
+    get: operations['token.packages']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/tokens/checkout': {
     parameters: {
       query?: never
       header?: never
@@ -1229,7 +1343,35 @@ export interface paths {
     }
     get?: never
     put?: never
-    post: operations['token.add']
+    /**
+     * Creates a Stripe PaymentIntent for a token package. The price is
+     *     looked up server-side from config('tokens.packages') — the client only
+     *     ever picks a token amount, never a price
+     */
+    post: operations['token.checkout']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/tokens/confirm/{paymentIntentId}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * Confirms a previously created Stripe PaymentIntent and credits the
+     *     tokens. Idempotent: calling this again for an already-completed
+     *     purchase just returns the current state instead of crediting twice
+     * @description The client only tells us which payment intent to check — the actual
+     *     status is always re-fetched from Stripe, never trusted from the client.
+     */
+    post: operations['token.confirm']
     delete?: never
     options?: never
     head?: never
@@ -1381,7 +1523,8 @@ export interface components {
         id: number
         title: string
       }
-      condition: string
+      /** @enum {string} */
+      condition: 'NEW' | 'VERY_GOOD' | 'GOOD' | 'WORN' | 'DAMAGED' | 'LOCKED' | 'REVIEW'
       borrow_count: number
       qr_code: string | null
       owner?: string | null
@@ -1530,12 +1673,12 @@ export interface components {
       deposit_tokens: number
       cover_image_url: string | null
       is_active: boolean
-      available_copies_count?: string | 0
+      available_copies_count?: number
       copies_count?: string | 0
       avg_rating?: null | number
       reviews_count?: number
-      is_favorited?: string
-      already_borrowed?: string
+      is_favorited?: boolean | null
+      already_borrowed?: boolean | null
       images?: {
         id: number
         url: string
@@ -1557,11 +1700,11 @@ export interface components {
     /** LoanResource */
     LoanResource: {
       id: number
-      copy?: components['schemas']['CopyResource']
+      copy?: components['schemas']['CopyResource'] & Record<string, never>
       game?: components['schemas']['GameResource'] | null
       user?: components['schemas']['UserResource']
       /** Format: date-time */
-      start_date: string
+      start_date: string | null
       /** Format: date-time */
       due_date: string
       /** Format: date-time */
@@ -1652,7 +1795,7 @@ export interface components {
       returned_at: string | null
       status: string
       is_overdue: string
-      loans?: components['schemas']['LoanResource'][]
+      loans?: (components['schemas']['LoanResource'] & Record<string, never>)[]
       /** Format: date-time */
       created_at: string | null
     }
@@ -1743,18 +1886,23 @@ export interface components {
       /** Format: date-time */
       updated_at: string | null
     }
-    /** TokenTransaction */
-    TokenTransaction: {
+    /** TokenTransactionResource */
+    TokenTransactionResource: {
       id: number
-      user_id: number
       loan_id: number | null
       type: string
       amount: number
       description: string | null
       /** Format: date-time */
       created_at: string | null
-      /** Format: date-time */
-      updated_at: string | null
+      loan?: {
+        copy?: {
+          game?: {
+            title: string
+            slug: string
+          }
+        }
+      }
     }
     /** UserResource */
     UserResource: {
@@ -1766,13 +1914,23 @@ export interface components {
       postal_code: string | null
       city: string | null
       date_of_birth: string | null
-      role: string
+      /** @enum {string} */
+      role: 'USER' | 'SUPPORTER' | 'MEMBER' | 'ADMIN'
       status: string
       newsletter_opt_in: boolean
       /** Format: date-time */
       terms_accepted_at: string | null
       terms_version: string | null
       tokens: number
+      bonus_tokens: number
+      /** @description Active bonus lots (earliest expiry first) — only queried when there is any bonus */
+      bonus_lots:
+        | {
+            remaining: number
+            /** Format: date-time */
+            expires_at: string | null
+          }[]
+        | string[]
       tokens_blocked: number
       /** Format: date-time */
       membership_expires_at: string | null
@@ -2052,7 +2210,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['CopyResource']
+            data: components['schemas']['CopyResource'] & Record<string, never>
           }
         }
       }
@@ -2079,7 +2237,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['CopyResource']
+            data: components['schemas']['CopyResource'] & Record<string, never>
           }
         }
       }
@@ -2110,7 +2268,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['CopyResource']
+            data: components['schemas']['CopyResource'] & Record<string, never>
           }
         }
       }
@@ -2184,7 +2342,7 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Kopie freigegeben.'
-            copy: components['schemas']['CopyResource']
+            copy: components['schemas']['CopyResource'] & Record<string, never>
           }
         }
       }
@@ -2219,7 +2377,7 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Kopie als beschädigt markiert.'
-            copy: components['schemas']['CopyResource']
+            copy: components['schemas']['CopyResource'] & Record<string, never>
           }
         }
       }
@@ -2330,9 +2488,9 @@ export interface operations {
         }
         content: {
           'application/json': {
-            active_loans: components['schemas']['LoanResource'][]
-            loan_history: components['schemas']['LoanResource'][]
-            reservations: components['schemas']['ReservationResource'][]
+            active_loans: (components['schemas']['LoanResource'] & Record<string, never>)[]
+            loan_history: (components['schemas']['LoanResource'] & Record<string, never>)[]
+            reservations: (components['schemas']['ReservationResource'] & Record<string, never>)[]
             stats: {
               total_loans: number
               active_loans_count: number
@@ -2900,7 +3058,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource'][]
+            data: (components['schemas']['GameResource'] & Record<string, never>)[]
           }
         }
       }
@@ -2980,7 +3138,6 @@ export interface operations {
       }
     }
     responses: {
-      /** @description Always respond with success to prevent email enumeration */
       200: {
         headers: {
           [name: string]: unknown
@@ -3013,7 +3170,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource'][]
+            data: (components['schemas']['GameResource'] & Record<string, never>)[]
             links: {
               first: string | null
               last: string | null
@@ -3063,7 +3220,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource']
+            data: components['schemas']['GameResource'] & Record<string, never>
           }
         }
       }
@@ -3140,7 +3297,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource']
+            data: components['schemas']['GameResource'] & Record<string, never>
           }
         }
       }
@@ -3167,7 +3324,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource']
+            data: components['schemas']['GameResource'] & Record<string, never>
           }
         }
       }
@@ -3198,7 +3355,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['GameResource']
+            data: components['schemas']['GameResource'] & Record<string, never>
           }
         }
       }
@@ -3323,7 +3480,7 @@ export interface operations {
           'application/json': {
             new: number
             updated: number
-            total: string
+            total: number
           }
         }
       }
@@ -3367,7 +3524,7 @@ export interface operations {
         content: {
           'application/json':
             | {
-                data: components['schemas']['GameResource'][]
+                data: (components['schemas']['GameResource'] & Record<string, never>)[]
                 meta: {
                   /** @constant */
                   intent: 'FULLTEXT'
@@ -3419,7 +3576,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource'][]
+            data: (components['schemas']['LoanResource'] & Record<string, never>)[]
             links: {
               first: string | null
               last: string | null
@@ -3471,7 +3628,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -3486,7 +3643,7 @@ export interface operations {
             /** @constant */
             reason: 'insufficient_tokens'
             borrow_cost: number
-            deposit: string
+            deposit: number
           }
         }
       }
@@ -3526,7 +3683,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -3558,7 +3715,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -3635,7 +3792,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -3673,7 +3830,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -3718,7 +3875,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['LoanResource']
+            data: components['schemas']['LoanResource'] & Record<string, never>
           }
         }
       }
@@ -4055,22 +4212,14 @@ export interface operations {
       404: components['responses']['ModelNotFoundException']
     }
   }
-  'membership.upgrade': {
+  'membership.pricing': {
     parameters: {
       query?: never
       header?: never
       path?: never
       cookie?: never
     }
-    requestBody: {
-      content: {
-        'application/json': {
-          street: string
-          postal_code: string
-          city: string
-        }
-      }
-    }
+    requestBody?: never
     responses: {
       200: {
         headers: {
@@ -4078,17 +4227,17 @@ export interface operations {
         }
         content: {
           'application/json': {
-            /** @constant */
-            message: 'Willkommen als Mitglied! Du hast 20 Token erhalten.'
-            user: components['schemas']['UserResource']
+            fee_cents: number
+            currency: string
+            tokens: number
+            bonus_tokens: number
+            bonus_valid_months: number
           }
         }
       }
-      401: components['responses']['AuthenticationException']
-      422: components['responses']['ValidationException']
     }
   }
-  'membership.upgradeSupporter': {
+  'membership.checkout': {
     parameters: {
       query?: never
       header?: never
@@ -4098,9 +4247,8 @@ export interface operations {
     requestBody: {
       content: {
         'application/json': {
-          street: string
-          postal_code: string
-          city: string
+          /** @enum {string} */
+          type: 'MEMBER' | 'SUPPORTER' | 'RENEWAL'
         }
       }
     }
@@ -4111,14 +4259,91 @@ export interface operations {
         }
         content: {
           'application/json': {
-            /** @constant */
-            message: 'Danke für deine Unterstützung als außerordentliches Mitglied!'
-            user: components['schemas']['UserResource']
+            clientSecret: unknown
+            price_cents: number
+            currency: string
           }
         }
       }
       401: components['responses']['AuthenticationException']
       422: components['responses']['ValidationException']
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung konnte nicht vorbereitet werden.'
+          }
+        }
+      }
+    }
+  }
+  'membership.confirm': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        paymentIntentId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | {
+                /** @enum {string} */
+                message:
+                  'Mitgliedschaft verlängert!' | 'Willkommen! Deine Mitgliedschaft ist aktiv.'
+                user: components['schemas']['UserResource']
+              }
+            | {
+                /** @constant */
+                message: 'Die Mitgliedschaft ist bereits aktiv.'
+                user: components['schemas']['UserResource']
+              }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung nicht gefunden.'
+          }
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung wurde nicht abgeschlossen.'
+          }
+        }
+      }
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung konnte nicht überprüft werden.'
+          }
+        }
+      }
     }
   }
   'membership.activateFullMembership': {
@@ -4136,8 +4361,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            /** @constant */
-            message: 'Willkommen als Vollmitglied! Du hast 20 Token erhalten.'
+            message: string
             user: components['schemas']['UserResource']
           }
         }
@@ -4156,7 +4380,7 @@ export interface operations {
       }
     }
   }
-  'membership.renew': {
+  'membershipCancellation.preview': {
     parameters: {
       query?: never
       header?: never
@@ -4171,10 +4395,14 @@ export interface operations {
         }
         content: {
           'application/json': {
-            /** @enum {string} */
-            message:
-              'Mitgliedschaft verlängert! Du hast 20 Token erhalten.' | 'Mitgliedschaft verlängert!'
-            user: components['schemas']['UserResource']
+            tokens: number
+            bonus_tokens: number
+            refund_tokens: number
+            gross_cents: number
+            fee_cents: unknown
+            refund_cents: number
+            non_refundable_tokens: unknown
+            blockers: ('open_loans' | 'blocked_tokens')[]
           }
         }
       }
@@ -4184,19 +4412,134 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json':
-            | {
-                /** @constant */
-                message: 'Die Mitgliedschaft kann erst 3 Monate vor Ablauf verlängert werden.'
-              }
-            | {
-                /** @constant */
-                message: 'Keine aktive Mitgliedschaft gefunden.'
-              }
-            | {
-                /** @constant */
-                message: 'Nur Mitglieder können verlängern.'
-              }
+          'application/json': {
+            /** @constant */
+            message: 'Nur Mitglieder können kündigen.'
+          }
+        }
+      }
+    }
+  }
+  'membershipCancellation.store': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @enum {unknown} */
+          confirm?: 'yes' | 'on' | '1' | 1 | 'true' | true
+          reason?: string | null
+          account_holder?: string | null
+          iban?: string | null
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Deine Mitgliedschaft wurde gekündigt.'
+            refund_cents: number
+            refund_tokens: number
+            user: components['schemas']['UserResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'membershipCancellation.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              id: number
+              user: {
+                id: number
+                name: string
+                email: string
+              } | null
+              previous_role: string
+              tokens_total: number
+              bonus_tokens_forfeited: number
+              refund_tokens: number
+              gross_cents: number
+              fee_cents: number
+              refund_cents: number
+              account_holder: string | null
+              iban: string | null
+              reason: string | null
+              status: string
+              /** Format: date-time */
+              refunded_at: string | null
+              /** Format: date-time */
+              created_at: string | null
+            }[]
+            meta: {
+              current_page: number
+              last_page: number
+              total: number
+            }
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'membershipCancellation.markRefunded': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The cancellation ID */
+        cancellation: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Als überwiesen markiert.'
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Diese Kündigung ist nicht offen.'
+          }
         }
       }
     }
@@ -4483,7 +4826,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['PackageLoanResource'][]
+            data: (components['schemas']['PackageLoanResource'] & Record<string, never>)[]
             links: {
               first: string | null
               last: string | null
@@ -4537,7 +4880,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['PackageLoanResource']
+            data: components['schemas']['PackageLoanResource'] & Record<string, never>
           }
         }
       }
@@ -4604,7 +4947,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['PackageLoanResource']
+            data: components['schemas']['PackageLoanResource'] & Record<string, never>
           }
         }
       }
@@ -4650,7 +4993,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['PackageLoanResource'][]
+            data: (components['schemas']['PackageLoanResource'] & Record<string, never>)[]
             links: {
               first: string | null
               last: string | null
@@ -4757,7 +5100,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['ReservationResource'][]
+            data: (components['schemas']['ReservationResource'] & Record<string, never>)[]
           }
         }
       }
@@ -4786,7 +5129,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['ReservationResource']
+            data: components['schemas']['ReservationResource'] & Record<string, never>
           }
         }
       }
@@ -4885,7 +5228,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['ReviewResource']
+            data: components['schemas']['ReviewResource'] & Record<string, never>
           }
         }
       }
@@ -4919,7 +5262,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['ReviewResource']
+            data: components['schemas']['ReviewResource'] & Record<string, never>
           }
         }
       }
@@ -4975,6 +5318,39 @@ export interface operations {
         }
       }
       404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'stripeWebhook.handle': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            status: 'ok'
+          }
+        }
+      }
+      400: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Invalid signature.'
+          }
+        }
+      }
     }
   }
   'tags.index': {
@@ -5121,7 +5497,32 @@ export interface operations {
       }
     }
   }
-  'token.add': {
+  'token.packages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: {
+              amount: string
+              price_cents: string
+              currency: string
+            }[]
+          }
+        }
+      }
+    }
+  }
+  'token.checkout': {
     parameters: {
       query?: never
       header?: never
@@ -5132,7 +5533,7 @@ export interface operations {
       content: {
         'application/json': {
           /** @enum {integer} */
-          amount: ''
+          amount: '20' | '30' | '40'
         }
       }
     }
@@ -5143,8 +5544,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            message: string
-            user: components['schemas']['UserResource']
+            clientSecret: unknown
           }
         }
       }
@@ -5161,6 +5561,81 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung konnte nicht vorbereitet werden.'
+          }
+        }
+      }
+    }
+  }
+  'token.confirm': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        paymentIntentId: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | {
+                message: string
+                user: components['schemas']['UserResource']
+              }
+            | {
+                /** @constant */
+                message: 'Token wurden bereits gutgeschrieben.'
+                user: components['schemas']['UserResource']
+              }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Bestellung nicht gefunden.'
+          }
+        }
+      }
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung wurde nicht abgeschlossen.'
+          }
+        }
+      }
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung konnte nicht überprüft werden.'
+          }
+        }
+      }
     }
   }
   'tokenTransaction.index': {
@@ -5172,34 +5647,39 @@ export interface operations {
     }
     requestBody?: never
     responses: {
+      /** @description Paginated set of `TokenTransactionResource` */
       200: {
         headers: {
           [name: string]: unknown
         }
         content: {
           'application/json': {
-            current_page: number
-            data: components['schemas']['TokenTransaction'][]
-            first_page_url: string | null
-            from: number | null
-            last_page_url: string | null
-            last_page: number
-            /** @description Generated paginator links. */
+            data: components['schemas']['TokenTransactionResource'][]
             links: {
-              url: string | null
-              label: string
-              active: boolean
-            }[]
-            next_page_url: string | null
-            /** @description Base path for paginator generated URLs. */
-            path: string | null
-            /** @description Number of items shown per page. */
-            per_page: number
-            prev_page_url: string | null
-            /** @description Number of the last item in the slice. */
-            to: number | null
-            /** @description Total number of items being paginated. */
-            total: number
+              first: string | null
+              last: string | null
+              prev: string | null
+              next: string | null
+            }
+            meta: {
+              current_page: number
+              from: number | null
+              last_page: number
+              /** @description Generated paginator links. */
+              links: {
+                url: string | null
+                label: string
+                active: boolean
+              }[]
+              /** @description Base path for paginator generated URLs. */
+              path: string | null
+              /** @description Number of items shown per page. */
+              per_page: number
+              /** @description Number of the last item in the slice. */
+              to: number | null
+              /** @description Total number of items being paginated. */
+              total: number
+            }
           }
         }
       }
@@ -5218,34 +5698,39 @@ export interface operations {
     }
     requestBody?: never
     responses: {
+      /** @description Paginated set of `TokenTransactionResource` */
       200: {
         headers: {
           [name: string]: unknown
         }
         content: {
           'application/json': {
-            current_page: number
-            data: components['schemas']['TokenTransaction'][]
-            first_page_url: string | null
-            from: number | null
-            last_page_url: string | null
-            last_page: number
-            /** @description Generated paginator links. */
+            data: components['schemas']['TokenTransactionResource'][]
             links: {
-              url: string | null
-              label: string
-              active: boolean
-            }[]
-            next_page_url: string | null
-            /** @description Base path for paginator generated URLs. */
-            path: string | null
-            /** @description Number of items shown per page. */
-            per_page: number
-            prev_page_url: string | null
-            /** @description Number of the last item in the slice. */
-            to: number | null
-            /** @description Total number of items being paginated. */
-            total: number
+              first: string | null
+              last: string | null
+              prev: string | null
+              next: string | null
+            }
+            meta: {
+              current_page: number
+              from: number | null
+              last_page: number
+              /** @description Generated paginator links. */
+              links: {
+                url: string | null
+                label: string
+                active: boolean
+              }[]
+              /** @description Base path for paginator generated URLs. */
+              path: string | null
+              /** @description Number of items shown per page. */
+              per_page: number
+              /** @description Number of the last item in the slice. */
+              to: number | null
+              /** @description Total number of items being paginated. */
+              total: number
+            }
           }
         }
       }

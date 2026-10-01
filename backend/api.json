@@ -460,7 +460,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/CopyResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/CopyResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -505,7 +515,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/CopyResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/CopyResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -558,7 +578,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/CopyResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/CopyResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -697,7 +727,17 @@
                                             "const": "Kopie freigegeben."
                                         },
                                         "copy": {
-                                            "$ref": "#/components/schemas/CopyResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/CopyResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -768,7 +808,17 @@
                                             "const": "Kopie als besch\u00e4digt markiert."
                                         },
                                         "copy": {
-                                            "$ref": "#/components/schemas/CopyResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/CopyResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -1021,19 +1071,50 @@
                                         "active_loans": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/LoanResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/LoanResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "copy",
+                                                            "extensions"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "loan_history": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/LoanResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/LoanResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "copy"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "reservations": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ReservationResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/ReservationResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "game"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "stats": {
@@ -2177,7 +2258,18 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/GameResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/GameResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "tags",
+                                                            "mechanics"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         }
                                     },
@@ -2318,7 +2410,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Always respond with success to prevent email enumeration",
+                        "description": "",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -2368,7 +2460,19 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/GameResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/GameResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "tags",
+                                                            "mechanics",
+                                                            "languages"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "links": {
@@ -2526,7 +2630,20 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/GameResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/GameResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "tags",
+                                                        "mechanics",
+                                                        "languages",
+                                                        "images"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -2727,7 +2844,19 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/GameResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/GameResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "tags",
+                                                        "mechanics",
+                                                        "languages"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -2772,7 +2901,21 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/GameResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/GameResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "tags",
+                                                        "mechanics",
+                                                        "languages",
+                                                        "images",
+                                                        "copies"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -2825,7 +2968,19 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/GameResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/GameResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "tags",
+                                                        "mechanics",
+                                                        "languages"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3063,7 +3218,7 @@
                                             "type": "integer"
                                         },
                                         "total": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     },
                                     "required": [
@@ -3126,7 +3281,19 @@
                                                 "data": {
                                                     "type": "array",
                                                     "items": {
-                                                        "$ref": "#/components/schemas/GameResource"
+                                                        "allOf": [
+                                                            {
+                                                                "$ref": "#/components/schemas/GameResource"
+                                                            },
+                                                            {
+                                                                "type": "object",
+                                                                "required": [
+                                                                    "tags",
+                                                                    "mechanics",
+                                                                    "languages"
+                                                                ]
+                                                            }
+                                                        ]
                                                     }
                                                 },
                                                 "meta": {
@@ -3156,8 +3323,7 @@
                                                         "type": "string"
                                                     },
                                                     "minItems": 0,
-                                                    "maxItems": 0,
-                                                    "additionalItems": false
+                                                    "maxItems": 0
                                                 },
                                                 "meta": {
                                                     "type": "object",
@@ -3225,7 +3391,18 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/LoanResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/LoanResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "copy",
+                                                            "extensions"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "links": {
@@ -3383,7 +3560,18 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3411,7 +3599,7 @@
                                             "type": "integer"
                                         },
                                         "deposit": {
-                                            "type": "string"
+                                            "type": "integer"
                                         }
                                     },
                                     "required": [
@@ -3486,7 +3674,18 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3544,7 +3743,18 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3747,7 +3957,19 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "user",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3811,7 +4033,19 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "user",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -3898,7 +4132,19 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/LoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "user",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -4486,9 +4732,55 @@
                 }
             }
         },
-        "/membership/upgrade": {
+        "/membership/pricing": {
+            "get": {
+                "operationId": "membership.pricing",
+                "summary": "Public price and benefits of the membership, straight from config",
+                "tags": [
+                    "Membership"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "fee_cents": {
+                                            "type": "integer"
+                                        },
+                                        "currency": {
+                                            "type": "string"
+                                        },
+                                        "tokens": {
+                                            "type": "integer"
+                                        },
+                                        "bonus_tokens": {
+                                            "type": "integer"
+                                        },
+                                        "bonus_valid_months": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "fee_cents",
+                                        "currency",
+                                        "tokens",
+                                        "bonus_tokens",
+                                        "bonus_valid_months"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/membership/checkout": {
             "post": {
-                "operationId": "membership.upgrade",
+                "operationId": "membership.checkout",
+                "summary": "Creates a Stripe PaymentIntent for a membership (new member, new\nsupporter or renewal). The price always comes from config \u2014 the client\nonly picks the type. The membership itself is only activated once the\npayment is confirmed (see confirm() and the Stripe webhook)",
                 "tags": [
                     "Membership"
                 ],
@@ -4499,22 +4791,17 @@
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "street": {
+                                    "type": {
                                         "type": "string",
-                                        "maxLength": 255
-                                    },
-                                    "postal_code": {
-                                        "type": "string"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "maxLength": 255
+                                        "enum": [
+                                            "MEMBER",
+                                            "SUPPORTER",
+                                            "RENEWAL"
+                                        ]
                                     }
                                 },
                                 "required": [
-                                    "street",
-                                    "postal_code",
-                                    "city"
+                                    "type"
                                 ]
                             }
                         }
@@ -4528,17 +4815,37 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Willkommen als Mitglied! Du hast 20 Token erhalten."
+                                        "clientSecret": {},
+                                        "price_cents": {
+                                            "type": "integer"
                                         },
-                                        "user": {
-                                            "$ref": "#/components/schemas/UserResource"
+                                        "currency": {
+                                            "type": "string"
                                         }
                                     },
                                     "required": [
-                                        "message",
-                                        "user"
+                                        "clientSecret",
+                                        "price_cents",
+                                        "currency"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung konnte nicht vorbereitet werden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
                                     ]
                                 }
                             }
@@ -4553,42 +4860,71 @@
                 }
             }
         },
-        "/membership/upgrade-supporter": {
+        "/membership/confirm/{paymentIntentId}": {
             "post": {
-                "operationId": "membership.upgradeSupporter",
+                "operationId": "membership.confirm",
+                "summary": "Confirms a previously created PaymentIntent and activates the\nmembership. Idempotent. The status is always re-fetched from Stripe",
                 "tags": [
                     "Membership"
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "street": {
-                                        "type": "string",
-                                        "maxLength": 255
-                                    },
-                                    "postal_code": {
-                                        "type": "string"
-                                    },
-                                    "city": {
-                                        "type": "string",
-                                        "maxLength": 255
-                                    }
-                                },
-                                "required": [
-                                    "street",
-                                    "postal_code",
-                                    "city"
-                                ]
-                            }
+                "parameters": [
+                    {
+                        "name": "paymentIntentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Mitgliedschaft verl\u00e4ngert!",
+                                                        "Willkommen! Deine Mitgliedschaft ist aktiv."
+                                                    ]
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "message",
+                                                "user"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Die Mitgliedschaft ist bereits aktiv."
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "message",
+                                                "user"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
                         "description": "",
                         "content": {
                             "application/json": {
@@ -4597,22 +4933,53 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "const": "Danke f\u00fcr deine Unterst\u00fctzung als au\u00dferordentliches Mitglied!"
-                                        },
-                                        "user": {
-                                            "$ref": "#/components/schemas/UserResource"
+                                            "const": "Zahlung wurde nicht abgeschlossen."
                                         }
                                     },
                                     "required": [
-                                        "message",
-                                        "user"
+                                        "message"
                                     ]
                                 }
                             }
                         }
                     },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
+                    "502": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung konnte nicht \u00fcberpr\u00fcft werden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung nicht gefunden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -4623,6 +4990,7 @@
         "/membership/activate-full": {
             "post": {
                 "operationId": "membership.activateFullMembership",
+                "summary": "Supporter who already paid the fee upgrades to a full membership",
                 "tags": [
                     "Membership"
                 ],
@@ -4635,8 +5003,7 @@
                                     "type": "object",
                                     "properties": {
                                         "message": {
-                                            "type": "string",
-                                            "const": "Willkommen als Vollmitglied! Du hast 20 Token erhalten."
+                                            "type": "string"
                                         },
                                         "user": {
                                             "$ref": "#/components/schemas/UserResource"
@@ -4675,11 +5042,346 @@
                 }
             }
         },
-        "/membership/renew": {
-            "post": {
-                "operationId": "membership.renew",
+        "/membership/cancel/preview": {
+            "get": {
+                "operationId": "membershipCancellation.preview",
+                "summary": "What the user would get back if they cancelled now",
                 "tags": [
-                    "Membership"
+                    "MembershipCancellation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "tokens": {
+                                            "type": "integer"
+                                        },
+                                        "bonus_tokens": {
+                                            "type": "integer"
+                                        },
+                                        "refund_tokens": {
+                                            "type": "integer"
+                                        },
+                                        "gross_cents": {
+                                            "type": "integer"
+                                        },
+                                        "fee_cents": {},
+                                        "refund_cents": {
+                                            "type": "number"
+                                        },
+                                        "non_refundable_tokens": {},
+                                        "blockers": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "open_loans",
+                                                    "blocked_tokens"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "tokens",
+                                        "bonus_tokens",
+                                        "refund_tokens",
+                                        "gross_cents",
+                                        "fee_cents",
+                                        "refund_cents",
+                                        "non_refundable_tokens",
+                                        "blockers"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Nur Mitglieder k\u00f6nnen k\u00fcndigen."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/membership/cancel": {
+            "post": {
+                "operationId": "membershipCancellation.store",
+                "tags": [
+                    "MembershipCancellation"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "confirm": {
+                                        "enum": [
+                                            "yes",
+                                            "on",
+                                            "1",
+                                            1,
+                                            "true",
+                                            true
+                                        ]
+                                    },
+                                    "reason": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 1000
+                                    },
+                                    "account_holder": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "maxLength": 255
+                                    },
+                                    "iban": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Deine Mitgliedschaft wurde gek\u00fcndigt."
+                                        },
+                                        "refund_cents": {
+                                            "type": "integer"
+                                        },
+                                        "refund_tokens": {
+                                            "type": "integer"
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "refund_cents",
+                                        "refund_tokens",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/cancellations": {
+            "get": {
+                "operationId": "membershipCancellation.index",
+                "tags": [
+                    "MembershipCancellation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "user": {
+                                                        "type": [
+                                                            "object",
+                                                            "null"
+                                                        ],
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "name": {
+                                                                "type": "string"
+                                                            },
+                                                            "email": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "id",
+                                                            "name",
+                                                            "email"
+                                                        ]
+                                                    },
+                                                    "previous_role": {
+                                                        "type": "string"
+                                                    },
+                                                    "tokens_total": {
+                                                        "type": "integer"
+                                                    },
+                                                    "bonus_tokens_forfeited": {
+                                                        "type": "integer"
+                                                    },
+                                                    "refund_tokens": {
+                                                        "type": "integer"
+                                                    },
+                                                    "gross_cents": {
+                                                        "type": "integer"
+                                                    },
+                                                    "fee_cents": {
+                                                        "type": "integer"
+                                                    },
+                                                    "refund_cents": {
+                                                        "type": "integer"
+                                                    },
+                                                    "account_holder": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "iban": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "reason": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ]
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "refunded_at": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "format": "date-time"
+                                                    },
+                                                    "created_at": {
+                                                        "type": [
+                                                            "string",
+                                                            "null"
+                                                        ],
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "id",
+                                                    "user",
+                                                    "previous_role",
+                                                    "tokens_total",
+                                                    "bonus_tokens_forfeited",
+                                                    "refund_tokens",
+                                                    "gross_cents",
+                                                    "fee_cents",
+                                                    "refund_cents",
+                                                    "account_holder",
+                                                    "iban",
+                                                    "reason",
+                                                    "status",
+                                                    "refunded_at",
+                                                    "created_at"
+                                                ]
+                                            }
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer"
+                                                },
+                                                "last_page": {
+                                                    "type": "integer"
+                                                },
+                                                "total": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "last_page",
+                                                "total"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data",
+                                        "meta"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/cancellations/{cancellation}/refunded": {
+            "patch": {
+                "operationId": "membershipCancellation.markRefunded",
+                "tags": [
+                    "MembershipCancellation"
+                ],
+                "parameters": [
+                    {
+                        "name": "cancellation",
+                        "in": "path",
+                        "required": true,
+                        "description": "The cancellation ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -4691,18 +5393,11 @@
                                     "properties": {
                                         "message": {
                                             "type": "string",
-                                            "enum": [
-                                                "Mitgliedschaft verl\u00e4ngert! Du hast 20 Token erhalten.",
-                                                "Mitgliedschaft verl\u00e4ngert!"
-                                            ]
-                                        },
-                                        "user": {
-                                            "$ref": "#/components/schemas/UserResource"
+                                            "const": "Als \u00fcberwiesen markiert."
                                         }
                                     },
                                     "required": [
-                                        "message",
-                                        "user"
+                                        "message"
                                     ]
                                 }
                             }
@@ -4713,47 +5408,22 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Die Mitgliedschaft kann erst 3 Monate vor Ablauf verl\u00e4ngert werden."
-                                                }
-                                            },
-                                            "required": [
-                                                "message"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Keine aktive Mitgliedschaft gefunden."
-                                                }
-                                            },
-                                            "required": [
-                                                "message"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Nur Mitglieder k\u00f6nnen verl\u00e4ngern."
-                                                }
-                                            },
-                                            "required": [
-                                                "message"
-                                            ]
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Diese K\u00fcndigung ist nicht offen."
                                         }
+                                    },
+                                    "required": [
+                                        "message"
                                     ]
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -5331,7 +6001,17 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/PackageLoanResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/PackageLoanResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "loans"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "links": {
@@ -5497,7 +6177,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PackageLoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PackageLoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "loans"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -5623,7 +6313,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/PackageLoanResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PackageLoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "loans"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -5697,7 +6397,18 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/PackageLoanResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/PackageLoanResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "user",
+                                                            "loans"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         },
                                         "links": {
@@ -5945,7 +6656,17 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ReservationResource"
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/ReservationResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "game"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         }
                                     },
@@ -5993,7 +6714,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/ReservationResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ReservationResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "game"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -6165,7 +6896,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/ReviewResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ReviewResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "user"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -6233,7 +6974,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/ReviewResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ReviewResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "user"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -6333,6 +7084,54 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/webhooks/stripe": {
+            "post": {
+                "operationId": "stripeWebhook.handle",
+                "tags": [
+                    "StripeWebhook"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "const": "ok"
+                                        }
+                                    },
+                                    "required": [
+                                        "status"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Invalid signature."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -6579,9 +7378,58 @@
                 }
             }
         },
-        "/tokens/add": {
+        "/tokens/packages": {
+            "get": {
+                "operationId": "token.packages",
+                "summary": "Public price list for the token packages \u2014 token amount + price, read\nstraight from config('tokens.packages') so the frontend never has to\nhardcode prices",
+                "tags": [
+                    "Token"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "amount": {
+                                                        "type": "string"
+                                                    },
+                                                    "price_cents": {
+                                                        "type": "string"
+                                                    },
+                                                    "currency": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "amount",
+                                                    "price_cents",
+                                                    "currency"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/tokens/checkout": {
             "post": {
-                "operationId": "token.add",
+                "operationId": "token.checkout",
+                "summary": "Creates a Stripe PaymentIntent for a token package. The price is\nlooked up server-side from config('tokens.packages') \u2014 the client only\never picks a token amount, never a price",
                 "tags": [
                     "Token"
                 ],
@@ -6595,7 +7443,9 @@
                                     "amount": {
                                         "type": "integer",
                                         "enum": [
-                                            ""
+                                            "20",
+                                            "30",
+                                            "40"
                                         ]
                                     }
                                 },
@@ -6614,16 +7464,29 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
+                                        "clientSecret": {}
+                                    },
+                                    "required": [
+                                        "clientSecret"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
                                         "message": {
-                                            "type": "string"
-                                        },
-                                        "user": {
-                                            "$ref": "#/components/schemas/UserResource"
+                                            "type": "string",
+                                            "const": "Zahlung konnte nicht vorbereitet werden."
                                         }
                                     },
                                     "required": [
-                                        "message",
-                                        "user"
+                                        "message"
                                     ]
                                 }
                             }
@@ -6657,6 +7520,130 @@
                 }
             }
         },
+        "/tokens/confirm/{paymentIntentId}": {
+            "post": {
+                "operationId": "token.confirm",
+                "description": "The client only tells us which payment intent to check \u2014 the actual\nstatus is always re-fetched from Stripe, never trusted from the client.",
+                "summary": "Confirms a previously created Stripe PaymentIntent and credits the\ntokens. Idempotent: calling this again for an already-completed\npurchase just returns the current state instead of crediting twice",
+                "tags": [
+                    "Token"
+                ],
+                "parameters": [
+                    {
+                        "name": "paymentIntentId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string"
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "message",
+                                                "user"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Token wurden bereits gutgeschrieben."
+                                                },
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "message",
+                                                "user"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung wurde nicht abgeschlossen."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung konnte nicht \u00fcberpr\u00fcft werden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Bestellung nicht gefunden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/token-transactions": {
             "get": {
                 "operationId": "tokenTransaction.index",
@@ -6665,123 +7652,139 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Paginated set of `TokenTransactionResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "current_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/TokenTransaction"
+                                                "$ref": "#/components/schemas/TokenTransactionResource"
                                             }
-                                        },
-                                        "first_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "from": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "last_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "last_page": {
-                                            "type": "integer",
-                                            "minimum": 1
                                         },
                                         "links": {
-                                            "type": "array",
-                                            "description": "Generated paginator links.",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "url": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
                                                         ]
-                                                    },
-                                                    "label": {
-                                                        "type": "string"
-                                                    },
-                                                    "active": {
-                                                        "type": "boolean"
                                                     }
                                                 },
-                                                "required": [
-                                                    "url",
-                                                    "label",
-                                                    "active"
-                                                ]
-                                            }
-                                        },
-                                        "next_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
                                             ]
-                                        },
-                                        "path": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "description": "Base path for paginator generated URLs."
-                                        },
-                                        "per_page": {
-                                            "type": "integer",
-                                            "description": "Number of items shown per page.",
-                                            "minimum": 0
-                                        },
-                                        "prev_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "to": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "description": "Number of the last item in the slice.",
-                                            "minimum": 1
-                                        },
-                                        "total": {
-                                            "type": "integer",
-                                            "description": "Total number of items being paginated.",
-                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "current_page",
                                         "data",
-                                        "first_page_url",
-                                        "from",
-                                        "last_page_url",
-                                        "last_page",
                                         "links",
-                                        "next_page_url",
-                                        "path",
-                                        "per_page",
-                                        "prev_page_url",
-                                        "to",
-                                        "total"
+                                        "meta"
                                     ]
                                 }
                             }
@@ -6812,123 +7815,139 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Paginated set of `TokenTransactionResource`",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "current_page": {
-                                            "type": "integer",
-                                            "minimum": 1
-                                        },
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/TokenTransaction"
+                                                "$ref": "#/components/schemas/TokenTransactionResource"
                                             }
-                                        },
-                                        "first_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "from": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "minimum": 1
-                                        },
-                                        "last_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "last_page": {
-                                            "type": "integer",
-                                            "minimum": 1
                                         },
                                         "links": {
-                                            "type": "array",
-                                            "description": "Generated paginator links.",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "url": {
-                                                        "type": [
-                                                            "string",
-                                                            "null"
+                                            "type": "object",
+                                            "properties": {
+                                                "first": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "last": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "prev": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "next": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "first",
+                                                "last",
+                                                "prev",
+                                                "next"
+                                            ]
+                                        },
+                                        "meta": {
+                                            "type": "object",
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "from": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "minimum": 1
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "links": {
+                                                    "type": "array",
+                                                    "description": "Generated paginator links.",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "url": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "label": {
+                                                                "type": "string"
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "url",
+                                                            "label",
+                                                            "active"
                                                         ]
-                                                    },
-                                                    "label": {
-                                                        "type": "string"
-                                                    },
-                                                    "active": {
-                                                        "type": "boolean"
                                                     }
                                                 },
-                                                "required": [
-                                                    "url",
-                                                    "label",
-                                                    "active"
-                                                ]
-                                            }
-                                        },
-                                        "next_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
+                                                "path": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "description": "Base path for paginator generated URLs."
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "description": "Number of items shown per page.",
+                                                    "minimum": 0
+                                                },
+                                                "to": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ],
+                                                    "description": "Number of the last item in the slice.",
+                                                    "minimum": 1
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "description": "Total number of items being paginated.",
+                                                    "minimum": 0
+                                                }
+                                            },
+                                            "required": [
+                                                "current_page",
+                                                "from",
+                                                "last_page",
+                                                "links",
+                                                "path",
+                                                "per_page",
+                                                "to",
+                                                "total"
                                             ]
-                                        },
-                                        "path": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ],
-                                            "description": "Base path for paginator generated URLs."
-                                        },
-                                        "per_page": {
-                                            "type": "integer",
-                                            "description": "Number of items shown per page.",
-                                            "minimum": 0
-                                        },
-                                        "prev_page_url": {
-                                            "type": [
-                                                "string",
-                                                "null"
-                                            ]
-                                        },
-                                        "to": {
-                                            "type": [
-                                                "integer",
-                                                "null"
-                                            ],
-                                            "description": "Number of the last item in the slice.",
-                                            "minimum": 1
-                                        },
-                                        "total": {
-                                            "type": "integer",
-                                            "description": "Total number of items being paginated.",
-                                            "minimum": 0
                                         }
                                     },
                                     "required": [
-                                        "current_page",
                                         "data",
-                                        "first_page_url",
-                                        "from",
-                                        "last_page_url",
-                                        "last_page",
                                         "links",
-                                        "next_page_url",
-                                        "path",
-                                        "per_page",
-                                        "prev_page_url",
-                                        "to",
-                                        "total"
+                                        "meta"
                                     ]
                                 }
                             }
@@ -7592,7 +8611,16 @@
                         ]
                     },
                     "condition": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "NEW",
+                            "VERY_GOOD",
+                            "GOOD",
+                            "WORN",
+                            "DAMAGED",
+                            "LOCKED",
+                            "REVIEW"
+                        ]
                     },
                     "borrow_count": {
                         "type": "integer"
@@ -8251,17 +9279,7 @@
                         "type": "boolean"
                     },
                     "available_copies_count": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "integer",
-                                "enum": [
-                                    0
-                                ]
-                            }
-                        ]
+                        "type": "integer"
                     },
                     "copies_count": {
                         "anyOf": [
@@ -8277,26 +9295,25 @@
                         ]
                     },
                     "avg_rating": {
-                        "anyOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "number"
-                            },
-                            {
-                                "type": "integer"
-                            }
+                        "type": [
+                            "null",
+                            "number"
                         ]
                     },
                     "reviews_count": {
                         "type": "integer"
                     },
                     "is_favorited": {
-                        "type": "string"
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
                     },
                     "already_borrowed": {
-                        "type": "string"
+                        "type": [
+                            "boolean",
+                            "null"
+                        ]
                     },
                     "images": {
                         "type": "array",
@@ -8393,7 +9410,17 @@
                         "type": "integer"
                     },
                     "copy": {
-                        "$ref": "#/components/schemas/CopyResource"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CopyResource"
+                            },
+                            {
+                                "type": "object",
+                                "required": [
+                                    "game"
+                                ]
+                            }
+                        ]
                     },
                     "game": {
                         "anyOf": [
@@ -8409,7 +9436,10 @@
                         "$ref": "#/components/schemas/UserResource"
                     },
                     "start_date": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "format": "date-time"
                     },
                     "due_date": {
@@ -8740,7 +9770,17 @@
                     "loans": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/LoanResource"
+                            "allOf": [
+                                {
+                                    "$ref": "#/components/schemas/LoanResource"
+                                },
+                                {
+                                    "type": "object",
+                                    "required": [
+                                        "copy"
+                                    ]
+                                }
+                            ]
                         }
                     },
                     "created_at": {
@@ -9073,13 +10113,10 @@
                 ],
                 "title": "TermsVersion"
             },
-            "TokenTransaction": {
+            "TokenTransactionResource": {
                 "type": "object",
                 "properties": {
                     "id": {
-                        "type": "integer"
-                    },
-                    "user_id": {
                         "type": "integer"
                     },
                     "loan_id": {
@@ -9107,25 +10144,41 @@
                         ],
                         "format": "date-time"
                     },
-                    "updated_at": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "format": "date-time"
+                    "loan": {
+                        "type": "object",
+                        "properties": {
+                            "copy": {
+                                "type": "object",
+                                "properties": {
+                                    "game": {
+                                        "type": "object",
+                                        "properties": {
+                                            "title": {
+                                                "type": "string"
+                                            },
+                                            "slug": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "title",
+                                            "slug"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "required": [
                     "id",
-                    "user_id",
                     "loan_id",
                     "type",
                     "amount",
                     "description",
-                    "created_at",
-                    "updated_at"
+                    "created_at"
                 ],
-                "title": "TokenTransaction"
+                "title": "TokenTransactionResource"
             },
             "UserResource": {
                 "type": "object",
@@ -9170,7 +10223,13 @@
                         ]
                     },
                     "role": {
-                        "type": "string"
+                        "type": "string",
+                        "enum": [
+                            "USER",
+                            "SUPPORTER",
+                            "MEMBER",
+                            "ADMIN"
+                        ]
                     },
                     "status": {
                         "type": "string"
@@ -9193,6 +10252,44 @@
                     },
                     "tokens": {
                         "type": "integer"
+                    },
+                    "bonus_tokens": {
+                        "type": "integer"
+                    },
+                    "bonus_lots": {
+                        "description": "Active bonus lots (earliest expiry first) \u2014 only queried when there is any bonus",
+                        "anyOf": [
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "remaining": {
+                                            "type": "integer"
+                                        },
+                                        "expires_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "required": [
+                                        "remaining",
+                                        "expires_at"
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "minItems": 0,
+                                "maxItems": 0
+                            }
+                        ]
                     },
                     "tokens_blocked": {
                         "type": "integer"
@@ -9237,6 +10334,8 @@
                     "terms_accepted_at",
                     "terms_version",
                     "tokens",
+                    "bonus_tokens",
+                    "bonus_lots",
                     "tokens_blocked",
                     "membership_expires_at",
                     "is_member",
