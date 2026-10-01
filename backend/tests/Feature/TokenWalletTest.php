@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\TokenLot;
 use App\Models\User;
 use App\Services\TokenWallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -137,22 +136,5 @@ class TokenWalletTest extends TestCase
         $this->assertSame(6, $user->freeTokens());
         $this->assertTrue($user->hasEnoughFreeTokens(6));
         $this->assertFalse($user->hasEnoughFreeTokens(7));
-    }
-
-    public function test_membership_upgrade_grants_a_valued_lot(): void
-    {
-        $user = User::factory()->create(['role' => 'USER', 'tokens' => 0]);
-
-        $this->actingAs($user)->postJson('/api/membership/upgrade', [
-            'street' => 'Hauptstraße 1',
-            'postal_code' => '1010',
-            'city' => 'Wien',
-        ])->assertOk();
-
-        $lot = TokenLot::where('user_id', $user->id)->firstOrFail();
-        $this->assertSame('MEMBERSHIP', $lot->source);
-        $this->assertSame(20, $lot->amount);
-        $this->assertSame(50, $lot->unit_cents);
-        $this->assertSame(20, $user->fresh()->tokens);
     }
 }

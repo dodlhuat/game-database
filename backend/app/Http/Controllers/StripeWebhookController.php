@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MembershipPayment;
 use App\Models\TokenPurchase;
+use App\Services\MembershipPaymentCompleter;
 use App\Services\StripeClient;
 use App\Services\TokenPurchaseCompleter;
 use Illuminate\Http\JsonResponse;
@@ -25,6 +27,7 @@ class StripeWebhookController extends Controller
     public function __construct(
         private StripeClient $stripe,
         private TokenPurchaseCompleter $completer,
+        private MembershipPaymentCompleter $membershipCompleter,
     ) {}
 
     public function handle(Request $request): JsonResponse
@@ -60,6 +63,13 @@ class StripeWebhookController extends Controller
             return;
         }
 
+        $membership = MembershipPayment::where('provider_payment_intent_id', $paymentIntentId)->first();
+        if ($membership) {
+            $this->membershipCompleter->complete($membership, $chargeId, $intent);
+
+            return;
+        }
+
         $purchase = TokenPurchase::where('provider_payment_intent_id', $paymentIntentId)->first();
 
         if (! $purchase) {
@@ -89,5 +99,6 @@ class StripeWebhookController extends Controller
         }
 
         TokenPurchase::where('provider_charge_id', $chargeId)->update(['status' => 'REFUNDED']);
+        MembershipPayment::where('provider_charge_id', $chargeId)->update(['status' => 'REFUNDED']);
     }
 }

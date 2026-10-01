@@ -66,6 +66,7 @@ Route::prefix('auth')->group(function () {
 
 Route::get('/loan-settings', [LoanSettingController::class, 'show']);
 Route::get('/tokens/packages', [TokenController::class, 'packages']);
+Route::get('/membership/pricing', [MembershipController::class, 'pricing']);
 
 Route::get('/games', [GameController::class, 'index']);
 Route::get('/games/smart-search', [GameSearchController::class, 'index']);
@@ -127,10 +128,9 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::post('/address/validate', [AddressValidationController::class, 'validate']);
 
     // Mitgliedschaft & Token
-    Route::post('/membership/upgrade', [MembershipController::class, 'upgrade']);
-    Route::post('/membership/upgrade-supporter', [MembershipController::class, 'upgradeSupporter']);
+    Route::post('/membership/checkout', [MembershipController::class, 'checkout']);
+    Route::post('/membership/confirm/{paymentIntentId}', [MembershipController::class, 'confirm']);
     Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
-    Route::post('/membership/renew', [MembershipController::class, 'renew']);
     Route::post('/tokens/checkout', [TokenController::class, 'checkout']);
     Route::post('/tokens/confirm/{paymentIntentId}', [TokenController::class, 'confirm']);
 

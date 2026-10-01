@@ -440,6 +440,15 @@
     </Transition>
 
     <AppFooter />
+
+    <div v-if="renewError" class="alert alert-error renew-error">{{ renewError }}</div>
+
+    <StripeCheckoutModal
+      :membership="renewCheckout"
+      @success="onRenewed"
+      @error="renewError = $event"
+      @close="renewCheckout = null"
+    />
   </div>
 </template>
 
@@ -651,17 +660,30 @@ const expiryClass = computed(() => {
   return ''
 })
 
+const renewCheckout = ref<{ type: 'RENEWAL'; price_cents: number; currency: string } | null>(null)
+const renewError = ref('')
+
 async function renew() {
   if (renewLoading.value) return
   renewLoading.value = true
+  renewError.value = ''
   try {
-    const data = await api.post<{ user: typeof auth.user }>('/membership/renew')
-    if (data.user) auth.setUser(data.user)
+    const pricing = await api.get<{ fee_cents: number; currency: string }>('/membership/pricing')
+    renewCheckout.value = {
+      type: 'RENEWAL',
+      price_cents: pricing.fee_cents,
+      currency: pricing.currency,
+    }
   } catch {
-    // error handled silently here – could add a toast
+    renewError.value = 'Der Mitgliedsbeitrag konnte nicht geladen werden.'
   } finally {
     renewLoading.value = false
   }
+}
+
+function onRenewed(result: { user: unknown }) {
+  renewCheckout.value = null
+  if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
 }
 </script>
 

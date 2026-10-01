@@ -26,7 +26,7 @@ mockNuxtImport('useApi', () => {
   })
 })
 
-const pkg = { amount: 20, price_cents: 50, currency: 'EUR' }
+const pkg = { amount: 20, price_cents: 1000, currency: 'EUR' }
 
 // Tracked so the Teleported dialog content doesn't leak into the next test.
 let activeWrapper: Awaited<ReturnType<typeof mountSuspended>> | null = null
@@ -118,5 +118,47 @@ describe('StripeCheckoutModal', () => {
 
     expect(wrapper.emitted('error')?.[0]?.[0]).toBe('Zahlung konnte nicht vorbereitet werden.')
     expect(wrapper.emitted('close')).toBeTruthy()
+  })
+
+  describe('membership checkout', () => {
+    const membership = {
+      type: 'MEMBER' as const,
+      price_cents: 2400,
+      currency: 'EUR',
+      address: { street: 'Hauptstraße 1', postal_code: '1010', city: 'Wien' },
+    }
+
+    async function mountMembership() {
+      activeWrapper = await mountSuspended(StripeCheckoutModal, {
+        props: { membership, onSuccess: () => {}, onError: () => {}, onClose: () => {} },
+      })
+      await flushPromises()
+      return activeWrapper
+    }
+
+    it('creates a membership payment intent with type and address', async () => {
+      await mountMembership()
+
+      expect(postMock).toHaveBeenCalledWith('/membership/checkout', {
+        type: 'MEMBER',
+        street: 'Hauptstraße 1',
+        postal_code: '1010',
+        city: 'Wien',
+      })
+      expect(modal().find('.dialog__title').text()).toContain('Vollmitgliedschaft')
+      expect(modal().find('.dialog__title').text()).toContain('24,00')
+    })
+
+    it('confirms against the membership endpoint', async () => {
+      const wrapper = await mountMembership()
+      confirmPayment.mockResolvedValue({ paymentIntent: { id: 'pi_m', status: 'succeeded' } })
+      postMock.mockResolvedValueOnce({ message: 'ok', user: { role: 'MEMBER' } })
+
+      await modal().find('form').trigger('submit.prevent')
+      await flushPromises()
+
+      expect(postMock).toHaveBeenCalledWith('/membership/confirm/pi_m')
+      expect(wrapper.emitted('success')).toBeTruthy()
+    })
   })
 })

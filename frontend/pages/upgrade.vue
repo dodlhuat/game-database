@@ -94,7 +94,26 @@
                     <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
                       >◈</span
                     >
-                    <div>{{ $t('pages.upgrade.tier_member_benefit_tokens') }}</div>
+                    <div>
+                      {{
+                        $t('pages.upgrade.tier_member_benefit_tokens', {
+                          tokens: pricing?.tokens ?? 20,
+                        })
+                      }}
+                    </div>
+                  </li>
+                  <li class="benefit-list__item">
+                    <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
+                      >◈</span
+                    >
+                    <div>
+                      {{
+                        $t('pages.upgrade.tier_member_benefit_bonus', {
+                          bonus: pricing?.bonus_tokens ?? 20,
+                          months: pricing?.bonus_valid_months ?? 12,
+                        })
+                      }}
+                    </div>
                   </li>
                   <li class="benefit-list__item">
                     <span class="benefit-list__icon" aria-hidden="true">
@@ -143,7 +162,9 @@
                 </li>
               </ul>
 
-              <p class="benefits-panel__note">{{ $t('pages.upgrade.payment_note') }}</p>
+              <p v-if="pricing" class="benefits-panel__note">
+                {{ $t('pages.upgrade.payment_note', { price: formatPrice(pricing.fee_cents) }) }}
+              </p>
             </div>
 
             <!-- Form -->
@@ -162,21 +183,37 @@
                 :city-error="cityError"
               />
 
-              <UiButton :loading="loading" @click="upgrade">{{
-                tier === 'MEMBER'
+              <UiButton :loading="loading" :disabled="!pricing" @click="upgrade">{{
+                (tier === 'MEMBER'
                   ? $t('pages.upgrade.submit_member')
-                  : $t('pages.upgrade.submit_supporter')
+                  : $t('pages.upgrade.submit_supporter')) +
+                (pricing ? ` · ${formatPrice(pricing.fee_cents)}` : '')
               }}</UiButton>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <StripeCheckoutModal
+      :membership="checkout"
+      @success="onPaid"
+      @error="onCheckoutError"
+      @close="checkout = null"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+
+interface MembershipPricing {
+  fee_cents: number
+  currency: string
+  tokens: number
+  bonus_tokens: number
+  bonus_valid_months: number
+}
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -192,6 +229,13 @@ const streetError = ref('')
 const postalCodeError = ref('')
 const cityError = ref('')
 const tier = ref<'MEMBER' | 'SUPPORTER'>('MEMBER')
+const pricing = ref<MembershipPricing | null>(null)
+const checkout = ref<{
+  type: 'MEMBER' | 'SUPPORTER'
+  price_cents: number
+  currency: string
+  address: { street: string; postal_code: string; city: string }
+} | null>(null)
 const activateLoading = ref(false)
 const activateError = ref('')
 
@@ -209,39 +253,49 @@ function formatDate(dateStr: string | null | undefined): string {
   })
 }
 
-async function upgrade() {
+onMounted(async () => {
+  try {
+    pricing.value = await api.get<MembershipPricing>('/membership/pricing')
+  } catch {
+    error.value = t('pages.upgrade.pricing_failed')
+  }
+})
+
+function formatPrice(cents: number): string {
+  return new Intl.NumberFormat('de-AT', {
+    style: 'currency',
+    currency: pricing.value?.currency ?? 'EUR',
+  }).format(cents / 100)
+}
+
+async function onPaid(result: { user: unknown }) {
+  checkout.value = null
+  if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
+  await navigateTo('/dashboard')
+}
+
+function onCheckoutError(message: string) {
+  error.value = message
+}
+
+function upgrade() {
   streetError.value = ''
   postalCodeError.value = ''
   cityError.value = ''
   error.value = ''
+
+  if (!pricing.value) return
 
   if (!street.value.trim() || !/^\d{4}$/.test(postalCode.value) || !city.value.trim()) {
     error.value = t('pages.upgrade.address_incomplete')
     return
   }
 
-  loading.value = true
-  try {
-    const endpoint =
-      tier.value === 'MEMBER' ? '/membership/upgrade' : '/membership/upgrade-supporter'
-    const data = await api.post<{ user: typeof auth.user }>(endpoint, {
-      street: street.value,
-      postal_code: postalCode.value,
-      city: city.value,
-    })
-    if (data.user) auth.setUser(data.user)
-    await navigateTo('/dashboard')
-  } catch (err: unknown) {
-    const e = err as { errors?: Record<string, string[]>; message?: string }
-    if (e.errors?.street || e.errors?.postal_code || e.errors?.city) {
-      streetError.value = e.errors.street?.[0] ?? ''
-      postalCodeError.value = e.errors.postal_code?.[0] ?? ''
-      cityError.value = e.errors.city?.[0] ?? ''
-    } else {
-      error.value = e.message ?? 'Ein Fehler ist aufgetreten.'
-    }
-  } finally {
-    loading.value = false
+  checkout.value = {
+    type: tier.value,
+    price_cents: pricing.value.fee_cents,
+    currency: pricing.value.currency,
+    address: { street: street.value, postal_code: postalCode.value, city: city.value },
   }
 }
 

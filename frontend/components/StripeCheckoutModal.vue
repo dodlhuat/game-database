@@ -1,10 +1,10 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="pkg" class="modal-overlay" @click.self="close">
+      <div v-if="item" class="modal-overlay" @click.self="close">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ pkg.amount }} Token &middot; {{ formattedPrice }}</h3>
+            <h3 class="dialog__title">{{ item.title }} &middot; {{ formattedPrice }}</h3>
             <button class="dialog__close" aria-label="Schließen" @click="close">
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#close" />
@@ -45,7 +45,56 @@ interface TokenPackage {
   currency: string
 }
 
-const props = defineProps<{ pkg: TokenPackage | null }>()
+interface MembershipCheckout {
+  type: 'MEMBER' | 'SUPPORTER' | 'RENEWAL'
+  price_cents: number
+  currency: string
+  address?: { street: string; postal_code: string; city: string }
+}
+
+const props = withDefaults(
+  defineProps<{ pkg?: TokenPackage | null; membership?: MembershipCheckout | null }>(),
+  { pkg: null, membership: null }
+)
+
+interface CheckoutItem {
+  title: string
+  price_cents: number
+  currency: string
+  checkoutPath: string
+  checkoutBody: Record<string, unknown>
+  confirmPath: (paymentIntentId: string) => string
+}
+
+const membershipTitles = {
+  MEMBER: 'Vollmitgliedschaft',
+  SUPPORTER: 'Außerordentliche Mitgliedschaft',
+  RENEWAL: 'Mitgliedschaft verlängern',
+}
+
+const item = computed<CheckoutItem | null>(() => {
+  if (props.pkg) {
+    return {
+      title: `${props.pkg.amount} Token`,
+      price_cents: props.pkg.price_cents,
+      currency: props.pkg.currency,
+      checkoutPath: '/tokens/checkout',
+      checkoutBody: { amount: props.pkg.amount },
+      confirmPath: (id) => `/tokens/confirm/${id}`,
+    }
+  }
+  if (props.membership) {
+    return {
+      title: membershipTitles[props.membership.type],
+      price_cents: props.membership.price_cents,
+      currency: props.membership.currency,
+      checkoutPath: '/membership/checkout',
+      checkoutBody: { type: props.membership.type, ...props.membership.address },
+      confirmPath: (id) => `/membership/confirm/${id}`,
+    }
+  }
+  return null
+})
 
 const emit = defineEmits<{
   success: [payload: { message: string; user: unknown }]
@@ -77,9 +126,9 @@ watch(elementContainer, (container) => {
 })
 
 const formattedPrice = computed(() =>
-  props.pkg
-    ? new Intl.NumberFormat('de-AT', { style: 'currency', currency: props.pkg.currency }).format(
-        props.pkg.price_cents / 100
+  item.value
+    ? new Intl.NumberFormat('de-AT', { style: 'currency', currency: item.value.currency }).format(
+        item.value.price_cents / 100
       )
     : ''
 )
@@ -96,13 +145,13 @@ function teardown() {
   formError.value = ''
 }
 
-async function init(pkg: TokenPackage) {
+async function init(current: CheckoutItem) {
   preparing.value = true
   teardown()
   try {
     const [stripeSdk, data] = await Promise.all([
       load(),
-      api.post<{ clientSecret: string }>('/tokens/checkout', { amount: pkg.amount }),
+      api.post<{ clientSecret: string }>(current.checkoutPath, current.checkoutBody),
     ])
 
     stripe = stripeSdk
@@ -144,7 +193,7 @@ async function onSubmit() {
     }
 
     const result = await api.post<{ message: string; user: unknown }>(
-      `/tokens/confirm/${paymentIntent.id}`
+      item.value!.confirmPath(paymentIntent.id)
     )
     emit('success', result)
   } catch (err: unknown) {
@@ -156,9 +205,9 @@ async function onSubmit() {
 }
 
 watch(
-  () => props.pkg,
-  (pkg) => {
-    if (pkg) init(pkg)
+  item,
+  (current) => {
+    if (current) init(current)
     else teardown()
   },
   { immediate: true }
