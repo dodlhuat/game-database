@@ -103,6 +103,8 @@
     "login_title": "Anmelden",
     "email": "E-Mail",
     "password": "Passwort",
+    "show_password": "Passwort anzeigen",
+    "hide_password": "Passwort verbergen",
     "email_not_verified": "Bitte bestätige zuerst deine E-Mail-Adresse.",
     "resend_link": "Link erneut senden",
     "resending": "Wird gesendet…",
