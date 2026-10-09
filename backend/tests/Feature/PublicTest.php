@@ -136,23 +136,26 @@ class PublicTest extends TestCase
 
     public function test_latest_terms_cover_membership_fee_bonus_tokens_and_cancellation(): void
     {
-        $content = $this->getJson('/api/terms')->assertOk()->assertJsonPath('version', '1.1')->json('content');
+        $content = $this->getJson('/api/terms')->assertOk()->assertJsonPath('version', '1.2')->json('content');
 
         $this->assertStringContainsString('24,00 €', $content);
         $this->assertStringContainsString('Bonus-Token', $content);
         $this->assertStringContainsString('12 Monate nach der Gutschrift', $content);
         $this->assertStringContainsString('Bearbeitungsgebühr von 2,00 €', $content);
         $this->assertStringContainsString('30 Tage nach dem Kauf', $content);
+        $this->assertStringContainsString('Vereinsstatuten', $content);
     }
 
     public function test_latest_privacy_policy_covers_stripe_and_bank_details(): void
     {
-        $content = $this->getJson('/api/privacy')->assertOk()->assertJsonPath('version', '1.1')->json('content');
+        $content = $this->getJson('/api/privacy')->assertOk()->assertJsonPath('version', '1.2')->json('content');
 
         $this->assertStringContainsString('Stripe', $content);
         $this->assertStringContainsString('IBAN', $content);
         $this->assertStringContainsString('Bonus-Token', $content);
         $this->assertStringContainsString('Stand: Oktober 2026', $content);
+        $this->assertStringContainsString('AUA-Alle.Unsere.Abenteuer', $content);
+        $this->assertStringContainsString('St. Pölten', $content);
     }
 
     public function test_cookies_returns_latest_version(): void

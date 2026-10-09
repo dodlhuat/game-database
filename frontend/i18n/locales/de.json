@@ -812,6 +812,8 @@
     "all_day": "Ganztägig"
   },
   "legal": {
+    "toc": "Inhaltsübersicht",
+    "basis": "Rechtsgrundlage",
     "terms": {
       "title": "Nutzungsbedingungen",
       "unavailable": "Nutzungsbedingungen sind derzeit nicht verfügbar."
@@ -828,6 +830,39 @@
   "about": {
     "tag": "Über uns",
     "title": "Wer wir sind",
-    "placeholder": "Diese Seite befindet sich noch im Aufbau. Hier stellen wir uns bald vor — wer hinter dieser Plattform steht und was uns antreibt."
+    "lead": "AUA – Alle.Unsere.Abenteuer ist ein Verein zur Förderung des gemeinsamen Spielens. Wir bringen Kinder, Jugendliche und Erwachsene an einen Tisch: analog, miteinander und ohne Bildschirm.",
+    "facts": {
+      "name_label": "Name",
+      "name": "AUA-Alle.Unsere.Abenteuer – Verein zur Förderung des gemeinsamen Spielens",
+      "seat_label": "Sitz",
+      "seat": "St. Pölten",
+      "area_label": "Tätigkeitsbereich",
+      "area": "ganz Österreich",
+      "values_label": "Ausrichtung",
+      "values": "nicht auf Gewinn gerichtet, politisch unabhängig und konfessionell ungebunden"
+    },
+    "why": {
+      "title": "Warum wir spielen",
+      "text": "Brett-, Karten-, Würfel- und Denkspiele fördern kognitive, emotionale, soziale, kommunikative, motorische, wahrnehmungsgebundene und kreative Fähigkeiten. Uns ist wichtig, dass Kinder, Jugendliche und Erwachsene gemeinsam etwas erleben und es dazu attraktive Alternativen zur bildschirmbasierten Freizeitgestaltung gibt."
+    },
+    "do": {
+      "title": "Was wir tun",
+      "events": "Spieleabende, Spieletreffen, Turniere und Spielangebote für Kinder, Jugendliche und Erwachsene",
+      "library": "Eine Spielothek: ein Spielverleih für Vereinsmitglieder",
+      "workshops": "Workshops, Vorträge und Informationsveranstaltungen",
+      "training": "Aus- und Weiterbildung für alle, die bei uns Spiele erklären oder Veranstaltungen betreuen",
+      "content": "Spielvorstellungen, Spielanleitungen und Empfehlungen zum Nachlesen",
+      "partners": "Zusammenarbeit mit Spieleautor:innen, Verlagen, Fachhandel und Bildungseinrichtungen"
+    },
+    "open": {
+      "title": "Für alle offen",
+      "text": "Wir möchten einen möglichst niederschwelligen Zugang zu Brett- und Gesellschaftsspielen ermöglichen. Alter, Geschlecht, Herkunft, finanzielle Möglichkeiten oder Spielerfahrung sollen kein Hindernis für die Teilnahme an unseren Angeboten sein."
+    },
+    "funding": {
+      "title": "Wie wir uns finanzieren",
+      "text": "Unser Verein finanziert sich aus Mitgliedsbeiträgen, freiwilligen Beiträgen und Spenden, Förderungen, Sponsoring, Veranstaltungseinnahmen und angemessenen Leihgebühren. Alle Mittel werden ausschließlich für die Vereinszwecke verwendet. Mitglieder erhalten keine Gewinnanteile.",
+      "donate": "Spiele spenden"
+    },
+    "cta_collection": "Zur Spielesammlung"
   }
 }

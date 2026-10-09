@@ -48,7 +48,7 @@
             <span class="legal-meta__sep" aria-hidden="true">·</span>
             <time class="legal-meta__date">{{ formatDate(terms.published_at) }}</time>
           </div>
-          <div class="legal-body">{{ terms.content }}</div>
+          <LegalDocument :content="terms.content" />
         </template>
       </div>
     </div>
@@ -220,14 +220,6 @@ $hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
   &__date {
     font-weight: 500;
   }
-}
-
-// ─── Body ─────────────────────────────────────────────────────────
-.legal-body {
-  white-space: pre-line;
-  color: var(--primary-text);
-  font-size: 0.9rem;
-  line-height: 1.8;
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────
