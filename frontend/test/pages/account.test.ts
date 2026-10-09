@@ -167,7 +167,7 @@ describe('account.vue — password', () => {
     await inputs[1]!.setValue('new-pw')
     await inputs[2]!.setValue('does-not-match')
 
-    await passwordSection(wrapper).find('button').trigger('click')
+    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
     await flushPromises()
 
     expect(patchMock).not.toHaveBeenCalled()
@@ -178,7 +178,7 @@ describe('account.vue — password', () => {
     setUser({})
     const wrapper = await mountAccountPage()
 
-    await passwordSection(wrapper).find('button').trigger('click')
+    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
     await flushPromises()
 
     expect(patchMock).not.toHaveBeenCalled()
@@ -194,7 +194,7 @@ describe('account.vue — password', () => {
     await inputs[1]!.setValue('new-pw')
     await inputs[2]!.setValue('new-pw')
 
-    await passwordSection(wrapper).find('button').trigger('click')
+    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
     await flushPromises()
 
     expect(patchMock).toHaveBeenCalledWith('/account', {
