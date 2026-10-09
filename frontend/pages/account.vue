@@ -112,7 +112,7 @@
         >
           <h2 class="account-section__title">{{ $t('account.cancel.section_title') }}</h2>
           <p class="account-section__text">{{ $t('account.cancel.section_text') }}</p>
-          <UiButton variant="secondary" @click="cancelOpen = true">{{
+          <UiButton variant="danger" @click="cancelOpen = true">{{
             $t('account.cancel.open')
           }}</UiButton>
         </section>

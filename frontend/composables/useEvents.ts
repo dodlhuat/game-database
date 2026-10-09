@@ -1,7 +1,5 @@
 import type { ApiEvent } from '~/types/api'
 
-export type { ApiEvent }
-
 export function useEvents() {
   const api = useApi()
 

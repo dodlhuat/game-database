@@ -75,7 +75,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import type { ApiEvent } from '~/composables/useEvents'
+import type { ApiEvent } from '~/types/api'
 import type { Calendar } from '@dodlhuat/basix/js/calendar'
 
 definePageMeta({ middleware: 'auth' })

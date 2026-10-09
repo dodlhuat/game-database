@@ -153,17 +153,28 @@ class UserTest extends TestCase
 
     public function test_index_search_matches_name_or_email_and_empty_search_returns_all(): void
     {
-        User::factory()->create(['name' => 'Anna Muster', 'email' => 'anna@example.com']);
-        User::factory()->create(['name' => 'Bernd Beispiel', 'email' => 'bernd@example.org']);
+        // Distinctive values, because the factory admin gets a random fake name and email
+        User::factory()->create(['name' => 'Zora Suchtest', 'email' => 'zora@alpha-suchtest.test']);
+        User::factory()->create(['name' => 'Yves Beispiel', 'email' => 'yves@beta-suchtest.test']);
         $admin = $this->admin();
 
-        $count = fn (string $query): int => count(
+        $emails = fn (string $query): array => collect(
             $this->actingAs($admin)->getJson('/api/admin/users?'.$query)->assertOk()->json('data')
-        );
+        )->pluck('email')->all();
 
-        $this->assertSame(1, $count('search=muster'));
-        $this->assertSame(1, $count('search=example.org'));
-        $this->assertSame(0, $count('search=niemand'));
-        $this->assertSame(3, $count('search='));
+        $byName = $emails('search=Suchtest');
+        $this->assertContains('zora@alpha-suchtest.test', $byName);
+        $this->assertContains('yves@beta-suchtest.test', $byName);
+
+        $byEmail = $emails('search=beta-suchtest');
+        $this->assertContains('yves@beta-suchtest.test', $byEmail);
+        $this->assertNotContains('zora@alpha-suchtest.test', $byEmail);
+
+        $this->assertSame([], $emails('search=gibt-es-nicht-xyz'));
+
+        $all = $emails('search=');
+        $this->assertContains('zora@alpha-suchtest.test', $all);
+        $this->assertContains('yves@beta-suchtest.test', $all);
+        $this->assertContains($admin->email, $all);
     }
 }

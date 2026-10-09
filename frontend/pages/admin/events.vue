@@ -209,7 +209,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import type { ApiEvent } from '~/composables/useEvents'
+import type { ApiEvent } from '~/types/api'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
