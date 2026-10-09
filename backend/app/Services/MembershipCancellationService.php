@@ -28,9 +28,9 @@ class MembershipCancellationService
             ->where(fn ($q) => $q->whereNull('refundable_after')->orWhere('refundable_after', '<=', now()))
             ->get();
 
-        $refundTokens = (int) $lots->sum('remaining');
+        $refundTokens = (int) $lots->sum(fn (TokenLot $lot) => $lot->remaining);
         $gross = (int) $lots->sum(fn (TokenLot $lot) => $lot->remaining * $lot->unit_cents);
-        $fee = min($gross, (int) config('membership.refund_fee_cents'));
+        $fee = min($gross, config()->integer('membership.refund_fee_cents'));
 
         return [
             'tokens' => $user->tokens,

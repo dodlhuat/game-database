@@ -13,16 +13,16 @@ class MembershipGrant
     {
         $this->wallet->grantTokens(
             $user,
-            (int) config('membership.tokens'),
+            config()->integer('membership.tokens'),
             'MEMBERSHIP',
-            (int) config('tokens.token_value_cents'),
+            config()->integer('tokens.token_value_cents'),
         );
 
         $this->wallet->grantBonus(
             $user,
-            (int) config('membership.bonus_tokens'),
+            config()->integer('membership.bonus_tokens'),
             'MEMBERSHIP',
-            now()->addMonths((int) config('membership.bonus_valid_months')),
+            now()->addMonths(config()->integer('membership.bonus_valid_months')),
             'Bonus-Token zur Mitgliedschaft',
         );
     }

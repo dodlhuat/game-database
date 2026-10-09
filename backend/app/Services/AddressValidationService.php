@@ -35,11 +35,11 @@ class AddressValidationService
     {
         try {
             $response = Http::withHeaders([
-                'User-Agent' => config('services.nominatim.user_agent'),
+                'User-Agent' => config()->string('services.nominatim.user_agent'),
             ])
                 ->timeout(4)
                 ->retry(1, 100)
-                ->get(config('services.nominatim.base_url').'/search', [
+                ->get(config()->string('services.nominatim.base_url').'/search', [
                     'street' => $street,
                     'postalcode' => $postalCode,
                     'city' => $city,
@@ -56,7 +56,9 @@ class AddressValidationService
                 return false;
             }
 
-            return count($response->json() ?? []) > 0;
+            $results = $response->json();
+
+            return is_array($results) && count($results) > 0;
         } catch (\Throwable $e) {
             Log::info('Address validation: lookup failed, treating as unverified', [
                 'error' => $e->getMessage(),

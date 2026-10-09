@@ -20,7 +20,7 @@ class WelcomeSupporterNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-        $dashboardUrl = config('frontend.url').'/dashboard';
+        $dashboardUrl = config()->string('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('welcome_supporter', [
             'name' => $notifiable->name,

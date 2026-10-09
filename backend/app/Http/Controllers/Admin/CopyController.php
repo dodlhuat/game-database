@@ -44,7 +44,7 @@ class CopyController extends Controller
                     ->orderBy('last_returned_at'),
                 fn ($q) => $q->orderBy('game_id')
             )
-            ->paginate(min(max((int) $request->per_page ?: 50, 1), 200));
+            ->paginate(min(max($request->integer('per_page') ?: 50, 1), 200));
 
         return CopyResource::collection($copies);
     }
@@ -72,7 +72,7 @@ class CopyController extends Controller
         ]);
 
         $copy = Copy::with(['game', 'activeLoans', 'lastReturnedLoan.user'])
-            ->where('qr_code', strtoupper(trim((string) $request->qr_code)))
+            ->where('qr_code', strtoupper($request->string('qr_code')->trim()->toString()))
             ->first();
 
         if (! $copy) {
@@ -186,7 +186,7 @@ class CopyController extends Controller
             return response()->json(['message' => 'Kopie ist nicht im Status "Überprüfen".'], 422);
         }
 
-        $notes = $request->notes;
+        $notes = $request->filled('notes') ? $request->string('notes')->toString() : null;
 
         ['depositLoan' => $depositLoan] = DB::transaction(function () use ($copy, $notes) {
             $copy->update([

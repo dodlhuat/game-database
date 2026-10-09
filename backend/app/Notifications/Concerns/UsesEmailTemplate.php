@@ -24,7 +24,7 @@ trait UsesEmailTemplate
 
         $replace = fn (string $s): string => str_replace(
             array_map(fn ($k) => '{'.$k.'}', array_keys($vars)),
-            array_values($vars),
+            array_map(fn (mixed $v): string => is_scalar($v) || $v instanceof \Stringable ? (string) $v : '', array_values($vars)),
             $s
         );
 

@@ -30,7 +30,7 @@ class LoanOverdueReminder extends Notification
         /** @var Game $game */
         $game = $loanCopy->game;
         $dueDate = $this->loan->due_date->format('d.m.Y');
-        $dashboardUrl = config('frontend.url').'/dashboard';
+        $dashboardUrl = config()->string('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('loan_overdue_reminder', [
             'name' => $notifiable->name,

@@ -20,7 +20,7 @@ class UserApproved extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-        $loginUrl = config('frontend.url').'/login';
+        $loginUrl = config()->string('frontend.url').'/login';
 
         return $this->buildFromTemplate('user_approved', [
             'name' => $notifiable->name,

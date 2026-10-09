@@ -37,7 +37,7 @@ class DonationRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
-            $loadedAt = (int) $this->input('form_loaded_at');
+            $loadedAt = $this->integer('form_loaded_at');
             $elapsed = (int) (microtime(true) * 1000) - $loadedAt;
 
             if ($elapsed < 3000) {

@@ -3,6 +3,9 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Game;
+use App\Models\Language;
+use App\Models\Mechanic;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -129,5 +132,110 @@ class GameTest extends TestCase
 
         $titles = collect($response->json('data'))->pluck('title');
         $this->assertContains('Inactive Game', $titles->all());
+    }
+
+    public function test_store_syncs_tags_mechanics_and_languages(): void
+    {
+        $tags = Tag::factory()->count(2)->create();
+        $mechanic = Mechanic::factory()->create();
+        $language = Language::factory()->create();
+
+        $id = $this->actingAs($this->admin())
+            ->postJson('/api/admin/games', $this->gamePayload([
+                'tag_ids' => $tags->pluck('id')->all(),
+                'mechanic_ids' => [$mechanic->id],
+                'language_ids' => [$language->id],
+            ]))
+            ->assertCreated()
+            ->json('data.id');
+
+        $game = Game::findOrFail($id);
+        $this->assertEqualsCanonicalizing($tags->pluck('id')->all(), $game->tags->pluck('id')->all());
+        $this->assertSame([$mechanic->id], $game->mechanics->pluck('id')->all());
+        $this->assertSame([$language->id], $game->languages->pluck('id')->all());
+    }
+
+    public function test_store_without_relation_ids_creates_game_without_relations(): void
+    {
+        $id = $this->actingAs($this->admin())
+            ->postJson('/api/admin/games', $this->gamePayload())
+            ->assertCreated()
+            ->json('data.id');
+
+        $game = Game::findOrFail($id);
+        $this->assertCount(0, $game->tags);
+        $this->assertCount(0, $game->mechanics);
+        $this->assertCount(0, $game->languages);
+    }
+
+    public function test_update_replaces_relation_ids_and_empty_list_clears_them(): void
+    {
+        $oldTag = Tag::factory()->create();
+        $newTag = Tag::factory()->create();
+        $oldMechanic = Mechanic::factory()->create();
+        $newMechanic = Mechanic::factory()->create();
+        $oldLanguage = Language::factory()->create();
+        $newLanguage = Language::factory()->create();
+        $game = Game::factory()->create();
+        $game->tags()->attach($oldTag);
+        $game->mechanics()->attach($oldMechanic);
+        $game->languages()->attach($oldLanguage);
+
+        $this->actingAs($this->admin())
+            ->putJson("/api/admin/games/{$game->id}", $this->gamePayload([
+                'slug' => $game->slug,
+                'tag_ids' => [$newTag->id],
+                'mechanic_ids' => [$newMechanic->id],
+                'language_ids' => [$newLanguage->id],
+            ]))
+            ->assertOk();
+
+        $game->refresh();
+        $this->assertSame([$newTag->id], $game->tags->pluck('id')->all());
+        $this->assertSame([$newMechanic->id], $game->mechanics->pluck('id')->all());
+        $this->assertSame([$newLanguage->id], $game->languages->pluck('id')->all());
+
+        $this->putJson("/api/admin/games/{$game->id}", $this->gamePayload([
+            'slug' => $game->slug,
+            'tag_ids' => [],
+            'mechanic_ids' => [],
+            'language_ids' => [],
+        ]))->assertOk();
+
+        $game->refresh();
+        $this->assertCount(0, $game->tags);
+        $this->assertCount(0, $game->mechanics);
+        $this->assertCount(0, $game->languages);
+    }
+
+    public function test_update_without_relation_keys_keeps_existing_relations(): void
+    {
+        $tag = Tag::factory()->create();
+        $language = Language::factory()->create();
+        $game = Game::factory()->create();
+        $game->tags()->attach($tag);
+        $game->languages()->attach($language);
+
+        $this->actingAs($this->admin())
+            ->putJson("/api/admin/games/{$game->id}", $this->gamePayload(['slug' => $game->slug, 'title' => 'Renamed']))
+            ->assertOk();
+
+        $game->refresh();
+        $this->assertSame([$tag->id], $game->tags->pluck('id')->all());
+        $this->assertSame([$language->id], $game->languages->pluck('id')->all());
+    }
+
+    public function test_index_search_filters_by_title_and_empty_search_returns_all(): void
+    {
+        Game::factory()->create(['title' => 'Catan']);
+        Game::factory()->create(['title' => 'Azul']);
+        $admin = $this->admin();
+
+        $titles = fn (string $query): array => collect(
+            $this->actingAs($admin)->getJson('/api/admin/games?'.$query)->assertOk()->json('data')
+        )->pluck('title')->all();
+
+        $this->assertSame(['Catan'], $titles('search=cat'));
+        $this->assertEqualsCanonicalizing(['Catan', 'Azul'], $titles('search='));
     }
 }

@@ -63,7 +63,7 @@ class StripeClient
             return false;
         }
 
-        $webhookSecret = config('services.stripe.webhook_secret');
+        $webhookSecret = config()->string('services.stripe.webhook_secret');
         $expected = hash_hmac('sha256', "{$timestamp}.{$payload}", $webhookSecret);
 
         foreach ($signatures as $signature) {
@@ -81,7 +81,7 @@ class StripeClient
      */
     private function request(string $method, string $path, array $body = []): array
     {
-        $response = Http::withToken(config('services.stripe.secret'))
+        $response = Http::withToken(config()->string('services.stripe.secret'))
             ->asForm()
             ->acceptJson()
             ->{$method}('https://api.stripe.com'.$path, $body);

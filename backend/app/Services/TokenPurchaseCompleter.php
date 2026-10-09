@@ -41,7 +41,7 @@ class TokenPurchaseCompleter
                 $locked->token_amount,
                 'PURCHASE',
                 intdiv($locked->price_cents, $locked->token_amount),
-                now()->addDays((int) config('membership.purchase_refund_wait_days')),
+                now()->addDays(config()->integer('membership.purchase_refund_wait_days')),
             );
 
             TokenTransaction::create([

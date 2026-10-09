@@ -73,6 +73,31 @@ class GameImportExportTest extends TestCase
         $this->assertSame(['Würfeln'], $game->mechanics->pluck('name')->all());
     }
 
+    public function test_import_handles_zero_flags_blank_cells_and_invalid_difficulty(): void
+    {
+        $csv = "title,min_players,max_players,difficulty,year,language,is_active\n"
+            ."Hidden,2,,impossible,,   ,0\n"
+            ."Visible,2,4,hard,2020,,\n";
+        $file = UploadedFile::fake()->createWithContent('games.csv', $csv);
+
+        $this->actingAs($this->admin())
+            ->postJson('/api/admin/games/import', ['file' => $file])
+            ->assertOk()
+            ->assertJson(['new' => 2, 'updated' => 0]);
+
+        $hidden = Game::where('title', 'Hidden')->firstOrFail();
+        $this->assertFalse($hidden->is_active);
+        $this->assertNull($hidden->max_players);
+        $this->assertNull($hidden->year);
+        $this->assertNull($hidden->difficulty);
+        $this->assertCount(0, $hidden->languages);
+
+        $visible = Game::where('title', 'Visible')->firstOrFail();
+        $this->assertTrue($visible->is_active);
+        $this->assertSame('HARD', $visible->difficulty);
+        $this->assertSame(2020, $visible->year);
+    }
+
     public function test_export_then_import_updates_existing_games(): void
     {
         $game = Game::factory()->create(['title' => 'Original']);

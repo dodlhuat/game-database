@@ -19,34 +19,37 @@ class GameImport implements ToModel, WithHeadingRow
     /** @param array<string, mixed> $row */
     public function model(array $row): ?Game
     {
-        $title = trim($row['title'] ?? '');
+        $title = trim($this->text($row, 'title') ?? '');
         if (empty($title)) {
             return null;
         }
 
-        $slug = trim($row['slug'] ?? '');
+        $slug = trim($this->text($row, 'slug') ?? '');
         if (empty($slug)) {
             $slug = Str::slug($title);
         }
 
         // ID vorhanden → Update, sonst → Neu
-        $id = isset($row['id']) && $row['id'] !== '' ? (int) $row['id'] : null;
+        $id = $this->number($row, 'id');
         $existing = $id ? Game::find($id) : null;
         $isNew = $existing === null;
+
+        $difficultyText = $this->text($row, 'difficulty');
+        $difficulty = $difficultyText !== null ? strtoupper($difficultyText) : null;
 
         $data = array_filter([
             'title' => $title,
             'slug' => $slug,
-            'short_description' => isset($row['short_description']) && $row['short_description'] !== '' ? substr(trim($row['short_description']), 0, 500) : null,
-            'description' => isset($row['description']) && $row['description'] !== '' ? trim($row['description']) : null,
-            'min_players' => isset($row['min_players']) && $row['min_players'] !== '' ? (int) $row['min_players'] : null,
-            'max_players' => isset($row['max_players']) && $row['max_players'] !== '' ? (int) $row['max_players'] : null,
-            'min_age' => isset($row['min_age']) && $row['min_age'] !== '' ? (int) $row['min_age'] : null,
-            'duration_min' => isset($row['duration_min']) && $row['duration_min'] !== '' ? (int) $row['duration_min'] : null,
-            'duration_max' => isset($row['duration_max']) && $row['duration_max'] !== '' ? (int) $row['duration_max'] : null,
-            'difficulty' => isset($row['difficulty']) && in_array(strtoupper($row['difficulty']), ['EASY', 'MEDIUM', 'HARD', 'EXPERT']) ? strtoupper($row['difficulty']) : null,
-            'year' => isset($row['year']) && $row['year'] !== '' ? (int) $row['year'] : null,
-            'is_active' => isset($row['is_active']) && $row['is_active'] !== '' ? (bool) (int) $row['is_active'] : true,
+            'short_description' => ($shortDescription = $this->text($row, 'short_description')) !== null ? substr(trim($shortDescription), 0, 500) : null,
+            'description' => ($description = $this->text($row, 'description')) !== null ? trim($description) : null,
+            'min_players' => $this->number($row, 'min_players'),
+            'max_players' => $this->number($row, 'max_players'),
+            'min_age' => $this->number($row, 'min_age'),
+            'duration_min' => $this->number($row, 'duration_min'),
+            'duration_max' => $this->number($row, 'duration_max'),
+            'difficulty' => $difficulty !== null && in_array($difficulty, ['EASY', 'MEDIUM', 'HARD', 'EXPERT'], true) ? $difficulty : null,
+            'year' => $this->number($row, 'year'),
+            'is_active' => ($isActive = $this->number($row, 'is_active')) !== null ? (bool) $isActive : true,
         ], fn ($v) => $v !== null);
 
         if ($isNew) {
@@ -59,8 +62,8 @@ class GameImport implements ToModel, WithHeadingRow
         }
 
         // Sprachen synchronisieren (kommagetrennt)
-        if (! empty($row['language'])) {
-            $langNames = array_filter(array_map('trim', explode(',', $row['language'])));
+        if (($languages = $this->text($row, 'language')) !== null) {
+            $langNames = $this->names($languages);
             $langIds = [];
             foreach ($langNames as $langName) {
                 $lang = Language::firstOrCreate(['name' => $langName]);
@@ -70,8 +73,8 @@ class GameImport implements ToModel, WithHeadingRow
         }
 
         // Tags synchronisieren (kommagetrennt)
-        if (! empty($row['tags'])) {
-            $tagNames = array_filter(array_map('trim', explode(',', $row['tags'])));
+        if (($tags = $this->text($row, 'tags')) !== null) {
+            $tagNames = $this->names($tags);
             $tagIds = [];
             foreach ($tagNames as $tagName) {
                 $tag = Tag::firstOrCreate(
@@ -84,8 +87,8 @@ class GameImport implements ToModel, WithHeadingRow
         }
 
         // Mechaniken synchronisieren (kommagetrennt)
-        if (! empty($row['mechanics'])) {
-            $mechanicNames = array_filter(array_map('trim', explode(',', $row['mechanics'])));
+        if (($mechanics = $this->text($row, 'mechanics')) !== null) {
+            $mechanicNames = $this->names($mechanics);
             $mechanicIds = [];
             foreach ($mechanicNames as $mechanicName) {
                 $mechanic = Mechanic::firstOrCreate(
@@ -98,5 +101,31 @@ class GameImport implements ToModel, WithHeadingRow
         }
 
         return null; // Model selbst gespeichert
+    }
+
+    /**
+     * Cell as string, or null when the column is missing or empty.
+     *
+     * @param  array<string, mixed>  $row
+     */
+    private function text(array $row, string $key): ?string
+    {
+        $value = $row[$key] ?? null;
+
+        return is_scalar($value) && (string) $value !== '' ? (string) $value : null;
+    }
+
+    /** @param  array<string, mixed>  $row */
+    private function number(array $row, string $key): ?int
+    {
+        $value = $this->text($row, $key);
+
+        return $value === null ? null : (int) $value;
+    }
+
+    /** @return list<string> */
+    private function names(string $commaSeparated): array
+    {
+        return array_values(array_filter(array_map('trim', explode(',', $commaSeparated))));
     }
 }

@@ -13,7 +13,7 @@ class EmailVerificationController extends Controller
 {
     public function verify(Request $request, int $id): RedirectResponse
     {
-        $frontendUrl = config('frontend.url');
+        $frontendUrl = config()->string('frontend.url');
 
         if (! $request->hasValidSignature()) {
             return redirect($frontendUrl.'/email-verified?error=invalid_link');

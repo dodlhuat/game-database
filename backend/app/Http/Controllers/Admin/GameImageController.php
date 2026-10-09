@@ -20,7 +20,8 @@ class GameImageController extends Controller
             'images.*' => ['required', 'image', 'max:10240'],
         ]);
 
-        $nextOrder = $game->images()->max('sort_order') + 1;
+        $maxOrder = $game->images()->max('sort_order');
+        $nextOrder = (is_numeric($maxOrder) ? (int) $maxOrder : 0) + 1;
         /** @var GameImage[] $created */
         $created = [];
 

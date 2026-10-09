@@ -42,7 +42,8 @@ class ReservationController extends Controller
             return response()->json(['message' => 'Du stehst bereits auf der Warteliste.'], 422);
         }
 
-        $position = Reservation::where('game_id', $game->id)->max('position') + 1;
+        $maxPosition = Reservation::where('game_id', $game->id)->max('position');
+        $position = (is_numeric($maxPosition) ? (int) $maxPosition : 0) + 1;
 
         $reservation = Reservation::create([
             'game_id' => $game->id,

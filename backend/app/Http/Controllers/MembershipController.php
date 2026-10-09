@@ -27,11 +27,11 @@ class MembershipController extends Controller
     public function pricing(): JsonResponse
     {
         return response()->json([
-            'fee_cents' => (int) config('membership.fee_cents'),
-            'currency' => config('tokens.currency'),
-            'tokens' => (int) config('membership.tokens'),
-            'bonus_tokens' => (int) config('membership.bonus_tokens'),
-            'bonus_valid_months' => (int) config('membership.bonus_valid_months'),
+            'fee_cents' => config()->integer('membership.fee_cents'),
+            'currency' => config()->string('tokens.currency'),
+            'tokens' => config()->integer('membership.tokens'),
+            'bonus_tokens' => config()->integer('membership.bonus_tokens'),
+            'bonus_valid_months' => config()->integer('membership.bonus_valid_months'),
         ]);
     }
 
@@ -79,8 +79,8 @@ class MembershipController extends Controller
             ]);
         }
 
-        $priceCents = (int) config('membership.fee_cents');
-        $currency = config('tokens.currency');
+        $priceCents = config()->integer('membership.fee_cents');
+        $currency = config()->string('tokens.currency');
 
         try {
             $intent = $this->stripe->createPaymentIntent($priceCents, $currency, [
@@ -181,7 +181,7 @@ class MembershipController extends Controller
         $user->notify(new WelcomeMemberNotification);
 
         return response()->json([
-            'message' => 'Willkommen als Vollmitglied! Du hast '.config('membership.tokens').' Token und '.config('membership.bonus_tokens').' Bonus-Token erhalten.',
+            'message' => 'Willkommen als Vollmitglied! Du hast '.config()->integer('membership.tokens').' Token und '.config()->integer('membership.bonus_tokens').' Bonus-Token erhalten.',
             'user' => new UserResource($user),
         ]);
     }

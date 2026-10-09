@@ -20,7 +20,7 @@ class GameController extends Controller
     {
         $games = Game::with(['tags', 'mechanics', 'languages'])
             ->withCount('copies')
-            ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%")
+            ->when($request->string('search')->toString(), fn ($q, string $s) => $q->where('title', 'like', "%{$s}%")
             )
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active'))
             )
@@ -42,14 +42,14 @@ class GameController extends Controller
         $game = Game::create($data);
 
         if ($request->filled('tag_ids')) {
-            $game->tags()->sync($request->tag_ids);
+            $game->tags()->sync($request->array('tag_ids'));
         }
 
         if ($request->filled('mechanic_ids')) {
-            $game->mechanics()->sync($request->mechanic_ids);
+            $game->mechanics()->sync($request->array('mechanic_ids'));
         }
 
-        $game->languages()->sync($request->language_ids ?? []);
+        $game->languages()->sync($request->array('language_ids'));
 
         $game->load(['tags', 'mechanics', 'languages']);
 
@@ -77,15 +77,15 @@ class GameController extends Controller
         $game->update($data);
 
         if ($request->has('tag_ids')) {
-            $game->tags()->sync($request->tag_ids ?? []);
+            $game->tags()->sync($request->array('tag_ids'));
         }
 
         if ($request->has('mechanic_ids')) {
-            $game->mechanics()->sync($request->mechanic_ids ?? []);
+            $game->mechanics()->sync($request->array('mechanic_ids'));
         }
 
         if ($request->has('language_ids')) {
-            $game->languages()->sync($request->language_ids ?? []);
+            $game->languages()->sync($request->array('language_ids'));
         }
 
         $game->load(['tags', 'mechanics', 'languages']);

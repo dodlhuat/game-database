@@ -23,7 +23,7 @@ class ReservationAvailable extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-        $catalogUrl = config('frontend.url').'/games/'.$this->game->slug;
+        $catalogUrl = config()->string('frontend.url').'/games/'.$this->game->slug;
 
         return $this->buildFromTemplate('reservation_available', [
             'name' => $notifiable->name,

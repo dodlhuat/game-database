@@ -56,8 +56,15 @@ class SimilarityScorer
 
                 return $game;
             })
-            ->filter(fn (Game $game): bool => (int) $game->getAttribute('similarity_score') > 0)
-            ->sortByDesc(fn (Game $game): int => (int) $game->getAttribute('similarity_score'))
+            ->filter(fn (Game $game): bool => self::similarityOf($game) > 0)
+            ->sortByDesc(fn (Game $game): int => self::similarityOf($game))
             ->values();
+    }
+
+    private static function similarityOf(Game $game): int
+    {
+        $score = $game->getAttribute('similarity_score');
+
+        return is_numeric($score) ? (int) $score : 0;
     }
 }

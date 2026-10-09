@@ -141,7 +141,7 @@ class TokenWallet
                     ->get();
 
                 // Tokens without a lot are worthless legacy tokens: spend them first.
-                $legacy = max(0, $locked->tokens - (int) $normalLots->sum('remaining'));
+                $legacy = max(0, $locked->tokens - (int) $normalLots->sum(fn (TokenLot $lot) => $lot->remaining));
                 $take = min($left, $legacy);
                 $left -= $take;
                 $normalUsed += $take;

@@ -41,7 +41,9 @@ class StripeWebhookController extends Controller
             return response()->json(['message' => 'Invalid signature.'], 400);
         }
 
-        $event = json_decode($payload, true) ?? [];
+        $decoded = json_decode($payload, true);
+        /** @var array<string, mixed> $event */
+        $event = is_array($decoded) ? $decoded : [];
 
         match ($event['type'] ?? null) {
             'payment_intent.succeeded' => $this->handlePaymentIntentSucceeded($event),
@@ -55,7 +57,7 @@ class StripeWebhookController extends Controller
     /** @param  array<string, mixed>  $event */
     private function handlePaymentIntentSucceeded(array $event): void
     {
-        $intent = $event['data']['object'] ?? [];
+        $intent = $this->eventObject($event);
         $paymentIntentId = $intent['id'] ?? null;
         $chargeId = $intent['latest_charge'] ?? null;
 
@@ -84,6 +86,24 @@ class StripeWebhookController extends Controller
     }
 
     /**
+     * The Stripe object a webhook event is about (`data.object`), or an empty
+     * array for malformed payloads.
+     *
+     * @param  array<string, mixed>  $event
+     * @return array<string, mixed>
+     */
+    private function eventObject(array $event): array
+    {
+        $data = $event['data'] ?? null;
+        $object = is_array($data) ? ($data['object'] ?? null) : null;
+
+        /** @var array<string, mixed> $result */
+        $result = is_array($object) ? $object : [];
+
+        return $result;
+    }
+
+    /**
      * Only flags the purchase as REFUNDED for bookkeeping/admin visibility —
      * deliberately does not auto-deduct tokens already spent on loans.
      *
@@ -91,7 +111,7 @@ class StripeWebhookController extends Controller
      */
     private function handleChargeRefunded(array $event): void
     {
-        $charge = $event['data']['object'] ?? [];
+        $charge = $this->eventObject($event);
         $chargeId = $charge['id'] ?? null;
 
         if (! is_string($chargeId)) {

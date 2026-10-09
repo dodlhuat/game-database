@@ -19,7 +19,7 @@ class GameSearchController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $q = trim((string) $request->get('q', ''));
+        $q = $request->string('q')->trim()->toString();
 
         if ($q === '') {
             return response()->json(['data' => [], 'meta' => ['intent' => 'EMPTY']]);

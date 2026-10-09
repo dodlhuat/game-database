@@ -167,4 +167,39 @@ class StripeWebhookTest extends TestCase
         $this->assertDatabaseHas('token_purchases', ['id' => $purchase->id, 'status' => 'CREATED']);
         $this->assertEquals(5, $user->fresh()->tokens);
     }
+
+    public function test_ignores_events_with_malformed_data_object(): void
+    {
+        foreach ([
+            ['type' => 'payment_intent.succeeded', 'data' => 'oops'],
+            ['type' => 'payment_intent.succeeded', 'data' => ['object' => 'oops']],
+            ['type' => 'charge.refunded', 'data' => null],
+            ['type' => 'charge.refunded', 'data' => ['object' => 'oops']],
+        ] as $event) {
+            $this->postEvent($event, $this->signedHeaders($event))->assertOk();
+        }
+    }
+
+    public function test_ignores_signed_payload_that_is_not_a_json_object(): void
+    {
+        $timestamp = time();
+        $signature = hash_hmac('sha256', "{$timestamp}.null", config('services.stripe.webhook_secret'));
+
+        $this->call('POST', '/api/webhooks/stripe', [], [], [], array_merge(
+            $this->transformHeadersToServerVars(['Stripe-Signature' => "t={$timestamp},v1={$signature}"]),
+            ['CONTENT_TYPE' => 'application/json']
+        ), 'null')->assertOk();
+    }
+
+    public function test_fails_loudly_when_webhook_secret_is_not_configured(): void
+    {
+        $event = ['type' => 'customer.created', 'data' => ['object' => []]];
+        $headers = $this->signedHeaders($event);
+
+        config(['services.stripe.webhook_secret' => null]);
+        $this->withoutExceptionHandling();
+        $this->expectException(\InvalidArgumentException::class);
+
+        $this->postEvent($event, $headers);
+    }
 }

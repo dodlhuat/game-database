@@ -26,10 +26,10 @@ class TokenController extends Controller
      */
     public function packages(): JsonResponse
     {
-        $currency = config('tokens.currency');
+        $currency = config()->string('tokens.currency');
 
         $packages = [];
-        foreach (config('tokens.packages') as $amount => $priceCents) {
+        foreach (config()->array('tokens.packages') as $amount => $priceCents) {
             $packages[] = [
                 'amount' => $amount,
                 'price_cents' => $priceCents,
@@ -47,7 +47,7 @@ class TokenController extends Controller
      */
     public function checkout(Request $request): JsonResponse
     {
-        $packages = config('tokens.packages');
+        $packages = config()->array('tokens.packages');
 
         $request->validate([
             'amount' => ['required', 'integer', Rule::in(array_keys($packages))],
@@ -61,8 +61,8 @@ class TokenController extends Controller
         }
 
         $amount = $request->integer('amount');
-        $priceCents = $packages[$amount];
-        $currency = config('tokens.currency');
+        $priceCents = config()->integer("tokens.packages.{$amount}");
+        $currency = config()->string('tokens.currency');
 
         try {
             $intent = $this->stripe->createPaymentIntent($priceCents, $currency, [

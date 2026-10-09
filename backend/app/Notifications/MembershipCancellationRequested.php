@@ -36,7 +36,7 @@ class MembershipCancellationRequested extends Notification
             'account_holder' => e($c->account_holder ?? '—'),
             'iban' => e($c->iban ?? '—'),
             'reason' => e($c->reason ?: '—'),
-        ], config('frontend.url').'/admin/cancellations', $notifiable);
+        ], config()->string('frontend.url').'/admin/cancellations', $notifiable);
     }
 
     public static function euro(int $cents): string

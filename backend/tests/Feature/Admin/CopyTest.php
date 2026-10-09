@@ -230,4 +230,22 @@ class CopyTest extends TestCase
 
         $this->assertSame([$oldest->id, $recent->id, $noLoan->id], $ids);
     }
+
+    public function test_index_per_page_defaults_and_is_clamped(): void
+    {
+        Copy::factory()->count(3)->create();
+        $admin = $this->admin();
+
+        $perPage = fn (string $query): int => $this->actingAs($admin)
+            ->getJson('/api/admin/copies?'.$query)
+            ->assertOk()
+            ->json('meta.per_page');
+
+        $this->assertSame(50, $perPage(''));
+        $this->assertSame(50, $perPage('per_page=abc'));
+        $this->assertSame(50, $perPage('per_page=0'));
+        $this->assertSame(1, $perPage('per_page=-5'));
+        $this->assertSame(2, $perPage('per_page=2'));
+        $this->assertSame(200, $perPage('per_page=9999'));
+    }
 }

@@ -14,8 +14,8 @@ class EmailLogController extends Controller
         $logs = EmailLog::query()
             ->with('user:id,name,email')
             ->when($request->template_key, fn ($q, $key) => $q->where('template_key', $key))
-            ->when($request->date_from, fn ($q, $date) => $q->whereDate('sent_at', '>=', $date))
-            ->when($request->date_to, fn ($q, $date) => $q->whereDate('sent_at', '<=', $date))
+            ->when($request->string('date_from')->toString(), fn ($q, string $date) => $q->whereDate('sent_at', '>=', $date))
+            ->when($request->string('date_to')->toString(), fn ($q, string $date) => $q->whereDate('sent_at', '<=', $date))
             ->orderByDesc('sent_at')
             ->paginate(50);
 

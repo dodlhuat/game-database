@@ -29,7 +29,7 @@ class DepositForfeited extends Notification
         $loanCopy = $this->loan->copy;
         /** @var Game $game */
         $game = $loanCopy->game;
-        $dashboardUrl = config('frontend.url').'/dashboard';
+        $dashboardUrl = config()->string('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('deposit_forfeited', [
             'name' => $notifiable->name,

@@ -30,7 +30,7 @@ class LoanDueSoon extends Notification
         /** @var Game $game */
         $game = $loanCopy->game;
         $dueDate = $this->loan->due_date->format('d.m.Y');
-        $dashboardUrl = config('frontend.url').'/dashboard';
+        $dashboardUrl = config()->string('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('loan_due_soon', [
             'name' => $notifiable->name,

@@ -25,11 +25,14 @@ class DonationController extends Controller
             ->map(fn ($file) => $this->imageUpload->compressForAttachment($file))
             ->all();
 
+        /** @var list<string> $games validated as games.* string by DonationRequest */
+        $games = $request->validated('games');
+
         $adminEmails = User::where('role', 'ADMIN')->pluck('email');
 
         if ($adminEmails->isNotEmpty()) {
             Mail::to($adminEmails->all())->queue(
-                new DonationMail($user->name, $user->email, $request->validated('games'), $images)
+                new DonationMail($user->name, $user->email, $games, $images)
             );
         }
 

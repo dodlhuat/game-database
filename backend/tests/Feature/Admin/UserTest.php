@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\TokenTransaction;
 use App\Models\User;
+use App\Notifications\UserRejected;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -118,5 +119,51 @@ class UserTest extends TestCase
             ->assertOk();
 
         $this->assertDatabaseHas('users', ['id' => $target->id, 'status' => 'SUSPENDED']);
+    }
+
+    public function test_reject_without_reason_sends_mail_without_reason_line(): void
+    {
+        Notification::fake();
+        $target = User::factory()->pending()->create();
+
+        $this->actingAs($this->admin())
+            ->patchJson("/api/admin/users/{$target->id}/reject")
+            ->assertOk();
+
+        Notification::assertSentTo($target, UserRejected::class, function (UserRejected $notification) use ($target): bool {
+            return ! collect($notification->toMail($target)->introLines)
+                ->contains(fn ($line) => str_contains((string) $line, 'Grund'));
+        });
+    }
+
+    public function test_reject_with_reason_includes_reason_in_mail(): void
+    {
+        Notification::fake();
+        $target = User::factory()->pending()->create();
+
+        $this->actingAs($this->admin())
+            ->patchJson("/api/admin/users/{$target->id}/reject", ['reason' => 'Not eligible'])
+            ->assertOk();
+
+        Notification::assertSentTo($target, UserRejected::class, function (UserRejected $notification) use ($target): bool {
+            return collect($notification->toMail($target)->introLines)
+                ->contains(fn ($line) => str_contains((string) $line, 'Not eligible'));
+        });
+    }
+
+    public function test_index_search_matches_name_or_email_and_empty_search_returns_all(): void
+    {
+        User::factory()->create(['name' => 'Anna Muster', 'email' => 'anna@example.com']);
+        User::factory()->create(['name' => 'Bernd Beispiel', 'email' => 'bernd@example.org']);
+        $admin = $this->admin();
+
+        $count = fn (string $query): int => count(
+            $this->actingAs($admin)->getJson('/api/admin/users?'.$query)->assertOk()->json('data')
+        );
+
+        $this->assertSame(1, $count('search=muster'));
+        $this->assertSame(1, $count('search=example.org'));
+        $this->assertSame(0, $count('search=niemand'));
+        $this->assertSame(3, $count('search='));
     }
 }

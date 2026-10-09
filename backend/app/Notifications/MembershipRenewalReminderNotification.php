@@ -20,7 +20,7 @@ class MembershipRenewalReminderNotification extends Notification
 
     public function toMail(User $notifiable): MailMessage
     {
-        $renewalUrl = config('frontend.url').'/dashboard';
+        $renewalUrl = config()->string('frontend.url').'/dashboard';
 
         return $this->buildFromTemplate('membership_renewal_reminder', [
             'name' => $notifiable->name,
