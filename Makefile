@@ -4,7 +4,8 @@
 
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
-        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify \
+        server-update server-update-install server-update-install-all server-reboot
 
 ## Erster Start (einmalig)
 setup:
@@ -147,3 +148,31 @@ deploy-fix-pull:
 deploy-verify:
 	curl -sf http://65.109.232.115/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
 	curl -sf http://65.109.232.115/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"
+
+# ============================================================
+# Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)
+# Der deploy-User hat kein passwordless sudo -> ssh -t, sudo fragt einmal nach dem Passwort.
+# ============================================================
+
+## Prüfen, ob Sicherheitsupdates anstehen (installiert nichts; aktualisiert nur die Paketlisten)
+server-update:
+	ssh -t $(DEPLOY_SERVER) 'sudo apt-get update -qq && echo "--- Ausstehende Sicherheitsupdates ---" && (apt list --upgradable 2>/dev/null | grep -i security || echo "keine") && echo "--- Sonstige Updates (nicht automatisch) ---" && (apt list --upgradable 2>/dev/null | grep -v -i -E "security|^Listing" || echo "keine") && echo "--- Neustart nötig? ---" && (cat /var/run/reboot-required 2>/dev/null || echo "nein")'
+
+## Sicherheitsupdates installieren (nur Security-Quellen, via unattended-upgrade) und Dienste prüfen
+server-update-install:
+	ssh -t $(DEPLOY_SERVER) 'sudo apt-get update -qq && sudo unattended-upgrade -v && echo "--- Neustart nötig? ---" && (cat /var/run/reboot-required 2>/dev/null || echo "nein") && echo "--- Dienste ---" && systemctl is-active nginx php8.5-fpm && pm2 list'
+
+## ALLE ausstehenden Updates installieren (auch nicht-sicherheitsrelevante, z.B. systemd) — danach ggf. Neustart nötig
+server-update-install-all:
+	ssh -t $(DEPLOY_SERVER) 'sudo apt-get update -qq && sudo apt-get upgrade -y && echo "--- Neustart nötig? ---" && (cat /var/run/reboot-required 2>/dev/null || echo "nein") && echo "--- Dienste ---" && systemctl is-active nginx php8.5-fpm && pm2 list'
+
+## Server neu starten, auf SSH warten und danach prüfen (fehlgeschlagene Dienste, PM2, Backend/Frontend von außen)
+server-reboot:
+	-ssh -t $(DEPLOY_SERVER) 'sudo reboot'
+	@echo "Warte auf Neustart ..."
+	@sleep 20
+	@until ssh -o BatchMode=yes -o ConnectTimeout=5 $(DEPLOY_SERVER) true 2>/dev/null; do sleep 5; done
+	@echo "--- Server wieder erreichbar, Uptime: ---"
+	@ssh $(DEPLOY_SERVER) 'uptime -p; echo "--- Fehlgeschlagene Dienste ---"; systemctl --failed --no-legend || true; echo "--- PM2 ---"; pm2 list'
+	@sleep 5
+	@$(MAKE) --no-print-directory deploy-verify
