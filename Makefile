@@ -5,7 +5,7 @@
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
         deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify \
-        server-update server-update-install server-update-install-all server-reboot
+        server-update server-update-install server-update-install-all
 
 ## Erster Start (einmalig)
 setup:
@@ -13,7 +13,7 @@ setup:
 	git config core.hooksPath .githooks
 
 ## start frontend with cleared cache
-fe-up:
+up-dev:
 	cd frontend && rm -rf .nuxt && npm run dev
 
 ## Container starten
@@ -166,7 +166,6 @@ server-update-install:
 server-update-install-all:
 	ssh -t $(DEPLOY_SERVER) 'sudo apt-get update -qq && sudo apt-get upgrade -y && echo "--- Neustart nötig? ---" && (cat /var/run/reboot-required 2>/dev/null || echo "nein") && echo "--- Dienste ---" && systemctl is-active nginx php8.5-fpm && pm2 list'
 
-## Server neu starten, auf SSH warten und danach prüfen (fehlgeschlagene Dienste, PM2, Backend/Frontend von außen)
 server-reboot:
 	-ssh -t $(DEPLOY_SERVER) 'sudo reboot'
 	@echo "Warte auf Neustart ..."
