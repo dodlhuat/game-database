@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import authMiddleware from '~/middleware/auth'
 import adminMiddleware from '~/middleware/admin'
+import maintenanceMiddleware from '~/middleware/maintenance.global'
 
 const navigateToMock = vi.hoisted(() => vi.fn())
 mockNuxtImport('navigateTo', () => navigateToMock)
@@ -54,6 +55,33 @@ describe('admin middleware', () => {
   it('does not redirect for an admin user', () => {
     localStorage.setItem('auth_user', JSON.stringify({ role: 'ADMIN' }))
     adminMiddleware(route, route)
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('maintenance middleware', () => {
+  const go = (path: string) => maintenanceMiddleware({ path } as never, route)
+
+  beforeEach(() => navigateToMock.mockReset())
+  afterEach(() => {
+    useRuntimeConfig().public.maintenanceMode = false
+  })
+
+  it('does nothing while maintenance mode is off', () => {
+    useRuntimeConfig().public.maintenanceMode = false
+    go('/games')
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('redirects every other route to the index page when on', () => {
+    useRuntimeConfig().public.maintenanceMode = true
+    go('/games')
+    expect(navigateToMock).toHaveBeenCalledWith('/', { replace: true })
+  })
+
+  it('lets the index page through when on', () => {
+    useRuntimeConfig().public.maintenanceMode = true
+    go('/')
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 })

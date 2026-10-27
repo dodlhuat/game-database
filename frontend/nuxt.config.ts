@@ -57,6 +57,10 @@ export default defineNuxtConfig({
   // API Base URL aus .env
   runtimeConfig: {
     public: {
+      // Wartungsmodus: NUXT_PUBLIC_MAINTENANCE_MODE=true leitet alle Routen
+      // auf die Startseite um, die dann die Wartungsansicht zeigt. Nuxt
+      // überschreibt den Wert zur Laufzeit aus der Umgebung — kein Rebuild nötig.
+      maintenanceMode: false,
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
       // Publishable Key ist per Design öffentlich (wird an Stripe.js
       // übergeben) — kein Secret. Test-/Live-Umschaltung passiert rein über

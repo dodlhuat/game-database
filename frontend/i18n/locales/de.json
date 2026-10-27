@@ -230,6 +230,15 @@
     "footer_logout": "Abmelden"
   },
   "pages": {
+    "maintenance": {
+      "eyebrow": "Brettspiel-Ausleihplattform",
+      "title_1": "Hier entsteht",
+      "title_2": "etwas",
+      "title_3": "Großartiges.",
+      "desc": "Wir sortieren die Regale, würfeln an Neuem und packen frische Spiele aus. Bald stehen alle unsere Abenteuer wieder für dich bereit.",
+      "status": "Spielaufbau läuft",
+      "signoff": "Alle. Unsere. Abenteuer."
+    },
     "home": {
       "hero_eyebrow": "Brettspiel-Ausleihplattform",
       "hero_title_1": "Alle.",

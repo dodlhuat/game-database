@@ -1,5 +1,6 @@
 <template>
-  <div class="landing">
+  <MaintenanceView v-if="maintenance" />
+  <div v-else class="landing">
     <!-- ── Hero ───────────────────────────────────────────────── -->
     <section class="hero">
       <div class="hero__backdrop" aria-hidden="true">
@@ -143,6 +144,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
+const maintenance = useRuntimeConfig().public.maintenanceMode
 
 // Feature section: scroll-triggered entrance via IntersectionObserver
 const featuresRef = ref<HTMLElement | null>(null)

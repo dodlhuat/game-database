@@ -1,111 +1,114 @@
 <template>
-  <div id="flyoutOverlay" class="flyout-overlay" />
-  <div id="flyoutMenu" class="flyout-menu">
-    <ul>
-      <li>
-        <NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink>
-      </li>
-      <li>
-        <NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink>
-      </li>
-      <li>
-        <NuxtLink to="/about">{{ $t('nav.about') }}</NuxtLink>
-      </li>
-      <li v-show="auth.isLoggedIn">
-        <NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink>
-      </li>
+  <div v-if="maintenance" class="app-shell"><slot /></div>
+  <template v-else>
+    <div id="flyoutOverlay" class="flyout-overlay" />
+    <div id="flyoutMenu" class="flyout-menu">
+      <ul>
+        <li>
+          <NuxtLink to="/games">{{ $t('nav.games') }}</NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/packages">{{ $t('nav.packages') }}</NuxtLink>
+        </li>
+        <li>
+          <NuxtLink to="/about">{{ $t('nav.about') }}</NuxtLink>
+        </li>
+        <li v-show="auth.isLoggedIn">
+          <NuxtLink to="/events">{{ $t('nav.events') }}</NuxtLink>
+        </li>
 
-      <!-- Dashboard only for non-admin users at level 1 -->
-      <li v-show="auth.isLoggedIn && !auth.isAdmin">
-        <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
-      </li>
+        <!-- Dashboard only for non-admin users at level 1 -->
+        <li v-show="auth.isLoggedIn && !auth.isAdmin">
+          <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
+        </li>
 
-      <!-- Admin submenu — FlyoutMenu turns a bare text label + nested <ul>
+        <!-- Admin submenu — FlyoutMenu turns a bare text label + nested <ul>
            into an accordion toggle; it must NOT be a link itself (basix
            hydration only picks up a loose text node as the toggle label). -->
-      <li v-show="auth.isLoggedIn && auth.isAdmin" ref="adminMenuItem">
-        {{ $t('nav.admin') }}
-        <ul>
-          <li>
-            <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/copy-review">{{ $t('admin.copy_review.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/events">{{ $t('admin.events.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/mechanics">{{ $t('admin.mechanics.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/users">{{ $t('admin.users.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/loans">{{ $t('admin.loans.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/package-loans">{{ $t('admin.package_loans.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/cancellations">{{ $t('admin.cancellations.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/extensions">{{ $t('admin.extensions.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/damage-reports">{{ $t('admin.damage_reports.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/newsletters">{{ $t('admin.newsletters.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/emails">{{ $t('admin.emails.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/email-logs">{{ $t('admin.email_logs.title') }}</NuxtLink>
-          </li>
-          <li>
-            <NuxtLink to="/admin/loan-settings">{{ $t('admin.loan_settings.title') }}</NuxtLink>
-          </li>
-        </ul>
-      </li>
+        <li v-show="auth.isLoggedIn && auth.isAdmin" ref="adminMenuItem">
+          {{ $t('nav.admin') }}
+          <ul>
+            <li>
+              <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/copy-review">{{ $t('admin.copy_review.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/events">{{ $t('admin.events.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/mechanics">{{ $t('admin.mechanics.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/users">{{ $t('admin.users.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/loans">{{ $t('admin.loans.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/package-loans">{{ $t('admin.package_loans.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/cancellations">{{ $t('admin.cancellations.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/extensions">{{ $t('admin.extensions.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/damage-reports">{{ $t('admin.damage_reports.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/newsletters">{{ $t('admin.newsletters.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/emails">{{ $t('admin.emails.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/email-logs">{{ $t('admin.email_logs.title') }}</NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/admin/loan-settings">{{ $t('admin.loan_settings.title') }}</NuxtLink>
+            </li>
+          </ul>
+        </li>
 
-      <li v-show="!auth.isLoggedIn">
-        <NuxtLink to="/login">{{ $t('nav.login') }}</NuxtLink>
-      </li>
-      <li v-show="!auth.isLoggedIn">
-        <NuxtLink to="/register">{{ $t('nav.register') }}</NuxtLink>
-      </li>
-      <li v-show="auth.isLoggedIn">
-        <button class="push-nav__logout" @click="handleLogout">{{ $t('nav.logout') }}</button>
-      </li>
-      <li class="push-nav__divider" aria-hidden="true" />
-      <li class="push-nav__legal">
-        <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink>
-      </li>
-      <li class="push-nav__legal">
-        <NuxtLink to="/privacy">{{ $t('nav.privacy') }}</NuxtLink>
-      </li>
-      <li class="push-nav__legal">
-        <NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink>
-      </li>
-    </ul>
-  </div>
+        <li v-show="!auth.isLoggedIn">
+          <NuxtLink to="/login">{{ $t('nav.login') }}</NuxtLink>
+        </li>
+        <li v-show="!auth.isLoggedIn">
+          <NuxtLink to="/register">{{ $t('nav.register') }}</NuxtLink>
+        </li>
+        <li v-show="auth.isLoggedIn">
+          <button class="push-nav__logout" @click="handleLogout">{{ $t('nav.logout') }}</button>
+        </li>
+        <li class="push-nav__divider" aria-hidden="true" />
+        <li class="push-nav__legal">
+          <NuxtLink to="/terms">{{ $t('nav.terms') }}</NuxtLink>
+        </li>
+        <li class="push-nav__legal">
+          <NuxtLink to="/privacy">{{ $t('nav.privacy') }}</NuxtLink>
+        </li>
+        <li class="push-nav__legal">
+          <NuxtLink to="/cookies">{{ $t('nav.cookies') }}</NuxtLink>
+        </li>
+      </ul>
+    </div>
 
-  <div class="app-shell">
-    <AppNav />
-    <slot />
-  </div>
+    <div class="app-shell">
+      <AppNav />
+      <slot />
+    </div>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -117,6 +120,7 @@ import { useAuth } from '~/composables/useAuth'
 const auth = useAuthStore()
 const { logout } = useAuth()
 const route = useRoute()
+const maintenance = useRuntimeConfig().public.maintenanceMode
 const { t } = useI18n()
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
@@ -139,6 +143,7 @@ function closeMenu() {
 }
 
 onMounted(async () => {
+  if (maintenance) return
   const { FlyoutMenu } = await import('@dodlhuat/basix/js/flyout-menu')
   flyout = new FlyoutMenu({
     triggerSelector: '.menu-trigger',
