@@ -124,6 +124,8 @@ phpstan:
 # ============================================================
 DEPLOY_SERVER := hetzner-deploy
 DEPLOY_DIR    := /var/www/alle-unsere-abenteuer
+# Basis-URL für deploy-verify; auf https:// umstellen, sobald certbot eingerichtet ist
+DEPLOY_URL    := http://alle-unsere-abenteuer.at
 
 ## Backend + Frontend auf dem Server aktualisieren (git pull, composer, migrate, npm build, pm2 restart)
 deploy: deploy-backend deploy-frontend
@@ -146,8 +148,8 @@ deploy-fix-pull:
 
 ## Nach dem Deploy: Backend-API und Frontend von außen erreichbar?
 deploy-verify:
-	curl -sf http://65.109.232.115/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
-	curl -sf http://65.109.232.115/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"
+	curl -sf $(DEPLOY_URL)/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
+	curl -sf $(DEPLOY_URL)/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"
 
 # ============================================================
 # Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)
