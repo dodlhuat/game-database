@@ -120,7 +120,7 @@ import { useAuth } from '~/composables/useAuth'
 const auth = useAuthStore()
 const { logout } = useAuth()
 const route = useRoute()
-const maintenance = useRuntimeConfig().public.maintenanceMode
+const maintenance = useMaintenance()
 const { t } = useI18n()
 
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
@@ -143,7 +143,7 @@ function closeMenu() {
 }
 
 onMounted(async () => {
-  if (maintenance) return
+  if (maintenance.value) return
   const { FlyoutMenu } = await import('@dodlhuat/basix/js/flyout-menu')
   flyout = new FlyoutMenu({
     triggerSelector: '.menu-trigger',

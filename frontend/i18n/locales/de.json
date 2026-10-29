@@ -237,7 +237,8 @@
       "title_3": "Großartiges.",
       "desc": "Wir sortieren die Regale, würfeln an Neuem und packen frische Spiele aus. Bald stehen alle unsere Abenteuer für dich bereit.",
       "status": "Spielaufbau läuft",
-      "signoff": "Alle. Unsere. Abenteuer."
+      "signoff": "Alle. Unsere. Abenteuer.",
+      "admin_login": "Admin-Login"
     },
     "home": {
       "hero_eyebrow": "Brettspiel-Ausleihplattform",

@@ -5,7 +5,8 @@
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
         deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify \
-        server-update server-update-install server-update-install-all
+        server-update server-update-install server-update-install-all \
+        maintenance-on maintenance-off
 
 ## Erster Start (einmalig)
 setup:
@@ -150,6 +151,17 @@ deploy-fix-pull:
 deploy-verify:
 	curl -sf $(DEPLOY_URL)/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
 	curl -sf $(DEPLOY_URL)/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"
+
+## Wartungsmodus einschalten: setzt NUXT_PUBLIC_MAINTENANCE_MODE=true im PM2-Prozess (kein Rebuild nötig)
+## `pm2 save` sorgt dafür, dass der Zustand einen Server-Neustart überlebt
+maintenance-on:
+	ssh $(DEPLOY_SERVER) 'NUXT_PUBLIC_MAINTENANCE_MODE=true pm2 restart alle-unsere-abenteuer-frontend --update-env && pm2 save'
+	@echo "✓ Wartungsmodus AN — $(DEPLOY_URL)"
+
+## Wartungsmodus ausschalten
+maintenance-off:
+	ssh $(DEPLOY_SERVER) 'NUXT_PUBLIC_MAINTENANCE_MODE=false pm2 restart alle-unsere-abenteuer-frontend --update-env && pm2 save'
+	@echo "✓ Wartungsmodus AUS — $(DEPLOY_URL)"
 
 # ============================================================
 # Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)

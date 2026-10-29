@@ -144,7 +144,7 @@ import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 
 const auth = useAuthStore()
-const maintenance = useRuntimeConfig().public.maintenanceMode
+const maintenance = useMaintenance()
 
 // Feature section: scroll-triggered entrance via IntersectionObserver
 const featuresRef = ref<HTMLElement | null>(null)

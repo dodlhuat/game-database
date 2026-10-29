@@ -32,6 +32,10 @@
         <span class="maintenance__hex" aria-hidden="true">⬡</span>
         {{ $t('pages.maintenance.signoff') }}
       </p>
+
+      <NuxtLink to="/login" class="maintenance__login">{{
+        $t('pages.maintenance.admin_login')
+      }}</NuxtLink>
     </div>
   </main>
 </template>
@@ -144,6 +148,20 @@ $indigo-glow: rgba(44, 40, 32, 0.6);
     margin-bottom: 2.5rem;
     padding-bottom: 0;
     animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+  }
+
+  &__login {
+    display: inline-block;
+    margin-top: 2.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    opacity: 0.4;
+    transition: opacity 0.25s ease;
+
+    &:hover,
+    &:focus-visible {
+      opacity: 1;
+    }
   }
 
   &__signoff {

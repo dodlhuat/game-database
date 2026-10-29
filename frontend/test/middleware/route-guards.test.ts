@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import authMiddleware from '~/middleware/auth'
 import adminMiddleware from '~/middleware/admin'
+import { useAuthStore } from '~/stores/auth'
 import maintenanceMiddleware from '~/middleware/maintenance.global'
 
 const navigateToMock = vi.hoisted(() => vi.fn())
@@ -62,9 +63,13 @@ describe('admin middleware', () => {
 describe('maintenance middleware', () => {
   const go = (path: string) => maintenanceMiddleware({ path } as never, route)
 
-  beforeEach(() => navigateToMock.mockReset())
+  beforeEach(() => {
+    navigateToMock.mockReset()
+    useAuthStore().user = null
+  })
   afterEach(() => {
     useRuntimeConfig().public.maintenanceMode = false
+    useAuthStore().user = null
   })
 
   it('does nothing while maintenance mode is off', () => {
@@ -83,5 +88,25 @@ describe('maintenance middleware', () => {
     useRuntimeConfig().public.maintenanceMode = true
     go('/')
     expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('lets the login page through when on', () => {
+    useRuntimeConfig().public.maintenanceMode = true
+    go('/login')
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('lets a logged-in admin reach every route when on', () => {
+    useRuntimeConfig().public.maintenanceMode = true
+    useAuthStore().user = { role: 'ADMIN' } as never
+    go('/admin/games')
+    expect(navigateToMock).not.toHaveBeenCalled()
+  })
+
+  it('still redirects a logged-in non-admin when on', () => {
+    useRuntimeConfig().public.maintenanceMode = true
+    useAuthStore().user = { role: 'MEMBER' } as never
+    go('/dashboard')
+    expect(navigateToMock).toHaveBeenCalledWith('/', { replace: true })
   })
 })
