@@ -262,7 +262,7 @@ const form = ref<LoanSettings>({
   start_date: '',
   interval_days: 14,
   grace_days: 3,
-  loan_duration_weeks: 4,
+  loan_duration_weeks: 2,
   max_extensions: 2,
   loan_cost_small: 3,
   loan_cost_medium: 6,

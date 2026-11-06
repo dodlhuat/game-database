@@ -14,7 +14,7 @@ class LoanSettingSeeder extends Seeder
                 'start_date' => now()->toDateString(),
                 'interval_days' => 14,
                 'grace_days' => 3,
-                'loan_duration_weeks' => 4,
+                'loan_duration_weeks' => 2,
             ]);
         }
     }
