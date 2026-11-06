@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\EnumColumn;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -9,9 +10,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('USER', 'MEMBER', 'ADMIN') NOT NULL DEFAULT 'USER'");
-        }
+        EnumColumn::allow('users', 'role', ['USER', 'MEMBER', 'ADMIN'], 'USER');
 
         Schema::table('users', function (Blueprint $table) {
             if (! Schema::hasColumn('users', 'tokens')) {
@@ -33,8 +32,6 @@ return new class extends Migration
             $table->dropColumn(['tokens', 'membership_expires_at']);
         });
 
-        if (DB::getDriverName() !== 'sqlite') {
-            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('MEMBER', 'ADMIN') NOT NULL DEFAULT 'MEMBER'");
-        }
+        EnumColumn::allow('users', 'role', ['MEMBER', 'ADMIN'], 'MEMBER');
     }
 };

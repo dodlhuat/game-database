@@ -23,6 +23,7 @@ class GameFactory extends Factory
             'min_age' => 10,
             'difficulty' => fake()->randomElement(['EASY', 'MEDIUM', 'HARD']),
             'deposit_tokens' => 0,
+            'size_category' => 'MEDIUM',
             'is_active' => true,
         ];
     }

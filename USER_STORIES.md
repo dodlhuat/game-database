@@ -19,7 +19,7 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 
 **Erwartetes Ergebnis**
 - Die Ausleihe wird erstellt und erscheint in den aktiven Ausleihen mit einem Rückgabedatum
-- Die Leihgebühr wird sofort vom Token-Guthaben abgezogen (dauerhaft weg)
+- Die Leihgebühr richtet sich nach der Kategorie des Spiels (klein 3, mittel 6, groß 10 Token) und wird sofort vom Token-Guthaben abgezogen (dauerhaft weg)
 - Der Kautionsbetrag wird auf dem Konto blockiert (reserviert, nicht verbraucht)
 
 ---
@@ -113,7 +113,8 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 **Voraussetzungen**
 - Als Mitglied mit aktiver Mitgliedschaft eingeloggt
 - Eine aktive Ausleihe ist vorhanden
-- Mindestens 1 freies Token ist vorhanden
+- Das Spiel ist von niemand anderem reserviert
+- Für die zweite Verlängerung sind mindestens 2 freie Token vorhanden (die erste ist gratis)
 - Das Maximum an Verlängerungen ist noch nicht erreicht
 - Kein offener Verlängerungsantrag für diese Ausleihe vorhanden
 
@@ -124,7 +125,8 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 
 **Erwartetes Ergebnis**
 - Der Antrag wird erstellt und erscheint als „Ausstehend"
-- 1 Token wird sofort abgezogen
+- Der Dialog zeigt die Kosten an („Kostenlos" oder „2 Token")
+- Beim Antrag wird noch nichts abgebucht
 - Ein weiterer Antrag für dieselbe Ausleihe ist nicht mehr möglich, solange dieser offen ist
 
 ---
@@ -173,6 +175,23 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 - Der Antrag wechselt in den Status „Genehmigt"
 - Das Rückgabedatum der Ausleihe wird auf das beantragte Datum gesetzt
 - Die Ausleihe wechselt in den Status „Verlängert"
+- War es die zweite Verlängerung, werden 2 Token abgebucht (Bonus-Token zuerst)
+- Wurde das Spiel inzwischen reserviert oder fehlen dem Mitglied die Token, schlägt die Genehmigung mit einer Meldung fehl und nichts wird verändert
+
+---
+
+### TC-10b — Verlängerung nicht möglich bei reserviertem Spiel
+
+**Voraussetzungen**
+- Als Mitglied mit aktiver Mitgliedschaft eingeloggt
+- Ein anderes Mitglied steht für das ausgeliehene Spiel auf der Warteliste
+
+**Schritte**
+1. Dashboard öffnen
+
+**Erwartetes Ergebnis**
+- Statt des Buttons „Verlängern" steht ein Hinweis, dass das Spiel reserviert ist
+- Eine direkte Anfrage wird mit der Begründung abgelehnt, und es entsteht kein Antrag
 
 ---
 
@@ -291,7 +310,7 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 **Erwartetes Ergebnis**
 - Der Benutzer erhält die Rolle „Mitglied"
 - Die Mitgliedschaft läuft ab heute ein Jahr
-- 20 Token werden dem Konto gutgeschrieben
+- 20 Bonus-Token (Wert 10 €) werden dem Konto gutgeschrieben, normale Token gibt es keine
 - Eine Willkommens-E-Mail wird versendet
 
 ---
@@ -307,7 +326,7 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 
 **Erwartetes Ergebnis**
 - Die Mitgliedschaft wird um ein Jahr ab dem bisherigen Ablaufdatum verlängert
-- 20 Token werden dem Konto gutgeschrieben
+- 20 Bonus-Token werden dem Konto gutgeschrieben
 
 ---
 

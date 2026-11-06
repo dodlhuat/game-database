@@ -21,9 +21,10 @@ const navigateToMock = vi.hoisted(() => vi.fn())
 mockNuxtImport('navigateTo', () => navigateToMock)
 
 const postMock = vi.fn()
+const getMock = vi.fn()
 mockNuxtImport('useApi', () => {
   return () => ({
-    get: vi.fn(),
+    get: getMock,
     post: postMock,
     put: vi.fn(),
     patch: vi.fn(),
@@ -85,6 +86,8 @@ describe('packages/[slug].vue — borrow CTA', () => {
   beforeEach(() => {
     fetchPackageMock.mockReset()
     postMock.mockReset()
+    getMock.mockReset()
+    getMock.mockResolvedValue({ package_loan_cost: 3 })
     navigateToMock.mockReset()
   })
 
@@ -114,7 +117,7 @@ describe('packages/[slug].vue — borrow CTA', () => {
     const wrapper = await mountPackagePage({ available: true })
     const cta = wrapper.find('.detail__cta')
 
-    expect(cta.text()).toContain(wrapper.vm.$t('pages.package.borrow'))
+    expect(cta.text()).toContain(wrapper.vm.$t('pages.package.borrow', { cost: 3 }))
   })
 
   it('shows a load-tokens link when tokens are insufficient', async () => {
@@ -134,6 +137,20 @@ describe('packages/[slug].vue — borrow CTA', () => {
 
     expect(cta.text()).toContain(wrapper.vm.$t('pages.package.cta_unavailable'))
     expect(cta.find('button').exists()).toBe(false)
+  })
+
+  it('takes the price from the loan settings', async () => {
+    getMock.mockResolvedValue({ package_loan_cost: 4 })
+    const auth = setUser({ tokens: 5 })
+    postMock.mockResolvedValue({})
+
+    const wrapper = await mountPackagePage({ available: true })
+    expect(wrapper.find('.detail__cta').text()).toContain('(4 Token)')
+
+    await wrapper.find('.detail__cta button').trigger('click')
+    await flushPromises()
+
+    expect(auth.user?.tokens).toBe(1)
   })
 
   it('borrows the package, deducts tokens, and navigates to the dashboard on success', async () => {

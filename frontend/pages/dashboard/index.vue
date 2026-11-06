@@ -189,6 +189,9 @@
                           <span v-if="pendingExtension(loan)" class="badge badge-warning">
                             {{ $t('common.badge.pending_extension') }}
                           </span>
+                          <span v-else-if="extensionNote(loan)" class="extension-note">
+                            {{ extensionNote(loan) }}
+                          </span>
                           <button v-else class="action-btn" @click="openExtension(loan)">
                             {{ $t('btn.extend') }}
                           </button>
@@ -431,12 +434,20 @@
             </button>
           </div>
           <p class="dialog__game">{{ extensionLoan.game?.title }}</p>
+          <p class="extension-cost">
+            <span>{{ $t('dashboard.extension_cost_label') }}</span>
+            <strong>{{ extensionCostLabel(extensionLoan) }}</strong>
+          </p>
+          <p v-if="extensionLoan.next_extension_cost" class="extension-cost__hint">
+            {{ $t('dashboard.extension_cost_hint') }}
+          </p>
           <UiDatePicker
             v-model="extensionDate"
             :label="$t('dashboard.extension_new_due_date')"
             :min-date="minExtensionDate"
             :max-date="maxExtensionDate"
           />
+          <div v-if="extensionError" class="alert alert-error">{{ extensionError }}</div>
           <div class="dialog__actions">
             <UiButton :loading="extending" @click="submitExtension">{{ $t('btn.apply') }}</UiButton>
             <button class="action-btn" @click="extensionLoan = null">{{ $t('btn.cancel') }}</button>
@@ -483,6 +494,7 @@ const returnCondition = ref('GOOD')
 const returning = ref(false)
 
 const extensionLoan = ref<Loan | null>(null)
+const extensionError = ref('')
 const extensionDate = ref('')
 const extending = ref(false)
 
@@ -562,16 +574,22 @@ async function submitReturn() {
 function openExtension(loan: Loan) {
   extensionLoan.value = loan
   extensionDate.value = ''
+  extensionError.value = ''
 }
 
 async function submitExtension() {
   if (!extensionLoan.value || !extensionDate.value) return
   extending.value = true
+  extensionError.value = ''
   try {
     await requestExtension(extensionLoan.value.id, extensionDate.value)
     data.value = await fetchDashboard()
-    auth.spendTokens(1)
     extensionLoan.value = null
+  } catch (e: unknown) {
+    const err = e as { message?: string; reason?: string }
+    extensionError.value = err?.message ?? t('common.error.generic')
+    // Wurde das Spiel erst nach dem Laden reserviert, soll die Liste das gleich zeigen
+    if (err?.reason === 'game_reserved') data.value = await fetchDashboard()
   } finally {
     extending.value = false
   }
@@ -623,6 +641,19 @@ async function handleLogout() {
 
 function pendingExtension(loan: Loan) {
   return loan.extensions.some((e) => e.status === 'PENDING')
+}
+
+function extensionNote(loan: Loan) {
+  if (loan.extension_blocked_reason === 'reserved') return t('dashboard.extension_reserved')
+  if (loan.extension_blocked_reason === 'max_reached') return t('dashboard.extension_max_reached')
+  return ''
+}
+
+function extensionCostLabel(loan: Loan) {
+  const cost = loan.next_extension_cost ?? 0
+  return cost > 0
+    ? t('dashboard.extension_cost_tokens', { n: cost })
+    : t('dashboard.extension_free')
 }
 
 function loanStatusVariant(loan: Loan) {
@@ -1096,6 +1127,39 @@ $hero-divider-20: var(--divider);
         }
       }
     }
+  }
+}
+
+.extension-note {
+  flex-basis: 100%;
+  max-width: 18rem;
+  font-size: 0.8rem;
+  text-align: left;
+  line-height: 1.35;
+  color: var(--accent-color);
+}
+
+.extension-cost {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.85rem;
+  color: var(--secondary-text);
+  background: rgba(212, 146, 30, 0.08);
+  border: 1px solid rgba(212, 146, 30, 0.25);
+  border-radius: 8px;
+
+  strong {
+    color: var(--accent-color);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--secondary-text);
   }
 }
 

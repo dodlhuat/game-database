@@ -64,7 +64,7 @@ class EmailTemplateController extends Controller
             'key' => 'welcome_member',
             'subject' => 'Willkommen als Mitglied!',
             'greeting' => 'Willkommen, {name}!',
-            'body' => '<p>Deine Mitgliedschaft wurde aktiviert. Du hast <strong>20 Token</strong> erhalten und kannst jetzt Spiele ausleihen.</p><p>Viel Spaß beim Entdecken unserer Spielesammlung!</p>',
+            'body' => '<p>Deine Mitgliedschaft wurde aktiviert. Du hast <strong>20 Bonus-Token</strong> erhalten und kannst jetzt Spiele ausleihen.</p><p>Viel Spaß beim Entdecken unserer Spielesammlung!</p>',
             'action_text' => 'Zum Dashboard',
         ],
         'membership_renewal_reminder' => [

@@ -29,8 +29,8 @@ class MembershipController extends Controller
         return response()->json([
             'fee_cents' => config()->integer('membership.fee_cents'),
             'currency' => config()->string('tokens.currency'),
-            'tokens' => config()->integer('membership.tokens'),
             'bonus_tokens' => config()->integer('membership.bonus_tokens'),
+            'bonus_value_cents' => config()->integer('membership.bonus_tokens') * config()->integer('tokens.token_value_cents'),
             'bonus_valid_months' => config()->integer('membership.bonus_valid_months'),
         ]);
     }
@@ -181,7 +181,7 @@ class MembershipController extends Controller
         $user->notify(new WelcomeMemberNotification);
 
         return response()->json([
-            'message' => 'Willkommen als Vollmitglied! Du hast '.config()->integer('membership.tokens').' Token und '.config()->integer('membership.bonus_tokens').' Bonus-Token erhalten.',
+            'message' => 'Willkommen als Vollmitglied! Du hast '.config()->integer('membership.bonus_tokens').' Bonus-Token erhalten.',
             'user' => new UserResource($user),
         ]);
     }

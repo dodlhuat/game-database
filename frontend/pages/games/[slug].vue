@@ -133,6 +133,19 @@
               <span class="gd-stat__val">{{ difficultyLabel(game.difficulty!) }}</span>
             </div>
           </template>
+          <div class="gd-stat__sep" />
+          <div class="gd-stat">
+            <svg class="icon-svg gd-stat__ico" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#toll" />
+            </svg>
+            <span class="gd-stat__lbl">{{ $t('pages.game.stats.size') }}</span>
+            <span class="gd-stat__val">{{
+              $t('pages.game.stats.size_value', {
+                size: $t(`common.size_category.${game.size_category}`),
+                cost: loanCost,
+              })
+            }}</span>
+          </div>
           <template v-if="game.languages?.length">
             <div class="gd-stat__sep" />
             <div class="gd-stat">
@@ -181,12 +194,12 @@
           </template>
           <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
-              v-if="auth.totalTokens >= loanCost + (game?.deposit_tokens ?? 0)"
+              v-if="auth.freeTokens >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-btn gd-btn--primary"
               @click="openLoanModal"
             >
               <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#send" /></svg
-              >{{ $t('btn.borrow_game') }}
+              >{{ $t('btn.borrow_game', { cost: loanCost }) }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
               <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#toll" /></svg
@@ -297,11 +310,11 @@
           </template>
           <template v-else-if="auth.canBorrow && game.available_copies_count > 0">
             <button
-              v-if="auth.totalTokens >= loanCost + (game?.deposit_tokens ?? 0)"
+              v-if="auth.freeTokens >= loanCost + (game?.deposit_tokens ?? 0)"
               class="gd-bar__btn"
               @click="openLoanModal"
             >
-              {{ $t('btn.borrow_game') }}
+              {{ $t('btn.borrow_game', { cost: loanCost }) }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-bar__btn gd-bar__btn--sec">{{
               $t('btn.load_tokens')
@@ -335,7 +348,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import type { Game } from '~/composables/useGames'
 import { Modal } from '@dodlhuat/basix/js/modal'
 import { Lightbox } from '@dodlhuat/basix/js/lightbox'
@@ -366,16 +379,7 @@ const { data: game, pending: loading } = useAsyncData<Game | null>(`game-${slug}
   }
 })
 
-const loanCost = ref(1)
-
-onMounted(async () => {
-  try {
-    const s = await fetchSettings()
-    loanCost.value = s.loan_cost
-  } catch {
-    // keep default
-  }
-})
+const loanCost = computed(() => game.value?.borrow_cost ?? 0)
 
 const reserving = ref(false)
 const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(null)
@@ -434,7 +438,7 @@ async function openLoanModal() {
   const depositHtml =
     deposit > 0
       ? `<div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
-        <span style="font-size:.8rem;color:var(--secondary-text)">${t('pages.game.confirm_borrow.deposit_label')}</span>
+        <span style="font-size:.8rem;color:var(--secondary-text)">${t('pages.game.confirm_borrow.deposit_label', { n: deposit })}</span>
         <strong style="color:var(--accent-color)">${deposit} Token</strong>
        </div>`
       : ''
@@ -449,6 +453,10 @@ async function openLoanModal() {
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.due_label')}</label>
         <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
+        <span style="font-size:.8rem;color:var(--secondary-text)">${t('pages.game.confirm_borrow.cost_label')}</span>
+        <strong style="color:var(--accent-color)">${loanCost.value} Token</strong>
       </div>
       ${depositHtml}
       <div id="loan-msg" style="display:none;font-size:.85rem;margin:0"></div>
@@ -569,6 +577,7 @@ const hasMeta = computed(
       game.value.min_age ||
       game.value.duration_min ||
       game.value.difficulty ||
+      game.value.size_category ||
       game.value.languages?.length ||
       game.value.year)
 )

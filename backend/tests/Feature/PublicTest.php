@@ -134,9 +134,18 @@ class PublicTest extends TestCase
             ->assertJsonStructure(['version', 'content']);
     }
 
+    public function test_latest_terms_describe_the_new_pricing_model(): void
+    {
+        $content = $this->getJson('/api/terms')->assertOk()->json('content');
+
+        $this->assertStringContainsString('klein 3 Token, mittel 6 Token, groß 10 Token', $content);
+        $this->assertStringContainsString('erste Verlängerung einer Ausleihe ist kostenlos', $content);
+        $this->assertStringNotContainsString('Zusätzlich zu den Token nach §5', $content);
+    }
+
     public function test_latest_terms_cover_membership_fee_bonus_tokens_and_cancellation(): void
     {
-        $content = $this->getJson('/api/terms')->assertOk()->assertJsonPath('version', '1.2')->json('content');
+        $content = $this->getJson('/api/terms')->assertOk()->assertJsonPath('version', '1.3')->json('content');
 
         $this->assertStringContainsString('24,00 €', $content);
         $this->assertStringContainsString('Bonus-Token', $content);

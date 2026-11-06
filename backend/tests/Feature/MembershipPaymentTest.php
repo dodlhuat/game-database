@@ -54,7 +54,6 @@ class MembershipPaymentTest extends TestCase
             ->assertJson([
                 'fee_cents' => 2400,
                 'currency' => 'EUR',
-                'tokens' => 20,
                 'bonus_tokens' => 20,
                 'bonus_valid_months' => 12,
             ]);
@@ -123,7 +122,7 @@ class MembershipPaymentTest extends TestCase
             ->postJson('/api/membership/confirm/pi_m1')
             ->assertOk()
             ->assertJsonPath('user.role', 'MEMBER')
-            ->assertJsonPath('user.tokens', 20)
+            ->assertJsonPath('user.tokens', 0)
             ->assertJsonPath('user.bonus_tokens', 20)
             ->assertJsonPath('user.bonus_lots.0.remaining', 20)
             ->assertJsonCount(1, 'user.bonus_lots');
@@ -133,9 +132,7 @@ class MembershipPaymentTest extends TestCase
         $this->assertSame('Wien', $user->city);
         $this->assertDatabaseHas('membership_payments', ['status' => 'COMPLETED', 'provider_charge_id' => 'ch_m1']);
 
-        $normal = TokenLot::where('user_id', $user->id)->where('kind', 'NORMAL')->firstOrFail();
-        $this->assertSame(50, $normal->unit_cents);
-        $this->assertNull($normal->refundable_after);
+        $this->assertFalse(TokenLot::where('user_id', $user->id)->where('kind', 'NORMAL')->exists());
         $bonus = TokenLot::where('user_id', $user->id)->where('kind', 'BONUS')->firstOrFail();
         $this->assertEqualsWithDelta(now()->addMonths(12)->timestamp, $bonus->expires_at->timestamp, 5);
         Notification::assertSentTo($user, WelcomeMemberNotification::class);
@@ -181,7 +178,7 @@ class MembershipPaymentTest extends TestCase
         $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
         $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
 
-        $this->assertSame(20, $user->fresh()->tokens);
+        $this->assertSame(0, $user->fresh()->tokens);
         $this->assertSame(20, $user->fresh()->bonus_tokens);
     }
 
@@ -198,7 +195,7 @@ class MembershipPaymentTest extends TestCase
 
         $user->refresh();
         $this->assertSame('MEMBER', $user->role);
-        $this->assertSame(20, $user->tokens);
+        $this->assertSame(0, $user->tokens);
         $this->assertSame(20, $user->bonus_tokens);
     }
 
@@ -214,7 +211,7 @@ class MembershipPaymentTest extends TestCase
 
         $user->refresh();
         $this->assertEqualsWithDelta($expires->copy()->addYear()->timestamp, $user->membership_expires_at->timestamp, 5);
-        $this->assertSame(23, $user->tokens);
+        $this->assertSame(3, $user->tokens);
         $this->assertSame(20, $user->bonus_tokens);
     }
 
@@ -246,7 +243,7 @@ class MembershipPaymentTest extends TestCase
         $this->actingAs($user)->postJson('/api/membership/activate-full')
             ->assertOk()
             ->assertJsonPath('user.role', 'MEMBER')
-            ->assertJsonPath('user.tokens', 20)
+            ->assertJsonPath('user.tokens', 0)
             ->assertJsonPath('user.bonus_tokens', 20);
     }
 

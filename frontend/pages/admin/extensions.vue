@@ -16,6 +16,7 @@
         <div v-if="loading" class="admin-state"><div class="spinner" /></div>
 
         <section v-else class="dash-section">
+          <div v-if="actionError" class="alert alert-error">{{ actionError }}</div>
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.extensions_admin.open_requests') }}</h2>
             <span class="dash-section__count">{{ extensions.length }}</span>
@@ -37,6 +38,7 @@
                   <th>{{ $t('admin.extensions_admin.currently_due') }}</th>
                   <th>{{ $t('admin.extensions_admin.requested_until') }}</th>
                   <th>{{ $t('admin.extensions_admin.requested_at') }}</th>
+                  <th>{{ $t('admin.extensions_admin.cost') }}</th>
                   <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
               </thead>
@@ -48,8 +50,22 @@
                   <td>{{ formatDate(ext.requested_due_date) }}</td>
                   <td class="text-muted">{{ formatDate(ext.requested_at) }}</td>
                   <td>
+                    {{
+                      ext.next_cost
+                        ? $t('admin.extensions_admin.cost_tokens', { n: ext.next_cost })
+                        : $t('admin.extensions_admin.cost_free')
+                    }}
+                  </td>
+                  <td>
+                    <p v-if="ext.game_reserved" class="reserved-note">
+                      {{ $t('admin.extensions_admin.reserved_note') }}
+                    </p>
                     <div class="action-row">
-                      <button class="action-btn action-btn--success" @click="approve(ext.id)">
+                      <button
+                        class="action-btn action-btn--success"
+                        :disabled="ext.game_reserved"
+                        @click="approve(ext.id)"
+                      >
                         {{ $t('admin.extensions_admin.approve') }}
                       </button>
                       <button class="action-btn action-btn--danger" @click="openReject(ext)">
@@ -119,11 +135,14 @@ import { ref, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchExtensions, approveExtension, rejectExtension } = useAdmin()
+const { t } = useI18n()
 
 interface Extension {
   id: number
   requested_due_date: string
   requested_at: string
+  next_cost?: number
+  game_reserved?: boolean
   loan: {
     due_date: string
     user: { name: string } | null
@@ -136,6 +155,7 @@ const loading = ref(true)
 const processing = ref(false)
 const extensions = ref<Extension[]>([])
 const rejectTarget = ref<Extension | null>(null)
+const actionError = ref('')
 const rejectNote = ref('')
 
 onMounted(load)
@@ -150,7 +170,12 @@ async function load() {
   }
 }
 async function approve(id: number) {
-  await approveExtension(id)
+  actionError.value = ''
+  try {
+    await approveExtension(id)
+  } catch (e: unknown) {
+    actionError.value = (e as { message?: string })?.message ?? t('common.error.generic')
+  }
   await load()
 }
 function openReject(ext: Extension) {
@@ -175,6 +200,12 @@ function formatDate(iso?: string) {
 </script>
 
 <style lang="scss" scoped>
+.reserved-note {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  color: var(--accent-color);
+}
+
 $hero-bg: var(--background);
 $nav-height: 64px;
 $amber-08: rgba(212, 146, 30, 0.08);

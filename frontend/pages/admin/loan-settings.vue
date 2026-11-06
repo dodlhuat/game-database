@@ -81,15 +81,61 @@
                   <p class="form-hint">{{ $t('admin.loan_settings.max_extensions_hint') }}</p>
                 </div>
                 <div class="form-field">
-                  <label class="form-label">{{ $t('admin.loan_settings.loan_cost') }}</label>
+                  <label class="form-label">{{ $t('admin.loan_settings.loan_cost_small') }}</label>
                   <input
-                    v-model.number="form.loan_cost"
+                    v-model.number="form.loan_cost_small"
                     class="form-input"
                     type="number"
                     min="0"
                     required
                   />
-                  <p class="form-hint">{{ $t('admin.loan_settings.loan_cost_hint') }}</p>
+                  <p class="form-hint">{{ $t('admin.loan_settings.loan_cost_small_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.loan_cost_medium') }}</label>
+                  <input
+                    v-model.number="form.loan_cost_medium"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                  <p class="form-hint">{{ $t('admin.loan_settings.loan_cost_medium_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.loan_cost_large') }}</label>
+                  <input
+                    v-model.number="form.loan_cost_large"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                  <p class="form-hint">{{ $t('admin.loan_settings.loan_cost_large_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{
+                    $t('admin.loan_settings.package_loan_cost')
+                  }}</label>
+                  <input
+                    v-model.number="form.package_loan_cost"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                  <p class="form-hint">{{ $t('admin.loan_settings.package_loan_cost_hint') }}</p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.extension_cost') }}</label>
+                  <input
+                    v-model.number="form.extension_cost"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                  <p class="form-hint">{{ $t('admin.loan_settings.extension_cost_hint') }}</p>
                 </div>
               </div>
 
@@ -218,7 +264,11 @@ const form = ref<LoanSettings>({
   grace_days: 3,
   loan_duration_weeks: 4,
   max_extensions: 2,
-  loan_cost: 2,
+  loan_cost_small: 3,
+  loan_cost_medium: 6,
+  loan_cost_large: 10,
+  package_loan_cost: 3,
+  extension_cost: 2,
   condition_very_good_after: 5,
   condition_good_after: 50,
   deposit_pct_very_good: 90,
@@ -259,7 +309,11 @@ onMounted(async () => {
       grace_days: data.grace_days,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
-      loan_cost: data.loan_cost ?? 2,
+      loan_cost_small: data.loan_cost_small,
+      loan_cost_medium: data.loan_cost_medium,
+      loan_cost_large: data.loan_cost_large,
+      package_loan_cost: data.package_loan_cost,
+      extension_cost: data.extension_cost,
       condition_very_good_after: data.condition_very_good_after ?? 5,
       condition_good_after: data.condition_good_after ?? 50,
       deposit_pct_very_good: data.deposit_pct_very_good ?? 90,
@@ -285,7 +339,11 @@ async function save() {
       grace_days: data.grace_days,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
-      loan_cost: data.loan_cost ?? 2,
+      loan_cost_small: data.loan_cost_small,
+      loan_cost_medium: data.loan_cost_medium,
+      loan_cost_large: data.loan_cost_large,
+      package_loan_cost: data.package_loan_cost,
+      extension_cost: data.extension_cost,
       condition_very_good_after: data.condition_very_good_after ?? 5,
       condition_good_after: data.condition_good_after ?? 50,
       deposit_pct_very_good: data.deposit_pct_very_good ?? 90,

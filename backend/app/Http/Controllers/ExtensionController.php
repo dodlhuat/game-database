@@ -7,10 +7,13 @@ use App\Http\Resources\ExtensionResource;
 use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\User;
+use App\Services\ExtensionPolicy;
 use Illuminate\Http\JsonResponse;
 
 class ExtensionController extends Controller
 {
+    public function __construct(private ExtensionPolicy $policy) {}
+
     public function store(StoreExtensionRequest $request, Loan $loan): JsonResponse|ExtensionResource
     {
         /** @var User $user */
@@ -18,34 +21,29 @@ class ExtensionController extends Controller
 
         $this->authorize('extend', $loan);
 
-        if (! $user->isAdmin()) {
-            if (! $user->isMember()) {
-                return response()->json([
-                    'message' => 'Eine aktive Mitgliedschaft ist erforderlich.',
-                    'reason' => 'membership_required',
-                ], 403);
-            }
-            if (! $user->hasEnoughTokens(1)) {
-                return response()->json([
-                    'message' => 'Nicht genug Token. Verlängern kostet 1 Token.',
-                    'reason' => 'insufficient_tokens',
-                ], 402);
-            }
+        if (! $user->isAdmin() && ! $user->isMember()) {
+            return response()->json([
+                'message' => 'Eine aktive Mitgliedschaft ist erforderlich.',
+                'reason' => 'membership_required',
+            ], 403);
         }
 
-        if (! in_array($loan->status, ['ACTIVE', 'OVERDUE'])) {
-            return response()->json(['message' => 'Für diese Ausleihe kann keine Verlängerung beantragt werden.'], 422);
-        }
-
-        $pending = $loan->extensions()->where('status', 'PENDING')->exists();
-        if ($pending) {
-            return response()->json(['message' => 'Es gibt bereits einen offenen Verlängerungsantrag.'], 422);
-        }
-
+        $loan->load(['copy.game.reservations', 'extensions']);
         $setting = LoanSetting::instance();
-        $usedExtensions = $loan->extensions()->where('status', '!=', 'REJECTED')->count();
-        if ($usedExtensions >= $setting->max_extensions) {
-            return response()->json(['message' => "Diese Ausleihe kann nicht weiter verlängert werden (Maximum: {$setting->max_extensions})."], 422);
+
+        $blocked = $this->blockedResponse($loan, $setting);
+        if ($blocked) {
+            return $blocked;
+        }
+
+        // Nur prüfen: abgebucht wird erst, wenn der Admin den Antrag genehmigt.
+        $cost = $this->policy->nextCost($loan, $setting);
+        if (! $user->isAdmin() && ! $user->hasEnoughFreeTokens($cost)) {
+            return response()->json([
+                'message' => "Nicht genug Token. Diese Verlängerung kostet {$cost} Token.",
+                'reason' => 'insufficient_tokens',
+                'extension_cost' => $cost,
+            ], 402);
         }
 
         $extension = $loan->extensions()->create([
@@ -54,10 +52,20 @@ class ExtensionController extends Controller
             'status' => 'PENDING',
         ]);
 
-        if (! $user->isAdmin()) {
-            $user->decrement('tokens', 1);
-        }
-
         return new ExtensionResource($extension);
+    }
+
+    private function blockedResponse(Loan $loan, LoanSetting $setting): ?JsonResponse
+    {
+        return match ($this->policy->blockReason($loan, $setting)) {
+            ExtensionPolicy::BLOCK_NOT_EXTENDABLE => response()->json(['message' => 'Für diese Ausleihe kann keine Verlängerung beantragt werden.'], 422),
+            ExtensionPolicy::BLOCK_PENDING => response()->json(['message' => 'Es gibt bereits einen offenen Verlängerungsantrag.'], 422),
+            ExtensionPolicy::BLOCK_MAX_REACHED => response()->json(['message' => "Diese Ausleihe kann nicht weiter verlängert werden (Maximum: {$setting->max_extensions})."], 422),
+            ExtensionPolicy::BLOCK_RESERVED => response()->json([
+                'message' => 'Dieses Spiel ist bereits reserviert und kann deshalb nicht verlängert werden.',
+                'reason' => 'game_reserved',
+            ], 409),
+            default => null,
+        };
     }
 }

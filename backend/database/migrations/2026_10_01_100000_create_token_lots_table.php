@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\EnumColumn;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -36,11 +37,10 @@ return new class extends Migration
                 ->constrained('token_lots')->nullOnDelete();
         });
 
-        $types = "'BORROW','DEPOSIT_BLOCK','DEPOSIT_RELEASE','DEPOSIT_FORFEIT','PURCHASE','ADMIN_ADJUSTMENT','BONUS_GRANT','BONUS_EXPIRE','REFUND'";
         if (DB::getDriverName() === 'sqlite') {
             Schema::table('token_transactions', fn (Blueprint $table) => $table->string('type', 32)->change());
         } else {
-            DB::statement("ALTER TABLE token_transactions MODIFY COLUMN type ENUM({$types}) NOT NULL");
+            EnumColumn::allow('token_transactions', 'type', ['BORROW', 'DEPOSIT_BLOCK', 'DEPOSIT_RELEASE', 'DEPOSIT_FORFEIT', 'PURCHASE', 'ADMIN_ADJUSTMENT', 'BONUS_GRANT', 'BONUS_EXPIRE', 'REFUND']);
         }
 
         // Bestand: vorhandene Token werden als wertlose Legacy-Charge übernommen,
@@ -74,7 +74,7 @@ return new class extends Migration
 
         if (DB::getDriverName() !== 'sqlite') {
             DB::statement("DELETE FROM token_transactions WHERE type IN ('BONUS_GRANT','BONUS_EXPIRE','REFUND')");
-            DB::statement("ALTER TABLE token_transactions MODIFY COLUMN type ENUM('BORROW','DEPOSIT_BLOCK','DEPOSIT_RELEASE','DEPOSIT_FORFEIT','PURCHASE','ADMIN_ADJUSTMENT') NOT NULL");
+            EnumColumn::allow('token_transactions', 'type', ['BORROW', 'DEPOSIT_BLOCK', 'DEPOSIT_RELEASE', 'DEPOSIT_FORFEIT', 'PURCHASE', 'ADMIN_ADJUSTMENT']);
         }
     }
 };

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Copy;
 use App\Models\Game;
+use App\Models\LoanSetting;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
@@ -32,6 +33,8 @@ class GameResource extends JsonResource
             'year' => $this->year,
             'instagram_url' => $this->instagram_url,
             'deposit_tokens' => $this->deposit_tokens,
+            'size_category' => $this->size_category,
+            'borrow_cost' => LoanSetting::forRequest($request)->costFor($this->size_category),
             'cover_image_url' => $this->cover_image_url,
             'is_active' => $this->is_active,
             'available_copies_count' => $this->whenCounted('available_copies_count', $this->available_copies_count ?? 0),

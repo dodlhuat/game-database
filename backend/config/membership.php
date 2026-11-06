@@ -13,10 +13,7 @@ return [
 
     'fee_cents' => 2400,
 
-    // Normale Token (unbegrenzt gültig, erstattbar) für Vollmitglieder
-    'tokens' => 20,
-
-    // Geschenkte Token (verfallen, nicht erstattbar) für Vollmitglieder
+    // Geschenkte Token (verfallen, nicht erstattbar) für Vollmitglieder, entspricht 10 €
     'bonus_tokens' => 20,
     'bonus_valid_months' => 12,
 

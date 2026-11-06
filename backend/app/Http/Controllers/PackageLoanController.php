@@ -82,7 +82,7 @@ class PackageLoanController extends Controller
         }
 
         if (! $user->isAdmin()) {
-            $loanCost = $setting->loan_cost;
+            $loanCost = $setting->package_loan_cost;
             $totalDeposit = 0;
             foreach ($selectedCopies as $copy) {
                 /** @var Game $copyGame */
@@ -130,7 +130,7 @@ class PackageLoanController extends Controller
         }
 
         if (! $user->isAdmin()) {
-            $loanCost = $setting->loan_cost;
+            $loanCost = $setting->package_loan_cost;
 
             $this->wallet->spend($user, $loanCost);
             TokenTransaction::create([

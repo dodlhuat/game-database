@@ -12,6 +12,8 @@ export interface Game {
   duration_min: number | null
   duration_max: number | null
   difficulty: 'EASY' | 'MEDIUM' | 'HARD' | 'EXPERT' | null
+  size_category: 'SMALL' | 'MEDIUM' | 'LARGE'
+  borrow_cost: number
   languages: { id: number; name: string }[]
   year: number | null
   instagram_url: string | null

@@ -26,6 +26,9 @@ export interface Loan {
     status: 'PENDING' | 'APPROVED' | 'REJECTED'
     admin_note: string | null
   }[]
+  can_extend?: boolean
+  extension_blocked_reason?: 'not_extendable' | 'pending' | 'max_reached' | 'reserved' | null
+  next_extension_cost?: number
 }
 
 export interface TokenTransaction {
@@ -41,6 +44,7 @@ export interface TokenTransaction {
     | 'BONUS_GRANT'
     | 'BONUS_EXPIRE'
     | 'REFUND'
+    | 'EXTENSION'
   amount: number
   description: string | null
   created_at: string

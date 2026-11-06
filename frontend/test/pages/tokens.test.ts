@@ -175,4 +175,27 @@ describe('tokens.vue', () => {
 
     expect(wrapper.find('.balance-chip--bonus').exists()).toBe(false)
   })
+
+  it('lists the current prices from the loan settings', async () => {
+    setMemberUser()
+    getMock.mockImplementation(async (url: string) =>
+      url === '/loan-settings'
+        ? {
+            loan_cost_small: 3,
+            loan_cost_medium: 6,
+            loan_cost_large: 10,
+            package_loan_cost: 4,
+            extension_cost: 2,
+          }
+        : { data: [] }
+    )
+
+    const wrapper = await mountSuspended(TokensPage, { route: '/tokens' })
+    await flushPromises()
+    const costs = wrapper.find('.token-info__list').text()
+
+    expect(costs).toContain('3 / 6 / 10 Token')
+    expect(costs).toContain('4 Token: Paket ausleihen')
+    expect(costs).toContain('danach 2 Token')
+  })
 })

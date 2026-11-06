@@ -31,8 +31,8 @@
     "to_dashboard": "Mein Dashboard →",
     "to_collection": "Zur Spielesammlung",
     "to_packages": "Zur Paketübersicht",
-    "borrow_game": "Jetzt ausleihen (2 Token)",
-    "borrow_package": "Paket ausleihen (3 Token)",
+    "borrow_game": "Jetzt ausleihen ({cost} Token)",
+    "borrow_package": "Paket ausleihen ({cost} Token)",
     "reserve": "Vormerken",
     "load_tokens": "Aufladen",
     "buy": "Kaufen",
@@ -57,6 +57,11 @@
     "add": "Hinzufügen"
   },
   "common": {
+    "size_category": {
+      "SMALL": "Klein",
+      "MEDIUM": "Mittel",
+      "LARGE": "Groß"
+    },
     "back_to_home": "← Zurück zur Startseite",
     "copyright": "© {year} AUA. Alle Rechte vorbehalten.",
     "copyright_short": "© {year} AUA",
@@ -138,7 +143,7 @@
   "account": {
     "cancel": {
       "section_title": "Mitgliedschaft kündigen",
-      "section_text": "Wenn du kündigst, bekommst du deine verbleibenden Token zurückerstattet. Geschenkte Bonus-Token verfallen.",
+      "section_text": "Wenn du kündigst, bekommst du deine verbleibenden gekauften Token zurückerstattet. Geschenkte Bonus-Token verfallen.",
       "open": "Mitgliedschaft kündigen",
       "title": "Mitgliedschaft kündigen",
       "refund_info": "Du bekommst {tokens} Token zurück: {amount}",
@@ -225,6 +230,12 @@
     "extension_title": "Verlängerung beantragen",
     "extension_new_due_date": "Neues Rückgabedatum",
     "extension_apply": "Beantragen",
+    "extension_cost_label": "Kosten",
+    "extension_cost_tokens": "{n} Token",
+    "extension_cost_hint": "Die Token werden abgebucht, sobald die Verlängerung genehmigt ist.",
+    "extension_free": "Kostenlos",
+    "extension_reserved": "Reserviert: Dieses Spiel kann nicht verlängert werden, weil jemand darauf wartet.",
+    "extension_max_reached": "Maximale Anzahl an Verlängerungen erreicht.",
     "cancel_reservation": "Stornieren",
     "footer_settings": "Konto-Einstellungen",
     "footer_logout": "Abmelden"
@@ -311,6 +322,8 @@
         "age": "Alter",
         "duration": "Spielzeit",
         "difficulty": "Schwierigkeit",
+        "size": "Kategorie",
+        "size_value": "{size} · {cost} Token",
         "language": "Sprache",
         "year": "Jahr"
       },
@@ -321,6 +334,7 @@
       "confirm_borrow": {
         "start_label": "Ausleihbeginn",
         "due_label": "Rückgabe bis",
+        "cost_label": "Leihgebühr",
         "confirm_btn": "Ausleihen bestätigen",
         "cancel_btn": "Abbrechen",
         "processing": "Wird bearbeitet…",
@@ -371,7 +385,7 @@
       "cta_login": "Melde dich an um dieses Paket auszuleihen.",
       "cta_not_member": "Nur Mitglieder können Pakete ausleihen.",
       "cta_unavailable": "Dieses Paket ist aktuell nicht vollständig verfügbar.",
-      "borrow": "Paket ausleihen (3 Token)",
+      "borrow": "Paket ausleihen ({cost} Token)",
       "borrowing": "Wird ausgeliehen…"
     },
     "upgrade": {
@@ -380,7 +394,6 @@
       "sub": "Werde Teil der Gemeinschaft und leih Spiele aus der ganzen Sammlung aus.",
       "already_member": "Du bist bereits Mitglied",
       "benefits_title": "Was du als Mitglied bekommst",
-      "benefit_tokens": "20 Token sofort beim Start — dein Startguthaben",
       "benefit_access": "Zugang zur gesamten Spielesammlung — Einzelspiele & Pakete ausleihen",
       "benefit_events": "Einladungen zu Events & Spieleabenden — exklusiv für Mitglieder",
       "benefit_newsletter": "Newsletter mit Neuheiten, Empfehlungen & Vereinsinfos",
@@ -393,8 +406,7 @@
       "select_tier": "Wähle deine Mitgliedschaft",
       "tier_member_name": "Vollmitglied",
       "tier_member_tagline": "Das volle Ausleih-Erlebnis",
-      "tier_member_benefit_tokens": "{tokens} Token sofort beim Start — unbegrenzt gültig",
-      "tier_member_benefit_bonus": "Zusätzlich {bonus} Bonus-Token geschenkt — werden zuerst verbraucht und verfallen nach {months} Monaten",
+      "tier_member_benefit_bonus": "{bonus} Bonus-Token im Wert von {value} sofort beim Start — werden zuerst verbraucht und verfallen nach {months} Monaten",
       "tier_member_benefit_access": "Einzelspiele & Pakete aus der ganzen Sammlung ausleihen",
       "tier_supporter_name": "Außerordentliches Mitglied",
       "tier_supporter_tagline": "Du unterstützt uns — ganz ohne Ausleihen",
@@ -406,7 +418,7 @@
       "already_supporter_title": "Du bist außerordentliches Mitglied",
       "already_supporter_text": "Deine Unterstützer-Mitgliedschaft ist gültig bis",
       "activate_full_title": "Bereit, richtig einzusteigen?",
-      "activate_full_text": "Werde Vollmitglied und erhalte sofort 20 Token plus 20 Bonus-Token, um Spiele aus unserer Sammlung auszuleihen.",
+      "activate_full_text": "Werde Vollmitglied und erhalte sofort {bonus} Bonus-Token, um Spiele aus unserer Sammlung auszuleihen.",
       "activate_full_note": "Kein neuer Beitrag nötig — dein Ablaufdatum bleibt gleich.",
       "activate_full_btn": "Jetzt zum Vollmitglied upgraden"
     },
@@ -422,10 +434,10 @@
       "balance_bonus": "Bonus-Token · gültig bis {date}",
       "balance_blocked": "Blockiert (Kaution)",
       "balance_free": "Verfügbar",
-      "cost_game": "2 Token: Spiel ausleihen",
+      "cost_game": "{small} / {medium} / {large} Token: Spiel ausleihen (klein / mittel / groß)",
       "cost_deposit": "Kaution: Wird bei Ausleihe gesperrt und nach Rückgabe freigegeben",
-      "cost_package": "3 Token: Paket ausleihen",
-      "cost_extension": "1 Token: Ausleihe verlängern",
+      "cost_package": "{cost} Token: Paket ausleihen",
+      "cost_extension": "Verlängern: erste Verlängerung pro Spiel gratis, danach {cost} Token. Nicht möglich, wenn das Spiel reserviert ist",
       "history_title": "Transaktionsverlauf",
       "history_empty": "Noch keine Transaktionen vorhanden.",
       "tx_borrow": "Ausleihe",
@@ -436,7 +448,8 @@
       "tx_admin": "Admin-Anpassung",
       "tx_bonus_grant": "Bonus-Token erhalten",
       "tx_bonus_expire": "Bonus-Token verfallen",
-      "tx_refund": "Rückerstattung"
+      "tx_refund": "Rückerstattung",
+      "tx_extension": "Verlängerung"
     }
   },
   "admin": {
@@ -569,6 +582,7 @@
       "condition_damaged": "Beschädigt",
       "condition_locked": "Gesperrt",
       "deposit_tokens": "Kaution (Token)",
+      "size_category": "Kategorie (bestimmt den Leihpreis)",
       "qr_code": "QR-Code (optional)",
       "owner": "Besitzer (optional)",
       "notes": "Notizen",
@@ -693,7 +707,11 @@
       "reject_title": "Antrag ablehnen",
       "reject_note": "Begründung (optional)",
       "approve": "Genehmigen",
-      "reject": "Ablehnen"
+      "reject": "Ablehnen",
+      "cost": "Kosten",
+      "cost_free": "Kostenlos",
+      "cost_tokens": "{n} Token",
+      "reserved_note": "Spiel wurde inzwischen reserviert, bitte ablehnen."
     },
     "newsletters": {
       "title": "Newsletter",
@@ -727,8 +745,16 @@
       "saved": "Gespeichert",
       "preview_return": "Rückgabe {date}",
       "load_error": "Einstellungen konnten nicht geladen werden.",
-      "loan_cost": "Ausleihkosten (Token)",
-      "loan_cost_hint": "Anzahl Token, die pro Einzelspiel-Ausleihe abgezogen werden.",
+      "loan_cost_small": "Leihpreis Klein (Token)",
+      "loan_cost_small_hint": "Token pro Ausleihe eines kleinen Spiels.",
+      "loan_cost_medium": "Leihpreis Mittel (Token)",
+      "loan_cost_medium_hint": "Token pro Ausleihe eines mittleren Spiels.",
+      "loan_cost_large": "Leihpreis Groß (Token)",
+      "loan_cost_large_hint": "Token pro Ausleihe eines großen Spiels.",
+      "package_loan_cost": "Leihpreis Paket (Token)",
+      "package_loan_cost_hint": "Fixer Preis pro Paket, unabhängig von den enthaltenen Spielen.",
+      "extension_cost": "Kosten weiterer Verlängerungen (Token)",
+      "extension_cost_hint": "Die erste Verlängerung pro Ausleihe ist gratis, jede weitere kostet diesen Betrag.",
       "condition_section": "Zustandsschwellen & Kaution",
       "condition_very_good_after": "Sehr gut ab (Ausleihen)",
       "condition_very_good_after_hint": "Ab wie vielen Ausleihen gilt eine Kopie als 'Sehr gut'.",

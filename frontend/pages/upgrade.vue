@@ -38,7 +38,9 @@
 
           <div class="activate-full-card">
             <h3 class="activate-full-card__title">{{ $t('pages.upgrade.activate_full_title') }}</h3>
-            <p class="activate-full-card__text">{{ $t('pages.upgrade.activate_full_text') }}</p>
+            <p class="activate-full-card__text">
+              {{ $t('pages.upgrade.activate_full_text', { bonus: pricing?.bonus_tokens ?? 20 }) }}
+            </p>
             <div v-if="activateError" class="alert alert-error">{{ activateError }}</div>
             <UiButton :loading="activateLoading" @click="activateFull">{{
               $t('pages.upgrade.activate_full_btn')
@@ -96,20 +98,9 @@
                     >
                     <div>
                       {{
-                        $t('pages.upgrade.tier_member_benefit_tokens', {
-                          tokens: pricing?.tokens ?? 20,
-                        })
-                      }}
-                    </div>
-                  </li>
-                  <li class="benefit-list__item">
-                    <span class="benefit-list__icon benefit-list__icon--token" aria-hidden="true"
-                      >◈</span
-                    >
-                    <div>
-                      {{
                         $t('pages.upgrade.tier_member_benefit_bonus', {
                           bonus: pricing?.bonus_tokens ?? 20,
+                          value: formatPrice(pricing?.bonus_value_cents ?? 1000),
                           months: pricing?.bonus_valid_months ?? 12,
                         })
                       }}
@@ -210,8 +201,8 @@ import { onMounted, ref } from 'vue'
 interface MembershipPricing {
   fee_cents: number
   currency: string
-  tokens: number
   bonus_tokens: number
+  bonus_value_cents: number
   bonus_valid_months: number
 }
 

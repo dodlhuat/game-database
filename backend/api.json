@@ -1909,41 +1909,21 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/ExtensionResource"
-                                        }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
-                    },
-                    "402": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Nicht genug Token. Verl\u00e4ngern kostet 1 Token."
+                                    "anyOf": [
+                                        {
+                                            "type": "object"
                                         },
-                                        "reason": {
-                                            "type": "string",
-                                            "const": "insufficient_tokens"
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/ExtensionResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
                                         }
-                                    },
-                                    "required": [
-                                        "message",
-                                        "reason"
                                     ]
                                 }
                             }
@@ -1957,6 +1937,9 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -2136,33 +2119,21 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/ExtensionResource"
+                                    "anyOf": [
+                                        {
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/ExtensionResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
                                         }
-                                    },
-                                    "required": [
-                                        "data"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Antrag wurde bereits bearbeitet."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
                                     ]
                                 }
                             }
@@ -2203,7 +2174,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/ExtensionResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/ExtensionResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "loan"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -2442,10 +2423,27 @@
                 ],
                 "parameters": [
                     {
-                        "name": "sort",
+                        "name": "players",
                         "in": "query",
                         "schema": {
-                            "type": "string"
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "language",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 0
+                        }
+                    },
+                    {
+                        "name": "available",
+                        "in": "query",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
                         }
                     }
                 ],
@@ -4240,7 +4238,23 @@
                                         "type": "integer",
                                         "minimum": 0
                                     },
-                                    "loan_cost": {
+                                    "loan_cost_small": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "loan_cost_medium": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "loan_cost_large": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "package_loan_cost": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "extension_cost": {
                                         "type": "integer",
                                         "minimum": 0
                                     },
@@ -4269,7 +4283,11 @@
                                     "grace_days",
                                     "loan_duration_weeks",
                                     "max_extensions",
-                                    "loan_cost",
+                                    "loan_cost_small",
+                                    "loan_cost_medium",
+                                    "loan_cost_large",
+                                    "package_loan_cost",
+                                    "extension_cost",
                                     "condition_very_good_after",
                                     "condition_good_after",
                                     "deposit_pct_very_good",
@@ -4748,26 +4766,26 @@
                                     "type": "object",
                                     "properties": {
                                         "fee_cents": {
-                                            "type": "integer"
+                                            "type": "string"
                                         },
                                         "currency": {
                                             "type": "string"
                                         },
-                                        "tokens": {
-                                            "type": "integer"
-                                        },
                                         "bonus_tokens": {
-                                            "type": "integer"
+                                            "type": "string"
+                                        },
+                                        "bonus_value_cents": {
+                                            "type": "number"
                                         },
                                         "bonus_valid_months": {
-                                            "type": "integer"
+                                            "type": "string"
                                         }
                                     },
                                     "required": [
                                         "fee_cents",
                                         "currency",
-                                        "tokens",
                                         "bonus_tokens",
+                                        "bonus_value_cents",
                                         "bonus_valid_months"
                                     ]
                                 }
@@ -4817,7 +4835,7 @@
                                     "properties": {
                                         "clientSecret": {},
                                         "price_cents": {
-                                            "type": "integer"
+                                            "type": "string"
                                         },
                                         "currency": {
                                             "type": "string"
@@ -9005,11 +9023,23 @@
                     "status": {
                         "type": "string"
                     },
+                    "tokens_charged": {
+                        "type": "integer"
+                    },
                     "admin_note": {
                         "type": [
                             "string",
                             "null"
                         ]
+                    },
+                    "loan": {
+                        "$ref": "#/components/schemas/LoanResource"
+                    },
+                    "next_cost": {
+                        "type": "string"
+                    },
+                    "game_reserved": {
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -9018,6 +9048,7 @@
                     "requested_at",
                     "requested_due_date",
                     "status",
+                    "tokens_charged",
                     "admin_note"
                 ],
                 "title": "ExtensionResource"
@@ -9127,6 +9158,14 @@
                         ],
                         "minimum": 0
                     },
+                    "size_category": {
+                        "type": "string",
+                        "enum": [
+                            "SMALL",
+                            "MEDIUM",
+                            "LARGE"
+                        ]
+                    },
                     "is_active": {
                         "type": "boolean"
                     },
@@ -9160,7 +9199,8 @@
                 },
                 "required": [
                     "title",
-                    "slug"
+                    "slug",
+                    "size_category"
                 ],
                 "title": "GameRequest"
             },
@@ -9269,6 +9309,12 @@
                     "deposit_tokens": {
                         "type": "integer"
                     },
+                    "size_category": {
+                        "type": "string"
+                    },
+                    "borrow_cost": {
+                        "type": "integer"
+                    },
                     "cover_image_url": {
                         "type": [
                             "string",
@@ -9365,6 +9411,8 @@
                     "year",
                     "instagram_url",
                     "deposit_tokens",
+                    "size_category",
+                    "borrow_cost",
                     "cover_image_url",
                     "is_active",
                     "created_at"
@@ -9481,6 +9529,18 @@
                             "$ref": "#/components/schemas/ExtensionResource"
                         }
                     },
+                    "can_extend": {
+                        "type": "boolean"
+                    },
+                    "extension_blocked_reason": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "next_extension_cost": {
+                        "type": "integer"
+                    },
                     "created_at": {
                         "type": [
                             "string",
@@ -9525,7 +9585,19 @@
                     "max_extensions": {
                         "type": "integer"
                     },
-                    "loan_cost": {
+                    "loan_cost_small": {
+                        "type": "integer"
+                    },
+                    "loan_cost_medium": {
+                        "type": "integer"
+                    },
+                    "loan_cost_large": {
+                        "type": "integer"
+                    },
+                    "package_loan_cost": {
+                        "type": "integer"
+                    },
+                    "extension_cost": {
                         "type": "integer"
                     },
                     "condition_very_good_after": {
@@ -9562,7 +9634,11 @@
                     "grace_days",
                     "loan_duration_weeks",
                     "max_extensions",
-                    "loan_cost",
+                    "loan_cost_small",
+                    "loan_cost_medium",
+                    "loan_cost_large",
+                    "package_loan_cost",
+                    "extension_cost",
                     "condition_very_good_after",
                     "condition_good_after",
                     "deposit_pct_very_good",

@@ -1620,7 +1620,11 @@ export interface components {
       /** Format: date-time */
       requested_due_date: string
       status: string
+      tokens_charged: number
       admin_note: string | null
+      loan?: components['schemas']['LoanResource']
+      next_cost?: string
+      game_reserved?: string
     }
     /** GameRequest */
     GameRequest: {
@@ -1640,6 +1644,8 @@ export interface components {
       /** Format: uri */
       instagram_url?: string | null
       deposit_tokens?: number | null
+      /** @enum {string} */
+      size_category: 'SMALL' | 'MEDIUM' | 'LARGE'
       is_active?: boolean
       /**
        * Format: binary
@@ -1671,6 +1677,8 @@ export interface components {
       year: number | null
       instagram_url: string | null
       deposit_tokens: number
+      size_category: string
+      borrow_cost: number
       cover_image_url: string | null
       is_active: boolean
       available_copies_count?: number
@@ -1716,6 +1724,9 @@ export interface components {
       /** Format: date-time */
       overdue_reminder_sent_at: string | null
       extensions?: components['schemas']['ExtensionResource'][]
+      can_extend?: boolean
+      extension_blocked_reason?: string | null
+      next_extension_cost?: number
       /** Format: date-time */
       created_at: string | null
     }
@@ -1728,7 +1739,11 @@ export interface components {
       grace_days: number
       loan_duration_weeks: number
       max_extensions: number
-      loan_cost: number
+      loan_cost_small: number
+      loan_cost_medium: number
+      loan_cost_large: number
+      package_loan_cost: number
+      extension_cost: number
       condition_very_good_after: number
       condition_good_after: number
       deposit_pct_very_good: number
@@ -2894,25 +2909,14 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            data: components['schemas']['ExtensionResource']
-          }
+          'application/json':
+            | Record<string, never>
+            | {
+                data: components['schemas']['ExtensionResource']
+              }
         }
       }
       401: components['responses']['AuthenticationException']
-      402: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Nicht genug Token. Verlängern kostet 1 Token.'
-            /** @constant */
-            reason: 'insufficient_tokens'
-          }
-        }
-      }
       403: components['responses']['AuthorizationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
@@ -2984,24 +2988,15 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            data: components['schemas']['ExtensionResource']
-          }
+          'application/json':
+            | Record<string, never>
+            | {
+                data: components['schemas']['ExtensionResource']
+              }
         }
       }
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Antrag wurde bereits bearbeitet.'
-          }
-        }
-      }
     }
   }
   'extension.reject': {
@@ -3023,7 +3018,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['ExtensionResource']
+            data: components['schemas']['ExtensionResource'] & Record<string, never>
           }
         }
       }
@@ -3155,7 +3150,9 @@ export interface operations {
   'game.index': {
     parameters: {
       query?: {
-        sort?: string
+        players?: number
+        language?: number
+        available?: boolean
       }
       header?: never
       path?: never
@@ -3939,7 +3936,11 @@ export interface operations {
           grace_days: number
           loan_duration_weeks: number
           max_extensions: number
-          loan_cost: number
+          loan_cost_small: number
+          loan_cost_medium: number
+          loan_cost_large: number
+          package_loan_cost: number
+          extension_cost: number
           condition_very_good_after: number
           condition_good_after: number
           deposit_pct_very_good: number
@@ -4227,11 +4228,11 @@ export interface operations {
         }
         content: {
           'application/json': {
-            fee_cents: number
+            fee_cents: string
             currency: string
-            tokens: number
-            bonus_tokens: number
-            bonus_valid_months: number
+            bonus_tokens: string
+            bonus_value_cents: number
+            bonus_valid_months: string
           }
         }
       }
@@ -4260,7 +4261,7 @@ export interface operations {
         content: {
           'application/json': {
             clientSecret: unknown
-            price_cents: number
+            price_cents: string
             currency: string
           }
         }

@@ -4,6 +4,9 @@ namespace App\Http\Resources;
 
 use App\Models\Copy;
 use App\Models\Loan;
+use App\Models\LoanSetting;
+use App\Models\User;
+use App\Services\ExtensionPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -13,6 +16,8 @@ class LoanResource extends JsonResource
     /** @return array<string, mixed> */
     public function toArray(Request $request): array
     {
+        $hasExtensions = $this->relationLoaded('extensions');
+
         return [
             'id' => $this->id,
             'copy' => new CopyResource($this->whenLoaded('copy')),
@@ -35,7 +40,31 @@ class LoanResource extends JsonResource
             'is_overdue' => $this->due_date < now() && in_array($this->status, ['ACTIVE', 'EXTENDED']),
             'overdue_reminder_sent_at' => $this->overdue_reminder_sent_at,
             'extensions' => ExtensionResource::collection($this->whenLoaded('extensions')),
+            'can_extend' => $this->when($hasExtensions, fn () => $this->extensionBlockReason($request) === null),
+            'extension_blocked_reason' => $this->when($hasExtensions, fn () => $this->extensionBlockReason($request)),
+            'next_extension_cost' => $this->when($hasExtensions, fn () => $this->nextExtensionCost($request)),
             'created_at' => $this->created_at,
         ];
+    }
+
+    private function extensionBlockReason(Request $request): ?string
+    {
+        /** @var Loan $loan */
+        $loan = $this->resource;
+
+        return app(ExtensionPolicy::class)->blockReason($loan, LoanSetting::forRequest($request));
+    }
+
+    private function nextExtensionCost(Request $request): int
+    {
+        /** @var Loan $loan */
+        $loan = $this->resource;
+        $user = $request->user();
+
+        if ($user instanceof User && $user->isAdmin()) {
+            return 0;
+        }
+
+        return app(ExtensionPolicy::class)->nextCost($loan, LoanSetting::forRequest($request));
     }
 }

@@ -105,12 +105,16 @@
                 {{ loanError }}
               </div>
               <button
-                v-if="auth.totalTokens >= 3"
+                v-if="packageCost !== null && auth.freeTokens >= packageCost"
                 class="detail__btn detail__btn--primary"
                 :disabled="loaning"
                 @click="borrowPackage"
               >
-                {{ loaning ? $t('pages.package.borrowing') : $t('pages.package.borrow') }}
+                {{
+                  loaning
+                    ? $t('pages.package.borrowing')
+                    : $t('pages.package.borrow', { cost: packageCost })
+                }}
               </button>
               <NuxtLink v-else to="/tokens" class="detail__btn">{{
                 $t('btn.load_tokens')
@@ -131,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import type { Package } from '~/composables/useGames'
 
 const route = useRoute()
@@ -140,6 +144,7 @@ const auth = useAuthStore()
 const { t } = useI18n()
 
 const api = useApi()
+const { fetchSettings } = useLoanSettings()
 
 const slug = route.params.slug as string
 
@@ -154,6 +159,15 @@ const { data: pkg } = await useAsyncData<Package | null>(`package-${slug}`, asyn
 const loading = ref(false)
 const loaning = ref(false)
 const loanError = ref('')
+const packageCost = ref<number | null>(null)
+
+onMounted(async () => {
+  try {
+    packageCost.value = (await fetchSettings()).package_loan_cost
+  } catch {
+    // ohne Preis bleibt nur der Link zum Aufladen sichtbar
+  }
+})
 
 async function borrowPackage() {
   if (!pkg.value) return
@@ -161,7 +175,7 @@ async function borrowPackage() {
   loanError.value = ''
   try {
     await api.post('/package-loans', { package_id: pkg.value.id })
-    auth.spendTokens(3)
+    auth.spendTokens(packageCost.value ?? 0)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
     const e = err as { message?: string }

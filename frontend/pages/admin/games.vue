@@ -198,6 +198,19 @@
                   />
                 </div>
 
+                <div>
+                  <label class="form-label">{{ $t('admin.form.size_category') }}</label>
+                  <UiVirtualDropdown
+                    v-model="form.size_category"
+                    class="form-select"
+                    :options="[
+                      { label: $t('common.size_category.SMALL'), value: 'SMALL' },
+                      { label: $t('common.size_category.MEDIUM'), value: 'MEDIUM' },
+                      { label: $t('common.size_category.LARGE'), value: 'LARGE' },
+                    ]"
+                  />
+                </div>
+
                 <div class="form-grid__full">
                   <label class="form-label">{{ $t('admin.form.language') }}</label>
                   <div class="tag-picker">
@@ -716,6 +729,7 @@ interface Game {
   year: number | null
   tags: { id: number; name: string }[]
   deposit_tokens: number
+  size_category: string
   instagram_url: string | null
   cover_image_url: string | null
   images: { id: number; url: string }[]
@@ -776,6 +790,7 @@ const form = reactive({
   year: '',
   instagram_url: '',
   deposit_tokens: '',
+  size_category: 'MEDIUM',
   is_active: true,
   tag_ids: [] as number[],
   language_ids: [] as number[],
@@ -846,6 +861,7 @@ function openCreate() {
     year: '',
     instagram_url: '',
     deposit_tokens: '',
+    size_category: 'MEDIUM',
     is_active: true,
     tag_ids: [],
     language_ids: [],
@@ -874,6 +890,7 @@ async function openEdit(game: Game) {
     year: game.year ?? '',
     instagram_url: game.instagram_url ?? '',
     deposit_tokens: game.deposit_tokens ?? '',
+    size_category: game.size_category ?? 'MEDIUM',
     is_active: game.is_active,
     tag_ids: game.tags?.map((t) => t.id) ?? [],
     language_ids: game.languages?.map((l) => l.id) ?? [],
@@ -950,6 +967,7 @@ async function save() {
       'year',
       'instagram_url',
       'deposit_tokens',
+      'size_category',
     ] as const
     fields.forEach((f) => {
       if (form[f] !== '' && form[f] !== null) fd.append(f, String(form[f]))

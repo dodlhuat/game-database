@@ -17,6 +17,7 @@ class Extension extends Model
         'requested_at',
         'requested_due_date',
         'status',
+        'tokens_charged',
         'admin_note',
     ];
 

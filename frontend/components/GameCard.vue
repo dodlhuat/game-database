@@ -35,7 +35,13 @@
       </p>
 
       <div
-        v-if="game.min_players || game.min_age || game.duration_min || game.difficulty"
+        v-if="
+          game.min_players ||
+          game.min_age ||
+          game.duration_min ||
+          game.difficulty ||
+          game.borrow_cost
+        "
         class="game-card__meta"
       >
         <span v-if="game.min_players" class="game-card__chip">
@@ -48,6 +54,9 @@
         <span v-if="game.difficulty" class="game-card__chip">{{
           difficultyLabel(game.difficulty)
         }}</span>
+        <span v-if="game.borrow_cost" class="game-card__chip game-card__chip--cost">
+          {{ game.borrow_cost }} Token
+        </span>
       </div>
     </div>
   </NuxtLink>

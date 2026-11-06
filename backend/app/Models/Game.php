@@ -18,6 +18,8 @@ class Game extends Model
     /** @use HasFactory<GameFactory> */
     use HasFactory;
 
+    public const SIZE_CATEGORIES = ['SMALL', 'MEDIUM', 'LARGE'];
+
     protected $fillable = [
         'title',
         'slug',
@@ -32,6 +34,7 @@ class Game extends Model
         'year',
         'instagram_url',
         'deposit_tokens',
+        'size_category',
         'cover_image_url',
         'is_active',
     ];

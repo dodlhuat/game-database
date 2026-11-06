@@ -22,7 +22,7 @@ return new class extends Migration
             }
         });
 
-        DB::statement("UPDATE copies SET `condition` = 'GOOD' WHERE `condition` = 'WORN'");
+        DB::table('copies')->where('condition', 'WORN')->update(['condition' => 'GOOD']);
         $driver = DB::getDriverName();
         if ($driver === 'mysql' || $driver === 'mariadb') {
             DB::statement("ALTER TABLE copies MODIFY COLUMN `condition` ENUM('NEW','VERY_GOOD','GOOD','REVIEW','DAMAGED','LOCKED') NOT NULL DEFAULT 'NEW'");

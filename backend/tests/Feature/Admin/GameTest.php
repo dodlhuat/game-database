@@ -28,6 +28,7 @@ class GameTest extends TestCase
         return array_merge([
             'title' => 'Test Game',
             'slug' => $slug,
+            'size_category' => 'MEDIUM',
             'is_active' => true,
         ], $overrides);
     }
@@ -106,6 +107,7 @@ class GameTest extends TestCase
             ->putJson("/api/admin/games/{$game->id}", $this->gamePayload([
                 'slug' => $game->slug,
                 'title' => 'Updated Title',
+                'size_category' => 'MEDIUM',
             ]))
             ->assertOk()
             ->assertJsonPath('data.title', 'Updated Title');

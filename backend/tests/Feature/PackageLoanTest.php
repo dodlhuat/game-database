@@ -8,6 +8,7 @@ use App\Models\LoanSetting;
 use App\Models\Package;
 use App\Models\PackageLoan;
 use App\Models\User;
+use App\Services\TokenWallet;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,6 +45,26 @@ class PackageLoanTest extends TestCase
         $this->actingAs($admin)
             ->postJson('/api/package-loans', ['package_id' => $package->id])
             ->assertCreated();
+    }
+
+    public function test_package_costs_fixed_price_regardless_of_game_sizes(): void
+    {
+        LoanSetting::factory()->create(['package_loan_cost' => 4]);
+        $user = User::factory()->member()->create(['tokens' => 0]);
+        app(TokenWallet::class)->grantTokens($user, 10, 'PURCHASE', 50);
+        $package = Package::factory()->create(['is_active' => true]);
+
+        foreach (['SMALL', 'LARGE'] as $category) {
+            $game = Game::factory()->create(['size_category' => $category]);
+            Copy::factory()->create(['game_id' => $game->id, 'condition' => 'NEW']);
+            $package->games()->attach($game->id);
+        }
+
+        $this->actingAs($user)
+            ->postJson('/api/package-loans', ['package_id' => $package->id])
+            ->assertCreated();
+
+        $this->assertSame(6, $user->fresh()->tokens);
     }
 
     public function test_store_fails_for_non_member(): void

@@ -27,7 +27,7 @@ class LoanController extends Controller
         /** @var User $user */
         $user = $request->user();
         $loans = $user->loans()
-            ->with(['copy.game', 'extensions'])
+            ->with(['copy.game.reservations', 'extensions'])
             ->orderByDesc('created_at')
             ->paginate(20);
 
@@ -54,7 +54,7 @@ class LoanController extends Controller
             $copy = Copy::with('game')->findOrFail($request->copy_id);
             /** @var Game $game */
             $game = $copy->game;
-            $loanCost = $setting->loan_cost;
+            $loanCost = $setting->costFor($game->size_category);
             $deposit = $copy->calculateDeposit($game, $setting);
 
             if (! $user->hasEnoughFreeTokens($loanCost + $deposit)) {
@@ -91,7 +91,7 @@ class LoanController extends Controller
                 abort(422, 'Du hast dieses Spiel bereits ausgeliehen.');
             }
 
-            $loanCost = $user->isAdmin() ? 0 : $setting->loan_cost;
+            $loanCost = $user->isAdmin() ? 0 : $setting->costFor($game->size_category);
             $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($game, $setting);
 
             $startDate = $this->calcNextAppointment($setting);

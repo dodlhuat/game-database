@@ -105,10 +105,20 @@
           <div class="token-info">
             <h3 class="token-info__title">{{ $t('pages.tokens.costs_title') }}</h3>
             <ul class="token-info__list">
-              <li>{{ $t('pages.tokens.cost_game') }}</li>
+              <template v-if="costs">
+                <li>
+                  {{
+                    $t('pages.tokens.cost_game', {
+                      small: costs.loan_cost_small,
+                      medium: costs.loan_cost_medium,
+                      large: costs.loan_cost_large,
+                    })
+                  }}
+                </li>
+                <li>{{ $t('pages.tokens.cost_package', { cost: costs.package_loan_cost }) }}</li>
+                <li>{{ $t('pages.tokens.cost_extension', { cost: costs.extension_cost }) }}</li>
+              </template>
               <li>{{ $t('pages.tokens.cost_deposit') }}</li>
-              <li>{{ $t('pages.tokens.cost_package') }}</li>
-              <li>{{ $t('pages.tokens.cost_extension') }}</li>
             </ul>
           </div>
 
@@ -195,6 +205,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import type { TokenTransaction } from '~/composables/useLoans'
+import type { LoanSettings } from '~/composables/useLoanSettings'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -208,9 +219,11 @@ interface TokenPackage {
 const auth = useAuthStore()
 const api = useApi()
 const { fetchTokenTransactions } = useLoans()
+const { fetchSettings } = useLoanSettings()
 const { t } = useI18n()
 const success = ref('')
 const error = ref('')
+const costs = ref<LoanSettings | null>(null)
 
 const blockedTokens = computed(() => auth.user?.tokens_blocked ?? 0)
 const freeTokens = computed(() => auth.freeTokens)
@@ -293,6 +306,7 @@ const TX_LABELS: Record<string, string> = {
   BONUS_GRANT: 'pages.tokens.tx_bonus_grant',
   BONUS_EXPIRE: 'pages.tokens.tx_bonus_expire',
   REFUND: 'pages.tokens.tx_refund',
+  EXTENSION: 'pages.tokens.tx_extension',
 }
 const TX_CLASSES: Record<string, string> = {
   BORROW: 'badge-error',
@@ -316,6 +330,11 @@ function txClass(type: string) {
 onMounted(() => {
   loadPackages()
   loadTx(1)
+  fetchSettings()
+    .then((settings) => (costs.value = settings))
+    .catch(() => {
+      // die Kostenliste ist nur eine Info, die Seite funktioniert auch ohne sie
+    })
 })
 </script>
 

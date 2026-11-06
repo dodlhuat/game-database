@@ -35,6 +35,7 @@ class GameRequest extends FormRequest
             'year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
             'instagram_url' => ['nullable', 'url', 'max:255'],
             'deposit_tokens' => ['nullable', 'integer', 'min:0'],
+            'size_category' => ['required', Rule::in(Game::SIZE_CATEGORIES)],
             'is_active' => ['boolean'],
             'cover_image' => ['nullable', 'image', 'max:5120'],
             'tag_ids' => ['nullable', 'array'],
