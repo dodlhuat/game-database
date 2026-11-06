@@ -96,6 +96,7 @@ class PackageLoanController extends Controller
                     'message' => "Nicht genug Token. Paket ausleihen kostet {$loanCost} Token + {$totalDeposit} Token Kaution.",
                     'reason' => 'insufficient_tokens',
                     'borrow_cost' => $loanCost,
+                    /** @var int */
                     'deposit' => $totalDeposit,
                 ], 402);
             }

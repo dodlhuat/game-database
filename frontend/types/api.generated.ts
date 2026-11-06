@@ -1487,7 +1487,7 @@ export interface components {
         returned_at: string | null
         user_name: string
       } | null
-      is_available?: string
+      is_available?: boolean
     }
     /** DamageReport */
     DamageReport: {
@@ -1669,7 +1669,7 @@ export interface components {
       return_condition: string | null
       deposit_tokens: number
       status: string
-      is_overdue: string
+      is_overdue: boolean
       /** Format: date-time */
       overdue_reminder_sent_at: string | null
       extensions?: components['schemas']['ExtensionResource'][]
@@ -1758,7 +1758,7 @@ export interface components {
       /** Format: date-time */
       returned_at: string | null
       status: string
-      is_overdue: string
+      is_overdue: boolean
       loans?: (components['schemas']['LoanResource'] & Record<string, never>)[]
       /** Format: date-time */
       created_at: string | null
@@ -2664,13 +2664,12 @@ export interface operations {
     }
     requestBody?: never
     responses: {
-      200: {
+      302: {
         headers: {
+          Location: string
           [name: string]: unknown
         }
-        content: {
-          'application/json': Record<string, never>
-        }
+        content?: never
       }
     }
   }

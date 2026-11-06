@@ -1,5 +1,5 @@
 {
-    "openapi": "3.1.0",
+    "openapi": "3.1.2",
     "info": {
         "title": "Brettspiel-Ausleihplattform",
         "version": "0.0.1"
@@ -1603,12 +1603,13 @@
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "302": {
                         "description": "",
-                        "content": {
-                            "application/json": {
+                        "headers": {
+                            "Location": {
+                                "required": true,
                                 "schema": {
-                                    "type": "object"
+                                    "type": "string"
                                 }
                             }
                         }
@@ -2347,7 +2348,8 @@
                                                         "tags",
                                                         "mechanics",
                                                         "languages",
-                                                        "images"
+                                                        "images",
+                                                        "copies"
                                                     ]
                                                 }
                                             ]
@@ -8400,7 +8402,7 @@
                         ]
                     },
                     "is_available": {
-                        "type": "string"
+                        "type": "boolean"
                     }
                 },
                 "required": [
@@ -9214,7 +9216,7 @@
                         "type": "string"
                     },
                     "is_overdue": {
-                        "type": "string"
+                        "type": "boolean"
                     },
                     "overdue_reminder_sent_at": {
                         "type": [
@@ -9541,7 +9543,7 @@
                         "type": "string"
                     },
                     "is_overdue": {
-                        "type": "string"
+                        "type": "boolean"
                     },
                     "loans": {
                         "type": "array",

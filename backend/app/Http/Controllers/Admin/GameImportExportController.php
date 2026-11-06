@@ -22,8 +22,11 @@ class GameImportExportController extends Controller
         Excel::import($import, $request->file('file'));
 
         return response()->json([
+            /** @var int */
             'new' => $import->newCount,
+            /** @var int */
             'updated' => $import->updatedCount,
+            /** @var int */
             'total' => $import->newCount + $import->updatedCount,
         ]);
     }
