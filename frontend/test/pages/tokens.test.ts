@@ -196,6 +196,6 @@ describe('tokens.vue', () => {
 
     expect(costs).toContain('3 / 6 / 10 Token')
     expect(costs).toContain('4 Token: Paket ausleihen')
-    expect(costs).toContain('danach 2 Token')
+    expect(costs).toContain('die zweite 2 Token')
   })
 })

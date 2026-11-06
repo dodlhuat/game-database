@@ -62,9 +62,6 @@
               <NuxtLink to="/admin/cancellations">{{ $t('admin.cancellations.title') }}</NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/admin/extensions">{{ $t('admin.extensions.title') }}</NuxtLink>
-            </li>
-            <li>
               <NuxtLink to="/admin/damage-reports">{{ $t('admin.damage_reports.title') }}</NuxtLink>
             </li>
             <li>

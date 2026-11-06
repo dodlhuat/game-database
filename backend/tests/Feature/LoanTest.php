@@ -163,19 +163,6 @@ class LoanTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function test_extend_creates_extension_request(): void
-    {
-        LoanSetting::factory()->create(['max_extensions' => 2]);
-        $user = $this->makeMember(5);
-        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
-
-        $this->actingAs($user)
-            ->postJson("/api/loans/{$loan->id}/extend", [
-                'requested_due_date' => now()->addWeek()->toDateString(),
-            ])
-            ->assertCreated();
-    }
-
     /** @return array<string, array{string, int}> */
     public static function sizeCategories(): array
     {
@@ -203,32 +190,53 @@ class LoanTest extends TestCase
         $this->assertDatabaseHas('token_transactions', ['user_id' => $user->id, 'type' => 'BORROW', 'amount' => -$cost]);
     }
 
-    public function test_first_extension_is_free_and_needs_no_tokens(): void
+    public function test_first_extension_happens_immediately_and_is_free(): void
     {
         LoanSetting::factory()->create();
         $user = $this->makeMember(0);
         $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
+        $newDue = $loan->due_date->copy()->addWeek()->toDateString();
 
-        $this->extend($user, $loan)->assertCreated();
+        $this->extend($user, $loan)
+            ->assertCreated()
+            ->assertJsonPath('data.status', 'APPROVED')
+            ->assertJsonPath('data.tokens_charged', 0);
 
-        $this->assertSame(0, $user->fresh()->tokens);
+        $loan->refresh();
+        $this->assertSame('EXTENDED', $loan->status);
+        $this->assertSame($newDue, $loan->due_date->toDateString());
+        $this->assertDatabaseMissing('token_transactions', ['type' => 'EXTENSION']);
     }
 
-    public function test_second_extension_needs_tokens_and_works_on_extended_loan(): void
+    public function test_second_extension_spends_bonus_tokens_first(): void
+    {
+        LoanSetting::factory()->create();
+        $user = $this->makeMember(0);
+        app(TokenWallet::class)->grantBonus($user, 5, 'MEMBERSHIP', now()->addYear());
+        $loan = $this->extendedLoan($user);
+
+        $this->extend($user, $loan)
+            ->assertCreated()
+            ->assertJsonPath('data.tokens_charged', 2);
+
+        $this->assertSame(3, $user->fresh()->bonus_tokens);
+        $this->assertDatabaseHas('token_transactions', ['user_id' => $user->id, 'type' => 'EXTENSION', 'amount' => -2]);
+    }
+
+    public function test_second_extension_fails_without_tokens_and_changes_nothing(): void
     {
         LoanSetting::factory()->create();
         $user = $this->makeMember(1);
-        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'EXTENDED']);
-        Extension::factory()->approved()->create(['loan_id' => $loan->id]);
+        $loan = $this->extendedLoan($user);
+        $due = $loan->due_date->toDateString();
 
         $this->extend($user, $loan)
             ->assertStatus(402)
             ->assertJsonPath('reason', 'insufficient_tokens');
 
-        $user->update(['tokens' => 2]);
-
-        $this->extend($user, $loan)->assertCreated();
-        $this->assertSame(2, $user->fresh()->tokens, 'Abgebucht wird erst bei der Genehmigung.');
+        $this->assertSame($due, $loan->fresh()->due_date->toDateString());
+        $this->assertSame(1, $user->fresh()->tokens);
+        $this->assertDatabaseCount('extensions', 1);
     }
 
     public function test_extension_cost_cannot_use_blocked_deposit_tokens(): void
@@ -236,10 +244,8 @@ class LoanTest extends TestCase
         LoanSetting::factory()->create();
         $user = $this->makeMember(2);
         $user->update(['tokens_blocked' => 1]);
-        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'EXTENDED']);
-        Extension::factory()->approved()->create(['loan_id' => $loan->id]);
 
-        $this->extend($user, $loan)->assertStatus(402);
+        $this->extend($user, $this->extendedLoan($user))->assertStatus(402);
     }
 
     public function test_extension_is_blocked_when_reserved_by_someone_else(): void
@@ -247,6 +253,7 @@ class LoanTest extends TestCase
         LoanSetting::factory()->create();
         $user = $this->makeMember(5);
         $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
+        $due = $loan->due_date->toDateString();
         Reservation::factory()->create(['game_id' => $loan->copy->game_id]);
 
         $this->extend($user, $loan)
@@ -254,6 +261,7 @@ class LoanTest extends TestCase
             ->assertJsonPath('reason', 'game_reserved');
 
         $this->assertDatabaseCount('extensions', 0);
+        $this->assertSame($due, $loan->fresh()->due_date->toDateString());
     }
 
     public function test_own_reservation_does_not_block_extension(): void
@@ -266,14 +274,55 @@ class LoanTest extends TestCase
         $this->extend($user, $loan)->assertCreated();
     }
 
-    public function test_extension_is_blocked_at_maximum(): void
+    public function test_third_extension_is_refused_with_a_message(): void
     {
-        LoanSetting::factory()->create(['max_extensions' => 2]);
+        LoanSetting::factory()->create();
         $user = $this->makeMember(5);
-        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'EXTENDED']);
-        Extension::factory()->approved()->count(2)->create(['loan_id' => $loan->id]);
+        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
 
-        $this->extend($user, $loan)->assertStatus(422);
+        $this->extend($user, $loan)->assertCreated();
+        $this->extend($user, $loan->fresh())->assertCreated();
+
+        $this->extend($user, $loan->fresh())
+            ->assertStatus(422)
+            ->assertJsonPath('reason', 'max_extensions_reached')
+            ->assertJsonPath('message', 'Dieses Spiel wurde bereits zweimal verlängert und kann nicht weiter verlängert werden.');
+
+        $this->assertSame(3, $user->fresh()->tokens);
+    }
+
+    public function test_extension_date_is_limited_relative_to_the_due_date(): void
+    {
+        LoanSetting::factory()->create();
+        $user = $this->makeMember(5);
+        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
+
+        $this->extend($user, $loan, $loan->due_date->toDateString())->assertStatus(422);
+        $this->extend($user, $loan, $loan->due_date->copy()->addDays(15)->toDateString())->assertStatus(422);
+        $this->extend($user, $loan, $loan->due_date->copy()->addDays(14)->toDateString())->assertCreated();
+    }
+
+    public function test_overdue_loan_is_extended_from_today(): void
+    {
+        LoanSetting::factory()->create();
+        $user = $this->makeMember(5);
+        $loan = Loan::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'OVERDUE',
+            'due_date' => now()->subDays(3)->toDateString(),
+        ]);
+
+        $this->extend($user, $loan, now()->addWeek()->toDateString())->assertCreated();
+
+        $this->assertSame('EXTENDED', $loan->fresh()->status);
+    }
+
+    public function test_cannot_extend_foreign_loan(): void
+    {
+        LoanSetting::factory()->create();
+        $loan = Loan::factory()->create(['status' => 'ACTIVE']);
+
+        $this->extend($this->makeMember(5), $loan)->assertForbidden();
     }
 
     public function test_index_exposes_extension_state(): void
@@ -296,10 +345,18 @@ class LoanTest extends TestCase
         $this->assertSame('reserved', $loans[$reserved->id]['extension_blocked_reason']);
     }
 
-    private function extend(User $user, Loan $loan): TestResponse
+    private function extendedLoan(User $user): Loan
+    {
+        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'EXTENDED']);
+        Extension::factory()->approved()->create(['loan_id' => $loan->id]);
+
+        return $loan;
+    }
+
+    private function extend(User $user, Loan $loan, ?string $date = null): TestResponse
     {
         return $this->actingAs($user)->postJson("/api/loans/{$loan->id}/extend", [
-            'requested_due_date' => now()->addWeek()->toDateString(),
+            'requested_due_date' => $date ?? $loan->due_date->copy()->addWeek()->toDateString(),
         ]);
     }
 }

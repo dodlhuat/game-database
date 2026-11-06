@@ -1,7 +1,6 @@
 export interface AdminStats {
   users: { total: number; pending: number; active: number }
   loans: { active: number; overdue: number; returned_today: number }
-  extensions: { pending: number }
   copies: { to_review: number }
 }
 
@@ -110,16 +109,6 @@ export function useAdmin() {
 
   const sendOverdueReminder = (id: number) => api.post(`/admin/loans/${id}/remind`)
 
-  // Extensions
-  const fetchExtensions = (status = 'PENDING') =>
-    api.get<{ data: unknown[] }>('/admin/extensions', { params: { status } })
-
-  const approveExtension = (id: number, adminNote?: string) =>
-    api.patch(`/admin/extensions/${id}/approve`, { admin_note: adminNote })
-
-  const rejectExtension = (id: number, adminNote?: string) =>
-    api.patch(`/admin/extensions/${id}/reject`, { admin_note: adminNote })
-
   // Newsletters
   const fetchNewsletters = () => api.get<{ data: unknown[] }>('/admin/newsletters')
 
@@ -175,9 +164,6 @@ export function useAdmin() {
     fetchAdminLoans,
     markOverdue,
     sendOverdueReminder,
-    fetchExtensions,
-    approveExtension,
-    rejectExtension,
     fetchNewsletters,
     sendNewsletter,
     fetchDamageReports,

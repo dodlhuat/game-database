@@ -372,54 +372,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/admin/extensions': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get: operations['extension.index']
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/admin/extensions/{extension}/approve': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch: operations['extension.approve']
-    trace?: never
-  }
-  '/admin/extensions/{extension}/reject': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post?: never
-    delete?: never
-    options?: never
-    head?: never
-    patch: operations['extension.reject']
-    trace?: never
-  }
   '/favorites': {
     parameters: {
       query?: never
@@ -1622,9 +1574,6 @@ export interface components {
       status: string
       tokens_charged: number
       admin_note: string | null
-      loan?: components['schemas']['LoanResource']
-      next_cost?: string
-      game_reserved?: string
     }
     /** GameRequest */
     GameRequest: {
@@ -2544,9 +2493,6 @@ export interface operations {
               overdue: number
               returned_today: number
             }
-            extensions: {
-              pending: number
-            }
             copies: {
               to_review: number
             }
@@ -2920,121 +2866,6 @@ export interface operations {
       403: components['responses']['AuthorizationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
-    }
-  }
-  'extension.index': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description Paginated set of `ExtensionResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['ExtensionResource'][]
-            links: {
-              first: string | null
-              last: string | null
-              prev: string | null
-              next: string | null
-            }
-            meta: {
-              current_page: number
-              from: number | null
-              last_page: number
-              /** @description Generated paginator links. */
-              links: {
-                url: string | null
-                label: string
-                active: boolean
-              }[]
-              /** @description Base path for paginator generated URLs. */
-              path: string | null
-              /** @description Number of items shown per page. */
-              per_page: number
-              /** @description Number of the last item in the slice. */
-              to: number | null
-              /** @description Total number of items being paginated. */
-              total: number
-            }
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-    }
-  }
-  'extension.approve': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The extension ID */
-        extension: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description `ExtensionResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json':
-            | Record<string, never>
-            | {
-                data: components['schemas']['ExtensionResource']
-              }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: components['responses']['ModelNotFoundException']
-    }
-  }
-  'extension.reject': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        /** @description The extension ID */
-        extension: number
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      /** @description `ExtensionResource` */
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            data: components['schemas']['ExtensionResource'] & Record<string, never>
-          }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: components['responses']['ModelNotFoundException']
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Antrag wurde bereits bearbeitet.'
-          }
-        }
-      }
     }
   }
   'favorite.index': {

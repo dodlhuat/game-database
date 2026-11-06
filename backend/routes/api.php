@@ -185,9 +185,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/loans/{loan}/return', [App\Http\Controllers\Admin\LoanController::class, 'return']);
 
     // Verlängerungsanträge
-    Route::get('/extensions', [App\Http\Controllers\Admin\ExtensionController::class, 'index']);
-    Route::patch('/extensions/{extension}/approve', [App\Http\Controllers\Admin\ExtensionController::class, 'approve']);
-    Route::patch('/extensions/{extension}/reject', [App\Http\Controllers\Admin\ExtensionController::class, 'reject']);
 
     // Newsletter
     Route::get('/newsletters', [NewsletterController::class, 'index']);

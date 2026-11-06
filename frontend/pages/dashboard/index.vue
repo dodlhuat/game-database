@@ -144,6 +144,7 @@
         <template v-else>
           <!-- Aktive Ausleihen ───────────────────────────────────── -->
           <section class="dash-section">
+            <div v-if="extensionSuccess" class="alert alert-success">{{ extensionSuccess }}</div>
             <header class="dash-section__header">
               <h2 class="dash-section__title">{{ $t('dashboard.active_loans_title') }}</h2>
               <span class="dash-section__count">{{ activeLoans.length }}</span>
@@ -186,10 +187,7 @@
                     <td :data-label="$t('dashboard.table.actions')">
                       <div class="action-row">
                         <template v-if="loan.status !== 'RETURNED'">
-                          <span v-if="pendingExtension(loan)" class="badge badge-warning">
-                            {{ $t('common.badge.pending_extension') }}
-                          </span>
-                          <span v-else-if="extensionNote(loan)" class="extension-note">
+                          <span v-if="extensionNote(loan)" class="extension-note">
                             {{ extensionNote(loan) }}
                           </span>
                           <button v-else class="action-btn" @click="openExtension(loan)">
@@ -449,7 +447,9 @@
           />
           <div v-if="extensionError" class="alert alert-error">{{ extensionError }}</div>
           <div class="dialog__actions">
-            <UiButton :loading="extending" @click="submitExtension">{{ $t('btn.apply') }}</UiButton>
+            <UiButton :loading="extending" @click="submitExtension">{{
+              $t('dashboard.extension_apply')
+            }}</UiButton>
             <button class="action-btn" @click="extensionLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
@@ -495,6 +495,7 @@ const returning = ref(false)
 
 const extensionLoan = ref<Loan | null>(null)
 const extensionError = ref('')
+const extensionSuccess = ref('')
 const extensionDate = ref('')
 const extending = ref(false)
 
@@ -575,6 +576,7 @@ function openExtension(loan: Loan) {
   extensionLoan.value = loan
   extensionDate.value = ''
   extensionError.value = ''
+  extensionSuccess.value = ''
 }
 
 async function submitExtension() {
@@ -583,13 +585,19 @@ async function submitExtension() {
   extensionError.value = ''
   try {
     await requestExtension(extensionLoan.value.id, extensionDate.value)
+    auth.spendTokens(extensionLoan.value.next_extension_cost ?? 0)
+    extensionSuccess.value = t('dashboard.extension_success', {
+      title: extensionLoan.value.game?.title ?? '',
+    })
     data.value = await fetchDashboard()
     extensionLoan.value = null
   } catch (e: unknown) {
     const err = e as { message?: string; reason?: string }
     extensionError.value = err?.message ?? t('common.error.generic')
-    // Wurde das Spiel erst nach dem Laden reserviert, soll die Liste das gleich zeigen
-    if (err?.reason === 'game_reserved') data.value = await fetchDashboard()
+    // Hat sich der Stand seit dem Laden geändert, soll die Liste das gleich zeigen
+    if (err?.reason === 'game_reserved' || err?.reason === 'max_extensions_reached') {
+      data.value = await fetchDashboard()
+    }
   } finally {
     extending.value = false
   }
@@ -637,10 +645,6 @@ async function cancelReservation(id: number) {
 
 async function handleLogout() {
   await logout()
-}
-
-function pendingExtension(loan: Loan) {
-  return loan.extensions.some((e) => e.status === 'PENDING')
 }
 
 function extensionNote(loan: Loan) {

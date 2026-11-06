@@ -108,79 +108,59 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 
 ## Verlängerung
 
-### TC-07 — Verlängerung einer aktiven Ausleihe beantragen
+### TC-07 — Ausleihe verlängern
 
 **Voraussetzungen**
 - Als Mitglied mit aktiver Mitgliedschaft eingeloggt
 - Eine aktive Ausleihe ist vorhanden
 - Das Spiel ist von niemand anderem reserviert
-- Für die zweite Verlängerung sind mindestens 2 freie Token vorhanden (die erste ist gratis)
-- Das Maximum an Verlängerungen ist noch nicht erreicht
-- Kein offener Verlängerungsantrag für diese Ausleihe vorhanden
+- Die Ausleihe wurde noch keine zwei Mal verlängert
 
 **Schritte**
-1. Ausleihe in der Übersicht öffnen
-2. Gewünschtes neues Rückgabedatum wählen
-3. Verlängerung beantragen
+1. Im Dashboard bei der Ausleihe auf „Verlängern" klicken
+2. Neues Rückgabedatum wählen (maximal 2 Wochen nach dem aktuellen)
+3. „Jetzt verlängern" klicken
 
 **Erwartetes Ergebnis**
-- Der Antrag wird erstellt und erscheint als „Ausstehend"
-- Der Dialog zeigt die Kosten an („Kostenlos" oder „2 Token")
-- Beim Antrag wird noch nichts abgebucht
-- Ein weiterer Antrag für dieselbe Ausleihe ist nicht mehr möglich, solange dieser offen ist
+- Der Dialog zeigt vorher die Kosten an („Kostenlos" oder „2 Token")
+- Die Verlängerung gilt sofort, es ist keine Freigabe durch einen Admin nötig
+- Das Rückgabedatum ändert sich, die Ausleihe steht auf „Verlängert"
+- Eine Bestätigung erscheint
 
 ---
 
-### TC-08 — Verlängerung nicht möglich bei bereits offenem Antrag
+### TC-08 — Kosten der Verlängerung
+
+**Voraussetzungen**
+- Als Mitglied eingeloggt, eine aktive Ausleihe ist vorhanden
+
+**Schritte**
+1. Ausleihe zum ersten Mal verlängern
+2. Dieselbe Ausleihe ein zweites Mal verlängern
+
+**Erwartetes Ergebnis**
+- Die erste Verlängerung ist kostenlos und funktioniert auch ohne Guthaben
+- Die zweite kostet 2 Token, die sofort abgebucht werden (Bonus-Token zuerst)
+- Ohne genug freie Token erscheint eine Fehlermeldung, und die Ausleihe bleibt unverändert
+
+---
+
+### TC-09 — Keine dritte Verlängerung
 
 **Voraussetzungen**
 - Als Mitglied eingeloggt
-- Eine aktive Ausleihe mit einem bereits ausstehenden Verlängerungsantrag ist vorhanden
+- Eine Ausleihe, die bereits zweimal verlängert wurde
 
 **Schritte**
-1. Erneut eine Verlängerung für dieselbe Ausleihe beantragen
+1. Dashboard öffnen
 
 **Erwartetes Ergebnis**
-- Eine Fehlermeldung erscheint, dass bereits ein offener Antrag existiert
-- Kein weiterer Antrag wird erstellt
+- Statt des Buttons „Verlängern" steht der Hinweis, dass das Spiel bereits zweimal verlängert wurde
+- Eine direkte Anfrage wird mit derselben Meldung abgelehnt
 
 ---
 
-### TC-09 — Verlängerung nicht möglich wenn Maximum erreicht
-
-**Voraussetzungen**
-- Als Mitglied eingeloggt
-- Eine Ausleihe, die bereits die maximale Anzahl an Verlängerungen ausgeschöpft hat
-
-**Schritte**
-1. Verlängerung für diese Ausleihe beantragen
-
-**Erwartetes Ergebnis**
-- Eine Fehlermeldung erscheint, dass die maximale Anzahl an Verlängerungen erreicht ist
-- Kein weiterer Antrag wird erstellt
-
----
-
-### TC-10 — Admin genehmigt Verlängerungsantrag
-
-**Voraussetzungen**
-- Als Admin eingeloggt
-- Ein ausstehender Verlängerungsantrag ist vorhanden
-
-**Schritte**
-1. Verlängerungsanträge in der Admin-Übersicht öffnen
-2. Antrag auswählen und genehmigen
-
-**Erwartetes Ergebnis**
-- Der Antrag wechselt in den Status „Genehmigt"
-- Das Rückgabedatum der Ausleihe wird auf das beantragte Datum gesetzt
-- Die Ausleihe wechselt in den Status „Verlängert"
-- War es die zweite Verlängerung, werden 2 Token abgebucht (Bonus-Token zuerst)
-- Wurde das Spiel inzwischen reserviert oder fehlen dem Mitglied die Token, schlägt die Genehmigung mit einer Meldung fehl und nichts wird verändert
-
----
-
-### TC-10b — Verlängerung nicht möglich bei reserviertem Spiel
+### TC-10 — Verlängerung nicht möglich bei reserviertem Spiel
 
 **Voraussetzungen**
 - Als Mitglied mit aktiver Mitgliedschaft eingeloggt
@@ -191,24 +171,7 @@ Verwaltungsplattform für eine Brettspiel-Leihbibliothek.
 
 **Erwartetes Ergebnis**
 - Statt des Buttons „Verlängern" steht ein Hinweis, dass das Spiel reserviert ist
-- Eine direkte Anfrage wird mit der Begründung abgelehnt, und es entsteht kein Antrag
-
----
-
-### TC-11 — Admin lehnt Verlängerungsantrag ab
-
-**Voraussetzungen**
-- Als Admin eingeloggt
-- Ein ausstehender Verlängerungsantrag ist vorhanden
-
-**Schritte**
-1. Verlängerungsanträge in der Admin-Übersicht öffnen
-2. Antrag auswählen und ablehnen
-
-**Erwartetes Ergebnis**
-- Der Antrag wechselt in den Status „Abgelehnt"
-- Das Rückgabedatum der Ausleihe bleibt unverändert
-- Der Status der Ausleihe bleibt unverändert
+- Eine direkte Anfrage wird mit der Begründung abgelehnt, und die Ausleihe bleibt unverändert
 
 ---
 

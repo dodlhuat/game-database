@@ -21,7 +21,7 @@ Diese Nutzungsbedingungen gelten für alle Mitglieder der Spielothek des Vereins
 
 §2 Ausleihe
 Spiele können für 14 Tage ausgeliehen werden. Der Leihpreis richtet sich nach der Kategorie des Spiels (derzeit klein 3 Token, mittel 6 Token, groß 10 Token; Pakete 3 Token). Zusätzlich wird je nach Spiel und Zustand eine Kaution in Token blockiert, die nach der Rückgabeprüfung wieder freigegeben wird.
-Eine Verlängerung ist auf Anfrage möglich, sofern das Spiel nicht von einem anderen Mitglied reserviert ist. Die erste Verlängerung einer Ausleihe ist kostenlos, jede weitere kostet derzeit 2 Token.
+Eine Ausleihe kann im Konto bis zu zweimal verlängert werden, sofern das Spiel nicht von einem anderen Mitglied reserviert ist. Die erste Verlängerung ist kostenlos, die zweite kostet derzeit 2 Token.
 
 §3 Haftung
 Bei Beschädigung oder Verlust ist der Zeitwert des Spiels zu ersetzen. Die blockierte Kaution kann bei Beschädigung oder Verlust einbehalten werden.

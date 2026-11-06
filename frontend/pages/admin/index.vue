@@ -64,19 +64,6 @@
                 </svg>
               </NuxtLink>
               <NuxtLink
-                v-if="stats.extensions.pending > 0"
-                to="/admin/extensions"
-                class="attention-item"
-              >
-                <span class="attention-item__dot" />
-                <span class="attention-item__text">
-                  <strong>{{ stats.extensions.pending }}</strong> offene Verlängerungsanträge
-                </span>
-                <svg class="icon-svg attention-item__arrow" aria-hidden="true">
-                  <use href="/svg-icons/icons.svg#chevron_right" />
-                </svg>
-              </NuxtLink>
-              <NuxtLink
                 v-if="stats.copies.to_review > 0"
                 to="/admin/copy-review"
                 class="attention-item"
@@ -116,28 +103,6 @@
                 :class="{ 'ops-card__sub--red': stats.loans.overdue > 0 }"
               >
                 {{ stats.loans.overdue > 0 ? `${stats.loans.overdue} überfällig` : 'aktiv' }}
-              </span>
-            </NuxtLink>
-
-            <NuxtLink
-              to="/admin/extensions"
-              class="ops-card"
-              :class="stats.extensions.pending > 0 ? 'ops-card--amber' : ''"
-            >
-              <div class="ops-card__top">
-                <span class="ops-card__icon">
-                  <svg class="icon-svg" aria-hidden="true">
-                    <use href="/svg-icons/icons.svg#calendar_today" />
-                  </svg>
-                </span>
-                <span v-if="stats.extensions.pending > 0" class="ops-card__badge">{{
-                  stats.extensions.pending
-                }}</span>
-              </div>
-              <span class="ops-card__value">{{ stats.extensions.pending }}</span>
-              <span class="ops-card__label">Verlängerungen</span>
-              <span class="ops-card__sub">
-                {{ stats.extensions.pending > 0 ? 'offen' : 'keine offen' }}
               </span>
             </NuxtLink>
 
@@ -342,7 +307,6 @@ const alertCount = computed(() => {
   return (
     (stats.value.loans.overdue > 0 ? 1 : 0) +
     (stats.value.users.pending > 0 ? 1 : 0) +
-    (stats.value.extensions.pending > 0 ? 1 : 0) +
     (stats.value.copies.to_review > 0 ? 1 : 0)
   )
 })

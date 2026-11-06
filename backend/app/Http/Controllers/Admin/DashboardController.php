@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Copy;
-use App\Models\Extension;
 use App\Models\Loan;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -25,9 +24,6 @@ class DashboardController extends Controller
                 'returned_today' => Loan::where('status', 'RETURNED')
                     ->whereDate('returned_at', today())
                     ->count(),
-            ],
-            'extensions' => [
-                'pending' => Extension::where('status', 'PENDING')->count(),
             ],
             'copies' => [
                 'to_review' => Copy::where('condition', 'REVIEW')->count(),

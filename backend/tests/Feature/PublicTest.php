@@ -139,7 +139,7 @@ class PublicTest extends TestCase
         $content = $this->getJson('/api/terms')->assertOk()->json('content');
 
         $this->assertStringContainsString('klein 3 Token, mittel 6 Token, groß 10 Token', $content);
-        $this->assertStringContainsString('erste Verlängerung einer Ausleihe ist kostenlos', $content);
+        $this->assertStringContainsString('erste Verlängerung ist kostenlos', $content);
         $this->assertStringNotContainsString('Zusätzlich zu den Token nach §5', $content);
     }
 

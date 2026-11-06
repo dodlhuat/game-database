@@ -5,13 +5,12 @@ namespace App\Services;
 use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Reservation;
+use Illuminate\Support\Carbon;
 
 /** Single source of truth for whether a loan can be extended and what it costs. */
 class ExtensionPolicy
 {
     public const BLOCK_NOT_EXTENDABLE = 'not_extendable';
-
-    public const BLOCK_PENDING = 'pending';
 
     public const BLOCK_MAX_REACHED = 'max_reached';
 
@@ -23,14 +22,16 @@ class ExtensionPolicy
         return $loan->extensions->where('status', 'APPROVED')->isEmpty() ? 0 : $setting->extension_cost;
     }
 
+    /** New due dates are counted from the current due date, or from today if it has passed. */
+    public static function earliestBase(Loan $loan): Carbon
+    {
+        return $loan->due_date->isFuture() ? $loan->due_date->copy() : today();
+    }
+
     public function blockReason(Loan $loan, LoanSetting $setting): ?string
     {
         if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return self::BLOCK_NOT_EXTENDABLE;
-        }
-
-        if ($loan->extensions->contains('status', 'PENDING')) {
-            return self::BLOCK_PENDING;
         }
 
         if ($loan->extensions->where('status', '!=', 'REJECTED')->count() >= $setting->max_extensions) {

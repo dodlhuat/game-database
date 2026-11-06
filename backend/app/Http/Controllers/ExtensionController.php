@@ -6,13 +6,19 @@ use App\Http\Requests\Loan\StoreExtensionRequest;
 use App\Http\Resources\ExtensionResource;
 use App\Models\Loan;
 use App\Models\LoanSetting;
+use App\Models\TokenTransaction;
 use App\Models\User;
 use App\Services\ExtensionPolicy;
+use App\Services\TokenWallet;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class ExtensionController extends Controller
 {
-    public function __construct(private ExtensionPolicy $policy) {}
+    public function __construct(
+        private ExtensionPolicy $policy,
+        private TokenWallet $wallet,
+    ) {}
 
     public function store(StoreExtensionRequest $request, Loan $loan): JsonResponse|ExtensionResource
     {
@@ -28,39 +34,60 @@ class ExtensionController extends Controller
             ], 403);
         }
 
-        $loan->load(['copy.game.reservations', 'extensions']);
-        $setting = LoanSetting::instance();
+        return DB::transaction(function () use ($request, $user, $loan): JsonResponse|ExtensionResource {
+            // Sperre, damit ein doppelter Klick nicht zweimal verlängert und abbucht
+            $locked = Loan::with(['copy.game.reservations', 'extensions'])->lockForUpdate()->findOrFail($loan->id);
+            $setting = LoanSetting::instance();
 
-        $blocked = $this->blockedResponse($loan, $setting);
-        if ($blocked) {
-            return $blocked;
-        }
+            $blocked = $this->blockedResponse($locked, $setting);
+            if ($blocked) {
+                return $blocked;
+            }
 
-        // Nur prüfen: abgebucht wird erst, wenn der Admin den Antrag genehmigt.
-        $cost = $this->policy->nextCost($loan, $setting);
-        if (! $user->isAdmin() && ! $user->hasEnoughFreeTokens($cost)) {
-            return response()->json([
-                'message' => "Nicht genug Token. Diese Verlängerung kostet {$cost} Token.",
-                'reason' => 'insufficient_tokens',
-                'extension_cost' => $cost,
-            ], 402);
-        }
+            $cost = $user->isAdmin() ? 0 : $this->policy->nextCost($locked, $setting);
+            if (! $user->hasEnoughFreeTokens($cost)) {
+                return response()->json([
+                    'message' => "Nicht genug Token. Diese Verlängerung kostet {$cost} Token.",
+                    'reason' => 'insufficient_tokens',
+                    'extension_cost' => $cost,
+                ], 402);
+            }
 
-        $extension = $loan->extensions()->create([
-            'requested_at' => now(),
-            'requested_due_date' => $request->requested_due_date,
-            'status' => 'PENDING',
-        ]);
+            if ($cost > 0) {
+                $this->wallet->spend($user, $cost);
+                TokenTransaction::create([
+                    'user_id' => $user->id,
+                    'loan_id' => $locked->id,
+                    'type' => 'EXTENSION',
+                    'amount' => -$cost,
+                    'description' => 'Verlängerung: '.$locked->copy?->game?->title,
+                ]);
+            }
 
-        return new ExtensionResource($extension);
+            $extension = $locked->extensions()->create([
+                'requested_at' => now(),
+                'requested_due_date' => $request->requested_due_date,
+                'status' => 'APPROVED',
+                'tokens_charged' => $cost,
+            ]);
+
+            $locked->update([
+                'due_date' => $request->requested_due_date,
+                'status' => 'EXTENDED',
+            ]);
+
+            return new ExtensionResource($extension);
+        });
     }
 
     private function blockedResponse(Loan $loan, LoanSetting $setting): ?JsonResponse
     {
         return match ($this->policy->blockReason($loan, $setting)) {
-            ExtensionPolicy::BLOCK_NOT_EXTENDABLE => response()->json(['message' => 'Für diese Ausleihe kann keine Verlängerung beantragt werden.'], 422),
-            ExtensionPolicy::BLOCK_PENDING => response()->json(['message' => 'Es gibt bereits einen offenen Verlängerungsantrag.'], 422),
-            ExtensionPolicy::BLOCK_MAX_REACHED => response()->json(['message' => "Diese Ausleihe kann nicht weiter verlängert werden (Maximum: {$setting->max_extensions})."], 422),
+            ExtensionPolicy::BLOCK_NOT_EXTENDABLE => response()->json(['message' => 'Diese Ausleihe kann nicht verlängert werden.'], 422),
+            ExtensionPolicy::BLOCK_MAX_REACHED => response()->json([
+                'message' => 'Dieses Spiel wurde bereits zweimal verlängert und kann nicht weiter verlängert werden.',
+                'reason' => 'max_extensions_reached',
+            ], 422),
             ExtensionPolicy::BLOCK_RESERVED => response()->json([
                 'message' => 'Dieses Spiel ist bereits reserviert und kann deshalb nicht verlängert werden.',
                 'reason' => 'game_reserved',

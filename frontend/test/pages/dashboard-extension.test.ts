@@ -118,6 +118,21 @@ describe('dashboard — extending a loan', () => {
     expect(wrapper.find('.extension-cost__hint').exists()).toBe(false)
   })
 
+  it('extends right away, deducts the tokens and confirms it', async () => {
+    const auth = useAuthStore()
+    const wrapper = await mountDashboard([loan({ status: 'EXTENDED', next_extension_cost: 2 })])
+    requestExtensionMock.mockResolvedValue({})
+
+    await extendButton(wrapper)!.trigger('click')
+    ;(wrapper.vm as unknown as { extensionDate: string }).extensionDate = '2026-12-05'
+    await wrapper.find('.dialog__actions button').trigger('click')
+    await flushPromises()
+
+    expect(requestExtensionMock).toHaveBeenCalledWith(1, '2026-12-05')
+    expect(auth.user?.tokens).toBe(3)
+    expect(wrapper.find('.alert-success').text()).toContain('Catan')
+  })
+
   it('shows the price of a paid extension', async () => {
     const wrapper = await mountDashboard([loan({ status: 'EXTENDED', next_extension_cost: 2 })])
 

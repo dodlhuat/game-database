@@ -27,7 +27,7 @@ export interface Loan {
     admin_note: string | null
   }[]
   can_extend?: boolean
-  extension_blocked_reason?: 'not_extendable' | 'pending' | 'max_reached' | 'reserved' | null
+  extension_blocked_reason?: 'not_extendable' | 'max_reached' | 'reserved' | null
   next_extension_cost?: number
 }
 
