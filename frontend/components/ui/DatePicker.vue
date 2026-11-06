@@ -64,6 +64,9 @@ onMounted(async () => {
         'November',
         'Dezember',
       ],
+      set: 'Übernehmen',
+      previous: 'Zurück',
+      next: 'Weiter',
     },
     format: (date: Date) => {
       const d = String(date.getDate()).padStart(2, '0')

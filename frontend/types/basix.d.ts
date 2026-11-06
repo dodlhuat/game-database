@@ -87,6 +87,9 @@ declare module '@dodlhuat/basix/js/datepicker' {
   export interface DatePickerLocales {
     days: string[]
     months: string[]
+    set?: string
+    previous?: string
+    next?: string
   }
   export interface DateRange {
     start: Date | null
