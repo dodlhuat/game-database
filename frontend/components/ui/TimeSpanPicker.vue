@@ -30,6 +30,9 @@ onMounted(async () => {
 
   const { TimeSpanPicker } = await import('@dodlhuat/basix/js/timepicker')
 
+  // The component may have unmounted while the import was pending.
+  if (!containerRef.value) return
+
   picker = new TimeSpanPicker(containerRef.value, {
     defaultStart: props.start || undefined,
     defaultEnd: props.end || undefined,

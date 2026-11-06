@@ -136,7 +136,7 @@ services:
     container_name: game-db-mailpit
     restart: unless-stopped
     ports:
-      - "8026:8025"   # Web UI (8025 already used by another project)
+      - "8027:8025"   # Web UI (8025/8026 already used by other projects)
       - "1025:1025"   # SMTP
 
 

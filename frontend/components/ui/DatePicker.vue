@@ -40,6 +40,9 @@ onMounted(async () => {
 
   const { DatePicker } = await import('@dodlhuat/basix/js/datepicker')
 
+  // The component may have unmounted while the import was pending.
+  if (!inputRef.value) return
+
   picker = new DatePicker(inputRef.value, {
     mode: 'single',
     startDay: 1,
