@@ -38,13 +38,13 @@
     "eslint": "^10.4.1",
     "eslint-config-prettier": "^10.1.8",
     "h3-next": "npm:h3@^2.0.1-rc.32",
-    "happy-dom": "^20.14.5",
+    "happy-dom": "^21.0.4",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.4",
     "sass": "^1.85.0",
     "typescript": "^6.0.3",
     "vitest": "^5.0.1",
-    "vue-tsc": "^3.3.4"
+    "vue-tsc": "3.3.13"
   },
   "overrides": {
     "js-yaml": "^4.3.0"
