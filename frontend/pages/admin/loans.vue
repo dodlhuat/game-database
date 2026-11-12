@@ -454,7 +454,7 @@ $hero-divider: var(--divider);
     color: var(--accent-text);
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
     &:hover {
@@ -506,7 +506,7 @@ $hero-divider: var(--divider);
   font-size: 0.8rem;
 }
 .text-danger {
-  color: #f87171;
+  color: var(--error-text);
   font-weight: 600;
 }
 

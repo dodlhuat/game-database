@@ -1527,12 +1527,12 @@ $hero-divider: var(--divider);
     color: var(--accent-text);
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
     &:hover {
       border-color: rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
+      color: var(--error-text-hover);
     }
   }
   &:disabled {
@@ -1631,7 +1631,7 @@ td.actions-cell {
     background: var(--background);
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     &:hover {
       background: rgba(239, 68, 68, 0.08);
     }
@@ -1818,7 +1818,7 @@ td.actions-cell {
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
-  color: #f87171;
+  color: var(--error-text);
   font-size: 0.875rem;
 }
 
@@ -1879,7 +1879,7 @@ td.actions-cell {
     color: var(--primary-text);
   }
   &__value--new {
-    color: #4ade80;
+    color: var(--success-text);
   }
   &__value--updated {
     color: $amber;
@@ -1937,7 +1937,7 @@ td.actions-cell {
     }
     &:hover {
       background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
+      color: var(--error-text);
       border-color: rgba(239, 68, 68, 0.4);
     }
   }

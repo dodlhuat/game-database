@@ -613,7 +613,7 @@ $hero-divider: var(--divider);
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
-  color: #f87171;
+  color: var(--error-text);
   font-size: 0.875rem;
 }
 

@@ -681,7 +681,7 @@ $hero-divider: var(--divider);
     color: $hero-muted-50;
     padding-bottom: 0;
     &--error {
-      color: #f87171;
+      color: var(--error-text);
     }
   }
 }
@@ -988,7 +988,7 @@ $hero-divider: var(--divider);
   background: rgba(239, 68, 68, 0.08);
   border: 1px solid rgba(239, 68, 68, 0.25);
   border-radius: 8px;
-  color: #f87171;
+  color: var(--error-text);
   font-size: 0.875rem;
 }
 
@@ -1014,12 +1014,12 @@ $hero-divider: var(--divider);
     color: var(--accent-text);
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
     &:hover {
       border-color: rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
+      color: var(--error-text-hover);
     }
   }
   &:disabled {

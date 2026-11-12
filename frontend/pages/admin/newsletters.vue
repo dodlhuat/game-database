@@ -317,7 +317,7 @@ $hero-divider: var(--divider);
   background: rgba(34, 197, 94, 0.08);
   border: 1px solid rgba(34, 197, 94, 0.25);
   border-radius: 8px;
-  color: #4ade80;
+  color: var(--success-text);
   font-size: 0.875rem;
   .icon {
     font-size: 1.125rem;

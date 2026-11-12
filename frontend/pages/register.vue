@@ -225,7 +225,7 @@ $_muted: var(--secondary-text);
 }
 
 .error-text {
-  color: #f87171;
+  color: var(--error-text);
   font-size: 0.8rem;
   margin: 0.2rem 0 0.5rem;
 }
@@ -340,7 +340,7 @@ $_muted: var(--secondary-text);
   }
 
   &__error {
-    color: #f87171;
+    color: var(--error-text);
   }
 
   &__footer {

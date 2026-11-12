@@ -15,6 +15,15 @@
   --accent-color-muted: rgba(247, 150, 61, 0.1);
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
   --success-muted: rgba(46, 139, 87, 0.1);
+
+  // Success/error text — dark shades here so they stay readable on light
+  // backgrounds, light shades in dark mode. Use these instead of hex values.
+  --success-text: #166534;
+  --success-border: rgba(22, 101, 52, 0.3);
+  --error-text: #b91c1c;
+  --error-text-hover: #991b1b;
+  --error-muted: rgba(239, 68, 68, 0.1);
+  --error-border: rgba(239, 68, 68, 0.3);
 }
 
 // Specificity note: basix also sets --accent-color inside
@@ -33,6 +42,12 @@
   --accent-color-muted: rgba(247, 150, 61, 0.1);
   --accent-lighten-muted: rgba(247, 150, 61, 0.07);
   --success-muted: rgba(92, 198, 137, 0.1);
+  --success-text: #4ade80;
+  --success-border: rgba(74, 222, 128, 0.25);
+  --error-text: #f87171;
+  --error-text-hover: #fca5a5;
+  --error-muted: rgba(239, 68, 68, 0.1);
+  --error-border: rgba(239, 68, 68, 0.2);
 
   // Body background overrides Basix default (#111113) with our exact dark tone
   --background: #0f0e0c;

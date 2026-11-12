@@ -212,6 +212,18 @@ describe('games/[slug].vue — borrow/reserve CTA', () => {
     )
   })
 
+  it('tells admins what members pay for a reservation', async () => {
+    setUser({ role: 'ADMIN', tokens: 0 })
+
+    const wrapper = await mountGamePage({ available_copies_count: 0 })
+    const actions = wrapper.find('.gd-actions')
+
+    expect(actions.text()).toContain(wrapper.vm.$t('btn.reserve'))
+    expect(actions.text()).toContain(
+      wrapper.vm.$t('pages.game.reserve_fee_note_admin', { cost: 1 })
+    )
+  })
+
   it('asks to load tokens when the reservation fee is not covered', async () => {
     setUser({ tokens: 1, tokens_blocked: 1 })
 

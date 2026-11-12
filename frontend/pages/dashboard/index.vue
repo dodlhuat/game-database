@@ -904,10 +904,10 @@ $hero-divider-20: var(--divider);
 
     .stat-card__icon {
       background: rgba(239, 68, 68, 0.12);
-      color: #f87171;
+      color: var(--error-text);
     }
     .stat-card__value {
-      color: #f87171;
+      color: var(--error-text);
     }
   }
 
@@ -1207,7 +1207,7 @@ $hero-divider-20: var(--divider);
   border-radius: 999px;
 
   &--free {
-    color: rgb(92, 198, 137);
+    color: var(--success-text);
     background: var(--success-muted);
   }
 }
@@ -1262,7 +1262,7 @@ $hero-divider-20: var(--divider);
 }
 
 .text-warn {
-  color: #f87171;
+  color: var(--error-text);
   font-weight: 600;
 }
 
@@ -1302,13 +1302,13 @@ $hero-divider-20: var(--divider);
   }
 
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
 
     &:hover {
       border-color: rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
+      color: var(--error-text-hover);
     }
   }
 

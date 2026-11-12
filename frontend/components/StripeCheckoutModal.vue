@@ -329,7 +329,7 @@ watch(
 }
 
 .form-error {
-  color: var(--error-text, #f87171);
+  color: var(--error-text);
   font-size: 0.85rem;
   margin: -0.5rem 0 1rem;
 }

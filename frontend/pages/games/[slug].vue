@@ -215,15 +215,13 @@
             >
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#bookmark_add" /></svg
-              >{{ reserving ? $t('common.loading') : reserveLabel }}
+              >{{ reserving ? $t('pages.game.reserving') : reserveLabel }}
             </button>
             <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
               <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#toll" /></svg
               >{{ $t('btn.load_tokens') }}
             </NuxtLink>
-            <span v-if="reservationCost" class="gd-avail-note">
-              {{ $t('pages.game.reserve_fee_note', { cost: reservationCost }) }}
-            </span>
+            <span v-if="reserveFeeNote" class="gd-avail-note">{{ reserveFeeNote }}</span>
             <span v-if="game.earliest_available_at" class="gd-avail-note">
               Wieder verfügbar ab
               {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
@@ -398,6 +396,14 @@ const { data: game, pending: loading } = useAsyncData<Game | null>(`game-${slug}
 const loanCost = computed(() => game.value?.borrow_cost ?? 0)
 const reservationCost = computed(() => (auth.isAdmin ? 0 : (game.value?.reservation_cost ?? 0)))
 const canAffordReservation = computed(() => auth.freeTokens >= reservationCost.value)
+// Admins reserve for free, but still see what members pay
+const reserveFeeNote = computed(() => {
+  const memberCost = game.value?.reservation_cost ?? 0
+  if (!memberCost) return ''
+  return auth.isAdmin
+    ? t('pages.game.reserve_fee_note_admin', { cost: memberCost })
+    : t('pages.game.reserve_fee_note', { cost: memberCost })
+})
 const reserveLabel = computed(() =>
   reservationCost.value ? t('btn.reserve_game', { cost: reservationCost.value }) : t('btn.reserve')
 )
@@ -992,7 +998,7 @@ $bar-h: 72px;
     background: $amber-dim;
   }
   &--avail {
-    color: #4ade80;
+    color: var(--success-text);
     border-color: rgba(74, 222, 128, 0.32);
     background: rgba(74, 222, 128, 0.1);
   }
@@ -1392,15 +1398,15 @@ $bar-h: 72px;
   font-weight: 500;
 
   &--success {
-    background: rgba(22, 101, 52, 0.15);
-    color: #86efac;
-    border: 1px solid rgba(22, 101, 52, 0.3);
+    background: var(--success-muted);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
   }
 
   &--error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #fca5a5;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: var(--error-muted);
+    color: var(--error-text);
+    border: 1px solid var(--error-border);
   }
 }
 
@@ -1534,12 +1540,12 @@ $bar-h: 72px;
     text-align: center;
 
     &--success {
-      color: #86efac;
-      background: rgba(22, 101, 52, 0.15);
+      color: var(--success-text);
+      background: var(--success-muted);
     }
     &--error {
-      color: #fca5a5;
-      background: rgba(239, 68, 68, 0.1);
+      color: var(--error-text);
+      background: var(--error-muted);
     }
   }
 }

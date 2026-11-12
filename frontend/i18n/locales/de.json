@@ -33,8 +33,8 @@
     "to_packages": "Zur Paketübersicht",
     "borrow_game": "Jetzt ausleihen ({cost} Token)",
     "borrow_package": "Paket ausleihen ({cost} Token)",
-    "reserve": "Vormerken",
-    "reserve_game": "Vormerken ({cost} Token)",
+    "reserve": "Reservieren",
+    "reserve_game": "Reservieren ({cost} Token)",
     "load_tokens": "Aufladen",
     "buy": "Kaufen",
     "extend": "Verlängern",
@@ -86,7 +86,7 @@
       "condition_damaged": "Beschädigt",
       "condition_locked": "Gesperrt"
     },
-    "loading": "Wird vorgemerkt…",
+    "loading": "Lädt…",
     "error": {
       "not_found": "Seite nicht gefunden",
       "not_found_desc": "Die aufgerufene Seite existiert nicht.",
@@ -351,7 +351,9 @@
       "reserve_success": "Du wurdest auf die Warteliste gesetzt.",
       "reserve_success_paid": "Du wurdest auf die Warteliste gesetzt. {cost} Token wurden abgebucht.",
       "reserve_fee_note": "Reservieren kostet {cost} Token, bei Stornierung gibt es keine Rückerstattung.",
-      "reserve_failed": "Vormerken fehlgeschlagen.",
+      "reserve_fee_note_admin": "Mitglieder zahlen fürs Reservieren {cost} Token, für dich als Admin ist es kostenlos.",
+      "reserve_failed": "Reservieren fehlgeschlagen.",
+      "reserving": "Wird reserviert…",
       "instagram_view": "Auf Instagram ansehen"
     },
     "packages": {

@@ -355,7 +355,7 @@ $hero-divider: var(--divider);
     color: var(--accent-text);
   }
   &--success {
-    color: #4ade80;
+    color: var(--success-text);
     border-color: rgba(34, 197, 94, 0.25);
     background: rgba(34, 197, 94, 0.06);
     &:hover {
@@ -363,7 +363,7 @@ $hero-divider: var(--divider);
     }
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
     &:hover {

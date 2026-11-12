@@ -455,7 +455,7 @@ $hero-divider: var(--divider);
   min-height: 200px;
 }
 .load-error {
-  color: #f87171;
+  color: var(--error-text);
   font-size: 0.9rem;
   font-weight: 500;
   padding-bottom: 0;
@@ -552,7 +552,7 @@ $hero-divider: var(--divider);
 }
 .form-error {
   font-size: 0.85rem;
-  color: #f87171;
+  color: var(--error-text);
   margin: 0;
   padding-bottom: 0;
 }
@@ -560,7 +560,7 @@ $hero-divider: var(--divider);
 .save-success {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4ade80;
+  color: var(--success-text);
 }
 
 .preview-list {

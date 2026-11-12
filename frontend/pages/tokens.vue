@@ -848,10 +848,10 @@ $border-amber: rgba(212, 146, 30, 0.4);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   &--pos {
-    color: var(--success-text, #4ade80);
+    color: var(--success-text);
   }
   &--neg {
-    color: var(--error-text, #f87171);
+    color: var(--error-text);
   }
 }
 

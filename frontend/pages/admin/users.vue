@@ -267,7 +267,9 @@
                   <td>{{ tx.description ?? tx.type }}</td>
                   <td
                     style="text-align: right; font-weight: 700"
-                    :style="tx.amount >= 0 ? 'color:#4ade80' : 'color:#f87171'"
+                    :style="
+                      tx.amount >= 0 ? 'color:var(--success-text)' : 'color:var(--error-text)'
+                    "
                   >
                     {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount }}
                   </td>
@@ -749,7 +751,7 @@ $hero-divider: var(--divider);
     color: var(--accent-text);
   }
   &--success {
-    color: #4ade80;
+    color: var(--success-text);
     border-color: rgba(34, 197, 94, 0.25);
     background: rgba(34, 197, 94, 0.06);
     &:hover {
@@ -757,12 +759,12 @@ $hero-divider: var(--divider);
     }
   }
   &--danger {
-    color: #f87171;
+    color: var(--error-text);
     border-color: rgba(239, 68, 68, 0.25);
     background: rgba(239, 68, 68, 0.05);
     &:hover {
       border-color: rgba(239, 68, 68, 0.5);
-      color: #fca5a5;
+      color: var(--error-text-hover);
     }
   }
   &:disabled {
@@ -866,7 +868,7 @@ $hero-divider: var(--divider);
 }
 .form-error {
   font-size: 0.85rem;
-  color: #f87171;
+  color: var(--error-text);
   margin: 0;
   padding-bottom: 0;
 }

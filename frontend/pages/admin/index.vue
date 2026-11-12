@@ -572,7 +572,7 @@ $hero-div: var(--divider);
       background: #f87171;
     }
     .attention-item__text strong {
-      color: #f87171;
+      color: var(--error-text);
     }
     .attention-item__arrow {
       color: rgba(239, 68, 68, 0.5);
@@ -635,7 +635,7 @@ $hero-div: var(--divider);
       background: #ef4444;
     }
     .ops-card__value {
-      color: #f87171;
+      color: var(--error-text);
     }
   }
 
@@ -699,7 +699,7 @@ $hero-div: var(--divider);
     font-size: 0.7rem;
     color: var(--secondary-text);
     &--red {
-      color: #f87171;
+      color: var(--error-text);
     }
   }
 }
