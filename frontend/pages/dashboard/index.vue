@@ -183,6 +183,31 @@
                       <span :class="{ 'text-warn': loan.status === 'OVERDUE' }">
                         {{ formatDate(loan.due_date) }}
                       </span>
+                      <span
+                        v-if="loan.max_extensions"
+                        class="ext-meter"
+                        :aria-label="
+                          $t('dashboard.extension_meter', {
+                            used: loan.extensions_used ?? 0,
+                            max: loan.max_extensions,
+                          })
+                        "
+                      >
+                        <span class="ext-meter__pips" aria-hidden="true">
+                          <i
+                            v-for="n in loan.max_extensions"
+                            :key="n"
+                            class="ext-meter__pip"
+                            :class="{ 'ext-meter__pip--used': n <= (loan.extensions_used ?? 0) }"
+                          />
+                        </span>
+                        {{
+                          $t('dashboard.extension_meter', {
+                            used: loan.extensions_used ?? 0,
+                            max: loan.max_extensions,
+                          })
+                        }}
+                      </span>
                     </td>
                     <td :data-label="$t('dashboard.table.actions')">
                       <div class="action-row">
@@ -192,6 +217,11 @@
                           </span>
                           <button v-else class="action-btn" @click="openExtension(loan)">
                             {{ $t('btn.extend') }}
+                            <span
+                              class="action-btn__price"
+                              :class="{ 'action-btn__price--free': !loan.next_extension_cost }"
+                              >{{ extensionCostLabel(loan) }}</span
+                            >
                           </button>
                         </template>
                         <button class="action-btn" @click="openReturn(loan)">
@@ -248,6 +278,7 @@
                   </tr>
                 </tbody>
               </table>
+              <p class="dash-hint">{{ $t('dashboard.reservation_fee_note') }}</p>
             </div>
           </section>
 
@@ -439,6 +470,9 @@
           <p v-if="extensionLoan.next_extension_cost" class="extension-cost__hint">
             {{ $t('dashboard.extension_cost_hint') }}
           </p>
+          <p v-if="extensionLoan.max_extensions" class="extension-round">
+            {{ extensionRoundLabel(extensionLoan) }}
+          </p>
           <UiDatePicker
             v-model="extensionDate"
             :label="$t('dashboard.extension_new_due_date')"
@@ -509,35 +543,16 @@ const damagePhotoPreviewUrl = computed(() =>
 )
 const reporting = ref(false)
 
-// Both bounds are offsets from the same floor — whichever is later, "today"
-// or the loan's current due date — so min (floor+1) is always exactly 13
-// days before max (floor+14) and can never end up past it. Anchoring max to
-// "today+14" alone (regardless of the loan) could put it *before* min
-// whenever a loan's due date is already more than ~13 days out, disabling
-// every day in the picker.
-const extensionFloor = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+// The backend owns the allowed window (it depends on the loan duration setting),
+// so the picker just mirrors it.
+const minExtensionDate = computed(() =>
+  toLocalDate(extensionLoan.value?.extension_earliest_due_date)
+)
+const maxExtensionDate = computed(() => toLocalDate(extensionLoan.value?.extension_latest_due_date))
 
-  if (!extensionLoan.value) return today
-
-  const due = new Date(extensionLoan.value.due_date)
-  due.setHours(0, 0, 0, 0)
-
-  return due > today ? due : today
-})
-
-const minExtensionDate = computed(() => {
-  const d = new Date(extensionFloor.value)
-  d.setDate(d.getDate() + 1)
-  return d
-})
-
-const maxExtensionDate = computed(() => {
-  const d = new Date(extensionFloor.value)
-  d.setDate(d.getDate() + 14)
-  return d
-})
+function toLocalDate(iso?: string) {
+  return iso ? new Date(`${iso}T00:00:00`) : undefined
+}
 
 const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
 const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
@@ -649,8 +664,18 @@ async function handleLogout() {
 
 function extensionNote(loan: Loan) {
   if (loan.extension_blocked_reason === 'reserved') return t('dashboard.extension_reserved')
-  if (loan.extension_blocked_reason === 'max_reached') return t('dashboard.extension_max_reached')
+  if (loan.extension_blocked_reason === 'max_reached') {
+    return t('dashboard.extension_max_reached', { n: loan.max_extensions ?? 0 })
+  }
   return ''
+}
+
+function extensionRoundLabel(loan: Loan) {
+  const next = (loan.extensions_used ?? 0) + 1
+  const max = loan.max_extensions ?? 0
+  return next >= max
+    ? t('dashboard.extension_last', { n: next, max })
+    : t('dashboard.extension_round', { n: next, max })
 }
 
 function extensionCostLabel(loan: Loan) {
@@ -1143,6 +1168,56 @@ $hero-divider-20: var(--divider);
   color: var(--accent-color);
 }
 
+.ext-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--secondary-text);
+  white-space: nowrap;
+
+  &__pips {
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  &__pip {
+    width: 0.5rem;
+    height: 0.5rem;
+    border: 1px solid rgba(212, 146, 30, 0.55);
+    border-radius: 50%;
+    transition:
+      background 0.2s ease,
+      transform 0.2s ease;
+
+    &--used {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+  }
+}
+
+.action-btn__price {
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  background: rgba(212, 146, 30, 0.12);
+  border-radius: 999px;
+
+  &--free {
+    color: rgb(92, 198, 137);
+    background: var(--success-muted);
+  }
+}
+
+.dash-hint {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  color: var(--secondary-text);
+}
+
 .extension-cost {
   display: flex;
   align-items: baseline;
@@ -1165,6 +1240,13 @@ $hero-divider-20: var(--divider);
     font-size: 0.8rem;
     color: var(--secondary-text);
   }
+}
+
+.extension-round {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--secondary-text);
 }
 
 .queue-badge {

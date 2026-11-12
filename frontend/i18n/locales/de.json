@@ -34,6 +34,7 @@
     "borrow_game": "Jetzt ausleihen ({cost} Token)",
     "borrow_package": "Paket ausleihen ({cost} Token)",
     "reserve": "Vormerken",
+    "reserve_game": "Vormerken ({cost} Token)",
     "load_tokens": "Aufladen",
     "buy": "Kaufen",
     "extend": "Verlängern",
@@ -235,7 +236,11 @@
     "extension_cost_hint": "Die Token werden sofort abgebucht.",
     "extension_free": "Kostenlos",
     "extension_reserved": "Reserviert: Dieses Spiel kann nicht verlängert werden, weil jemand darauf wartet.",
-    "extension_max_reached": "Dieses Spiel wurde bereits zweimal verlängert und kann nicht weiter verlängert werden.",
+    "extension_max_reached": "Bereits {n}-mal verlängert. Eine weitere Verlängerung ist erst nach Rückgabe und neuer Ausleihe möglich.",
+    "extension_meter": "{used} von {max} Verlängerungen",
+    "extension_round": "Das ist deine {n}. von {max} Verlängerungen.",
+    "extension_last": "Das ist deine letzte Verlängerung ({n} von {max}). Danach ist eine weitere Verlängerung erst nach Rückgabe und neuer Ausleihe möglich.",
+    "reservation_fee_note": "Die Reservierungsgebühr wird bei Stornierung nicht erstattet.",
     "cancel_reservation": "Stornieren",
     "footer_settings": "Konto-Einstellungen",
     "footer_logout": "Abmelden"
@@ -344,6 +349,8 @@
         "deposit_label": "Kaution ({n} Token wird gesperrt)"
       },
       "reserve_success": "Du wurdest auf die Warteliste gesetzt.",
+      "reserve_success_paid": "Du wurdest auf die Warteliste gesetzt. {cost} Token wurden abgebucht.",
+      "reserve_fee_note": "Reservieren kostet {cost} Token, bei Stornierung gibt es keine Rückerstattung.",
       "reserve_failed": "Vormerken fehlgeschlagen.",
       "instagram_view": "Auf Instagram ansehen"
     },
@@ -437,7 +444,8 @@
       "cost_game": "{small} / {medium} / {large} Token: Spiel ausleihen (klein / mittel / groß)",
       "cost_deposit": "Kaution: Wird bei Ausleihe gesperrt und nach Rückgabe freigegeben",
       "cost_package": "{cost} Token: Paket ausleihen",
-      "cost_extension": "Verlängern: bis zu zweimal pro Spiel, die erste Verlängerung gratis, die zweite {cost} Token. Nicht möglich, wenn das Spiel reserviert ist",
+      "cost_extension": "Verlängern: bis zu {max}-mal pro Ausleihe, die erste Verlängerung gratis, jede weitere {cost} Token. Nicht möglich, wenn das Spiel reserviert ist",
+      "cost_reservation": "{cost} Token: Spiel reservieren (wird bei Stornierung nicht erstattet)",
       "history_title": "Transaktionsverlauf",
       "history_empty": "Noch keine Transaktionen vorhanden.",
       "tx_borrow": "Ausleihe",
@@ -449,7 +457,8 @@
       "tx_bonus_grant": "Bonus-Token erhalten",
       "tx_bonus_expire": "Bonus-Token verfallen",
       "tx_refund": "Rückerstattung",
-      "tx_extension": "Verlängerung"
+      "tx_extension": "Verlängerung",
+      "tx_reservation": "Reservierung"
     }
   },
   "admin": {
@@ -720,7 +729,7 @@
       "grace_days": "Vorlauf (Tage)",
       "grace_days_hint": "Wie viele Tage vor einem Termin dieser noch wählbar ist.",
       "loan_duration_weeks": "Ausleihdauer (Wochen)",
-      "loan_duration_weeks_hint": "Anzahl Wochen bis zum Rückgabedatum.",
+      "loan_duration_weeks_hint": "Anzahl Wochen bis zum Rückgabedatum. Gilt auch als maximale Dauer einer einzelnen Verlängerung.",
       "max_extensions": "Max. Verlängerungen pro Ausleihe",
       "max_extensions_hint": "Wie oft eine Ausleihe maximal verlängert werden darf (0 = keine Verlängerung möglich).",
       "save_btn": "Einstellungen speichern",
@@ -737,6 +746,8 @@
       "package_loan_cost_hint": "Fixer Preis pro Paket, unabhängig von den enthaltenen Spielen.",
       "extension_cost": "Kosten der zweiten Verlängerung (Token)",
       "extension_cost_hint": "Die erste Verlängerung pro Ausleihe ist gratis, ab der zweiten gilt dieser Betrag.",
+      "reservation_cost": "Kosten einer Reservierung (Token)",
+      "reservation_cost_hint": "Wird beim Reservieren abgebucht und bei Stornierung nicht erstattet.",
       "condition_section": "Zustandsschwellen & Kaution",
       "condition_very_good_after": "Sehr gut ab (Ausleihen)",
       "condition_very_good_after_hint": "Ab wie vielen Ausleihen gilt eine Kopie als 'Sehr gut'.",

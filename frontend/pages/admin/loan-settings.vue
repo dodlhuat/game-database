@@ -137,6 +137,17 @@
                   />
                   <p class="form-hint">{{ $t('admin.loan_settings.extension_cost_hint') }}</p>
                 </div>
+                <div class="form-field">
+                  <label class="form-label">{{ $t('admin.loan_settings.reservation_cost') }}</label>
+                  <input
+                    v-model.number="form.reservation_cost"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    required
+                  />
+                  <p class="form-hint">{{ $t('admin.loan_settings.reservation_cost_hint') }}</p>
+                </div>
               </div>
 
               <div class="settings-section-title">
@@ -269,6 +280,7 @@ const form = ref<LoanSettings>({
   loan_cost_large: 10,
   package_loan_cost: 3,
   extension_cost: 2,
+  reservation_cost: 1,
   condition_very_good_after: 5,
   condition_good_after: 50,
   deposit_pct_very_good: 90,
@@ -314,6 +326,7 @@ onMounted(async () => {
       loan_cost_large: data.loan_cost_large,
       package_loan_cost: data.package_loan_cost,
       extension_cost: data.extension_cost,
+      reservation_cost: data.reservation_cost,
       condition_very_good_after: data.condition_very_good_after ?? 5,
       condition_good_after: data.condition_good_after ?? 50,
       deposit_pct_very_good: data.deposit_pct_very_good ?? 90,
@@ -344,6 +357,7 @@ async function save() {
       loan_cost_large: data.loan_cost_large,
       package_loan_cost: data.package_loan_cost,
       extension_cost: data.extension_cost,
+      reservation_cost: data.reservation_cost,
       condition_very_good_after: data.condition_very_good_after ?? 5,
       condition_good_after: data.condition_good_after ?? 50,
       deposit_pct_very_good: data.deposit_pct_very_good ?? 90,

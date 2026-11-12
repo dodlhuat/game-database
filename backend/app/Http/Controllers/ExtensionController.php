@@ -85,7 +85,8 @@ class ExtensionController extends Controller
         return match ($this->policy->blockReason($loan, $setting)) {
             ExtensionPolicy::BLOCK_NOT_EXTENDABLE => response()->json(['message' => 'Diese Ausleihe kann nicht verlängert werden.'], 422),
             ExtensionPolicy::BLOCK_MAX_REACHED => response()->json([
-                'message' => 'Dieses Spiel wurde bereits zweimal verlängert und kann nicht weiter verlängert werden.',
+                'message' => "Dieses Spiel wurde bereits {$setting->max_extensions}-mal verlängert. "
+                    .'Eine weitere Verlängerung ist erst möglich, wenn du es zurückgibst und neu ausborgst.',
                 'reason' => 'max_extensions_reached',
             ], 422),
             ExtensionPolicy::BLOCK_RESERVED => response()->json([

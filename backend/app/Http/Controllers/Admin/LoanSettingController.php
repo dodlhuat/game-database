@@ -27,6 +27,7 @@ class LoanSettingController extends Controller
             'loan_cost_large' => ['required', 'integer', 'min:0'],
             'package_loan_cost' => ['required', 'integer', 'min:0'],
             'extension_cost' => ['required', 'integer', 'min:0'],
+            'reservation_cost' => ['required', 'integer', 'min:0'],
             'condition_very_good_after' => ['required', 'integer', 'min:1'],
             'condition_good_after' => ['required', 'integer', 'min:1'],
             'deposit_pct_very_good' => ['required', 'integer', 'min:0', 'max:100'],

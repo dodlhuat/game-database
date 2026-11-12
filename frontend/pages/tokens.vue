@@ -116,7 +116,15 @@
                   }}
                 </li>
                 <li>{{ $t('pages.tokens.cost_package', { cost: costs.package_loan_cost }) }}</li>
-                <li>{{ $t('pages.tokens.cost_extension', { cost: costs.extension_cost }) }}</li>
+                <li>
+                  {{
+                    $t('pages.tokens.cost_extension', {
+                      cost: costs.extension_cost,
+                      max: costs.max_extensions,
+                    })
+                  }}
+                </li>
+                <li>{{ $t('pages.tokens.cost_reservation', { cost: costs.reservation_cost }) }}</li>
               </template>
               <li>{{ $t('pages.tokens.cost_deposit') }}</li>
             </ul>
@@ -307,6 +315,7 @@ const TX_LABELS: Record<string, string> = {
   BONUS_EXPIRE: 'pages.tokens.tx_bonus_expire',
   REFUND: 'pages.tokens.tx_refund',
   EXTENSION: 'pages.tokens.tx_extension',
+  RESERVATION: 'pages.tokens.tx_reservation',
 }
 const TX_CLASSES: Record<string, string> = {
   BORROW: 'badge-error',

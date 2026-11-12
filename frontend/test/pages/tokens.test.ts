@@ -186,6 +186,8 @@ describe('tokens.vue', () => {
             loan_cost_large: 10,
             package_loan_cost: 4,
             extension_cost: 2,
+            max_extensions: 2,
+            reservation_cost: 1,
           }
         : { data: [] }
     )
@@ -196,6 +198,8 @@ describe('tokens.vue', () => {
 
     expect(costs).toContain('3 / 6 / 10 Token')
     expect(costs).toContain('4 Token: Paket ausleihen')
-    expect(costs).toContain('die zweite 2 Token')
+    expect(costs).toContain('bis zu 2-mal pro Ausleihe')
+    expect(costs).toContain('jede weitere 2 Token')
+    expect(costs).toContain('1 Token: Spiel reservieren')
   })
 })

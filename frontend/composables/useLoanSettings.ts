@@ -9,6 +9,7 @@ export interface LoanSettings {
   loan_cost_large: number
   package_loan_cost: number
   extension_cost: number
+  reservation_cost: number
   condition_very_good_after: number
   condition_good_after: number
   deposit_pct_very_good: number

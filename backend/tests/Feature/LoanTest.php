@@ -286,7 +286,7 @@ class LoanTest extends TestCase
         $this->extend($user, $loan->fresh())
             ->assertStatus(422)
             ->assertJsonPath('reason', 'max_extensions_reached')
-            ->assertJsonPath('message', 'Dieses Spiel wurde bereits zweimal verlängert und kann nicht weiter verlängert werden.');
+            ->assertJsonPath('message', 'Dieses Spiel wurde bereits 2-mal verlängert. Eine weitere Verlängerung ist erst möglich, wenn du es zurückgibst und neu ausborgst.');
 
         $this->assertSame(3, $user->fresh()->tokens);
     }
@@ -300,6 +300,32 @@ class LoanTest extends TestCase
         $this->extend($user, $loan, $loan->due_date->toDateString())->assertStatus(422);
         $this->extend($user, $loan, $loan->due_date->copy()->addDays(15)->toDateString())->assertStatus(422);
         $this->extend($user, $loan, $loan->due_date->copy()->addDays(14)->toDateString())->assertCreated();
+    }
+
+    public function test_max_extensions_message_follows_the_setting(): void
+    {
+        LoanSetting::factory()->create(['max_extensions' => 1]);
+        $user = $this->makeMember(5);
+        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
+
+        $this->extend($user, $loan)->assertCreated();
+
+        $this->extend($user, $loan->fresh())
+            ->assertStatus(422)
+            ->assertJsonPath('reason', 'max_extensions_reached')
+            ->assertJsonPath('message', fn (string $message) => str_contains($message, 'bereits 1-mal verlängert'));
+    }
+
+    public function test_extension_length_follows_the_loan_duration_setting(): void
+    {
+        LoanSetting::factory()->create(['loan_duration_weeks' => 3]);
+        $user = $this->makeMember(5);
+        $loan = Loan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
+
+        $this->extend($user, $loan, $loan->due_date->copy()->addDays(22)->toDateString())
+            ->assertStatus(422)
+            ->assertJsonPath('errors.requested_due_date.0', 'Eine Verlängerung ist um maximal 3 Wochen möglich.');
+        $this->extend($user, $loan, $loan->due_date->copy()->addDays(21)->toDateString())->assertCreated();
     }
 
     public function test_overdue_loan_is_extended_from_today(): void
@@ -343,6 +369,12 @@ class LoanTest extends TestCase
         $this->assertSame(2, $loans[$paid->id]['next_extension_cost']);
         $this->assertFalse($loans[$reserved->id]['can_extend']);
         $this->assertSame('reserved', $loans[$reserved->id]['extension_blocked_reason']);
+
+        $this->assertSame(0, $loans[$free->id]['extensions_used']);
+        $this->assertSame(1, $loans[$paid->id]['extensions_used']);
+        $this->assertSame(2, $loans[$paid->id]['max_extensions']);
+        $this->assertSame($free->due_date->copy()->addDay()->toDateString(), $loans[$free->id]['extension_earliest_due_date']);
+        $this->assertSame($free->due_date->copy()->addWeeks(2)->toDateString(), $loans[$free->id]['extension_latest_due_date']);
     }
 
     private function extendedLoan(User $user): Loan

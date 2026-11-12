@@ -3969,6 +3969,10 @@
                                         "type": "integer",
                                         "minimum": 0
                                     },
+                                    "reservation_cost": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
                                     "condition_very_good_after": {
                                         "type": "integer",
                                         "minimum": 1
@@ -3999,6 +4003,7 @@
                                     "loan_cost_large",
                                     "package_loan_cost",
                                     "extension_cost",
+                                    "reservation_cost",
                                     "condition_very_good_after",
                                     "condition_good_after",
                                     "deposit_pct_very_good",
@@ -6465,6 +6470,57 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    },
+                    "402": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "reason": {
+                                            "type": "string",
+                                            "const": "insufficient_tokens"
+                                        },
+                                        "reservation_cost": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "reason",
+                                        "reservation_cost"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Eine aktive Mitgliedschaft ist erforderlich um Spiele zu reservieren."
+                                        },
+                                        "reason": {
+                                            "type": "string",
+                                            "const": "membership_required"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "reason"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -9017,6 +9073,9 @@
                     "borrow_cost": {
                         "type": "integer"
                     },
+                    "reservation_cost": {
+                        "type": "integer"
+                    },
                     "cover_image_url": {
                         "type": [
                             "string",
@@ -9115,6 +9174,7 @@
                     "deposit_tokens",
                     "size_category",
                     "borrow_cost",
+                    "reservation_cost",
                     "cover_image_url",
                     "is_active",
                     "created_at"
@@ -9243,6 +9303,18 @@
                     "next_extension_cost": {
                         "type": "integer"
                     },
+                    "extensions_used": {
+                        "type": "integer"
+                    },
+                    "max_extensions": {
+                        "type": "integer"
+                    },
+                    "extension_earliest_due_date": {
+                        "type": "string"
+                    },
+                    "extension_latest_due_date": {
+                        "type": "string"
+                    },
                     "created_at": {
                         "type": [
                             "string",
@@ -9302,6 +9374,9 @@
                     "extension_cost": {
                         "type": "integer"
                     },
+                    "reservation_cost": {
+                        "type": "integer"
+                    },
                     "condition_very_good_after": {
                         "type": "integer"
                     },
@@ -9341,6 +9416,7 @@
                     "loan_cost_large",
                     "package_loan_cost",
                     "extension_cost",
+                    "reservation_cost",
                     "condition_very_good_after",
                     "condition_good_after",
                     "deposit_pct_very_good",

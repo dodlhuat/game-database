@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\ExtensionPolicy;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use LogicException;
 
 /** @mixin Loan */
 class LoanResource extends JsonResource
@@ -43,8 +44,44 @@ class LoanResource extends JsonResource
             'can_extend' => $this->when($hasExtensions, fn () => $this->extensionBlockReason($request) === null),
             'extension_blocked_reason' => $this->when($hasExtensions, fn () => $this->extensionBlockReason($request)),
             'next_extension_cost' => $this->when($hasExtensions, fn () => $this->nextExtensionCost($request)),
+            'extensions_used' => $this->when($hasExtensions, fn () => $this->extensionsUsed()),
+            'max_extensions' => $this->when($hasExtensions, fn () => $this->maxExtensions($request)),
+            'extension_earliest_due_date' => $this->when($hasExtensions, fn () => $this->extensionEarliestDueDate()),
+            'extension_latest_due_date' => $this->when($hasExtensions, fn () => $this->extensionLatestDueDate($request)),
             'created_at' => $this->created_at,
         ];
+    }
+
+    private function extensionsUsed(): int
+    {
+        return app(ExtensionPolicy::class)->used($this->loan());
+    }
+
+    private function maxExtensions(Request $request): int
+    {
+        return LoanSetting::forRequest($request)->max_extensions;
+    }
+
+    /** First date the extension endpoint accepts, so the date picker never offers more. */
+    private function extensionEarliestDueDate(): string
+    {
+        return ExtensionPolicy::earliestBase($this->loan())->addDay()->toDateString();
+    }
+
+    /** Last date the extension endpoint accepts. */
+    private function extensionLatestDueDate(Request $request): string
+    {
+        return ExtensionPolicy::latestDueDate($this->loan(), LoanSetting::forRequest($request))->toDateString();
+    }
+
+    private function loan(): Loan
+    {
+        $loan = $this->resource;
+        if (! $loan instanceof Loan) {
+            throw new LogicException('LoanResource wraps a '.get_debug_type($loan).' instead of a Loan.');
+        }
+
+        return $loan;
     }
 
     private function extensionBlockReason(Request $request): ?string

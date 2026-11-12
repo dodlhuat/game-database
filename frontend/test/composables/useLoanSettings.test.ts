@@ -39,6 +39,7 @@ const baseSettings: LoanSettings = {
   loan_cost_large: 10,
   package_loan_cost: 3,
   extension_cost: 2,
+  reservation_cost: 1,
   condition_very_good_after: 5,
   condition_good_after: 10,
   deposit_pct_very_good: 0,

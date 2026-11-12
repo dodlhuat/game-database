@@ -29,6 +29,10 @@ export interface Loan {
   can_extend?: boolean
   extension_blocked_reason?: 'not_extendable' | 'max_reached' | 'reserved' | null
   next_extension_cost?: number
+  extensions_used?: number
+  max_extensions?: number
+  extension_earliest_due_date?: string
+  extension_latest_due_date?: string
 }
 
 export interface TokenTransaction {
@@ -45,6 +49,7 @@ export interface TokenTransaction {
     | 'BONUS_EXPIRE'
     | 'REFUND'
     | 'EXTENSION'
+    | 'RESERVATION'
   amount: number
   description: string | null
   created_at: string

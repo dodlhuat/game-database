@@ -76,6 +76,7 @@ const baseGame: Game = {
   deposit_tokens: 0,
   size_category: 'MEDIUM',
   borrow_cost: 6,
+  reservation_cost: 1,
   cover_image_url: null,
   available_copies_count: 1,
   copies_count: 1,
@@ -192,19 +193,33 @@ describe('games/[slug].vue — borrow/reserve CTA', () => {
     expect(small.text()).toContain('Klein · 3 Token')
   })
 
-  it('shows a reserve button when no copies are available, and reserving shows a success status', async () => {
-    setUser({})
+  it('shows the reservation fee, charges it and confirms the reservation', async () => {
+    const auth = setUser({ tokens: 10 })
     addReservationMock.mockResolvedValue({})
 
     const wrapper = await mountGamePage({ available_copies_count: 0 })
     const actions = wrapper.find('.gd-actions')
-    expect(actions.text()).toContain(wrapper.vm.$t('btn.reserve'))
+    expect(actions.text()).toContain(wrapper.vm.$t('btn.reserve_game', { cost: 1 }))
+    expect(actions.text()).toContain(wrapper.vm.$t('pages.game.reserve_fee_note', { cost: 1 }))
 
     await actions.find('button').trigger('click')
     await flushPromises()
 
     expect(addReservationMock).toHaveBeenCalledWith(baseGame.id)
-    expect(wrapper.find('.gd-reserve-status--success').exists()).toBe(true)
+    expect(auth.user?.tokens).toBe(9)
+    expect(wrapper.find('.gd-reserve-status--success').text()).toBe(
+      wrapper.vm.$t('pages.game.reserve_success_paid', { cost: 1 })
+    )
+  })
+
+  it('asks to load tokens when the reservation fee is not covered', async () => {
+    setUser({ tokens: 1, tokens_blocked: 1 })
+
+    const wrapper = await mountGamePage({ available_copies_count: 0 })
+    const actions = wrapper.find('.gd-actions')
+
+    expect(actions.text()).toContain(wrapper.vm.$t('btn.load_tokens'))
+    expect(actions.findAll('button')).toHaveLength(0)
   })
 
   it('shows an error status when reserving fails', async () => {

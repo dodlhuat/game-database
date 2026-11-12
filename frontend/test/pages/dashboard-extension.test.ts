@@ -32,6 +32,10 @@ function loan(overrides: Partial<Loan> = {}): Loan {
     can_extend: true,
     extension_blocked_reason: null,
     next_extension_cost: 0,
+    extensions_used: 0,
+    max_extensions: 2,
+    extension_earliest_due_date: '2026-11-30',
+    extension_latest_due_date: '2026-12-13',
     ...overrides,
   } as Loan
 }
@@ -72,7 +76,7 @@ async function mountDashboard(active: Loan[]) {
 }
 
 const extendButton = (wrapper: Awaited<ReturnType<typeof mountDashboard>>) =>
-  wrapper.findAll('.action-btn').find((b) => b.text() === wrapper.vm.$t('btn.extend'))
+  wrapper.findAll('.action-btn').find((b) => b.text().startsWith(wrapper.vm.$t('btn.extend')))
 
 describe('dashboard — extending a loan', () => {
   beforeEach(() => {
@@ -98,13 +102,14 @@ describe('dashboard — extending a loan', () => {
 
   it('shows when the maximum number of extensions is reached', async () => {
     const wrapper = await mountDashboard([
-      loan({ can_extend: false, extension_blocked_reason: 'max_reached' }),
+      loan({ can_extend: false, extension_blocked_reason: 'max_reached', extensions_used: 2 }),
     ])
 
     expect(extendButton(wrapper)).toBeUndefined()
     expect(wrapper.find('.extension-note').text()).toBe(
-      wrapper.vm.$t('dashboard.extension_max_reached')
+      wrapper.vm.$t('dashboard.extension_max_reached', { n: 2 })
     )
+    expect(wrapper.findAll('.ext-meter__pip--used')).toHaveLength(2)
   })
 
   it('shows the first extension as free', async () => {
@@ -140,5 +145,46 @@ describe('dashboard — extending a loan', () => {
 
     expect(wrapper.find('.extension-cost').text()).toContain('2 Token')
     expect(wrapper.find('.extension-cost__hint').exists()).toBe(true)
+  })
+
+  it('shows the price on the button and how many extensions are used', async () => {
+    const wrapper = await mountDashboard([
+      loan({ status: 'EXTENDED', extensions_used: 1, next_extension_cost: 2 }),
+    ])
+
+    expect(extendButton(wrapper)!.find('.action-btn__price').text()).toBe('2 Token')
+    expect(wrapper.find('.ext-meter').text()).toContain(
+      wrapper.vm.$t('dashboard.extension_meter', { used: 1, max: 2 })
+    )
+    expect(wrapper.findAll('.ext-meter__pip')).toHaveLength(2)
+    expect(wrapper.findAll('.ext-meter__pip--used')).toHaveLength(1)
+  })
+
+  it('marks the first extension as free on the button', async () => {
+    const wrapper = await mountDashboard([loan()])
+
+    const price = extendButton(wrapper)!.find('.action-btn__price')
+    expect(price.text()).toBe(wrapper.vm.$t('dashboard.extension_free'))
+    expect(price.classes()).toContain('action-btn__price--free')
+  })
+
+  it('warns in the dialog that the second extension is the last one', async () => {
+    const wrapper = await mountDashboard([
+      loan({ status: 'EXTENDED', extensions_used: 1, next_extension_cost: 2 }),
+    ])
+
+    await extendButton(wrapper)!.trigger('click')
+
+    expect(wrapper.text()).toContain(wrapper.vm.$t('dashboard.extension_last', { n: 2, max: 2 }))
+  })
+
+  it('limits the date picker to the window sent by the backend', async () => {
+    const wrapper = await mountDashboard([loan()])
+
+    await extendButton(wrapper)!.trigger('click')
+
+    const vm = wrapper.vm as unknown as { minExtensionDate: Date; maxExtensionDate: Date }
+    expect(vm.minExtensionDate.toDateString()).toBe(new Date('2026-11-30T00:00:00').toDateString())
+    expect(vm.maxExtensionDate.toDateString()).toBe(new Date('2026-12-13T00:00:00').toDateString())
   })
 })

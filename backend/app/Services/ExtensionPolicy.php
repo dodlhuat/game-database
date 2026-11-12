@@ -28,13 +28,25 @@ class ExtensionPolicy
         return $loan->due_date->isFuture() ? $loan->due_date->copy() : today();
     }
 
+    /** One extension adds at most one regular loan period. */
+    public static function latestDueDate(Loan $loan, LoanSetting $setting): Carbon
+    {
+        return self::earliestBase($loan)->addWeeks($setting->loan_duration_weeks);
+    }
+
+    /** Extensions that count against `max_extensions`. Closed legacy requests (REJECTED) do not. */
+    public function used(Loan $loan): int
+    {
+        return $loan->extensions->where('status', '!=', 'REJECTED')->count();
+    }
+
     public function blockReason(Loan $loan, LoanSetting $setting): ?string
     {
         if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return self::BLOCK_NOT_EXTENDABLE;
         }
 
-        if ($loan->extensions->where('status', '!=', 'REJECTED')->count() >= $setting->max_extensions) {
+        if ($this->used($loan) >= $setting->max_extensions) {
             return self::BLOCK_MAX_REACHED;
         }
 

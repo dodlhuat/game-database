@@ -207,11 +207,23 @@
             </NuxtLink>
           </template>
           <template v-else-if="auth.canBorrow">
-            <button class="gd-btn gd-btn--secondary" :disabled="reserving" @click="handleReserve">
+            <button
+              v-if="canAffordReservation"
+              class="gd-btn gd-btn--secondary"
+              :disabled="reserving"
+              @click="handleReserve"
+            >
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#bookmark_add" /></svg
-              >{{ reserving ? $t('common.loading') : $t('btn.reserve') }}
+              >{{ reserving ? $t('common.loading') : reserveLabel }}
             </button>
+            <NuxtLink v-else to="/tokens" class="gd-btn gd-btn--secondary">
+              <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#toll" /></svg
+              >{{ $t('btn.load_tokens') }}
+            </NuxtLink>
+            <span v-if="reservationCost" class="gd-avail-note">
+              {{ $t('pages.game.reserve_fee_note', { cost: reservationCost }) }}
+            </span>
             <span v-if="game.earliest_available_at" class="gd-avail-note">
               Wieder verfügbar ab
               {{ new Date(game.earliest_available_at + 'T00:00:00').toLocaleDateString('de-DE') }}
@@ -322,12 +334,16 @@
           </template>
           <template v-else-if="auth.canBorrow">
             <button
+              v-if="canAffordReservation"
               class="gd-bar__btn gd-bar__btn--sec"
               :disabled="reserving"
               @click="handleReserve"
             >
-              {{ reserving ? '…' : $t('btn.reserve') }}
+              {{ reserving ? '…' : reserveLabel }}
             </button>
+            <NuxtLink v-else to="/tokens" class="gd-bar__btn gd-bar__btn--sec">{{
+              $t('btn.load_tokens')
+            }}</NuxtLink>
           </template>
         </div>
         <Transition name="gd-status-fade">
@@ -380,6 +396,11 @@ const { data: game, pending: loading } = useAsyncData<Game | null>(`game-${slug}
 })
 
 const loanCost = computed(() => game.value?.borrow_cost ?? 0)
+const reservationCost = computed(() => (auth.isAdmin ? 0 : (game.value?.reservation_cost ?? 0)))
+const canAffordReservation = computed(() => auth.freeTokens >= reservationCost.value)
+const reserveLabel = computed(() =>
+  reservationCost.value ? t('btn.reserve_game', { cost: reservationCost.value }) : t('btn.reserve')
+)
 
 const reserving = ref(false)
 const reserveStatus = ref<{ text: string; type: 'success' | 'error' } | null>(null)
@@ -550,7 +571,13 @@ async function handleReserve() {
   reserving.value = true
   try {
     await addReservation(game.value.id)
-    showReserveStatus(t('pages.game.reserve_success'), 'success')
+    auth.spendTokens(reservationCost.value)
+    showReserveStatus(
+      reservationCost.value
+        ? t('pages.game.reserve_success_paid', { cost: reservationCost.value })
+        : t('pages.game.reserve_success'),
+      'success'
+    )
   } catch (e: unknown) {
     const err = e as { message?: string }
     showReserveStatus(err?.message ?? t('pages.game.reserve_failed'), 'error')

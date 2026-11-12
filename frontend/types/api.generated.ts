@@ -1628,6 +1628,7 @@ export interface components {
       deposit_tokens: number
       size_category: string
       borrow_cost: number
+      reservation_cost: number
       cover_image_url: string | null
       is_active: boolean
       available_copies_count?: number
@@ -1676,6 +1677,10 @@ export interface components {
       can_extend?: boolean
       extension_blocked_reason?: string | null
       next_extension_cost?: number
+      extensions_used?: number
+      max_extensions?: number
+      extension_earliest_due_date?: string
+      extension_latest_due_date?: string
       /** Format: date-time */
       created_at: string | null
     }
@@ -1693,6 +1698,7 @@ export interface components {
       loan_cost_large: number
       package_loan_cost: number
       extension_cost: number
+      reservation_cost: number
       condition_very_good_after: number
       condition_good_after: number
       deposit_pct_very_good: number
@@ -3771,6 +3777,7 @@ export interface operations {
           loan_cost_large: number
           package_loan_cost: number
           extension_cost: number
+          reservation_cost: number
           condition_very_good_after: number
           condition_good_after: number
           deposit_pct_very_good: number
@@ -4965,6 +4972,32 @@ export interface operations {
         }
       }
       401: components['responses']['AuthenticationException']
+      402: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            message: string
+            /** @constant */
+            reason: 'insufficient_tokens'
+            reservation_cost: number
+          }
+        }
+      }
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Eine aktive Mitgliedschaft ist erforderlich um Spiele zu reservieren.'
+            /** @constant */
+            reason: 'membership_required'
+          }
+        }
+      }
       422: components['responses']['ValidationException']
     }
   }

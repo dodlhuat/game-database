@@ -35,6 +35,7 @@ class GameResource extends JsonResource
             'deposit_tokens' => $this->deposit_tokens,
             'size_category' => $this->size_category,
             'borrow_cost' => LoanSetting::forRequest($request)->costFor($this->size_category),
+            'reservation_cost' => LoanSetting::forRequest($request)->reservation_cost,
             'cover_image_url' => $this->cover_image_url,
             'is_active' => $this->is_active,
             'available_copies_count' => $this->whenCounted('available_copies_count', $this->available_copies_count ?? 0),
