@@ -125,8 +125,8 @@ phpstan:
 # ============================================================
 DEPLOY_SERVER := hetzner-deploy
 DEPLOY_DIR    := /var/www/alle-unsere-abenteuer
-# Basis-URL für deploy-verify; auf https:// umstellen, sobald certbot eingerichtet ist
-DEPLOY_URL    := http://alle-unsere-abenteuer.at
+# Basis-URL für deploy-verify
+DEPLOY_URL    := https://alle-unsere-abenteuer.at
 
 ## Backend + Frontend auf dem Server aktualisieren (git pull, composer, migrate, npm build, pm2 restart)
 deploy: deploy-backend deploy-frontend

@@ -115,4 +115,20 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Global "Reply-To" Address
+    |--------------------------------------------------------------------------
+    |
+    | The sender address (e.g. noreply@) has no mailbox behind it, so replies
+    | are routed here instead. Ignored while MAIL_REPLY_TO_ADDRESS is unset.
+    | A reply-to set on an individual mailable (e.g. DonationMail) wins.
+    |
+    */
+
+    'reply_to' => [
+        'address' => env('MAIL_REPLY_TO_ADDRESS'),
+        'name' => env('MAIL_REPLY_TO_NAME', env('APP_NAME', 'Laravel')),
+    ],
+
 ];
