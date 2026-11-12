@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Casts\StorageUrl;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -17,9 +18,7 @@ class ImageUploadService
      */
     public function uploadGameCover(UploadedFile $file, ?string $oldUrl = null): string
     {
-        if ($oldUrl) {
-            $this->deleteByUrl($oldUrl);
-        }
+        $this->delete($oldUrl);
 
         try {
             $contents = $this->resizeAndCompress($file, maxDimension: 1200, quality: 85);
@@ -36,7 +35,7 @@ class ImageUploadService
 
         Storage::disk('public')->put($filename, $contents);
 
-        return Storage::disk('public')->url($filename);
+        return $filename;
     }
 
     public function uploadGameImage(UploadedFile $file): string
@@ -48,14 +47,12 @@ class ImageUploadService
         }
         Storage::disk('public')->put($filename, $contents);
 
-        return Storage::disk('public')->url($filename);
+        return $filename;
     }
 
     public function uploadEventImage(UploadedFile $file, ?string $oldUrl = null): string
     {
-        if ($oldUrl) {
-            $this->deleteByUrl($oldUrl);
-        }
+        $this->delete($oldUrl);
 
         $filename = 'events/'.Str::uuid().'.'.$file->getClientOriginalExtension();
         $contents = file_get_contents((string) $file->getRealPath());
@@ -64,7 +61,7 @@ class ImageUploadService
         }
         Storage::disk('public')->put($filename, $contents);
 
-        return Storage::disk('public')->url($filename);
+        return $filename;
     }
 
     /**
@@ -78,14 +75,22 @@ class ImageUploadService
         $filename = 'damage-photos/'.Str::uuid().'.jpg';
         Storage::disk('public')->put($filename, $contents);
 
-        return Storage::disk('public')->url($filename);
+        return $filename;
     }
 
-    public function deleteByUrl(string $url): void
+    /**
+     * Deletes an uploaded file. Takes the stored path or the URL a model hands
+     * out; nothing (null) and anything outside the public disk (e.g. an external
+     * image) are left alone.
+     */
+    public function delete(?string $pathOrUrl): void
     {
-        // Pfad relativ zum public-Disk extrahieren
-        $path = preg_replace('#^.*/storage/#', '', $url);
-        if ($path) {
+        if ($pathOrUrl === null) {
+            return;
+        }
+
+        $path = StorageUrl::toPath($pathOrUrl);
+        if ($path !== null && $path !== '') {
             Storage::disk('public')->delete($path);
         }
     }

@@ -1639,7 +1639,7 @@ export interface components {
       already_borrowed?: boolean | null
       images?: {
         id: number
-        url: string
+        url: string | null
       }[]
       copies?: components['schemas']['CopyResource'][]
       earliest_available_at?: string

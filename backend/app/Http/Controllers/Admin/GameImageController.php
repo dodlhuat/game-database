@@ -44,7 +44,7 @@ class GameImageController extends Controller
             return response()->json(['message' => 'Nicht gefunden.'], 404);
         }
 
-        $this->imageUpload->deleteByUrl($image->url);
+        $this->imageUpload->delete($image->url);
         $image->delete();
 
         return response()->json(['message' => 'Bild gelöscht.']);

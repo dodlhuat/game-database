@@ -60,9 +60,7 @@ class EventController extends Controller
 
     public function destroy(Event $event): Response
     {
-        if ($event->image_url) {
-            $this->imageUpload->deleteByUrl($event->image_url);
-        }
+        $this->imageUpload->delete($event->image_url);
 
         $event->delete();
 

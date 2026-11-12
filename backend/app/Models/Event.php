@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrl;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,5 +25,6 @@ class Event extends Model
     protected $casts = [
         'date' => 'date',
         'is_all_day' => 'boolean',
+        'image_url' => StorageUrl::class,
     ];
 }

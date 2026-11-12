@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrl;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GameImage extends Model
 {
     protected $fillable = ['game_id', 'url', 'sort_order'];
+
+    protected $casts = [
+        'url' => StorageUrl::class,
+    ];
 
     /** @return BelongsTo<Game, $this> */
     public function game(): BelongsTo

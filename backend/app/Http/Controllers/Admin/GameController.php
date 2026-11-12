@@ -95,12 +95,10 @@ class GameController extends Controller
 
     public function destroy(Game $game): JsonResponse
     {
-        if ($game->cover_image_url) {
-            $this->imageUpload->deleteByUrl($game->cover_image_url);
-        }
+        $this->imageUpload->delete($game->cover_image_url);
 
         foreach ($game->images as $image) {
-            $this->imageUpload->deleteByUrl($image->url);
+            $this->imageUpload->delete($image->url);
         }
 
         $game->delete();

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrl;
 use Database\Factories\DamageReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,10 @@ class DamageReport extends Model
         'user_id',
         'description',
         'photo_url',
+    ];
+
+    protected $casts = [
+        'photo_url' => StorageUrl::class,
     ];
 
     /** @return BelongsTo<Loan, $this> */

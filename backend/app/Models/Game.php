@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\StorageUrl;
 use Database\Factories\GameFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -49,6 +50,7 @@ class Game extends Model
             'duration_min' => 'integer',
             'duration_max' => 'integer',
             'year' => 'integer',
+            'cover_image_url' => StorageUrl::class,
         ];
     }
 
