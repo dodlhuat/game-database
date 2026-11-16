@@ -44,6 +44,9 @@
               <NuxtLink to="/admin/packages">{{ $t('admin.packages_admin.title') }}</NuxtLink>
             </li>
             <li>
+              <NuxtLink to="/admin/sponsors">{{ $t('admin.sponsors.title') }}</NuxtLink>
+            </li>
+            <li>
               <NuxtLink to="/admin/tags">{{ $t('admin.tags.title') }}</NuxtLink>
             </li>
             <li>

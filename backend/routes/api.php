@@ -36,6 +36,7 @@ use App\Http\Controllers\PackageLoanController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\SponsorController;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\TokenController;
@@ -79,6 +80,7 @@ Route::get('/terms', [TermsController::class, 'show']);
 Route::get('/privacy', [PrivacyController::class, 'show']);
 Route::get('/cookies', [CookieController::class, 'show']);
 Route::get('/languages', [LanguageController::class, 'index']);
+Route::get('/sponsors', [SponsorController::class, 'index']);
 Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
 
 // Stripe ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
@@ -219,4 +221,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Events
     Route::apiResource('events', App\Http\Controllers\Admin\EventController::class)->except(['show']);
+
+    // Sponsoren
+    Route::put('/sponsors/order', [App\Http\Controllers\Admin\SponsorController::class, 'reorder']);
+    Route::patch('/sponsors/{sponsor}/toggle', [App\Http\Controllers\Admin\SponsorController::class, 'toggle']);
+    Route::apiResource('sponsors', App\Http\Controllers\Admin\SponsorController::class)->except(['show']);
 });

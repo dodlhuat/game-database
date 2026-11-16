@@ -1,6 +1,7 @@
 {
   "footer": {
-    "tagline": "Gemeinsam mehr spielen."
+    "tagline": "Gemeinsam mehr spielen.",
+    "sponsors": "Mit Unterstützung unserer Sponsoren"
   },
   "nav": {
     "games": "Spiele",
@@ -20,7 +21,8 @@
     "menu_open": "Menü öffnen",
     "menu_close": "Menü schließen",
     "menu_title": "Menü",
-    "theme_toggle": "Theme wechseln"
+    "theme_toggle": "Theme wechseln",
+    "sponsors": "Sponsoren"
   },
   "btn": {
     "sign_in": "Anmelden",
@@ -832,12 +834,56 @@
         "image": "Bild (optional)",
         "image_current": "Aktuelles Bild"
       }
+    },
+    "sponsors": {
+      "title": "Sponsoren verwalten",
+      "breadcrumb": "Sponsoren",
+      "all": "Alle Sponsoren",
+      "add": "Sponsor hinzufügen",
+      "edit": "Sponsor bearbeiten",
+      "empty": "Noch keine Sponsoren angelegt.",
+      "order_hint": "Reihenfolge per Ziehen oder Pfeilen ändern",
+      "order_col": "Reihenfolge",
+      "logo_col": "Logo",
+      "link_col": "Link",
+      "active_col": "Aktiv",
+      "move_up": "{name} nach oben verschieben",
+      "move_down": "{name} nach unten verschieben",
+      "confirm_delete": "Sponsor „{name}“ wirklich löschen?",
+      "form": {
+        "name": "Name",
+        "url": "Link (optional)",
+        "logo": "Logo (optional)",
+        "logo_formats": "PNG, JPG, WebP oder GIF · max. 5 MB · transparenter Hintergrund empfohlen",
+        "logo_current": "Aktuelles Logo",
+        "plate": "Hintergrund – wähle, worauf das Logo besser lesbar ist",
+        "plate_dark": "Dunkle Fläche",
+        "plate_light": "Helle Fläche",
+        "active": "Auf der Sponsorenseite anzeigen"
+      },
+      "errors": {
+        "name": "Bitte einen Namen angeben.",
+        "url": "Bitte einen gültigen Link mit http:// oder https:// angeben.",
+        "format": "Nur PNG, JPG, WebP oder GIF erlaubt.",
+        "save": "Fehler beim Speichern.",
+        "order": "Reihenfolge konnte nicht gespeichert werden.",
+        "delete": "Fehler beim Löschen."
+      }
     }
   },
   "events": {
     "eyebrow": "Mitgliederbereich",
     "title": "Events & Veranstaltungen",
     "all_day": "Ganztägig"
+  },
+  "sponsors": {
+    "eyebrow": "Mit Unterstützung von",
+    "title": "Unsere Sponsoren",
+    "title_lead": "Danke, dass ihr",
+    "title_accent": "mitspielt.",
+    "lead": "Diese Partner machen möglich, dass unsere Spielesammlung wächst und gemeinsames Spielen für alle zugänglich bleibt.",
+    "also": "Außerdem mit dabei",
+    "empty": "Derzeit sind keine Sponsoren eingetragen."
   },
   "legal": {
     "toc": "Inhaltsübersicht",

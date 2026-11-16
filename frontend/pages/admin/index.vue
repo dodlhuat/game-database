@@ -192,6 +192,13 @@
                 ></span>
                 <span class="nav-tile__label">Events</span>
               </NuxtLink>
+              <NuxtLink to="/admin/sponsors" class="nav-tile">
+                <span class="nav-tile__icon"
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#handshake" /></svg
+                ></span>
+                <span class="nav-tile__label">Sponsoren</span>
+              </NuxtLink>
             </div>
           </section>
 

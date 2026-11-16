@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import { computed, onMounted } from 'vue'
+
 const year = new Date().getFullYear()
+
+// The sponsors link only appears once there is someone to thank.
+const { activeSponsors, fetchSponsors } = useSponsors()
+const hasSponsors = computed(() => (activeSponsors.value?.length ?? 0) > 0)
+onMounted(() => {
+  fetchSponsors().catch(() => {})
+})
 </script>
 
 <template>
@@ -13,6 +22,12 @@ const year = new Date().getFullYear()
           <span class="app-footer__name">AUA</span>
         </NuxtLink>
         <p class="app-footer__tagline">{{ $t('footer.tagline') }}</p>
+        <NuxtLink v-if="hasSponsors" to="/sponsors" class="app-footer__sponsors">
+          {{ $t('footer.sponsors') }}
+          <svg class="icon-svg" aria-hidden="true">
+            <use href="/svg-icons/icons.svg#north_east" />
+          </svg>
+        </NuxtLink>
       </div>
 
       <div class="app-footer__divider" aria-hidden="true" />
@@ -160,6 +175,36 @@ $_brand-gap: 0.55rem;
     color: $_dim;
     line-height: 1.5;
     padding-left: calc(#{$_hex-size} + #{$_brand-gap});
+  }
+
+  // Sits under the tagline on the same hanging indent — reads as part of
+  // the masthead ("…supported by") rather than another legal fine-print link.
+  &__sponsors {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.15rem;
+    padding-left: calc(#{$_hex-size} + #{$_brand-gap});
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+
+    .icon-svg {
+      width: 0.8rem;
+      height: 0.8rem;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &:hover .icon-svg {
+      transform: translate(2px, -2px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $amber;
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
   }
 
   // Vertical seam between the brand column and the legal column — only

@@ -1201,6 +1201,87 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/sponsors': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['sponsor.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/sponsors/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['sponsor.reorder']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/sponsors/{sponsor}/toggle': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['sponsor.toggle']
+    trace?: never
+  }
+  '/admin/sponsors': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['sponsors.index']
+    put?: never
+    post: operations['sponsors.store']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/sponsors/{sponsor}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['sponsors.update']
+    post?: never
+    /** Soft delete — the logo file is kept so the record stays restorable */
+    delete: operations['sponsors.destroy']
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/webhooks/stripe': {
     parameters: {
       query?: never
@@ -1820,6 +1901,30 @@ export interface components {
       comment: string | null
       /** Format: date-time */
       created_at: string | null
+    }
+    /** SponsorRequest */
+    SponsorRequest: {
+      name: string
+      /** Format: uri */
+      url?: string | null
+      /**
+       * Format: binary
+       * @description Raster formats only — no SVG (scriptable when opened directly).
+       */
+      logo?: string | null
+      remove_logo?: boolean
+      logo_on_light?: boolean
+      is_active?: boolean
+    }
+    /** SponsorResource */
+    SponsorResource: {
+      id: number
+      name: string
+      url: string | null
+      logo_url: string | null
+      logo_on_light: boolean
+      is_active: boolean
+      sort_order: number
     }
     /** StoreExtensionRequest */
     StoreExtensionRequest: {
@@ -5181,6 +5286,187 @@ export interface operations {
           }
         }
       }
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'sponsor.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `SponsorResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['SponsorResource'][]
+          }
+        }
+      }
+    }
+  }
+  'sponsor.reorder': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          ids: number[]
+        }
+      }
+    }
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'sponsor.toggle': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The sponsor ID */
+        sponsor: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `SponsorResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['SponsorResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'sponsors.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `SponsorResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['SponsorResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'sponsors.store': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['SponsorRequest']
+      }
+    }
+    responses: {
+      /** @description `SponsorResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['SponsorResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'sponsors.update': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The sponsor ID */
+        sponsor: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['SponsorRequest']
+      }
+    }
+    responses: {
+      /** @description `SponsorResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['SponsorResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'sponsors.destroy': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The sponsor ID */
+        sponsor: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
     }
   }

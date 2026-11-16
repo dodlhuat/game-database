@@ -65,6 +65,24 @@ class ImageUploadService
     }
 
     /**
+     * Stored as uploaded: logos are usually small, and re-encoding to JPEG
+     * (like resizeAndCompress does) would destroy PNG/WebP transparency.
+     */
+    public function uploadSponsorLogo(UploadedFile $file, ?string $oldUrl = null): string
+    {
+        $this->delete($oldUrl);
+
+        $filename = 'sponsors/'.Str::uuid().'.'.$file->guessExtension();
+        $contents = file_get_contents((string) $file->getRealPath());
+        if ($contents === false) {
+            throw new \RuntimeException('Could not read uploaded file.');
+        }
+        Storage::disk('public')->put($filename, $contents);
+
+        return $filename;
+    }
+
+    /**
      * Member-submitted damage photos come straight from phone cameras
      * (often several MB), so — unlike the other upload* methods — this one
      * downscales/recompresses before storing.
