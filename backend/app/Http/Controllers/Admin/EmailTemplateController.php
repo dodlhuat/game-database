@@ -74,7 +74,60 @@ class EmailTemplateController extends Controller
             'body' => '<p>Deine Mitgliedschaft läuft am <strong>{expiry_date}</strong> ab.</p><p>Du kannst deine Mitgliedschaft bereits jetzt verlängern und erhältst dabei wieder 20 Token.</p>',
             'action_text' => 'Mitgliedschaft verlängern',
         ],
+        'welcome_supporter' => [
+            'key' => 'welcome_supporter',
+            'subject' => 'Danke für deine Unterstützung!',
+            'greeting' => 'Willkommen, {name}!',
+            'body' => '<p>Danke, dass du die AUA Spieleausleihe als außerordentliches Mitglied unterstützt!</p><p>Als außerordentliches Mitglied erhältst du keine Token und kannst aktuell keine Spiele ausleihen. Du kannst dich aber jederzeit zum Vollmitglied hochstufen lassen, um Token zu erhalten und Spiele aus unserer Sammlung auszuleihen.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
+        'password_reset' => [
+            'key' => 'password_reset',
+            'subject' => 'Passwort zurücksetzen',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Du hast eine Anfrage zum Zurücksetzen deines Passworts gestellt.</p><p>Klicke auf den Button unten, um ein neues Passwort zu vergeben. Der Link ist <strong>60 Minuten</strong> gültig.</p><p>Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>',
+            'action_text' => 'Passwort zurücksetzen',
+        ],
+        'deposit_released' => [
+            'key' => 'deposit_released',
+            'subject' => 'Deine Kaution wurde freigegeben – {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Deine Kaution von <strong>{deposit} Token(s)</strong> für das Spiel <strong>{game}</strong> wurde freigegeben und deinem Konto gutgeschrieben.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
+        'deposit_forfeited' => [
+            'key' => 'deposit_forfeited',
+            'subject' => 'Deine Kaution wurde einbehalten – {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Leider musste deine Kaution von <strong>{deposit} Token(s)</strong> für das Spiel <strong>{game}</strong> einbehalten werden.</p><p>{notes}</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
+        'membership_cancellation_user' => [
+            'key' => 'membership_cancellation_user',
+            'subject' => 'Bestätigung deiner Kündigung',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>wir haben deine Kündigung der Mitgliedschaft erhalten.</p><p>{refund_text}</p><p>Geschenkte Bonus-Token ({bonus_tokens}) verfallen mit der Kündigung.</p><p>Danke, dass du dabei warst!</p>',
+            'action_text' => null,
+        ],
+        'membership_cancellation_admin' => [
+            'key' => 'membership_cancellation_admin',
+            'subject' => 'Kündigung: {name}',
+            'greeting' => 'Hallo,',
+            'body' => '<p>{name} ({email}) hat die Mitgliedschaft gekündigt.</p><p>Rückzuüberweisen: <strong>{refund}</strong> ({refund_tokens} Token, abzüglich {fee} Bearbeitungsabzug). Verfallene Bonus-Token: {bonus_tokens}.</p><p>Kontoinhaber: {account_holder}<br>IBAN: {iban}</p><p>Grund: {reason}</p><p>Die Rücküberweisung erfolgt manuell.</p>',
+            'action_text' => 'Kündigungen ansehen',
+        ],
     ];
+
+    /**
+     * Every template key a notification can send. A key missing here is
+     * still mailed from the database row, but never shows up in the admin.
+     *
+     * @return list<string>
+     */
+    public static function keys(): array
+    {
+        return array_keys((new self)->defaults);
+    }
 
     public function index(): JsonResponse
     {

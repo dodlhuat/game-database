@@ -191,6 +191,58 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'calendar_today',
     vars: ['name', 'expiry_date', 'renewal_link'],
   },
+  loan_overdue_reminder: {
+    label: 'Rückgabe überfällig',
+    recipient: 'Mitglied',
+    icon: 'warning',
+    vars: ['name', 'game', 'due_date'],
+  },
+  welcome_supporter: {
+    label: 'Willkommen als außerordentliches Mitglied',
+    recipient: 'Außerordentliches Mitglied',
+    icon: 'volunteer_activism',
+    vars: ['name'],
+  },
+  password_reset: {
+    label: 'Passwort zurücksetzen',
+    recipient: 'Mitglied',
+    icon: 'lock_reset',
+    vars: ['name', 'reset_link'],
+  },
+  deposit_released: {
+    label: 'Kaution freigegeben',
+    recipient: 'Mitglied',
+    icon: 'lock_open',
+    vars: ['name', 'game', 'deposit'],
+  },
+  deposit_forfeited: {
+    label: 'Kaution einbehalten',
+    recipient: 'Mitglied',
+    icon: 'money_off',
+    vars: ['name', 'game', 'deposit', 'notes'],
+  },
+  membership_cancellation_user: {
+    label: 'Kündigungsbestätigung',
+    recipient: 'Mitglied',
+    icon: 'logout',
+    vars: ['name', 'refund_text', 'bonus_tokens'],
+  },
+  membership_cancellation_admin: {
+    label: 'Neue Kündigung',
+    recipient: 'Admin',
+    icon: 'person_remove',
+    vars: [
+      'name',
+      'email',
+      'refund',
+      'refund_tokens',
+      'fee',
+      'bonus_tokens',
+      'account_holder',
+      'iban',
+      'reason',
+    ],
+  },
 }
 
 const form = reactive({
