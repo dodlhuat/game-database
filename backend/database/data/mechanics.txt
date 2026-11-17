@@ -1,1 +1,21 @@
 # Mechaniken – ein Name pro Zeile. Leerzeilen und Zeilen mit # werden ignoriert.
+Worker Placement
+Deckbuilding
+Engine Builder
+Drafting
+Set Collection
+Tile Placement
+Area Control
+Hand Management
+Push Your Luck
+Roll & Write
+Flip & Write
+Dice Placement
+Trick Taking (Stichspiel)
+Cooperative Play
+Deduction
+Pattern Building
+Resource Management
+Action Selection
+Auction / Bidding
+Racing

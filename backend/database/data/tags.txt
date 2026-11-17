@@ -1,1 +1,48 @@
 # Tags – ein Name pro Zeile. Leerzeilen und Zeilen mit # werden ignoriert.
+#
+# Tags beschreiben, für wen, wann und wie sich ein Spiel anfühlt – nicht, wie es
+# funktioniert (das sind Mechaniken). Nicht als Tag nötig, weil es eigene Filter
+# gibt: Spieleranzahl, Spieldauer, Alter, Schwierigkeit, Sprache.
+#
+# Aus dem ersten Entwurf entfernt, weil eher Mechaniken:
+# Memory, Echtzeit, Bluffen, Verhandeln, Verdeckte Rollen, Bag Building
+
+# ── Spielart ──────────────────────────────────────────────
+Familienspiel
+Kinderspiel
+Partyspiel
+Kennerspiel
+Expertenspiel
+Geschicklichkeit
+Quiz & Wissen
+
+# ── Anlass ────────────────────────────────────────────────
+Einsteigerfreundlich
+Absacker
+Reisespiel
+Eisbrecher
+Generationenübergreifend
+
+# ── Spielgefühl ───────────────────────────────────────────
+Kommunikativ
+Lustig
+Taktisch
+Knobeln
+Glückslastig
+Konfrontativ
+Entspannt
+Atmosphärisch
+Nervenkitzel
+
+# ── Thema ─────────────────────────────────────────────────
+Fantasy
+Science-Fiction
+Krimi & Mystery
+Historisch
+Natur & Tiere
+Abenteuer
+
+# ── Besonderheit ──────────────────────────────────────────
+Kampagne / Legacy
+Sprachunabhängig
+Preisgekrönt
