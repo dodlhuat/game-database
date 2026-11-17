@@ -2,9 +2,9 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test \
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
-        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify \
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data \
         server-update server-update-install server-update-install-all \
         maintenance-on maintenance-off
 
@@ -52,6 +52,10 @@ migrate-fresh:
 ## Datenbank zurücksetzen und Demo-Daten laden
 demo:
 	docker compose exec backend php artisan db:demo
+
+## Lokal: alle Spiel- und Testdaten löschen, User behalten, Mechaniken/Tags aus backend/database/data/*.txt einspielen
+reset-data:
+	docker compose exec backend php artisan app:reset-test-data
 
 ## Shell im Backend-Container öffnen
 shell-backend:
@@ -151,6 +155,18 @@ deploy-fix-pull:
 deploy-verify:
 	curl -sf $(DEPLOY_URL)/api/games > /dev/null && echo "✓ Backend erreichbar" || echo "✗ Backend NICHT erreichbar"
 	curl -sf $(DEPLOY_URL)/ > /dev/null && echo "✓ Frontend erreichbar" || echo "✗ Frontend NICHT erreichbar"
+
+## Backup von Datenbank und Uploads auf dem Server nach ~/backups/<Zeitstempel>/
+deploy-backup:
+	ssh $(DEPLOY_SERVER) 'bash -s' < scripts/server-backup.sh
+
+## EINMALIG vor dem Livegang: alle Spiel- und Testdaten auf dem Server löschen, User behalten,
+## Mechaniken/Tags aus backend/database/data/*.txt einspielen. Ablauf: Deploy → Backup →
+## Wartungsmodus → Reset (fragt nach „RESET“) → Wartungsmodus aus. Bricht der Reset ab,
+## bleibt der Wartungsmodus an (mit `make maintenance-off` beenden).
+deploy-reset-data: deploy-backend deploy-backup maintenance-on
+	ssh -t $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && php artisan app:reset-test-data'
+	$(MAKE) maintenance-off
 
 ## Wartungsmodus einschalten: setzt NUXT_PUBLIC_MAINTENANCE_MODE=true im PM2-Prozess (kein Rebuild nötig)
 ## `pm2 save` sorgt dafür, dass der Zustand einen Server-Neustart überlebt
