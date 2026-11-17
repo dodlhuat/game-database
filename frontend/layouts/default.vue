@@ -79,6 +79,11 @@
             <li>
               <NuxtLink to="/admin/loan-settings">{{ $t('admin.loan_settings.title') }}</NuxtLink>
             </li>
+            <li>
+              <NuxtLink to="/admin/pickup-locations">{{
+                $t('admin.pickup_locations.title')
+              }}</NuxtLink>
+            </li>
           </ul>
         </li>
 

@@ -20,6 +20,7 @@ class LoanController extends Controller
         $loans = Loan::with(['copy.game', 'user', 'extensions'])
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->user_id, fn ($q, $id) => $q->where('user_id', $id))
+            ->when($request->pickup_location_id, fn ($q, $id) => $q->where('pickup_location_id', $id))
             ->when($request->game_id, fn ($q, $id) => $q->whereHas('copy', fn ($q) => $q->where('game_id', $id))
             )
             ->orderByDesc('created_at')
@@ -77,5 +78,25 @@ class LoanController extends Controller
         $loanCopy->update(['condition' => 'REVIEW']);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
+    }
+
+    /** Moves a running loan to another pickup location — members cannot change it themselves. */
+    public function updatePickupLocation(Request $request, Loan $loan): JsonResponse|LoanResource
+    {
+        $request->validate([
+            'pickup_location_id' => ['required', 'integer', Rule::exists('pickup_locations', 'id')->whereNull('deleted_at')->where('is_active', true)],
+        ]);
+
+        if ($loan->package_loan_id !== null) {
+            return response()->json(['message' => 'Dieses Spiel gehört zu einer Paket-Ausleihe. Bitte den Ort beim Paket ändern.'], 422);
+        }
+
+        if (! in_array($loan->status, Loan::OPEN_STATUSES)) {
+            return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
+        }
+
+        $loan->update(['pickup_location_id' => $request->integer('pickup_location_id')]);
+
+        return new LoanResource($loan->load(['copy.game', 'user', 'extensions', 'pickupLocation']));
     }
 }

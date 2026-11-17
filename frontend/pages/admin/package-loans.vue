@@ -49,6 +49,7 @@
                   <th>{{ $t('admin.package_loans.package_col') }}</th>
                   <th>{{ $t('admin.package_loans.loaned_at') }}</th>
                   <th>{{ $t('admin.package_loans.due_at') }}</th>
+                  <th>{{ $t('admin.loans.location_col') }}</th>
                   <th>{{ $t('admin.table.status') }}</th>
                 </tr>
               </thead>
@@ -59,6 +60,15 @@
                   <td class="text-muted">{{ formatDate(loan.start_date) }}</td>
                   <td class="text-muted" :class="{ 'text-warn': loan.is_overdue }">
                     {{ formatDate(loan.due_date) }}
+                  </td>
+                  <td>
+                    <AdminPickupLocationSelect
+                      :current="loan.pickup_location"
+                      :locations="locations"
+                      :editable="loan.status === 'ACTIVE' || loan.status === 'OVERDUE'"
+                      :endpoint="`/admin/package-loans/${loan.id}/pickup-location`"
+                      @updated="loan.pickup_location = $event"
+                    />
                   </td>
                   <td>
                     <span class="badge" :class="statusClass(loan.status)">{{
@@ -101,8 +111,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import type { ApiPickupLocation } from '~/types/api'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
+
+const { fetchActiveLocations } = usePickupLocations()
+const locations = ref<ApiPickupLocation[]>([])
 
 const api = useApi()
 const { t } = useI18n()
@@ -116,6 +130,7 @@ interface PackageLoan {
   returned_at: string | null
   status: string
   is_overdue: boolean
+  pickup_location: ApiPickupLocation | null
 }
 
 interface Meta {
@@ -168,7 +183,12 @@ function changePage(p: number) {
   load()
 }
 
-onMounted(load)
+onMounted(() => {
+  load()
+  fetchActiveLocations(true)
+    .then((list) => (locations.value = list))
+    .catch(() => {})
+})
 
 function formatDate(iso: string | null) {
   if (!iso) return '—'

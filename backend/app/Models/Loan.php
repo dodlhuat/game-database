@@ -19,10 +19,17 @@ class Loan extends Model
     /** @use HasFactory<LoanFactory> */
     use HasFactory;
 
+    /** Statuses in which the game has not come back yet. */
+    public const OPEN_STATUSES = ['ACTIVE', 'EXTENDED', 'OVERDUE'];
+
+    /** Every loan view shows where the game goes back to. */
+    protected $with = ['pickupLocation'];
+
     protected $fillable = [
         'copy_id',
         'user_id',
         'package_loan_id',
+        'pickup_location_id',
         'start_date',
         'due_date',
         'returned_at',
@@ -52,6 +59,16 @@ class Loan extends Model
     public function packageLoan(): BelongsTo
     {
         return $this->belongsTo(PackageLoan::class);
+    }
+
+    /**
+     * Where the game is picked up and has to be returned.
+     *
+     * @return BelongsTo<PickupLocation, $this>
+     */
+    public function pickupLocation(): BelongsTo
+    {
+        return $this->belongsTo(PickupLocation::class)->withTrashed();
     }
 
     /** @return BelongsTo<User, $this> */

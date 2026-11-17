@@ -253,6 +253,16 @@
                   <use href="/svg-icons/icons.svg#chevron_right" />
                 </svg>
               </NuxtLink>
+              <NuxtLink to="/admin/pickup-locations" class="nav-row">
+                <span class="nav-row__icon"
+                  ><svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#location_on" /></svg
+                ></span>
+                <span class="nav-row__label">Abholorte</span>
+                <svg class="icon-svg nav-row__arrow" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#chevron_right" />
+                </svg>
+              </NuxtLink>
               <NuxtLink to="/admin/emails" class="nav-row">
                 <span class="nav-row__icon"
                   ><svg class="icon-svg" aria-hidden="true">

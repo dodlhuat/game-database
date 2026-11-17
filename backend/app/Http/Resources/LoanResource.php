@@ -31,7 +31,9 @@ class LoanResource extends JsonResource
                     return $copy->game !== null ? new GameResource($copy->game) : null;
                 }
             ),
+            'package_loan_id' => $this->package_loan_id,
             'user' => new UserResource($this->whenLoaded('user')),
+            'pickup_location' => new PickupLocationResource($this->whenLoaded('pickupLocation')),
             'start_date' => $this->start_date,
             'due_date' => $this->due_date,
             'returned_at' => $this->returned_at,

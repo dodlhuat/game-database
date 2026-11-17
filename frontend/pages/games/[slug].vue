@@ -364,12 +364,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Game } from '~/composables/useGames'
+import type { ApiPickupLocation } from '~/types/api'
 import { Modal } from '@dodlhuat/basix/js/modal'
 import { Lightbox } from '@dodlhuat/basix/js/lightbox'
 
 const route = useRoute()
 const { fetchGame } = useGames()
 const { createLoan, addReservation } = useLoans()
+const { fetchActiveLocations } = usePickupLocations()
 const auth = useAuthStore()
 const { fetchSettings, getNextAppointment, getDueDate, formatDate, toIsoDate } = useLoanSettings()
 const { t } = useI18n()
@@ -428,6 +430,7 @@ function openLightbox(i: number) {
 }
 
 const loanDates = { start_date: '', due_date: '' }
+let pickupLocations: ApiPickupLocation[] = []
 
 useHead({
   link: [
@@ -461,6 +464,15 @@ async function openLoanModal() {
     dueLabel = loanDates.due_date
   }
 
+  try {
+    pickupLocations = await fetchActiveLocations()
+  } catch {
+    pickupLocations = []
+  }
+  const pickerHtml = pickupLocations.length
+    ? renderPickupPickerHtml(pickupLocations, initialPickupLocationId(pickupLocations), t)
+    : ''
+
   const deposit = game.value.deposit_tokens ?? 0
   const depositHtml =
     deposit > 0
@@ -481,6 +493,7 @@ async function openLoanModal() {
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.due_label')}</label>
         <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
       </div>
+      ${pickerHtml}
       <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
         <span style="font-size:.8rem;color:var(--secondary-text)">${t('pages.game.confirm_borrow.cost_label')}</span>
         <strong style="color:var(--accent-color)">${loanCost.value} Token</strong>
@@ -508,6 +521,12 @@ async function openLoanModal() {
     requestAnimationFrame(() => {
       document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
       document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
+      document.querySelectorAll('input[name="pickup_location"]').forEach((input) =>
+        input.addEventListener('change', () => {
+          const pickupError = document.getElementById('pickup-error')
+          if (pickupError) pickupError.hidden = true
+        })
+      )
     })
   })
 }
@@ -528,6 +547,20 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     return
   }
 
+  const pickupLocationId = readPickupPickerChoice(pickupLocations)
+  const pickupError = document.getElementById('pickup-error')
+  if (!pickupLocationId) {
+    if (pickupError) {
+      pickupError.hidden = false
+    } else if (msgEl) {
+      msgEl.style.color = 'var(--error)'
+      msgEl.textContent = t('pickup.load_error')
+      msgEl.style.display = 'block'
+    }
+    return
+  }
+  if (pickupError) pickupError.hidden = true
+
   if (submitBtn) {
     submitBtn.disabled = true
     submitBtn.textContent = t('pages.game.confirm_borrow.processing')
@@ -539,12 +572,14 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
   try {
     await createLoan({
       copy_id: copy.id,
+      pickup_location_id: pickupLocationId,
       start_date: loanDates.start_date,
       due_date: loanDates.due_date,
     })
     if (msgEl) {
       msgEl.style.color = 'var(--success)'
       msgEl.textContent = t('pages.game.confirm_borrow.success')
+      rememberPickupLocation(pickupLocationId)
       msgEl.style.display = 'block'
     }
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)

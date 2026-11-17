@@ -164,6 +164,7 @@
                     <th>{{ $t('dashboard.table.game') }}</th>
                     <th>{{ $t('dashboard.table.status') }}</th>
                     <th>{{ $t('dashboard.table.due_date') }}</th>
+                    <th>{{ $t('dashboard.table.location') }}</th>
                     <th>{{ $t('dashboard.table.actions') }}</th>
                   </tr>
                 </thead>
@@ -208,6 +209,25 @@
                           })
                         }}
                       </span>
+                    </td>
+                    <td :data-label="$t('dashboard.table.location')">
+                      <span v-if="loan.pickup_location" class="loan-location">
+                        <svg class="icon-svg" aria-hidden="true">
+                          <use href="/svg-icons/icons.svg#location_on" />
+                        </svg>
+                        <span>
+                          <span class="loan-location__name">{{ loan.pickup_location.name }}</span>
+                          <a
+                            v-if="loan.pickup_location.map_url"
+                            class="loan-location__map"
+                            :href="loan.pickup_location.map_url"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            >{{ $t('pickup.map_link') }}</a
+                          >
+                        </span>
+                      </span>
+                      <span v-else>—</span>
                     </td>
                     <td :data-label="$t('dashboard.table.actions')">
                       <div class="action-row">
@@ -348,6 +368,17 @@
             </button>
           </div>
           <p class="dialog__game">{{ returnLoan.game?.title }}</p>
+          <div v-if="returnLoan.pickup_location" class="dialog__location">
+            <p class="pickup-picker__hint">{{ $t('dashboard.return_location_hint') }}</p>
+            <div class="pickup-option pickup-option--static">
+              <span class="pickup-option__card">
+                <span class="pickup-option__pin" aria-hidden="true">
+                  <svg class="icon-svg"><use href="/svg-icons/icons.svg#location_on" /></svg>
+                </span>
+                <PickupLocationDetails :location="returnLoan.pickup_location" />
+              </span>
+            </div>
+          </div>
           <label class="dialog__label">{{ $t('dashboard.return_condition') }}</label>
           <UiVirtualDropdown
             v-model="returnCondition"
@@ -1159,6 +1190,27 @@ $hero-divider-20: var(--divider);
   }
 }
 
+.loan-location {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  > .icon-svg {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.15rem;
+    color: $amber;
+  }
+  &__name {
+    display: block;
+    font-weight: 600;
+  }
+  &__map {
+    font-size: 0.75rem;
+  }
+}
+
 .extension-note {
   flex-basis: 100%;
   max-width: 18rem;
@@ -1419,6 +1471,10 @@ $hero-divider-20: var(--divider);
     color: var(--secondary-text);
     margin-bottom: 1.25rem;
     padding-bottom: 0;
+  }
+
+  &__location {
+    margin-bottom: 1.25rem;
   }
 
   &__label {

@@ -6,6 +6,7 @@ use App\Models\Copy;
 use App\Models\Game;
 use App\Models\Loan;
 use App\Models\User;
+use App\Notifications\Concerns\DescribesPickupLocation;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -13,7 +14,7 @@ use Illuminate\Notifications\Notification;
 
 class LoanDueSoon extends Notification
 {
-    use Queueable, UsesEmailTemplate;
+    use DescribesPickupLocation, Queueable, UsesEmailTemplate;
 
     public function __construct(private Loan $loan) {}
 
@@ -36,6 +37,7 @@ class LoanDueSoon extends Notification
             'name' => $notifiable->name,
             'game' => $game->title,
             'due_date' => $dueDate,
+            ...$this->locationVars($this->loan->pickupLocation),
         ], $dashboardUrl, $notifiable);
     }
 }

@@ -33,6 +33,7 @@ use App\Http\Controllers\MembershipCancellationController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
+use App\Http\Controllers\PickupLocationController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
@@ -96,6 +97,7 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
     Route::get('/auth/me', [LoginController::class, 'me']);
 
     // Ausleihen
+    Route::get('/pickup-locations', [PickupLocationController::class, 'index']);
     Route::get('/loans', [LoanController::class, 'index']);
     Route::post('/loans', [LoanController::class, 'store']);
     Route::get('/loans/{loan}', [LoanController::class, 'show']);
@@ -185,6 +187,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::patch('/loans/{loan}/overdue', [App\Http\Controllers\Admin\LoanController::class, 'markOverdue']);
     Route::post('/loans/{loan}/remind', [App\Http\Controllers\Admin\LoanController::class, 'sendOverdueReminder']);
     Route::post('/loans/{loan}/return', [App\Http\Controllers\Admin\LoanController::class, 'return']);
+    Route::patch('/loans/{loan}/pickup-location', [App\Http\Controllers\Admin\LoanController::class, 'updatePickupLocation']);
 
     // Verlängerungsanträge
 
@@ -215,6 +218,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Paket-Ausleihen
     Route::get('/package-loans', [App\Http\Controllers\Admin\PackageLoanController::class, 'index']);
+    Route::patch('/package-loans/{packageLoan}/pickup-location', [App\Http\Controllers\Admin\PackageLoanController::class, 'updatePickupLocation']);
 
     // Token-Transaktionen (Admin: pro User)
     Route::get('/users/{user}/token-transactions', [App\Http\Controllers\Admin\TokenTransactionController::class, 'index']);
@@ -226,4 +230,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/sponsors/order', [App\Http\Controllers\Admin\SponsorController::class, 'reorder']);
     Route::patch('/sponsors/{sponsor}/toggle', [App\Http\Controllers\Admin\SponsorController::class, 'toggle']);
     Route::apiResource('sponsors', App\Http\Controllers\Admin\SponsorController::class)->except(['show']);
+
+    // Abholorte
+    Route::put('/pickup-locations/order', [App\Http\Controllers\Admin\PickupLocationController::class, 'reorder']);
+    Route::patch('/pickup-locations/{pickupLocation}/toggle', [App\Http\Controllers\Admin\PickupLocationController::class, 'toggle']);
+    Route::apiResource('pickup-locations', App\Http\Controllers\Admin\PickupLocationController::class)->except(['show']);
 });

@@ -15,6 +15,9 @@
 // 6. Theme overrides — amber accent replaces basix default blue
 @use 'theme';
 
+// Shared by the game modal (HTML string) and the package page
+@use 'pickup-picker';
+
 // 7. Bibliotheks-Overrides
 // basix push-menu.scss wendet position:fixed + transform:translateX(-100%)
 // auf ALLE <nav>-Elemente an. Zurücksetzen für alle Seiten.

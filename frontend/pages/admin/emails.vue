@@ -161,11 +161,17 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'person',
     vars: ['name', 'email'],
   },
+  loan_confirmation: {
+    label: 'Ausleihe bestätigt',
+    recipient: 'Mitglied',
+    icon: 'event_available',
+    vars: ['name', 'game', 'start_date', 'due_date', 'location', 'location_details'],
+  },
   loan_due_soon: {
     label: 'Rückgabe-Erinnerung',
     recipient: 'Mitglied',
     icon: 'schedule',
-    vars: ['name', 'game', 'due_date'],
+    vars: ['name', 'game', 'due_date', 'location', 'location_details'],
   },
   reservation_available: {
     label: 'Spiel wieder verfügbar',
@@ -195,7 +201,7 @@ const meta: Record<string, TemplateMeta> = {
     label: 'Rückgabe überfällig',
     recipient: 'Mitglied',
     icon: 'warning',
-    vars: ['name', 'game', 'due_date'],
+    vars: ['name', 'game', 'due_date', 'location', 'location_details'],
   },
   welcome_supporter: {
     label: 'Willkommen als außerordentliches Mitglied',

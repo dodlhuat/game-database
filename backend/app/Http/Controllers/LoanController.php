@@ -9,8 +9,10 @@ use App\Models\Copy;
 use App\Models\Game;
 use App\Models\Loan;
 use App\Models\LoanSetting;
+use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
+use App\Notifications\LoanConfirmation;
 use App\Services\TokenWallet;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +48,11 @@ class LoanController extends Controller
             ], 403);
         }
 
+        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'));
+        if (! $location) {
+            return $this->invalidLocationResponse();
+        }
+
         $setting = LoanSetting::instance();
 
         // Vorzeitige Token-Prüfung außerhalb der Transaktion, damit wir früh abbrechen können
@@ -67,7 +74,7 @@ class LoanController extends Controller
             }
         }
 
-        $loan = DB::transaction(function () use ($request, $user, $setting) {
+        $loan = DB::transaction(function () use ($request, $user, $setting, $location) {
             // Kopie mit Lock holen, damit kein zweiter Request dieselbe Kopie gleichzeitig verleiht
             /** @var Copy $copy */
             $copy = Copy::with('game')->lockForUpdate()->findOrFail($request->copy_id);
@@ -100,6 +107,7 @@ class LoanController extends Controller
             $loan = Loan::create([
                 'copy_id' => $copy->id,
                 'user_id' => $user->id,
+                'pickup_location_id' => $location->id,
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
@@ -133,9 +141,20 @@ class LoanController extends Controller
             return $loan;
         });
 
-        $loan->load(['copy.game', 'extensions']);
+        $loan->load(['copy.game', 'extensions', 'pickupLocation']);
+
+        LoanConfirmation::sendSafely($user, $loan);
 
         return new LoanResource($loan);
+    }
+
+    private function invalidLocationResponse(): JsonResponse
+    {
+        return response()->json([
+            'message' => 'Bitte wähle einen gültigen Abholort.',
+            'reason' => 'invalid_pickup_location',
+            'errors' => ['pickup_location_id' => ['Bitte wähle einen gültigen Abholort.']],
+        ], 422);
     }
 
     private function calcNextAppointment(LoanSetting $setting): Carbon

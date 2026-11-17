@@ -52,6 +52,7 @@
                   <th>{{ $t('admin.table.title') }}</th>
                   <th>{{ $t('admin.loans.loaned_at') }}</th>
                   <th>{{ $t('admin.loans.due_at') }}</th>
+                  <th>{{ $t('admin.loans.location_col') }}</th>
                   <th>{{ $t('admin.table.status') }}</th>
                   <th>{{ $t('admin.table.actions') }}</th>
                 </tr>
@@ -65,6 +66,20 @@
                     <span :class="{ 'text-danger': loan.status === 'OVERDUE' }">{{
                       formatDate(loan.due_date)
                     }}</span>
+                  </td>
+                  <td>
+                    <AdminPickupLocationSelect
+                      :current="loan.pickup_location"
+                      :locations="locations"
+                      :editable="isOpen(loan.status) && !loan.package_loan_id"
+                      :locked-hint="
+                        isOpen(loan.status) && loan.package_loan_id
+                          ? $t('admin.loans.location_via_package')
+                          : undefined
+                      "
+                      :endpoint="`/admin/loans/${loan.id}/pickup-location`"
+                      @updated="loan.pickup_location = $event"
+                    />
                   </td>
                   <td>
                     <span class="badge" :class="statusClass(loan.status)">{{
@@ -127,8 +142,13 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import type { ApiPickupLocation } from '~/types/api'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
+
+const { fetchActiveLocations } = usePickupLocations()
+const locations = ref<ApiPickupLocation[]>([])
+const isOpen = (status: string) => ['ACTIVE', 'EXTENDED', 'OVERDUE'].includes(status)
 
 const { fetchAdminLoans, markOverdue, sendOverdueReminder } = useAdmin()
 const { t } = useI18n()
@@ -146,6 +166,8 @@ const loans = ref<
     due_date: string
     status: string
     overdue_reminder_sent_at: string | null
+    package_loan_id: number | null
+    pickup_location: ApiPickupLocation | null
   }[]
 >([])
 
@@ -157,7 +179,12 @@ const statusOptions = computed(() => [
   { value: 'RETURNED', label: t('admin.loans.filter_returned') },
 ])
 
-onMounted(load)
+onMounted(() => {
+  load()
+  fetchActiveLocations(true)
+    .then((list) => (locations.value = list))
+    .catch(() => {})
+})
 
 function setStatusFilter(value: string) {
   statusFilter.value = value

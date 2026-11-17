@@ -692,6 +692,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/admin/loans/{loan}/pickup-location': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Moves a running loan to another pickup location — members cannot change it themselves */
+    patch: operations['loan.updatePickupLocation']
+    trace?: never
+  }
   '/loan-settings': {
     parameters: {
       query?: never
@@ -1084,6 +1101,105 @@ export interface paths {
     put?: never
     post?: never
     delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/package-loans/{packageLoan}/pickup-location': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Moves the package — and every game in it — to another pickup location */
+    patch: operations['packageLoan.updatePickupLocation']
+    trace?: never
+  }
+  '/pickup-locations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Active pickup locations, in the order members get to choose from */
+    get: operations['pickupLocation.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/pickup-locations/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['pickupLocation.reorder']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/pickup-locations/{pickupLocation}/toggle': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch: operations['pickupLocation.toggle']
+    trace?: never
+  }
+  '/admin/pickup-locations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['pickup-locations.index']
+    put?: never
+    post: operations['pickup-locations.store']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/pickup-locations/{pickupLocation}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put: operations['pickup-locations.update']
+    post?: never
+    /** Soft delete — past loans keep pointing at the location */
+    delete: operations['pickup-locations.destroy']
     options?: never
     head?: never
     patch?: never
@@ -1741,7 +1857,9 @@ export interface components {
       id: number
       copy?: components['schemas']['CopyResource'] & Record<string, never>
       game?: components['schemas']['GameResource'] | null
+      package_loan_id: number | null
       user?: components['schemas']['UserResource']
+      pickup_location?: components['schemas']['PickupLocationResource'] | null
       /** Format: date-time */
       start_date: string | null
       /** Format: date-time */
@@ -1838,8 +1956,9 @@ export interface components {
         slug: string
       }
       user?: components['schemas']['UserResource']
+      pickup_location?: components['schemas']['PickupLocationResource'] | null
       /** Format: date-time */
-      start_date: string
+      start_date: string | null
       /** Format: date-time */
       due_date: string
       /** Format: date-time */
@@ -1849,6 +1968,29 @@ export interface components {
       loans?: (components['schemas']['LoanResource'] & Record<string, never>)[]
       /** Format: date-time */
       created_at: string | null
+    }
+    /** PickupLocationRequest */
+    PickupLocationRequest: {
+      name: string
+      address?: string | null
+      opening_hours?: string | null
+      notes?: string | null
+      /** Format: uri */
+      map_url?: string | null
+      is_active?: boolean
+    }
+    /** PickupLocationResource */
+    PickupLocationResource: {
+      id: number
+      name: string
+      address: string | null
+      opening_hours: string | null
+      notes: string | null
+      map_url: string | null
+      is_active: boolean
+      sort_order: number
+      /** @description Admin list only: borrowed games that still have to come back here. */
+      open_loans_count?: number
     }
     /** PrivacyVersion */
     PrivacyVersion: {
@@ -1934,6 +2076,8 @@ export interface components {
     /** StoreLoanRequest */
     StoreLoanRequest: {
       copy_id: number
+      /** @description Optional only while a single location is active — then it is implied. */
+      pickup_location_id?: number | null
     }
     /** StoreReviewRequest */
     StoreReviewRequest: {
@@ -3822,6 +3966,40 @@ export interface operations {
       422: components['responses']['ValidationException']
     }
   }
+  'loan.updatePickupLocation': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The loan ID */
+        loan: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          pickup_location_id: number
+        }
+      }
+    }
+    responses: {
+      /** @description `LoanResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['LoanResource'] & Record<string, never>
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
   'loanSetting.show': {
     parameters: {
       query?: never
@@ -4812,6 +4990,8 @@ export interface operations {
       content: {
         'application/json': {
           package_id: number
+          /** @description Optional only while a single location is active — then it is implied. */
+          pickup_location_id?: number | null
         }
       }
     }
@@ -4966,6 +5146,227 @@ export interface operations {
         }
       }
       401: components['responses']['AuthenticationException']
+    }
+  }
+  'packageLoan.updatePickupLocation': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The package loan ID */
+        packageLoan: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          pickup_location_id: number
+        }
+      }
+    }
+    responses: {
+      /** @description `PackageLoanResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['PackageLoanResource'] & Record<string, never>
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickupLocation.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['PickupLocationResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'pickupLocation.reorder': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          ids: number[]
+        }
+      }
+    }
+    responses: {
+      /** @description No content */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickupLocation.toggle': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The pickup location ID */
+        pickupLocation: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | Record<string, never>
+            | {
+                data: components['schemas']['PickupLocationResource']
+              }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'pickup-locations.index': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['PickupLocationResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'pickup-locations.store': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PickupLocationRequest']
+      }
+    }
+    responses: {
+      /** @description `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['PickupLocationResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickup-locations.update': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The pickup location ID */
+        pickupLocation: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PickupLocationRequest']
+      }
+    }
+    responses: {
+      /** @description `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json':
+            | Record<string, never>
+            | {
+                data: components['schemas']['PickupLocationResource']
+              }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickup-locations.destroy': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The pickup location ID */
+        pickupLocation: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': Record<string, never>
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
     }
   }
   'privacy.show': {

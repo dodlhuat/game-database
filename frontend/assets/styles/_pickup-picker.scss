@@ -1,0 +1,197 @@
+// ============================================================
+// Pickup location picker
+// Global on purpose: the game page renders it as an HTML string inside a
+// basix Modal (outside any scoped component), the package page renders the
+// same markup through <PickupLocationPicker>.
+// ============================================================
+@use 'variables' as *;
+
+.pickup-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+
+  &__legend {
+    display: block;
+    padding: 0;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+  }
+
+  &__hint {
+    margin: 0 0 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--secondary-text);
+  }
+
+  &__options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__error {
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    color: var(--error-text, var(--error));
+  }
+}
+
+.pickup-option {
+  position: relative;
+  display: block;
+  margin: 0;
+  cursor: pointer;
+
+  &__input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  &__card {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: 0.75rem;
+    padding: 0.75rem 0.9rem 0.75rem 1rem;
+    background: var(--background);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    overflow: hidden;
+    transition:
+      border-color 0.2s ease,
+      background-color 0.2s ease,
+      transform 0.2s ease;
+
+    // Amber rail that slides in on selection
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: $amber;
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  }
+
+  &:hover &__card {
+    border-color: color-mix(in srgb, #{$amber} 45%, var(--divider));
+  }
+
+  &__pin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: var(--secondary-text);
+    background: color-mix(in srgb, var(--secondary-text) 10%, transparent);
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+
+    .icon-svg {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--primary-text);
+  }
+
+  &__meta,
+  &__note {
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--secondary-text);
+    white-space: pre-line;
+  }
+
+  &__note {
+    font-style: italic;
+  }
+
+  &__map {
+    align-self: flex-start;
+    margin-top: 0.2rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  &__check {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.4rem;
+    border: 2px solid var(--divider);
+    border-radius: 50%;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  &__input:checked + &__card,
+  &--static &__card {
+    border-color: color-mix(in srgb, #{$amber} 60%, transparent);
+    background: color-mix(in srgb, #{$amber} 6%, var(--background));
+
+    &::before {
+      transform: scaleY(1);
+    }
+  }
+
+  &__input:checked + &__card &__pin,
+  &--static &__pin {
+    color: $amber;
+    background: color-mix(in srgb, #{$amber} 14%, transparent);
+  }
+
+  &__input:checked + &__card &__check {
+    border-color: $amber;
+    box-shadow:
+      inset 0 0 0 3px var(--background),
+      inset 0 0 0 10px $amber;
+  }
+
+  &__input:focus-visible + &__card {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+  }
+
+  &--static {
+    cursor: default;
+  }
+  &--static &__card {
+    grid-template-columns: auto 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pickup-option__card,
+  .pickup-option__card::before {
+    transition: none;
+  }
+}

@@ -3277,6 +3277,7 @@
                                                     "type": "object",
                                                     "required": [
                                                         "copy",
+                                                        "pickup_location",
                                                         "extensions"
                                                     ]
                                                 }
@@ -3321,6 +3322,9 @@
                             }
                         }
                     },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
                     "403": {
                         "description": "",
                         "content": {
@@ -3350,9 +3354,6 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
-                    },
-                    "422": {
-                        "$ref": "#/components/responses/ValidationException"
                     }
                 }
             }
@@ -3850,6 +3851,86 @@
                                                     "required": [
                                                         "copy",
                                                         "user",
+                                                        "extensions"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/loans/{loan}/pickup-location": {
+            "patch": {
+                "operationId": "loan.updatePickupLocation",
+                "summary": "Moves a running loan to another pickup location \u2014 members cannot change it themselves",
+                "tags": [
+                    "Loan"
+                ],
+                "parameters": [
+                    {
+                        "name": "loan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "pickup_location_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "pickup_location_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`LoanResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/LoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "copy",
+                                                        "user",
+                                                        "pickup_location",
                                                         "extensions"
                                                     ]
                                                 }
@@ -5893,6 +5974,13 @@
                                 "properties": {
                                     "package_id": {
                                         "type": "integer"
+                                    },
+                                    "pickup_location_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "description": "Optional only while a single location is active \u2014 then it is implied."
                                     }
                                 },
                                 "required": [
@@ -5918,6 +6006,7 @@
                                                 {
                                                     "type": "object",
                                                     "required": [
+                                                        "pickup_location",
                                                         "loans"
                                                     ]
                                                 }
@@ -6139,6 +6228,7 @@
                                                         "type": "object",
                                                         "required": [
                                                             "user",
+                                                            "pickup_location",
                                                             "loans"
                                                         ]
                                                     }
@@ -6270,6 +6360,391 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/package-loans/{packageLoan}/pickup-location": {
+            "patch": {
+                "operationId": "packageLoan.updatePickupLocation",
+                "summary": "Moves the package \u2014 and every game in it \u2014 to another pickup location",
+                "tags": [
+                    "PackageLoan"
+                ],
+                "parameters": [
+                    {
+                        "name": "packageLoan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The package loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "pickup_location_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "required": [
+                                    "pickup_location_id"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PackageLoanResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/PackageLoanResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "user",
+                                                        "pickup_location",
+                                                        "loans"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/pickup-locations": {
+            "get": {
+                "operationId": "pickupLocation.index",
+                "summary": "Active pickup locations, in the order members get to choose from",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickupLocationResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/pickup-locations/order": {
+            "put": {
+                "operationId": "pickupLocation.reorder",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "minItems": 1,
+                                        "uniqueItems": true
+                                    }
+                                },
+                                "required": [
+                                    "ids"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/pickup-locations/{pickupLocation}/toggle": {
+            "patch": {
+                "operationId": "pickupLocation.toggle",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "parameters": [
+                    {
+                        "name": "pickupLocation",
+                        "in": "path",
+                        "required": true,
+                        "description": "The pickup location ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/PickupLocationResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/pickup-locations": {
+            "get": {
+                "operationId": "pickup-locations.index",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickupLocationResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "pickup-locations.store",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PickupLocationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/PickupLocationResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            }
+        },
+        "/admin/pickup-locations/{pickupLocation}": {
+            "put": {
+                "operationId": "pickup-locations.update",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "parameters": [
+                    {
+                        "name": "pickupLocation",
+                        "in": "path",
+                        "required": true,
+                        "description": "The pickup location ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PickupLocationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "`PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "anyOf": [
+                                        {
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/PickupLocationResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "pickup-locations.destroy",
+                "summary": "Soft delete \u2014 past loans keep pointing at the location",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "parameters": [
+                    {
+                        "name": "pickupLocation",
+                        "in": "path",
+                        "required": true,
+                        "description": "The pickup location ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -9526,8 +10001,24 @@
                             }
                         ]
                     },
+                    "package_loan_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
                     "user": {
                         "$ref": "#/components/schemas/UserResource"
+                    },
+                    "pickup_location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PickupLocationResource"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     },
                     "start_date": {
                         "type": [
@@ -9609,6 +10100,7 @@
                 },
                 "required": [
                     "id",
+                    "package_loan_id",
                     "start_date",
                     "due_date",
                     "returned_at",
@@ -9884,8 +10376,21 @@
                     "user": {
                         "$ref": "#/components/schemas/UserResource"
                     },
+                    "pickup_location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PickupLocationResource"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "start_date": {
-                        "type": "string",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
                         "format": "date-time"
                     },
                     "due_date": {
@@ -9939,6 +10444,107 @@
                     "created_at"
                 ],
                 "title": "PackageLoanResource"
+            },
+            "PickupLocationRequest": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "opening_hours": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "notes": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "maxLength": 1000
+                    },
+                    "map_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "uri",
+                        "maxLength": 2048
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "name"
+                ],
+                "title": "PickupLocationRequest"
+            },
+            "PickupLocationResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "address": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "opening_hours": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "notes": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "map_url": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "sort_order": {
+                        "type": "integer"
+                    },
+                    "open_loans_count": {
+                        "type": "integer",
+                        "description": "Admin list only: borrowed games that still have to come back here."
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "address",
+                    "opening_hours",
+                    "notes",
+                    "map_url",
+                    "is_active",
+                    "sort_order"
+                ],
+                "title": "PickupLocationResource"
             },
             "PrivacyVersion": {
                 "type": "object",
@@ -10230,6 +10836,13 @@
                 "properties": {
                     "copy_id": {
                         "type": "integer"
+                    },
+                    "pickup_location_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Optional only while a single location is active \u2014 then it is implied."
                     }
                 },
                 "required": [

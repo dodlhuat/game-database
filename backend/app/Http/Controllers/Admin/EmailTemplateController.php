@@ -32,18 +32,25 @@ class EmailTemplateController extends Controller
             'body' => '<p>Ein neues Mitglied hat sich registriert und wartet auf Freischaltung.</p><p><strong>Name:</strong> {name}<br><strong>E-Mail:</strong> {email}</p><p>Bitte prüfe die Anfrage im Admin-Bereich.</p>',
             'action_text' => 'Mitglied freischalten',
         ],
+        'loan_confirmation' => [
+            'key' => 'loan_confirmation',
+            'subject' => 'Ausleihe bestätigt: {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>du hast <strong>{game}</strong> ausgeliehen.</p><p><strong>Abholtermin:</strong> {start_date}<br><strong>Rückgabe bis:</strong> {due_date}</p><p>Abholen und wieder zurückbringen kannst du es hier:</p>{location_details}<p>Viel Spaß beim Spielen!</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
         'loan_due_soon' => [
             'key' => 'loan_due_soon',
             'subject' => 'Erinnerung: Rückgabe von „{game}" am {due_date}',
             'greeting' => 'Hallo {name},',
-            'body' => '<p>Deine Ausleihe von <strong>{game}</strong> läuft am <strong>{due_date}</strong> ab.</p><p>Falls du das Spiel länger behalten möchtest, kannst du eine Verlängerung beantragen.</p>',
+            'body' => '<p>Deine Ausleihe von <strong>{game}</strong> läuft am <strong>{due_date}</strong> ab. Bitte bring das Spiel bis dahin dorthin zurück, wo du es abgeholt hast:</p>{location_details}<p>Falls du das Spiel länger behalten möchtest, kannst du eine Verlängerung beantragen.</p>',
             'action_text' => 'Zum Dashboard',
         ],
         'loan_overdue_reminder' => [
             'key' => 'loan_overdue_reminder',
             'subject' => 'Erinnerung: Rückgabe von „{game}" ist überfällig',
             'greeting' => 'Hallo {name},',
-            'body' => '<p>Deine Ausleihe von <strong>{game}</strong> war am <strong>{due_date}</strong> zur Rückgabe fällig und ist derzeit überfällig.</p><p>Bitte bringe das Spiel so bald wie möglich zurück. Bei Fragen wende dich an uns.</p>',
+            'body' => '<p>Deine Ausleihe von <strong>{game}</strong> war am <strong>{due_date}</strong> zur Rückgabe fällig und ist derzeit überfällig.</p><p>Bitte bring das Spiel so bald wie möglich dorthin zurück, wo du es abgeholt hast:</p>{location_details}<p>Bei Fragen wende dich an uns.</p>',
             'action_text' => 'Zum Dashboard',
         ],
         'reservation_available' => [

@@ -16,6 +16,8 @@ class StoreLoanRequest extends FormRequest
     {
         return [
             'copy_id' => ['required', 'integer', 'exists:copies,id'],
+            // Optional only while a single location is active — then it is implied.
+            'pickup_location_id' => ['nullable', 'integer'],
         ];
     }
 }

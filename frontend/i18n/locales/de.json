@@ -1,4 +1,12 @@
 {
+  "pickup": {
+    "legend": "Wo holst du es ab?",
+    "legend_single": "Abholung & Rückgabe",
+    "hint": "Dort holst du es ab – und bringst es auch wieder dorthin zurück.",
+    "required": "Bitte wähle einen Abholort.",
+    "load_error": "Die Abholorte konnten nicht geladen werden. Bitte lade die Seite neu.",
+    "map_link": "Auf der Karte ansehen"
+  },
   "footer": {
     "tagline": "Gemeinsam mehr spielen.",
     "sponsors": "Mit Unterstützung unserer Sponsoren"
@@ -219,11 +227,13 @@
       "game": "Spiel",
       "status": "Status",
       "due_date": "Fällig am",
+      "location": "Rückgabe an",
       "actions": "Aktionen",
       "position": "Position in Warteschlange",
       "returned_at": "Zurückgegeben am"
     },
     "return_title": "Spiel zurückgeben",
+    "return_location_hint": "Bitte bring das Spiel dorthin zurück, wo du es abgeholt hast:",
     "return_condition": "Zustand",
     "damage_title": "Schaden melden",
     "damage_description": "Beschreibung",
@@ -706,7 +716,11 @@
       "mark_overdue": "Als überfällig markieren",
       "send_reminder": "Erinnerung senden",
       "reminder_sent_at": "Gesendet am {date}",
-      "empty": "Keine Ausleihen für diesen Filter."
+      "empty": "Keine Ausleihen für diesen Filter.",
+      "location_col": "Abholort",
+      "change_location": "Abholort ändern",
+      "location_via_package": "über Paket-Ausleihe",
+      "location_error": "Abholort konnte nicht geändert werden."
     },
     "newsletters": {
       "title": "Newsletter",
@@ -865,6 +879,46 @@
         "name": "Bitte einen Namen angeben.",
         "url": "Bitte einen gültigen Link mit http:// oder https:// angeben.",
         "format": "Nur PNG, JPG, WebP oder GIF erlaubt.",
+        "save": "Fehler beim Speichern.",
+        "order": "Reihenfolge konnte nicht gespeichert werden.",
+        "delete": "Fehler beim Löschen."
+      }
+    },
+    "pickup_locations": {
+      "title": "Abholorte",
+      "breadcrumb": "Abholorte",
+      "lead": "Hier holen Mitglieder ihre Spiele ab – und bringen sie auch genau dorthin zurück. Beim Ausleihen wählen sie einen der aktiven Orte.",
+      "all": "Alle Abholorte",
+      "add": "Abholort hinzufügen",
+      "edit": "Abholort bearbeiten",
+      "order_hint": "Reihenfolge per Ziehen oder Pfeilen ändern",
+      "order_col": "Reihenfolge",
+      "location_col": "Ort",
+      "hours_col": "Öffnungszeiten",
+      "open_col": "Ausgeliehen",
+      "active_col": "Aktiv",
+      "map": "Karte",
+      "move_up": "{name} nach oben verschieben",
+      "move_down": "{name} nach unten verschieben",
+      "confirm_delete": "Abholort „{name}“ wirklich löschen? Vergangene Ausleihen behalten den Ort.",
+      "rule_note": "Es muss immer mindestens ein Ort aktiv sein. Ein Ort lässt sich erst deaktivieren oder löschen, wenn alle dort ausgeliehenen Spiele zurück sind.",
+      "lock": {
+        "last_active": "Letzter aktiver Ort – es muss immer mindestens einer aktiv sein.",
+        "open_loans": "Ein ausgeliehenes Spiel muss noch hierher zurück. | {n} ausgeliehene Spiele müssen noch hierher zurück."
+      },
+      "form": {
+        "name": "Name",
+        "address": "Adresse (optional)",
+        "opening_hours": "Öffnungszeiten (optional)",
+        "opening_hours_placeholder": "z. B. Di und Do 18–20 Uhr",
+        "notes": "Hinweis (optional)",
+        "notes_placeholder": "z. B. Bei „Müller“ klingeln, 2. Stock",
+        "map_url": "Karten-Link (optional)",
+        "active": "Beim Ausleihen zur Auswahl anbieten"
+      },
+      "errors": {
+        "name": "Bitte einen Namen angeben.",
+        "url": "Bitte einen gültigen Link mit http:// oder https:// angeben.",
         "save": "Fehler beim Speichern.",
         "order": "Reihenfolge konnte nicht gespeichert werden.",
         "delete": "Fehler beim Löschen."

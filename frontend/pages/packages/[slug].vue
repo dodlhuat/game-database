@@ -101,6 +101,13 @@
 
             <!-- Member, package available -->
             <template v-else-if="pkg.available">
+              <PickupLocationPicker
+                v-if="pickupLocations.length"
+                v-model="pickupLocationId"
+                class="detail__picker"
+                :locations="pickupLocations"
+                :show-error="pickupMissing"
+              />
               <div v-if="loanError" class="alert alert-error" style="margin-bottom: 0.75rem">
                 {{ loanError }}
               </div>
@@ -135,8 +142,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import type { Package } from '~/composables/useGames'
+import type { ApiPickupLocation } from '~/types/api'
 
 const route = useRoute()
 const { fetchPackage } = useGames()
@@ -161,20 +169,43 @@ const loaning = ref(false)
 const loanError = ref('')
 const packageCost = ref<number | null>(null)
 
+const { fetchActiveLocations } = usePickupLocations()
+const pickupLocations = ref<ApiPickupLocation[]>([])
+const pickupLocationId = ref<number | null>(null)
+const pickupMissing = ref(false)
+watch(pickupLocationId, () => (pickupMissing.value = false))
+
 onMounted(async () => {
   try {
     packageCost.value = (await fetchSettings()).package_loan_cost
   } catch {
     // ohne Preis bleibt nur der Link zum Aufladen sichtbar
   }
+  if (auth.canBorrow) {
+    try {
+      pickupLocations.value = await fetchActiveLocations()
+      pickupLocationId.value = initialPickupLocationId(pickupLocations.value)
+    } catch {
+      // the backend still rejects a loan without a valid location
+    }
+  }
 })
 
 async function borrowPackage() {
   if (!pkg.value) return
+  if (!pickupLocationId.value) {
+    if (pickupLocations.value.length) pickupMissing.value = true
+    else loanError.value = t('pickup.load_error')
+    return
+  }
   loaning.value = true
   loanError.value = ''
   try {
-    await api.post('/package-loans', { package_id: pkg.value.id })
+    await api.post('/package-loans', {
+      package_id: pkg.value.id,
+      pickup_location_id: pickupLocationId.value,
+    })
+    rememberPickupLocation(pickupLocationId.value)
     auth.spendTokens(packageCost.value ?? 0)
     await navigateTo('/dashboard')
   } catch (err: unknown) {
@@ -397,6 +428,10 @@ $hero-divider: var(--divider);
     justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
+  }
+
+  &__picker {
+    flex: 1 1 100%;
   }
 
   &__cta-text {

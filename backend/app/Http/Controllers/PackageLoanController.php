@@ -9,8 +9,10 @@ use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Package;
 use App\Models\PackageLoan;
+use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
+use App\Notifications\LoanConfirmation;
 use App\Services\TokenWallet;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -37,7 +39,18 @@ class PackageLoanController extends Controller
     {
         $request->validate([
             'package_id' => ['required', 'integer', 'exists:packages,id'],
+            // Optional only while a single location is active — then it is implied.
+            'pickup_location_id' => ['nullable', 'integer'],
         ]);
+
+        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'));
+        if (! $location) {
+            return response()->json([
+                'message' => 'Bitte wähle einen gültigen Abholort.',
+                'reason' => 'invalid_pickup_location',
+                'errors' => ['pickup_location_id' => ['Bitte wähle einen gültigen Abholort.']],
+            ], 422);
+        }
 
         /** @var User $user */
         $user = $request->user();
@@ -110,6 +123,7 @@ class PackageLoanController extends Controller
         $packageLoan = PackageLoan::create([
             'package_id' => $package->id,
             'user_id' => $user->id,
+            'pickup_location_id' => $location->id,
             'start_date' => $startDate->toDateString(),
             'due_date' => $dueDate->toDateString(),
             'status' => 'ACTIVE',
@@ -122,6 +136,7 @@ class PackageLoanController extends Controller
             $packageLoan->loans()->create([
                 'copy_id' => $copy->id,
                 'user_id' => $user->id,
+                'pickup_location_id' => $location->id,
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
@@ -154,7 +169,9 @@ class PackageLoanController extends Controller
             }
         }
 
-        $packageLoan->load(['package', 'loans.copy.game']);
+        $packageLoan->load(['package', 'loans.copy.game', 'pickupLocation']);
+
+        LoanConfirmation::sendSafely($user, $packageLoan);
 
         return new PackageLoanResource($packageLoan);
     }

@@ -1,3 +1,5 @@
+import type { ApiPickupLocation } from '~/types/api'
+
 export interface Loan {
   id: number
   copy: {
@@ -18,6 +20,8 @@ export interface Loan {
   returned_at: string | null
   return_condition: string | null
   deposit_tokens: number
+  /** Where the game is picked up — and has to be returned. */
+  pickup_location?: ApiPickupLocation | null
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED'
   is_overdue: boolean
   extensions: {
@@ -84,8 +88,12 @@ export function useLoans() {
 
   const fetchLoans = () => api.get<{ data: Loan[] }>('/loans')
 
-  const createLoan = (payload: { copy_id: number; start_date: string; due_date: string }) =>
-    api.post<{ data: Loan }>('/loans', payload)
+  const createLoan = (payload: {
+    copy_id: number
+    pickup_location_id: number
+    start_date: string
+    due_date: string
+  }) => api.post<{ data: Loan }>('/loans', payload)
 
   const returnLoan = (loanId: number, returnCondition: string) =>
     api.post<{ data: Loan }>(`/loans/${loanId}/return`, { return_condition: returnCondition })
