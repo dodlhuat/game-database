@@ -2,9 +2,9 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data \
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data seed-taxonomy \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
-        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data \
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy \
         server-update server-update-install server-update-install-all \
         maintenance-on maintenance-off
 
@@ -56,6 +56,10 @@ demo:
 ## Lokal: alle Spiel- und Testdaten löschen, User behalten, Mechaniken/Tags aus backend/database/data/*.txt einspielen
 reset-data:
 	docker compose exec backend php artisan app:reset-test-data
+
+## Mechaniken und Tags aus backend/database/data/*.txt einspielen (lokal, beliebig oft ausführbar)
+seed-taxonomy:
+	docker compose exec backend php artisan db:seed --class=TaxonomySeeder
 
 ## Shell im Backend-Container öffnen
 shell-backend:
@@ -164,6 +168,10 @@ deploy-backup:
 ## Mechaniken/Tags aus backend/database/data/*.txt einspielen. Ablauf: Deploy → Backup →
 ## Wartungsmodus → Reset (fragt nach „RESET“) → Wartungsmodus aus. Bricht der Reset ab,
 ## bleibt der Wartungsmodus an (mit `make maintenance-off` beenden).
+## Mechaniken und Tags am Server einspielen (deployt vorher das Backend, damit die Listen aktuell sind)
+deploy-seed-taxonomy: deploy-backend
+	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && php artisan db:seed --class=TaxonomySeeder --force'
+
 deploy-reset-data: deploy-backend deploy-backup maintenance-on
 	ssh -t $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && php artisan app:reset-test-data'
 	$(MAKE) maintenance-off

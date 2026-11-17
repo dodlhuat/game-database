@@ -5,11 +5,13 @@ namespace App\Console\Commands;
 use App\Models\Mechanic;
 use App\Models\Tag;
 use App\Models\User;
+use App\Support\TaxonomyList;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * One-time cut from test operation to live operation: wipes the catalogue and
@@ -138,56 +140,19 @@ class ResetTestData extends Command
         return self::SUCCESS;
     }
 
-    /**
-     * One name per line; blank lines and lines starting with # are ignored.
-     *
-     * @return list<string>|null
-     */
+    /** @return list<string>|null */
     private function readList(string $name): ?array
     {
         $option = $this->option($name);
-        $path = is_string($option) && $option !== '' ? $option : database_path("data/{$name}.txt");
-        if (! is_file($path)) {
-            $this->error("Liste fehlt: {$path}");
+        $path = is_string($option) && $option !== '' ? $option : TaxonomyList::path($name);
+
+        try {
+            return TaxonomyList::read($path);
+        } catch (RuntimeException $e) {
+            $this->error($e->getMessage());
 
             return null;
         }
-
-        $names = [];
-        $slugs = [];
-        $problems = [];
-        foreach (preg_split('/\R/', (string) file_get_contents($path)) ?: [] as $i => $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#')) {
-                continue;
-            }
-            $slug = Str::slug($line);
-            if ($slug === '') {
-                $problems[] = 'Zeile '.($i + 1).": „{$line}“ ergibt keinen gültigen Slug";
-            } elseif (isset($slugs[$slug])) {
-                $problems[] = 'Zeile '.($i + 1).": „{$line}“ ist doppelt (wie „{$slugs[$slug]}“)";
-            } else {
-                $slugs[$slug] = $line;
-                $names[] = $line;
-            }
-        }
-
-        if ($problems !== []) {
-            $this->error("Fehler in {$path}:");
-            foreach ($problems as $problem) {
-                $this->line("  - {$problem}");
-            }
-
-            return null;
-        }
-
-        if ($names === []) {
-            $this->error("Liste ist leer: {$path}");
-
-            return null;
-        }
-
-        return $names;
     }
 
     /**
