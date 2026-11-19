@@ -28,6 +28,7 @@ export interface Game {
   copies?: { id: number; condition: string; is_available: boolean }[]
   images?: { id: number; url: string }[]
   earliest_available_at?: string | null
+  created_at?: string | null
 }
 
 export type SmartSearchIntent = 'SIMILARITY' | 'MECHANIC' | 'TAG' | 'FULLTEXT' | 'EMPTY'

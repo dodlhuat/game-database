@@ -14,6 +14,7 @@
       <div v-else class="game-card__placeholder">
         <svg class="icon-svg" aria-hidden="true"><use href="/svg-icons/icons.svg#layers" /></svg>
       </div>
+      <span v-if="isNew" class="game-card__new">{{ $t('common.badge.new') }}</span>
       <span
         v-if="auth.isLoggedIn && game.copies_count > 0"
         class="game-card__badge"
@@ -63,10 +64,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Game } from '~/composables/useGames'
 
-defineProps<{ game: Game }>()
+const props = defineProps<{ game: Game }>()
+
+const NEW_WINDOW_MS = 30 * 24 * 60 * 60 * 1000
+
+// Based on when the catalogue record was created, not when the copy
+// physically arrived — a bulk import marks everything new for 30 days.
+const isNew = computed(() => {
+  if (!props.game.created_at) return false
+  const added = new Date(props.game.created_at).getTime()
+  return !Number.isNaN(added) && Date.now() - added < NEW_WINDOW_MS
+})
 
 const auth = useAuthStore()
 const imgLoaded = ref(false)
@@ -212,6 +223,24 @@ $amber-30: rgba(212, 146, 30, 0.3);
     [data-theme='dark'] &--out {
       color: var(--background);
     }
+  }
+
+  // Opposite corner from the availability badge. Opaque for the same
+  // reason as above: it sits on an arbitrary cover image.
+  &__new {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    background: $amber;
+    color: #0f0e0c;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transform: rotate(-3deg);
   }
 
   // ── Body ───────────────────────────────────────────────────────
