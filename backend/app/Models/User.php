@@ -16,6 +16,9 @@ use Laravel\Sanctum\HasApiTokens;
  * @property 'USER'|'SUPPORTER'|'MEMBER'|'ADMIN' $role
  * @property Carbon|null $membership_expires_at
  * @property Carbon|null $date_of_birth
+ * @property Carbon|null $last_seen_at
+ * @property Carbon|null $inactivity_notice_sent_at
+ * @property Carbon|null $anonymized_at
  */
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -42,6 +45,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'membership_expires_at',
         'renewal_reminder_sent_at',
         'email_verified_at',
+        'last_seen_at',
+        'inactivity_notice_sent_at',
+        'anonymized_at',
     ];
 
     protected $hidden = [
@@ -57,6 +63,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'terms_accepted_at' => 'datetime',
             'membership_expires_at' => 'datetime',
             'renewal_reminder_sent_at' => 'datetime',
+            'last_seen_at' => 'datetime',
+            'inactivity_notice_sent_at' => 'datetime',
+            'anonymized_at' => 'datetime',
             'password' => 'hashed',
             'newsletter_opt_in' => 'boolean',
             'tokens' => 'integer',
@@ -68,6 +77,25 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
+     * Records activity for the inactive-account cleanup. Any sign of life
+     * also cancels a pending deletion notice. Throttled to once a day so
+     * /auth/me on every page load doesn't write each time.
+     */
+    public function markSeen(): void
+    {
+        if ($this->inactivity_notice_sent_at === null
+            && $this->last_seen_at !== null
+            && $this->last_seen_at->gt(now()->subDay())) {
+            return;
+        }
+
+        $this->forceFill([
+            'last_seen_at' => now(),
+            'inactivity_notice_sent_at' => null,
+        ])->saveQuietly();
     }
 
     public function isAdmin(): bool
@@ -131,6 +159,12 @@ class User extends Authenticatable implements MustVerifyEmail
             ->whereNull('expired_at')
             ->orderBy('expires_at')
             ->orderBy('id');
+    }
+
+    /** @return HasMany<EmailLog, $this> */
+    public function emailLogs(): HasMany
+    {
+        return $this->hasMany(EmailLog::class);
     }
 
     /** @return HasMany<Loan, $this> */

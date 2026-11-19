@@ -32,6 +32,7 @@ class RegisterController extends Controller
             'newsletter_opt_in' => $request->boolean('newsletter_opt_in', false),
             'terms_accepted_at' => now(),
             'terms_version' => $latestTerms?->version,
+            'last_seen_at' => now(),
         ]);
 
         $user->notify(new VerifyEmailNotification);

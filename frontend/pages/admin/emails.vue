@@ -249,6 +249,12 @@ const meta: Record<string, TemplateMeta> = {
       'reason',
     ],
   },
+  inactive_account_notice: {
+    label: 'Löschung wegen Inaktivität',
+    recipient: 'Mitglied',
+    icon: 'hourglass_bottom',
+    vars: ['name', 'deletion_date', 'login_link'],
+  },
 }
 
 const form = reactive({

@@ -157,12 +157,16 @@ class PublicTest extends TestCase
 
     public function test_latest_privacy_policy_covers_stripe_and_bank_details(): void
     {
-        $content = $this->getJson('/api/privacy')->assertOk()->assertJsonPath('version', '1.2')->json('content');
+        $content = $this->getJson('/api/privacy')->assertOk()->assertJsonPath('version', '1.3')->json('content');
 
         $this->assertStringContainsString('Stripe', $content);
         $this->assertStringContainsString('IBAN', $content);
         $this->assertStringContainsString('Bonus-Token', $content);
-        $this->assertStringContainsString('Stand: Oktober 2026', $content);
+        $this->assertStringContainsString('Stand: November 2026', $content);
+        $this->assertStringContainsString('alle.unsere.abenteuer@gmail.com', $content);
+        $this->assertStringContainsString('https://alle-unsere-abenteuer.at', $content);
+        $this->assertStringContainsString('Resend', $content);
+        $this->assertStringNotContainsString('beispiel.at', $content);
         $this->assertStringContainsString('AUA-Alle.Unsere.Abenteuer', $content);
         $this->assertStringContainsString('St. Pölten', $content);
     }

@@ -59,6 +59,8 @@ class LoginController extends Controller
             ], 403);
         }
 
+        $user->markSeen();
+
         $token = $user->createToken('spa')->plainTextToken;
 
         return response()->json([
@@ -78,6 +80,10 @@ class LoginController extends Controller
 
     public function me(Request $request): UserResource
     {
-        return new UserResource($request->user());
+        /** @var User $user */
+        $user = $request->user();
+        $user->markSeen();
+
+        return new UserResource($user);
     }
 }

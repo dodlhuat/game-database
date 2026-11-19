@@ -123,6 +123,13 @@ class EmailTemplateController extends Controller
             'body' => '<p>{name} ({email}) hat die Mitgliedschaft gekündigt.</p><p>Rückzuüberweisen: <strong>{refund}</strong> ({refund_tokens} Token, abzüglich {fee} Bearbeitungsabzug). Verfallene Bonus-Token: {bonus_tokens}.</p><p>Kontoinhaber: {account_holder}<br>IBAN: {iban}</p><p>Grund: {reason}</p><p>Die Rücküberweisung erfolgt manuell.</p>',
             'action_text' => 'Kündigungen ansehen',
         ],
+        'inactive_account_notice' => [
+            'key' => 'inactive_account_notice',
+            'subject' => 'Dein Konto wird am {deletion_date} gelöscht',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>du hast dich seit drei Jahren nicht mehr bei der AUA Spieleausleihe angemeldet. Wie in unserer Datenschutzerklärung beschrieben, löschen wir inaktive Konten.</p><p>Wenn du nichts unternimmst, werden deine persönlichen Daten (Name, E-Mail-Adresse, Adresse, Geburtsdatum, Bewertungen, Favoriten und Reservierungen) am <strong>{deletion_date}</strong> gelöscht. Ausleih- und Zahlungsbelege bewahren wir nur so lange auf, wie es die gesetzliche Aufbewahrungspflicht verlangt.</p><p>Du möchtest dein Konto behalten? Dann melde dich einfach vor diesem Datum einmal an.</p>',
+            'action_text' => 'Jetzt anmelden',
+        ],
     ];
 
     /**
