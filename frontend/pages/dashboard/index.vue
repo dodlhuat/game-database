@@ -943,6 +943,10 @@ $amber-ink: var(--amber-ink);
     line-height: 0.85;
     letter-spacing: -0.06em;
     font-variant-numeric: tabular-nums;
+    // Negative letter-spacing ends the box before the last glyph, and
+    // background-clip: text would shave its right edge (same fix as tokens.vue).
+    padding-right: 0.1em;
+    margin-right: -0.1em;
     background: var(--wallet-gradient);
     -webkit-background-clip: text;
     background-clip: text;

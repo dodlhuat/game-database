@@ -656,6 +656,13 @@ $amber-ink: var(--amber-ink);
     line-height: 0.85;
     letter-spacing: -0.06em;
     font-variant-numeric: tabular-nums;
+    // The negative letter-spacing also applies after the last digit, so the
+    // box ends before the glyph does — and background-clip: text only paints
+    // inside the box, shaving off the right edge of the final digit. Pad the
+    // box out to the glyph and cancel it with a negative margin so the
+    // layout doesn't move.
+    padding-right: 0.1em;
+    margin-right: -0.1em;
     background: var(--balance-gradient);
     -webkit-background-clip: text;
     background-clip: text;
