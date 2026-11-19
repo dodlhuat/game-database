@@ -46,8 +46,12 @@ export function useAuth() {
   }
 
   async function fetchMe() {
-    const user = await api.get<Parameters<typeof auth.setAuth>[0]>('/auth/me')
-    auth.user = user
+    // A top-level Laravel resource, so the user comes wrapped in `data`
+    // (unlike login/register, where it's nested under `user`).
+    const { data: user } = await api.get<{ data: Parameters<typeof auth.setAuth>[0] }>('/auth/me')
+    // setUser also updates the localStorage copy, so the next app start
+    // doesn't flash the stale snapshot again.
+    auth.setUser(user)
     return user
   }
 

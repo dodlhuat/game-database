@@ -111,8 +111,8 @@ describe('useAuth', () => {
     expect(navigateToMock).toHaveBeenCalledWith('/login')
   })
 
-  it('fetchMe() loads the current user into the store', async () => {
-    getMock.mockResolvedValue(fakeUser)
+  it('fetchMe() unwraps the resource and stores the current user', async () => {
+    getMock.mockResolvedValue({ data: fakeUser })
     const host = await mountHost()
 
     const result = await host.fetchMe()
@@ -120,5 +120,6 @@ describe('useAuth', () => {
     expect(getMock).toHaveBeenCalledWith('/auth/me')
     expect(result).toEqual(fakeUser)
     expect(host.auth.user).toEqual(fakeUser)
+    expect(JSON.parse(localStorage.getItem('auth_user')!)).toEqual(fakeUser)
   })
 })

@@ -104,6 +104,19 @@ class InactiveAccountTest extends TestCase
         $this->assertTrue($user->last_seen_at->isToday());
     }
 
+    public function test_any_token_authenticated_request_records_activity(): void
+    {
+        $user = $this->staleUser(['inactivity_notice_sent_at' => now()->subDays(3)]);
+        $token = $user->createToken('spa')->plainTextToken;
+
+        // Not /auth/me or login: the SPA keeps its token and may never call those.
+        $this->withToken($token)->getJson('/api/favorites')->assertOk();
+
+        $user->refresh();
+        $this->assertTrue($user->last_seen_at->isToday());
+        $this->assertNull($user->inactivity_notice_sent_at);
+    }
+
     public function test_login_records_activity(): void
     {
         $user = $this->staleUser(['inactivity_notice_sent_at' => now()->subDays(3)]);
