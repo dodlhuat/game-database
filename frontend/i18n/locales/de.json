@@ -197,7 +197,20 @@
     "password_confirm_new": "Neues Passwort wiederholen",
     "password_mismatch": "Passwörter stimmen nicht überein.",
     "password_changed": "Passwort wurde geändert.",
-    "password_save": "Passwort speichern"
+    "password_save": "Passwort speichern",
+    "nav_label": "Bereiche",
+    "nav_password": "Passwort",
+    "section_personal": "Persönliches",
+    "section_address": "Adresse",
+    "address_hint": "Für Ausleihen brauchen wir deine Wohnadresse.",
+    "unsaved": "Ungespeicherte Änderungen",
+    "newsletter_text": "Neuigkeiten zu Spielen und Events per E-Mail.",
+    "password_text": "Für die Anmeldung mit {email}.",
+    "membership_title": "Mitgliedschaft",
+    "membership_full": "Vollmitglied",
+    "membership_active_until": "Aktiv bis {date}",
+    "no_membership": "Kein Mitglied",
+    "role_admin": "Administrator"
   },
   "dashboard": {
     "member_area": "Mitglieder-Bereich",

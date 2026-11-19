@@ -9,26 +9,31 @@
       @update:model-value="$emit('update:street', $event)"
     />
     <div class="address-fields__row">
-      <UiInput
-        :model-value="postalCode"
-        :label="$t('account.address_postal_code')"
-        :error="postalCodeError"
-        placeholder="1010"
-        autocomplete="postal-code"
-        inputmode="numeric"
-        maxlength="4"
-        class="address-fields__plz"
-        @update:model-value="$emit('update:postalCode', $event)"
-      />
-      <UiInput
-        :model-value="city"
-        :label="$t('account.address_city')"
-        :error="cityError"
-        placeholder="Wien"
-        autocomplete="address-level2"
-        @update:model-value="$emit('update:city', $event)"
-        @blur="checkAddress"
-      />
+      <!-- UiInput forwards attrs (incl. class) to the inner <input>, so the
+           column widths live on wrapper divs, not on the components -->
+      <div class="address-fields__plz">
+        <UiInput
+          :model-value="postalCode"
+          :label="$t('account.address_postal_code')"
+          :error="postalCodeError"
+          placeholder="1010"
+          autocomplete="postal-code"
+          inputmode="numeric"
+          maxlength="4"
+          @update:model-value="$emit('update:postalCode', $event)"
+        />
+      </div>
+      <div class="address-fields__city">
+        <UiInput
+          :model-value="city"
+          :label="$t('account.address_city')"
+          :error="cityError"
+          placeholder="Wien"
+          autocomplete="address-level2"
+          @update:model-value="$emit('update:city', $event)"
+          @blur="checkAddress"
+        />
+      </div>
     </div>
     <Transition name="fade">
       <p
@@ -117,7 +122,7 @@ watch([() => props.street, () => props.postalCode, () => props.city], () => {
   flex: 0 0 6.5rem;
 }
 
-.address-fields__row > :last-child {
+.address-fields__city {
   flex: 1;
   min-width: 0;
 }

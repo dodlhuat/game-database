@@ -58,6 +58,11 @@ function passwordSection(wrapper: Awaited<ReturnType<typeof mountAccountPage>>) 
   return wrapper.findAll('.account-section')[2]!
 }
 
+// The password fields stay collapsed until the user asks to change it
+async function openPasswordForm(wrapper: Awaited<ReturnType<typeof mountAccountPage>>) {
+  await passwordSection(wrapper).find('.password-reveal').trigger('click')
+}
+
 describe('account.vue — profile', () => {
   beforeEach(() => {
     patchMock.mockReset()
@@ -135,6 +140,17 @@ describe('account.vue — profile', () => {
   })
 })
 
+describe('account.vue — unsaved changes', () => {
+  it('flags edits that differ from the stored profile', async () => {
+    setUser({})
+    const wrapper = await mountAccountPage()
+    expect(wrapper.find('.unsaved').exists()).toBe(false)
+
+    await profileSection(wrapper).find('input').setValue('Anderer Name')
+    expect(wrapper.find('.unsaved').exists()).toBe(true)
+  })
+})
+
 describe('account.vue — newsletter', () => {
   beforeEach(() => {
     patchMock.mockReset()
@@ -155,6 +171,15 @@ describe('account.vue — newsletter', () => {
 })
 
 describe('account.vue — password', () => {
+  it('keeps the password fields collapsed until requested', async () => {
+    setUser({})
+    const wrapper = await mountAccountPage()
+
+    expect(passwordSection(wrapper).findAll('input')).toHaveLength(0)
+    await openPasswordForm(wrapper)
+    expect(passwordSection(wrapper).findAll('input')).toHaveLength(3)
+  })
+
   beforeEach(() => {
     patchMock.mockReset()
   })
@@ -162,12 +187,13 @@ describe('account.vue — password', () => {
   it('does not submit when the new password confirmation does not match', async () => {
     setUser({})
     const wrapper = await mountAccountPage()
+    await openPasswordForm(wrapper)
     const inputs = passwordSection(wrapper).findAll('input')
     await inputs[0]!.setValue('current-pw')
     await inputs[1]!.setValue('new-pw')
     await inputs[2]!.setValue('does-not-match')
 
-    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
+    await passwordSection(wrapper).find('.password-save').trigger('click')
     await flushPromises()
 
     expect(patchMock).not.toHaveBeenCalled()
@@ -177,8 +203,9 @@ describe('account.vue — password', () => {
   it('does not submit when required fields are empty', async () => {
     setUser({})
     const wrapper = await mountAccountPage()
+    await openPasswordForm(wrapper)
 
-    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
+    await passwordSection(wrapper).find('.password-save').trigger('click')
     await flushPromises()
 
     expect(patchMock).not.toHaveBeenCalled()
@@ -189,12 +216,13 @@ describe('account.vue — password', () => {
     patchMock.mockResolvedValue({})
 
     const wrapper = await mountAccountPage()
+    await openPasswordForm(wrapper)
     const inputs = passwordSection(wrapper).findAll('input')
     await inputs[0]!.setValue('current-pw')
     await inputs[1]!.setValue('new-pw')
     await inputs[2]!.setValue('new-pw')
 
-    await passwordSection(wrapper).find('button:not(.input-toggle)').trigger('click')
+    await passwordSection(wrapper).find('.password-save').trigger('click')
     await flushPromises()
 
     expect(patchMock).toHaveBeenCalledWith('/account', {
@@ -210,10 +238,10 @@ describe('account.vue — password', () => {
     setUser()
     const wrapper = await mountAccountPage()
 
-    const section = wrapper.find('.account-section--danger')
-    expect(section.exists()).toBe(true)
+    const zone = wrapper.find('.cancel-zone')
+    expect(zone.exists()).toBe(true)
 
-    await section.find('button').trigger('click')
+    await zone.find('button').trigger('click')
     expect(wrapper.findComponent({ name: 'CancelMembershipModal' }).props('open')).toBe(true)
   })
 
@@ -221,6 +249,6 @@ describe('account.vue — password', () => {
     setUser({ role: 'USER', is_member: false })
     const wrapper = await mountAccountPage()
 
-    expect(wrapper.find('.account-section--danger').exists()).toBe(false)
+    expect(wrapper.find('.cancel-zone').exists()).toBe(false)
   })
 })

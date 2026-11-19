@@ -56,6 +56,18 @@
   --primary-dark: #0f0e0c;
 }
 
+// ─── Document scrolling ───────────────────────────────────────────
+// basix's defaults.scss sets `html, body { overflow: auto }`. That turns
+// <body> into its own scroll container which never actually scrolls (the
+// viewport does), and position: sticky then sticks to the wrong ancestor —
+// every sticky element in the app silently scrolled away with the page.
+// Visible lets the viewport be the only scroller; the JS scroll locks
+// (body.style.overflow = 'hidden') still propagate to it.
+html,
+body {
+  overflow: visible;
+}
+
 // ─── Icon SVG sizing ──────────────────────────────────────────────
 // basix 1.5.0 replaced the font-icon system with an SVG sprite
 // (svg-icons/icons.svg). Its base .icon-svg is fixed at 24×24px;
