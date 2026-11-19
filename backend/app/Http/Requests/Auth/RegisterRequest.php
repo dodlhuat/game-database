@@ -21,7 +21,8 @@ class RegisterRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'newsletter_opt_in' => ['boolean'],
             'terms_accepted' => ['required', 'accepted'],
-            'website' => ['prohibited'],
+            // Honeypot, checked silently in RegisterController.
+            'website' => ['nullable', 'string', 'max:255'],
             'form_loaded_at' => ['required', 'integer'],
         ];
     }

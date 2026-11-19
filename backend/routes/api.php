@@ -57,14 +57,16 @@ use Illuminate\Support\Facades\Route;
 // ----------------------------------------------------------------
 // Öffentliche Routen
 // ----------------------------------------------------------------
+// Rate limits are defined in AppServiceProvider::configureRateLimits().
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [RegisterController::class, 'store']);
-    Route::post('/login', [LoginController::class, 'store']);
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:register');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:login');
     Route::get('/verify-email/{id}', [EmailVerificationController::class, 'verify'])
+        ->middleware('throttle:auth-token')
         ->name('auth.verify-email');
-    Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
-    Route::post('/forgot-password', [ForgotPasswordController::class, 'store']);
-    Route::post('/reset-password', [ResetPasswordController::class, 'store']);
+    Route::post('/email/resend', [EmailVerificationController::class, 'resend'])->middleware('throttle:auth-email');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])->middleware('throttle:auth-email');
+    Route::post('/reset-password', [ResetPasswordController::class, 'store'])->middleware('throttle:auth-token');
 });
 
 Route::get('/loan-settings', [LoanSettingController::class, 'show']);
@@ -130,7 +132,7 @@ Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () 
 
     // Konto
     Route::patch('/account', [AccountController::class, 'update']);
-    Route::post('/address/validate', [AddressValidationController::class, 'validate']);
+    Route::post('/address/validate', [AddressValidationController::class, 'validate'])->middleware('throttle:address');
 
     // Mitgliedschaft & Token
     Route::post('/membership/checkout', [MembershipController::class, 'checkout']);
