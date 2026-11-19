@@ -256,6 +256,16 @@ $hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
 
 .calendar-wrap {
   width: 100%;
+
+  // basix's 88px month cells push the 6th week below the fold on laptop
+  // screens (~780px viewport). 70px fits the whole month; it is a
+  // min-height, so a busy day still grows instead of clipping its events.
+  // Desktop only: below $bp-md basix already uses compact 52px cells.
+  @media (min-width: $bp-md + 1) {
+    :deep(.cal__day) {
+      min-height: 70px;
+    }
+  }
 }
 
 // ─── Modal Base ───────────────────────────────────────────────────
