@@ -70,13 +70,14 @@ defineEmits<{
 const { t } = useI18n()
 const { validateAddress } = useAddress()
 
-type Status = 'idle' | 'checking' | 'verified' | 'not-found'
+type Status = 'idle' | 'checking' | 'verified' | 'not-found' | 'unavailable'
 const status = ref<Status>('idle')
 
 const statusText = computed(() => {
   if (status.value === 'checking') return t('account.address_check_pending')
   if (status.value === 'verified') return t('account.address_check_verified')
   if (status.value === 'not-found') return t('account.address_check_not_found')
+  if (status.value === 'unavailable') return t('account.address_check_unavailable')
   return ''
 })
 
@@ -92,8 +93,11 @@ async function checkAddress() {
   }
   status.value = 'checking'
   try {
-    const { verified } = await validateAddress(props.street!, props.postalCode!, props.city!)
-    status.value = verified ? 'verified' : 'not-found'
+    const result = await validateAddress(props.street!, props.postalCode!, props.city!)
+    // The geocoder being down/rate-limited is not the member's fault — keep
+    // it visibly distinct from "this address doesn't exist".
+    if (result.status === 'unavailable') status.value = 'unavailable'
+    else status.value = result.verified ? 'verified' : 'not-found'
   } catch {
     status.value = 'idle'
   }
@@ -133,7 +137,8 @@ watch([() => props.street, () => props.postalCode, () => props.city], () => {
   padding-bottom: 0;
 }
 
-.address-fields__status--checking {
+.address-fields__status--checking,
+.address-fields__status--unavailable {
   color: var(--secondary-text);
 }
 

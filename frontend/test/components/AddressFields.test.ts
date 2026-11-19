@@ -76,6 +76,17 @@ describe('AddressFields', () => {
     expect(wrapper.find('.address-fields__status--not-found').exists()).toBe(true)
   })
 
+  it('shows a neutral hint, not not-found, when the backend could not check', async () => {
+    validateAddressMock.mockResolvedValue({ verified: false, status: 'unavailable' })
+    const wrapper = await mountFields()
+
+    await cityInput(wrapper).trigger('blur')
+    await flushPromises()
+
+    expect(wrapper.find('.address-fields__status--unavailable').exists()).toBe(true)
+    expect(wrapper.find('.address-fields__status--not-found').exists()).toBe(false)
+  })
+
   it('resets to idle (never shows an error) when the check itself fails', async () => {
     validateAddressMock.mockRejectedValue(new Error('network down'))
     const wrapper = await mountFields()

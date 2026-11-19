@@ -185,6 +185,7 @@
     "address_check_pending": "Adresse wird geprüft …",
     "address_check_verified": "Adresse gefunden.",
     "address_check_not_found": "Adresse konnte nicht gefunden werden — bitte prüfe deine Eingabe. Du kannst trotzdem fortfahren.",
+    "address_check_unavailable": "Adresse konnte gerade nicht geprüft werden. Du kannst trotzdem fortfahren.",
     "date_of_birth": "Geburtsdatum",
     "profile_save": "Profil speichern",
     "profile_saved": "Profil gespeichert.",

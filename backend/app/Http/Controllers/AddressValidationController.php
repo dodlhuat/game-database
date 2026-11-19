@@ -19,12 +19,15 @@ class AddressValidationController extends Controller
             'city' => ['required', 'string', 'max:255'],
         ]);
 
-        $verified = $this->addressValidation->exists(
+        $status = $this->addressValidation->check(
             $validated['street'],
             $validated['postal_code'],
             $validated['city'],
         );
 
-        return response()->json(['verified' => $verified]);
+        return response()->json([
+            'verified' => $status === AddressValidationService::STATUS_VERIFIED,
+            'status' => $status,
+        ]);
     }
 }
