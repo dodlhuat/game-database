@@ -66,9 +66,12 @@ const resendLoading = ref(false)
 const resendSuccess = ref(false)
 const resendError = ref(false)
 const lastEmail = ref('')
-const statusMessage = ref(
-  route.query.reason === 'unauthenticated' ? t('common.error.session_expired') : ''
-)
+const reasonMessages: Record<string, string> = {
+  unauthenticated: 'common.error.session_expired',
+  maintenance: 'common.error.maintenance_logout',
+}
+const reasonKey = reasonMessages[String(route.query.reason)]
+const statusMessage = ref(reasonKey ? t(reasonKey) : '')
 
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '' })

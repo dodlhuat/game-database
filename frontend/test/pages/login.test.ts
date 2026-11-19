@@ -54,6 +54,14 @@ describe('login.vue', () => {
     expect(wrapper.find('.alert-error').text()).toBe(wrapper.vm.$t('common.error.session_expired'))
   })
 
+  it('shows the maintenance notice when redirected with ?reason=maintenance', async () => {
+    const wrapper = await mountLoginPage('/login?reason=maintenance')
+
+    expect(wrapper.find('.alert-error').text()).toBe(
+      wrapper.vm.$t('common.error.maintenance_logout')
+    )
+  })
+
   it('logs in and navigates to the dashboard on success', async () => {
     loginMock.mockResolvedValue({})
     const wrapper = await mountLoginPage()

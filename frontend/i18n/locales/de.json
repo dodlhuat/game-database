@@ -103,6 +103,7 @@
       "generic": "Ein Fehler ist aufgetreten",
       "try_later": "Bitte versuche es später erneut.",
       "session_expired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+      "maintenance_logout": "Wegen Wartungsarbeiten wurdest du abgemeldet. Bitte schau später wieder vorbei.",
       "save": "Fehler beim Speichern.",
       "import_failed": "Import fehlgeschlagen.",
       "export_failed": "Export fehlgeschlagen."

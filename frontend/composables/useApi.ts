@@ -50,12 +50,15 @@ export function useApi() {
     })
 
     if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Unbekannter Fehler' }))
       if (response.status === 401 && !skipAuthRedirect) {
         const auth = useAuthStore()
         auth.logout()
-        await navigateTo('/login?reason=unauthenticated')
+        // Im Wartungsmodus beendet das Backend Logins von Nicht-Admins —
+        // dann den Wartungshinweis statt "Sitzung abgelaufen" zeigen.
+        const reason = error.reason === 'maintenance' ? 'maintenance' : 'unauthenticated'
+        await navigateTo(`/login?reason=${reason}`)
       }
-      const error = await response.json().catch(() => ({ message: 'Unbekannter Fehler' }))
       throw { status: response.status, ...error }
     }
 

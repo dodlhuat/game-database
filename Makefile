@@ -164,28 +164,36 @@ deploy-verify:
 deploy-backup:
 	ssh $(DEPLOY_SERVER) 'bash -s' < scripts/server-backup.sh
 
-## EINMALIG vor dem Livegang: alle Spiel- und Testdaten auf dem Server löschen, User behalten,
-## Mechaniken/Tags aus backend/database/data/*.txt einspielen. Ablauf: Deploy → Backup →
-## Wartungsmodus → Reset (fragt nach „RESET“) → Wartungsmodus aus. Bricht der Reset ab,
-## bleibt der Wartungsmodus an (mit `make maintenance-off` beenden).
 ## Mechaniken und Tags am Server einspielen (deployt vorher das Backend, damit die Listen aktuell sind)
 deploy-seed-taxonomy: deploy-backend
 	ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && php artisan db:seed --class=TaxonomySeeder --force'
 
+## EINMALIG vor dem Livegang: alle Spiel- und Testdaten auf dem Server löschen, User behalten,
+## Mechaniken/Tags aus backend/database/data/*.txt einspielen. Ablauf: Deploy → Backup →
+## Wartungsmodus → Reset (fragt nach „RESET“) → Wartungsmodus aus. Bricht der Reset ab,
+## bleibt der Wartungsmodus an (mit `make maintenance-off` beenden).
 deploy-reset-data: deploy-backend deploy-backup maintenance-on
 	ssh -t $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && php artisan app:reset-test-data'
 	$(MAKE) maintenance-off
 
-## Wartungsmodus einschalten: setzt NUXT_PUBLIC_MAINTENANCE_MODE=true im PM2-Prozess (kein Rebuild nötig)
+# Setzt MAINTENANCE_MODE=<wert> in backend/.env (legt die Zeile an, falls sie fehlt) und baut den Config-Cache neu
+MAINTENANCE_BACKEND = cd $(DEPLOY_DIR)/backend && if grep -q "^MAINTENANCE_MODE=" .env; then sed -i "s/^MAINTENANCE_MODE=.*/MAINTENANCE_MODE=$(1)/" .env; else echo "MAINTENANCE_MODE=$(1)" >> .env; fi && php artisan config:cache
+
+## Wartungsmodus einschalten:
+## - Backend: MAINTENANCE_MODE=true in .env + config:cache → nur Admins können sich einloggen,
+##   Registrierung gesperrt, bestehende Logins von Nicht-Admins werden beendet
+## - Frontend: NUXT_PUBLIC_MAINTENANCE_MODE=true im PM2-Prozess (kein Rebuild nötig)
 ## `pm2 save` sorgt dafür, dass der Zustand einen Server-Neustart überlebt
 maintenance-on:
+	ssh $(DEPLOY_SERVER) '$(call MAINTENANCE_BACKEND,true)'
 	ssh $(DEPLOY_SERVER) 'NUXT_PUBLIC_MAINTENANCE_MODE=true pm2 restart alle-unsere-abenteuer-frontend --update-env && pm2 save'
-	@echo "✓ Wartungsmodus AN — $(DEPLOY_URL)"
+	@echo "✓ Wartungsmodus AN (Backend + Frontend) — $(DEPLOY_URL)"
 
-## Wartungsmodus ausschalten
+## Wartungsmodus ausschalten (Frontend und Backend)
 maintenance-off:
 	ssh $(DEPLOY_SERVER) 'NUXT_PUBLIC_MAINTENANCE_MODE=false pm2 restart alle-unsere-abenteuer-frontend --update-env && pm2 save'
-	@echo "✓ Wartungsmodus AUS — $(DEPLOY_URL)"
+	ssh $(DEPLOY_SERVER) '$(call MAINTENANCE_BACKEND,false)'
+	@echo "✓ Wartungsmodus AUS (Backend + Frontend) — $(DEPLOY_URL)"
 
 # ============================================================
 # Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)

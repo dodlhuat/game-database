@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { defineComponent } from 'vue'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { useApi } from '~/composables/useApi'
 import { useAuthStore } from '~/stores/auth'
 
@@ -31,6 +31,9 @@ function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   })
 }
 
+const navigateToMock = vi.hoisted(() => vi.fn())
+mockNuxtImport('navigateTo', () => navigateToMock)
+
 let fetchMock: ReturnType<typeof vi.fn>
 
 describe('useApi', () => {
@@ -38,6 +41,7 @@ describe('useApi', () => {
     localStorage.clear()
     fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
+    navigateToMock.mockReset()
   })
 
   afterEach(() => {
@@ -138,6 +142,20 @@ describe('useApi', () => {
 
     expect(auth.token).toBeNull()
     expect(auth.user).toBeNull()
+    expect(navigateToMock).toHaveBeenCalledWith('/login?reason=unauthenticated')
+  })
+
+  it('redirects with the maintenance reason when the backend ends the login for maintenance', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ message: 'Wartung', reason: 'maintenance' }, { status: 401 })
+    )
+    const { api, auth } = await mountHost()
+    auth.setAuth({ id: 1 } as Parameters<typeof auth.setAuth>[0], 'old-token')
+
+    await expect(api.get('/account')).rejects.toMatchObject({ status: 401, reason: 'maintenance' })
+
+    expect(auth.token).toBeNull()
+    expect(navigateToMock).toHaveBeenCalledWith('/login?reason=maintenance')
   })
 
   it('does not log out on a 401 when skipAuthRedirect is set', async () => {
