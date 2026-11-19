@@ -117,5 +117,18 @@ button.button-primary {
   }
 }
 
-// In dark mode basix button-variant-dark uses color:var(--primary-text)
-// (#EEEEF0 cream) which gives good contrast on cyan-blue — leave as-is.
+// Dark mode: basix button-variant-dark switches to color:var(--primary-text)
+// (cream), which only made sense for the old cyan-blue accent — cream on
+// orange is ~2:1. Keep the same near-black as light mode. Needs the
+// :root[data-theme] prefix to beat basix's [data-theme='dark'] rule.
+:root[data-theme='dark'] {
+  .button-primary,
+  button.button-primary {
+    color: var(--accent-color-text);
+
+    &:hover:not(:disabled),
+    &:active:not(:disabled) {
+      color: var(--accent-color-text);
+    }
+  }
+}
