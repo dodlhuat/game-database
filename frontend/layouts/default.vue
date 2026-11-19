@@ -207,6 +207,16 @@ async function handleLogout() {
    is required for a flex child to actually be allowed to scroll. */
 #flyoutMenu {
   overflow: hidden;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* basix keeps its 80px drop shadow on the closed drawer, which only sits
+   just off-screen at translateX(-100%) — the blur bleeds into the viewport
+   as a grey band along the left edge (invisible on dark, obvious on light).
+   Only cast the shadow while the drawer is actually open. */
+#flyoutMenu:not(.is-open) {
+  box-shadow: none;
 }
 #flyoutMenu .flyout-links {
   min-height: 0;
