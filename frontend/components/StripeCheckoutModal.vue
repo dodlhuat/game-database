@@ -288,6 +288,14 @@ watch(
     // enabled.
     flex: 1 1 auto;
     min-height: 0;
+    // overflow-y: auto turns the x-axis into a scroll container too, and the
+    // Stripe iframe is deliberately 8px wider than its parent (-4px margins
+    // for its focus rings), which showed up as a horizontal scrollbar.
+    // Give it those 4px of room on every side, pull the box back out by the
+    // same amount so alignment is unchanged, and never scroll sideways.
+    overflow-x: hidden;
+    padding: 4px;
+    margin: -4px;
   }
   &__actions {
     flex-shrink: 0;
