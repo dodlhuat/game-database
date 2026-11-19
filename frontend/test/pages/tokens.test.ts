@@ -194,12 +194,108 @@ describe('tokens.vue', () => {
 
     const wrapper = await mountSuspended(TokensPage, { route: '/tokens' })
     await flushPromises()
-    const costs = wrapper.find('.token-info__list').text()
+    const rows = wrapper.findAll('.price-row').map((r: DOMWrapper<Element>) => r.text())
 
-    expect(costs).toContain('3 / 6 / 10 Token')
-    expect(costs).toContain('4 Token: Paket ausleihen')
-    expect(costs).toContain('bis zu 2-mal pro Ausleihe')
-    expect(costs).toContain('jede weitere 2 Token')
-    expect(costs).toContain('1 Token: Spiel reservieren')
+    expect(rows[0]).toContain('Spiel ausleihen')
+    expect(rows[0]).toContain('3 / 6 / 10')
+    expect(rows[1]).toContain('Paket ausleihen')
+    expect(rows[1]).toContain('4')
+    expect(rows[2]).toContain('bis zu 2-mal pro Ausleihe')
+    expect(rows[2]).toContain('2')
+    expect(rows[3]).toContain('Spiel reservieren')
+    expect(rows[3]).toContain('1')
+    expect(rows[4]).toContain('Kaution')
+  })
+})
+
+describe('tokens.vue — derived figures', () => {
+  beforeEach(() => {
+    fetchTokenTransactionsMock.mockReset()
+    setMemberUser()
+  })
+
+  afterEach(() => {
+    activeWrapper?.unmount()
+    activeWrapper = null
+  })
+
+  it('shows the per-token price and the saving against the smallest package', async () => {
+    fetchTokenTransactionsMock.mockResolvedValue({ data: [], meta: { last_page: 1, total: 0 } })
+    getMock.mockImplementation(async (url: string) =>
+      url === '/tokens/packages'
+        ? {
+            data: [
+              { amount: 20, price_cents: 1000, currency: 'EUR' },
+              { amount: 40, price_cents: 1850, currency: 'EUR' },
+            ],
+          }
+        : Promise.reject(new Error('no settings'))
+    )
+
+    const wrapper = await mountTokensPage()
+    await flushPromises()
+    const cards = wrapper.findAll('.token-card')
+
+    expect(cards[0]!.find('.token-card__rate').text()).toContain('0,50')
+    expect(cards[0]!.find('.token-card__save').exists()).toBe(false)
+    expect(cards[1]!.find('.token-card__rate').text()).toContain('0,46')
+    expect(cards[1]!.find('.token-card__save').text()).toContain('7 %')
+  })
+
+  it('tells how many games of each size the free balance covers', async () => {
+    const auth = useAuthStore()
+    auth.user = { ...auth.user!, tokens: 20 }
+    fetchTokenTransactionsMock.mockResolvedValue({ data: [], meta: { last_page: 1, total: 0 } })
+    getMock.mockImplementation(async (url: string) =>
+      url === '/loan-settings'
+        ? {
+            loan_cost_small: 3,
+            loan_cost_medium: 6,
+            loan_cost_large: 10,
+            package_loan_cost: 4,
+            extension_cost: 2,
+            max_extensions: 2,
+            reservation_cost: 1,
+          }
+        : { data: [] }
+    )
+
+    const wrapper = await mountTokensPage()
+    await flushPromises()
+    const counts = wrapper.findAll('.capacity__count').map((c: DOMWrapper<Element>) => c.text())
+
+    expect(counts).toEqual(['6×', '3×', '2×'])
+  })
+
+  it('hides Stripe payment references in the history', async () => {
+    getMock.mockResolvedValue({ data: [] })
+    fetchTokenTransactionsMock.mockResolvedValue({
+      data: [
+        {
+          id: 1,
+          type: 'PURCHASE',
+          amount: 30,
+          description: 'Stripe-Kauf (Payment Intent pi_123)',
+          created_at: '2026-09-18T10:00:00Z',
+        },
+        {
+          id: 2,
+          type: 'BORROW',
+          amount: -6,
+          description: 'Azul',
+          created_at: '2026-08-02T10:00:00Z',
+        },
+      ],
+      meta: { last_page: 1, total: 2 },
+    })
+
+    const wrapper = await mountTokensPage()
+    await flushPromises()
+    const rows = wrapper.findAll('.tx-row')
+
+    expect(wrapper.text()).not.toContain('pi_123')
+    expect(rows[0]!.find('.tx-row__detail').exists()).toBe(false)
+    expect(rows[1]!.find('.tx-row__detail').text()).toBe('Azul')
+    expect(wrapper.findAll('.tx-group__month')).toHaveLength(2)
   })
 })
