@@ -77,6 +77,83 @@ class AuthTest extends TestCase
         ])->assertStatus(401);
     }
 
+    public function test_login_is_blocked_for_non_admins_in_maintenance_mode(): void
+    {
+        config(['app.maintenance_mode' => true]);
+        User::factory()->create([
+            'email' => 'member@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => 'member@example.com',
+            'password' => 'password123',
+        ])->assertStatus(503)->assertJson(['reason' => 'maintenance']);
+    }
+
+    public function test_login_still_works_for_admins_in_maintenance_mode(): void
+    {
+        config(['app.maintenance_mode' => true]);
+        User::factory()->create([
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password123'),
+            'role' => 'ADMIN',
+        ]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => 'admin@example.com',
+            'password' => 'password123',
+        ])->assertOk()->assertJsonStructure(['token']);
+    }
+
+    public function test_login_with_wrong_password_reveals_nothing_in_maintenance_mode(): void
+    {
+        config(['app.maintenance_mode' => true]);
+        User::factory()->create([
+            'email' => 'member@example.com',
+            'password' => Hash::make('correct'),
+        ]);
+
+        $this->postJson('/api/auth/login', [
+            'email' => 'member@example.com',
+            'password' => 'wrong',
+        ])->assertStatus(401);
+    }
+
+    public function test_register_is_blocked_in_maintenance_mode(): void
+    {
+        config(['app.maintenance_mode' => true]);
+
+        $this->postJson('/api/auth/register', $this->registerPayload([
+            'email' => 'new@example.com',
+        ]))->assertStatus(503)->assertJson(['reason' => 'maintenance']);
+
+        $this->assertDatabaseMissing('users', ['email' => 'new@example.com']);
+    }
+
+    public function test_existing_non_admin_login_is_ended_in_maintenance_mode(): void
+    {
+        $user = User::factory()->create();
+        $token = $user->createToken('spa')->plainTextToken;
+        config(['app.maintenance_mode' => true]);
+
+        $this->withToken($token)->getJson('/api/auth/me')
+            ->assertStatus(401)
+            ->assertJson(['reason' => 'maintenance']);
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_existing_admin_login_keeps_working_in_maintenance_mode(): void
+    {
+        $admin = User::factory()->create(['role' => 'ADMIN']);
+        $token = $admin->createToken('spa')->plainTextToken;
+        config(['app.maintenance_mode' => true]);
+
+        $this->withToken($token)->getJson('/api/auth/me')->assertOk();
+        $this->withToken($token)->getJson('/api/admin/users')->assertOk();
+    }
+
     public function test_logout_revokes_token(): void
     {
         $user = User::factory()->create();

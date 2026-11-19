@@ -22,6 +22,15 @@ class LoginController extends Controller
             ], 401);
         }
 
+        // Erst nach der Passwortprüfung, damit sich so nicht herausfinden lässt,
+        // welche E-Mail-Adressen zu Admin-Konten gehören.
+        if (config('app.maintenance_mode') && ! $user->isAdmin()) {
+            return response()->json([
+                'message' => 'Wegen Wartungsarbeiten ist die Anmeldung gerade nicht möglich.',
+                'reason' => 'maintenance',
+            ], 503);
+        }
+
         if (! $user->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'Bitte bestätige zuerst deine E-Mail-Adresse.',

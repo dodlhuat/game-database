@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BlockNonAdminsDuringMaintenance;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'admin' => EnsureUserIsAdmin::class,
+            'maintenance' => BlockNonAdminsDuringMaintenance::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

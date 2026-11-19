@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Plattform-Wartungsmodus
+    |--------------------------------------------------------------------------
+    |
+    | Gegenstück zu NUXT_PUBLIC_MAINTENANCE_MODE im Frontend (beide gemeinsam
+    | setzen). Anders als Laravels "artisan down" bleibt die API erreichbar,
+    | aber nur Admins können sich einloggen; Registrierungen sind gesperrt.
+    |
+    */
+
+    'maintenance_mode' => (bool) env('MAINTENANCE_MODE', false),
+
 ];

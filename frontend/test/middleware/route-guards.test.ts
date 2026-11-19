@@ -96,6 +96,15 @@ describe('maintenance middleware', () => {
     expect(navigateToMock).not.toHaveBeenCalled()
   })
 
+  it.each(['/forgot-password', '/reset-password'])(
+    'lets the password reset flow (%s) through when on',
+    (path) => {
+      useRuntimeConfig().public.maintenanceMode = true
+      go(path)
+      expect(navigateToMock).not.toHaveBeenCalled()
+    }
+  )
+
   it('lets a logged-in admin reach every route when on', () => {
     useRuntimeConfig().public.maintenanceMode = true
     useAuthStore().user = { role: 'ADMIN' } as never

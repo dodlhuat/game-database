@@ -82,7 +82,7 @@ Route::get('/privacy', [PrivacyController::class, 'show']);
 Route::get('/cookies', [CookieController::class, 'show']);
 Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/sponsors', [SponsorController::class, 'index']);
-Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'active']);
+Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'maintenance', 'active']);
 
 // Stripe ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
 // wird stattdessen über die Webhook-Signatur (siehe StripeWebhookController) geprüft.
@@ -91,7 +91,7 @@ Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
 // ----------------------------------------------------------------
-Route::middleware(['auth:sanctum', 'active'])->group(function () {
+Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () {
     // Auth
     Route::post('/auth/logout', [LoginController::class, 'destroy']);
     Route::get('/auth/me', [LoginController::class, 'me']);

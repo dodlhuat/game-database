@@ -14,6 +14,13 @@ class RegisterController extends Controller
 {
     public function store(RegisterRequest $request): JsonResponse
     {
+        if (config('app.maintenance_mode')) {
+            return response()->json([
+                'message' => 'Wegen Wartungsarbeiten sind Registrierungen gerade nicht möglich.',
+                'reason' => 'maintenance',
+            ], 503);
+        }
+
         $latestTerms = TermsVersion::orderByDesc('published_at')->first();
 
         $user = User::create([

@@ -1,13 +1,20 @@
 import { useAuthStore } from '~/stores/auth'
 
 /**
+ * Seiten, die im Wartungsmodus erreichbar bleiben: Startseite (zeigt die
+ * Wartungsansicht), Login sowie Passwort vergessen/zurücksetzen, damit sich
+ * ein Admin auch ohne bekanntes Passwort wieder Zugang verschaffen kann.
+ */
+const ALLOWED_PATHS = new Set(['/', '/login', '/forgot-password', '/reset-password'])
+
+/**
  * Wartungsmodus (NUXT_PUBLIC_MAINTENANCE_MODE=true)
- * Leitet jede Route außer der Startseite und dem Login dorthin um.
+ * Leitet jede Route außer ALLOWED_PATHS auf die Startseite um.
  * Eingeloggte Admins sind ausgenommen, damit sie weiter Daten pflegen können.
  */
 export default defineNuxtRouteMiddleware((to) => {
   if (!useRuntimeConfig().public.maintenanceMode) return
-  if (to.path === '/' || to.path === '/login') return
+  if (ALLOWED_PATHS.has(to.path)) return
   if (useAuthStore().isAdmin) return
 
   return navigateTo('/', { replace: true })
