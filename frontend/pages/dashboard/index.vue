@@ -1,135 +1,72 @@
 <template>
   <div class="dashboard-page">
-    <!-- ── Page Hero ────────────────────────────────────────────── -->
+    <!-- ── Hero: greeting + wallet ──────────────────────────────── -->
     <section class="page-hero">
       <div class="page-hero__backdrop" aria-hidden="true">
-        <div class="page-hero__glow page-hero__glow--amber" />
-        <div class="page-hero__glow page-hero__glow--warm" />
+        <div class="page-hero__glow" />
         <div class="page-hero__dots" />
       </div>
       <div class="page-hero__body">
-        <p class="page-hero__eyebrow">{{ $t('dashboard.member_area') }}</p>
-        <h1 class="page-hero__title">{{ $t('dashboard.welcome', { name: auth.user?.name }) }}</h1>
-        <p class="page-hero__sub">{{ $t('dashboard.subtitle') }}</p>
-
-        <!-- Stats ────────────────────────────────────────────────── -->
-        <div v-if="!loading" class="stats-grid">
-          <div class="stat-card">
-            <span class="stat-card__icon">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#article" />
-              </svg>
-            </span>
-            <div class="stat-card__body">
-              <span class="stat-card__value">{{ data?.stats.active_loans_count ?? 0 }}</span>
-              <span class="stat-card__label">{{ $t('dashboard.stats.active_loans') }}</span>
-            </div>
-          </div>
-          <div class="stat-card stat-card--warn">
-            <span class="stat-card__icon">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#warning" />
-              </svg>
-            </span>
-            <div class="stat-card__body">
-              <span class="stat-card__value">{{ data?.stats.overdue_count ?? 0 }}</span>
-              <span class="stat-card__label">{{ $t('dashboard.stats.overdue') }}</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <span class="stat-card__icon">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#calendar_today" />
-              </svg>
-            </span>
-            <div class="stat-card__body">
-              <span class="stat-card__value">{{ data?.stats.reservations_count ?? 0 }}</span>
-              <span class="stat-card__label">{{ $t('dashboard.stats.reservations') }}</span>
-            </div>
-          </div>
-          <div class="stat-card">
-            <span class="stat-card__icon">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#cases" />
-              </svg>
-            </span>
-            <div class="stat-card__body">
-              <span class="stat-card__value">{{ data?.stats.total_loans ?? 0 }}</span>
-              <span class="stat-card__label">{{ $t('dashboard.stats.total_loans') }}</span>
-            </div>
-          </div>
+        <div class="greeting">
+          <p class="greeting__eyebrow">{{ $t('dashboard.member_area') }}</p>
+          <h1 class="greeting__title">{{ $t('dashboard.welcome', { name: firstName }) }}</h1>
+          <p class="greeting__sub">{{ $t('dashboard.subtitle') }}</p>
+          <p v-if="!loading" class="greeting__meta">
+            <span>{{ $t('dashboard.total_loans_meta', { n: totalLoans }, totalLoans) }}</span>
+            <template
+              v-if="(auth.canBorrow || auth.isSupporter) && auth.user?.membership_expires_at"
+            >
+              <span class="greeting__meta-sep" aria-hidden="true" />
+              <span class="membership-expiry" :class="expiryClass">
+                {{ $t('dashboard.membership.label') }}
+                <strong class="membership-expiry__date">{{
+                  formatDate(auth.user?.membership_expires_at)
+                }}</strong>
+                <a
+                  v-if="canRenew"
+                  href="/dashboard"
+                  class="membership-expiry__renew"
+                  @click.prevent="renew"
+                  >{{ $t('btn.renew') }}</a
+                >
+              </span>
+            </template>
+          </p>
         </div>
 
-        <div v-else class="stats-grid stats-grid--loading">
-          <div v-for="i in 4" :key="i" class="stat-card stat-card--skeleton" />
+        <!-- Wallet: what the member can spend, or how to become one -->
+        <div v-if="auth.canBorrow" class="wallet">
+          <span class="wallet__label">{{ $t('dashboard.tokens.available') }}</span>
+          <span class="wallet__value">{{ auth.totalTokens }}</span>
+          <span v-if="auth.bonusTokens > 0" class="wallet__bonus">{{
+            $t('dashboard.tokens.bonus_note', {
+              bonus: auth.bonusTokens,
+              date: formatDate(auth.bonusExpiresAt),
+            })
+          }}</span>
+          <NuxtLink to="/tokens" class="wallet__cta">
+            {{ $t('dashboard.tokens.charge') }}
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#arrow_forward" />
+            </svg>
+          </NuxtLink>
         </div>
-
-        <!-- Token & Mitgliedschaft ────────────────────────────────── -->
-        <div class="membership-bar">
-          <div v-if="auth.canBorrow" class="membership-bar__member">
-            <div class="token-bar">
-              <span class="token-bar__icon">◈</span>
-              <span class="token-bar__count"
-                >{{ auth.totalTokens }} {{ $t('dashboard.tokens.label') }}</span
-              >
-              <span v-if="auth.bonusTokens > 0" class="token-bar__bonus">{{
-                $t('dashboard.tokens.bonus_note', {
-                  bonus: auth.bonusTokens,
-                  date: formatDate(auth.bonusExpiresAt),
-                })
-              }}</span>
-              <NuxtLink to="/tokens" class="token-bar__link">{{
-                $t('dashboard.tokens.charge')
-              }}</NuxtLink>
-            </div>
-            <div class="membership-expiry" :class="expiryClass">
-              <span class="membership-expiry__label">{{ $t('dashboard.membership.label') }}</span>
-              <span class="membership-expiry__date">{{
-                formatDate(auth.user?.membership_expires_at)
-              }}</span>
-              <NuxtLink
-                v-if="canRenew"
-                to="/dashboard"
-                class="membership-expiry__renew"
-                @click.prevent="renew"
-              >
-                {{ $t('btn.renew') }}
-              </NuxtLink>
-            </div>
-          </div>
-          <div v-else-if="auth.isSupporter" class="membership-bar__supporter">
-            <div class="supporter-badge">
-              <span class="supporter-badge__icon"
-                ><svg class="icon-svg"><use href="/svg-icons/icons.svg#support" /></svg
-              ></span>
-              <span class="supporter-badge__label">{{
-                $t('dashboard.membership.supporter_label')
-              }}</span>
-            </div>
-            <div class="membership-expiry" :class="expiryClass">
-              <span class="membership-expiry__label">{{ $t('dashboard.membership.label') }}</span>
-              <span class="membership-expiry__date">{{
-                formatDate(auth.user?.membership_expires_at)
-              }}</span>
-              <NuxtLink
-                v-if="canRenew"
-                to="/dashboard"
-                class="membership-expiry__renew"
-                @click.prevent="renew"
-              >
-                {{ $t('btn.renew') }}
-              </NuxtLink>
-            </div>
-            <NuxtLink to="/upgrade" class="membership-bar__cta">{{
-              $t('dashboard.membership.activate_full')
-            }}</NuxtLink>
-          </div>
-          <div v-else-if="auth.isRegisteredUser" class="membership-bar__upgrade">
-            <span class="membership-bar__text">{{ $t('dashboard.membership.not_member') }}</span>
-            <NuxtLink to="/upgrade" class="membership-bar__cta">{{
-              $t('dashboard.membership.upgrade')
-            }}</NuxtLink>
-          </div>
+        <div v-else-if="auth.isSupporter" class="wallet wallet--plain">
+          <span class="wallet__badge">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#support" />
+            </svg>
+            {{ $t('dashboard.membership.supporter_label') }}
+          </span>
+          <NuxtLink to="/upgrade" class="wallet__cta">{{
+            $t('dashboard.membership.activate_full')
+          }}</NuxtLink>
+        </div>
+        <div v-else-if="auth.isRegisteredUser" class="wallet wallet--plain">
+          <span class="wallet__text">{{ $t('dashboard.membership.not_member') }}</span>
+          <NuxtLink to="/upgrade" class="wallet__cta">{{
+            $t('dashboard.membership.upgrade')
+          }}</NuxtLink>
         </div>
       </div>
     </section>
@@ -137,221 +74,203 @@
     <!-- ── Content ──────────────────────────────────────────────── -->
     <div class="dashboard-content">
       <div class="dashboard-content__inner">
-        <div v-if="loading" class="dashboard-state">
-          <div class="spinner" />
+        <!-- Active loans, most urgent first ────────────────────── -->
+        <section class="loans" :aria-label="$t('dashboard.active_loans_title')">
+          <header class="loans__header">
+            <h2 class="loans__title">{{ $t('dashboard.active_loans_title') }}</h2>
+            <span v-if="!loading" class="count-pill">{{ activeLoans.length }}</span>
+          </header>
+
+          <div v-if="extensionSuccess" class="alert alert-success">{{ extensionSuccess }}</div>
+
+          <div v-if="loading" class="loans__list">
+            <div v-for="i in 2" :key="i" class="loan-card loan-card--skeleton" />
+          </div>
+
+          <div v-else-if="!activeLoans.length" class="loans-empty">
+            <svg class="icon-svg loans-empty__icon" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#casino" />
+            </svg>
+            <p class="loans-empty__text">{{ $t('common.empty.no_active_loans') }}</p>
+            <NuxtLink to="/games" class="button button-primary loans-empty__cta">{{
+              $t('dashboard.browse_games')
+            }}</NuxtLink>
+          </div>
+
+          <ol v-else class="loans__list">
+            <li
+              v-for="(loan, i) in activeLoans"
+              :key="loan.id"
+              class="loan-card"
+              :class="`loan-card--${dueTone(loan)}`"
+              :style="{ '--i': i }"
+            >
+              <NuxtLink
+                :to="`/games/${loan.game?.slug}`"
+                class="loan-card__cover"
+                tabindex="-1"
+                aria-hidden="true"
+              >
+                <img
+                  v-if="loan.game?.cover_image_url"
+                  :src="loan.game.cover_image_url"
+                  alt=""
+                  loading="lazy"
+                />
+                <span v-else class="loan-card__initial">{{ loan.game?.title?.charAt(0) }}</span>
+              </NuxtLink>
+
+              <div class="loan-card__main">
+                <span class="badge" :class="loanStatusVariant(loan)">
+                  {{ loanStatusLabel(loan) }}
+                </span>
+                <NuxtLink :to="`/games/${loan.game?.slug}`" class="loan-card__cta">
+                  {{ loan.game?.title }}
+                </NuxtLink>
+                <span v-if="loan.pickup_location" class="loan-location">
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#location_on" />
+                  </svg>
+                  <span>
+                    {{ $t('dashboard.return_to') }}
+                    <strong>{{ loan.pickup_location.name }}</strong>
+                    <a
+                      v-if="loan.pickup_location.map_url"
+                      class="loan-location__map"
+                      :href="loan.pickup_location.map_url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      >{{ $t('pickup.map_link') }}</a
+                    >
+                  </span>
+                </span>
+              </div>
+
+              <div class="loan-card__due">
+                <span class="loan-card__due-rel">{{ dueText(loan) }}</span>
+                <span class="loan-card__due-date">{{ formatDate(loan.due_date) }}</span>
+                <span
+                  v-if="loan.max_extensions"
+                  class="ext-meter"
+                  :aria-label="
+                    $t('dashboard.extension_meter', {
+                      used: loan.extensions_used ?? 0,
+                      max: loan.max_extensions,
+                    })
+                  "
+                >
+                  <span class="ext-meter__pips" aria-hidden="true">
+                    <i
+                      v-for="n in loan.max_extensions"
+                      :key="n"
+                      class="ext-meter__pip"
+                      :class="{ 'ext-meter__pip--used': n <= (loan.extensions_used ?? 0) }"
+                    />
+                  </span>
+                  {{
+                    $t('dashboard.extension_meter', {
+                      used: loan.extensions_used ?? 0,
+                      max: loan.max_extensions,
+                    })
+                  }}
+                </span>
+              </div>
+
+              <div class="loan-card__actions">
+                <template v-if="loan.status !== 'RETURNED'">
+                  <span v-if="extensionNote(loan)" class="extension-note">
+                    {{ extensionNote(loan) }}
+                  </span>
+                  <button
+                    v-else
+                    class="action-btn action-btn--primary"
+                    @click="openExtension(loan)"
+                  >
+                    {{ $t('btn.extend') }}
+                    <span
+                      class="action-btn__price"
+                      :class="{ 'action-btn__price--free': !loan.next_extension_cost }"
+                      >{{ extensionCostLabel(loan) }}</span
+                    >
+                  </button>
+                </template>
+                <button class="action-btn" @click="openReturn(loan)">
+                  {{ $t('btn.return') }}
+                </button>
+                <button class="action-btn action-btn--quiet" @click="openDamage(loan)">
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#warning" />
+                  </svg>
+                  {{ $t('btn.damage') }}
+                </button>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- Queue + history side by side ─────────────────────────── -->
+        <div v-if="!loading" class="dash-columns">
+          <section class="panel">
+            <header class="panel__header">
+              <h2 class="panel__title">{{ $t('dashboard.reservations_title') }}</h2>
+              <span class="count-pill">{{ reservations.length }}</span>
+            </header>
+            <p v-if="!reservations.length" class="panel__empty">
+              {{ $t('common.empty.no_reservations') }}
+            </p>
+            <template v-else>
+              <ul class="queue">
+                <li v-for="res in reservations" :key="res.id" class="queue__row">
+                  <span class="queue__pos" :aria-label="$t('dashboard.table.position')"
+                    ><small>#</small>{{ res.position }}</span
+                  >
+                  <span class="queue__body">
+                    <NuxtLink
+                      v-if="res.game?.slug"
+                      :to="`/games/${res.game.slug}`"
+                      class="queue__cta"
+                      >{{ res.game?.title }}</NuxtLink
+                    >
+                    <span v-else class="queue__cta">{{ res.game?.title }}</span>
+                    <span class="queue__hint">{{ $t('dashboard.queue_hint') }}</span>
+                  </span>
+                  <button class="action-btn action-btn--danger" @click="cancelReservation(res.id)">
+                    {{ $t('dashboard.cancel_reservation') }}
+                  </button>
+                </li>
+              </ul>
+              <p class="panel__note">{{ $t('dashboard.reservation_fee_note') }}</p>
+            </template>
+          </section>
+
+          <section class="panel panel--quiet">
+            <header class="panel__header">
+              <h2 class="panel__title">{{ $t('dashboard.loan_history_title') }}</h2>
+              <span class="count-pill">{{ loanHistory.length }}</span>
+            </header>
+            <p v-if="!loanHistory.length" class="panel__empty">
+              {{ $t('common.empty.no_loan_history') }}
+            </p>
+            <ol v-else class="history">
+              <li v-for="loan in loanHistory" :key="loan.id" class="history__row">
+                <span class="history__title">{{ loan.game?.title }}</span>
+                <span class="history__date">
+                  <span class="visually-hidden">{{ $t('dashboard.table.returned_at') }}</span>
+                  {{ formatDate(loan.returned_at!) }}
+                </span>
+              </li>
+            </ol>
+          </section>
         </div>
 
-        <template v-else>
-          <!-- Aktive Ausleihen ───────────────────────────────────── -->
-          <section class="dash-section">
-            <div v-if="extensionSuccess" class="alert alert-success">{{ extensionSuccess }}</div>
-            <header class="dash-section__header">
-              <h2 class="dash-section__title">{{ $t('dashboard.active_loans_title') }}</h2>
-              <span class="dash-section__count">{{ activeLoans.length }}</span>
-            </header>
-
-            <div v-if="!activeLoans.length" class="dash-empty">
-              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#mail" />
-              </svg>
-              <p class="dash-empty__text">{{ $t('common.empty.no_active_loans') }}</p>
-            </div>
-
-            <div v-else class="table-wrap">
-              <table class="dash-table">
-                <thead>
-                  <tr>
-                    <th>{{ $t('dashboard.table.game') }}</th>
-                    <th>{{ $t('dashboard.table.status') }}</th>
-                    <th>{{ $t('dashboard.table.due_date') }}</th>
-                    <th>{{ $t('dashboard.table.location') }}</th>
-                    <th>{{ $t('dashboard.table.actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="loan in activeLoans" :key="loan.id">
-                    <td :data-label="$t('dashboard.table.game')">
-                      <NuxtLink :to="`/games/${loan.game?.slug}`" class="dash-table__link">
-                        {{ loan.game?.title }}
-                      </NuxtLink>
-                    </td>
-                    <td :data-label="$t('dashboard.table.status')">
-                      <span class="badge" :class="loanStatusVariant(loan)">
-                        {{ loanStatusLabel(loan) }}
-                      </span>
-                    </td>
-                    <td :data-label="$t('dashboard.table.due_date')">
-                      <span :class="{ 'text-warn': loan.status === 'OVERDUE' }">
-                        {{ formatDate(loan.due_date) }}
-                      </span>
-                      <span
-                        v-if="loan.max_extensions"
-                        class="ext-meter"
-                        :aria-label="
-                          $t('dashboard.extension_meter', {
-                            used: loan.extensions_used ?? 0,
-                            max: loan.max_extensions,
-                          })
-                        "
-                      >
-                        <span class="ext-meter__pips" aria-hidden="true">
-                          <i
-                            v-for="n in loan.max_extensions"
-                            :key="n"
-                            class="ext-meter__pip"
-                            :class="{ 'ext-meter__pip--used': n <= (loan.extensions_used ?? 0) }"
-                          />
-                        </span>
-                        {{
-                          $t('dashboard.extension_meter', {
-                            used: loan.extensions_used ?? 0,
-                            max: loan.max_extensions,
-                          })
-                        }}
-                      </span>
-                    </td>
-                    <td :data-label="$t('dashboard.table.location')">
-                      <span v-if="loan.pickup_location" class="loan-location">
-                        <svg class="icon-svg" aria-hidden="true">
-                          <use href="/svg-icons/icons.svg#location_on" />
-                        </svg>
-                        <span>
-                          <span class="loan-location__name">{{ loan.pickup_location.name }}</span>
-                          <a
-                            v-if="loan.pickup_location.map_url"
-                            class="loan-location__map"
-                            :href="loan.pickup_location.map_url"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            >{{ $t('pickup.map_link') }}</a
-                          >
-                        </span>
-                      </span>
-                      <span v-else>—</span>
-                    </td>
-                    <td :data-label="$t('dashboard.table.actions')">
-                      <div class="action-row">
-                        <template v-if="loan.status !== 'RETURNED'">
-                          <span v-if="extensionNote(loan)" class="extension-note">
-                            {{ extensionNote(loan) }}
-                          </span>
-                          <button v-else class="action-btn" @click="openExtension(loan)">
-                            {{ $t('btn.extend') }}
-                            <span
-                              class="action-btn__price"
-                              :class="{ 'action-btn__price--free': !loan.next_extension_cost }"
-                              >{{ extensionCostLabel(loan) }}</span
-                            >
-                          </button>
-                        </template>
-                        <button class="action-btn" @click="openReturn(loan)">
-                          {{ $t('btn.return') }}
-                        </button>
-                        <button class="action-btn action-btn--danger" @click="openDamage(loan)">
-                          {{ $t('btn.damage') }}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- Reservierungen ─────────────────────────────────────── -->
-          <section class="dash-section">
-            <header class="dash-section__header">
-              <h2 class="dash-section__title">{{ $t('dashboard.reservations_title') }}</h2>
-              <span class="dash-section__count">{{ reservations.length }}</span>
-            </header>
-
-            <div v-if="!reservations.length" class="dash-empty">
-              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#bookmark" />
-              </svg>
-              <p class="dash-empty__text">{{ $t('common.empty.no_reservations') }}</p>
-            </div>
-
-            <div v-else class="table-wrap">
-              <table class="dash-table">
-                <thead>
-                  <tr>
-                    <th>{{ $t('dashboard.table.game') }}</th>
-                    <th>{{ $t('dashboard.table.position') }}</th>
-                    <th>{{ $t('dashboard.table.actions') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="res in reservations" :key="res.id">
-                    <td :data-label="$t('dashboard.table.game')">{{ res.game?.title }}</td>
-                    <td :data-label="$t('dashboard.table.position')">
-                      <span class="queue-badge"># {{ res.position }}</span>
-                    </td>
-                    <td :data-label="$t('dashboard.table.actions')">
-                      <button
-                        class="action-btn action-btn--danger"
-                        @click="cancelReservation(res.id)"
-                      >
-                        {{ $t('dashboard.cancel_reservation') }}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p class="dash-hint">{{ $t('dashboard.reservation_fee_note') }}</p>
-            </div>
-          </section>
-
-          <!-- Ausleihhistorie ────────────────────────────────────── -->
-          <section class="dash-section">
-            <header class="dash-section__header">
-              <h2 class="dash-section__title">{{ $t('dashboard.loan_history_title') }}</h2>
-              <span class="dash-section__count">{{ loanHistory.length }}</span>
-            </header>
-
-            <div v-if="!loanHistory.length" class="dash-empty">
-              <svg class="icon-svg dash-empty__icon" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#schedule" />
-              </svg>
-              <p class="dash-empty__text">{{ $t('common.empty.no_loan_history') }}</p>
-            </div>
-
-            <div v-else class="table-wrap">
-              <table class="dash-table">
-                <thead>
-                  <tr>
-                    <th>{{ $t('dashboard.table.game') }}</th>
-                    <th>{{ $t('dashboard.table.returned_at') }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="loan in loanHistory" :key="loan.id">
-                    <td :data-label="$t('dashboard.table.game')">{{ loan.game?.title }}</td>
-                    <td :data-label="$t('dashboard.table.returned_at')">
-                      {{ formatDate(loan.returned_at!) }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- Konto-Link ─────────────────────────────────────────── -->
-          <div class="dash-footer-actions">
-            <NuxtLink to="/account" class="dash-link">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#settings" />
-              </svg>
-              {{ $t('dashboard.footer_settings') }}
-            </NuxtLink>
-            <button class="action-btn action-btn--ghost" @click="handleLogout">
-              <svg class="icon-svg" aria-hidden="true">
-                <use href="/svg-icons/icons.svg#power_settings_new" />
-              </svg>
-              {{ $t('dashboard.footer_logout') }}
-            </button>
-          </div>
-        </template>
+        <div class="dash-footer-actions">
+          <NuxtLink to="/account" class="dash-settings__cta">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#settings" />
+            </svg>
+            {{ $t('dashboard.footer_settings') }}
+          </NuxtLink>
+        </div>
       </div>
     </div>
 
@@ -541,7 +460,6 @@ import type { Loan, Reservation, DashboardData } from '~/composables/useLoans'
 definePageMeta({ middleware: ['auth'] })
 
 const auth = useAuthStore()
-const { logout } = useAuth()
 const { t } = useI18n()
 const {
   fetchDashboard,
@@ -585,7 +503,14 @@ function toLocalDate(iso?: string) {
   return iso ? new Date(`${iso}T00:00:00`) : undefined
 }
 
-const activeLoans = computed<Loan[]>(() => data.value?.active_loans ?? [])
+// Most urgent first: overdue, then whatever is due soonest
+const activeLoans = computed<Loan[]>(() =>
+  [...(data.value?.active_loans ?? [])].sort(
+    (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+  )
+)
+const totalLoans = computed(() => data.value?.stats.total_loans ?? 0)
+const firstName = computed(() => auth.user?.name?.split(' ')[0] ?? '')
 const loanHistory = computed<Loan[]>(() => data.value?.loan_history ?? [])
 const reservations = computed<Reservation[]>(() => data.value?.reservations ?? [])
 
@@ -689,10 +614,6 @@ async function cancelReservation(id: number) {
   data.value = await fetchDashboard()
 }
 
-async function handleLogout() {
-  await logout()
-}
-
 function extensionNote(loan: Loan) {
   if (loan.extension_blocked_reason === 'reserved') return t('dashboard.extension_reserved')
   if (loan.extension_blocked_reason === 'max_reached') {
@@ -714,6 +635,29 @@ function extensionCostLabel(loan: Loan) {
   return cost > 0
     ? t('dashboard.extension_cost_tokens', { n: cost })
     : t('dashboard.extension_free')
+}
+
+/** Whole days from today until the due date (negative = overdue). */
+function daysUntilDue(loan: Loan) {
+  const due = new Date(loan.due_date)
+  due.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return Math.round((due.getTime() - today.getTime()) / 86_400_000)
+}
+
+function dueTone(loan: Loan) {
+  const days = daysUntilDue(loan)
+  if (loan.status === 'OVERDUE' || days < 0) return 'overdue'
+  if (days <= 3) return 'soon'
+  return 'ok'
+}
+
+function dueText(loan: Loan) {
+  const days = daysUntilDue(loan)
+  if (days < 0) return t('dashboard.due.overdue', { n: -days }, -days)
+  if (days === 0) return t('dashboard.due.today')
+  return t('dashboard.due.in_days', { n: days }, days)
 }
 
 function loanStatusVariant(loan: Loan) {
@@ -785,204 +729,519 @@ function onRenewed(result: { user: unknown }) {
 </script>
 
 <style lang="scss" scoped>
-$hero-bg: var(--background);
 $nav-height: 64px;
+$content-width: 1100px;
+$ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
-$amber-08: rgba(212, 146, 30, 0.08);
-$amber-14: rgba(212, 146, 30, 0.14);
-$amber-25: rgba(212, 146, 30, 0.25);
-$amber-40: rgba(212, 146, 30, 0.4);
-$amber-glow: rgba(212, 146, 30, 0.2);
-// Was 0.7 — nearly opaque, which recedes fine against a dark hero but
-// paints a visible muddy gray patch once the hero background can go
-// light. Matches the sibling $amber-glow's opacity, which already works
-// in both themes.
-$warm-glow: rgba(44, 40, 32, 0.2);
+// Amber tints are mixed from the live accent ($amber), never hard-coded rgba —
+// the old rgba(212,146,30,…) values no longer matched the #f7963d text.
+@function amber($pct) {
+  @return color-mix(in srgb, #{$amber} $pct, transparent);
+}
+// Neutral tints derive from the text colour so they read on both themes.
+@function ink($pct) {
+  @return color-mix(in srgb, var(--primary-text) $pct, transparent);
+}
+// Small amber text: #f7963d is ~2:1 on the light background, so light mode
+// uses a deeper burnt orange (4.5:1); dark mode keeps the bright accent.
+$amber-ink: var(--amber-ink);
 
-$hero-text: var(--primary-text);
-$hero-muted: var(--secondary-text);
-$hero-muted-50: color-mix(in srgb, var(--secondary-text) 80%, transparent);
-$hero-muted-20: color-mix(in srgb, var(--secondary-text) 30%, transparent);
-$hero-divider: var(--divider);
-$hero-divider-20: var(--divider);
-
-// ─── Page Shell ───────────────────────────────────────────────────
 .dashboard-page {
+  --amber-ink: #b45f0f;
+  --wallet-gradient: linear-gradient(175deg, #f0a032 10%, #d4741a 55%, #8a520a 100%);
+  --danger-tint: rgba(220, 38, 38, 0.06);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--background);
 }
+:root[data-theme='dark'] .dashboard-page {
+  --amber-ink: #{$amber};
+  --wallet-gradient: linear-gradient(175deg, #ffc35a 10%, #{$amber} 55%, #9a5f0c 100%);
+  --danger-tint: rgba(239, 68, 68, 0.07);
+}
 
-// ─── Page Hero ────────────────────────────────────────────────────
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+// ─── Hero ─────────────────────────────────────────────────────────
 .page-hero {
   position: relative;
-  background: $hero-bg;
-  padding: calc(#{$nav-height} + 3rem) 1.5rem 3.5rem;
+  padding: calc(#{$nav-height} + 2.5rem) 1.5rem 5.5rem;
   overflow: hidden;
+  @media (max-width: 600px) {
+    padding: calc(#{$nav-height} + 1.5rem) 1rem 4.5rem;
+  }
 
   &__backdrop {
     position: absolute;
     inset: 0;
     pointer-events: none;
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
   }
-
   &__glow {
     position: absolute;
+    width: 560px;
+    height: 560px;
+    top: -240px;
+    right: -120px;
     border-radius: 50%;
-    filter: blur(90px);
-
-    &--amber {
-      width: 550px;
-      height: 550px;
-      top: -120px;
-      right: -80px;
-      background: $amber-glow;
-    }
-
-    &--warm {
-      width: 400px;
-      height: 400px;
-      bottom: -80px;
-      left: -100px;
-      background: $warm-glow;
-    }
+    filter: blur(110px);
+    background: amber(16%);
   }
-
   &__dots {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-image: radial-gradient(circle, #{ink(6%)} 1px, transparent 1px);
     background-size: 24px 24px;
-    mask-image: radial-gradient(ellipse 80% 100% at 70% 50%, black 20%, transparent 100%);
+    mask-image: radial-gradient(ellipse 60% 90% at 80% 30%, black 10%, transparent 100%);
   }
-
   &__body {
     position: relative;
     z-index: 1;
-    max-width: 1100px;
+    max-width: $content-width;
     margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 2rem 3rem;
+    @media (max-width: 760px) {
+      grid-template-columns: 1fr;
+      gap: 1.75rem;
+    }
   }
+}
+
+.greeting {
+  animation: rise 0.55s $ease-out both;
 
   &__eyebrow {
-    display: inline-block;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: $amber;
-    margin-bottom: 0.75rem;
-    padding: 0.25rem 0.65rem;
-    border: 1px solid $amber-25;
-    border-radius: 999px;
-    background: $amber-08;
-  }
-
-  &__title {
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    color: $hero-text;
-    margin: 0 0 0.4rem;
-  }
-
-  &__sub {
-    font-size: 0.975rem;
-    color: $hero-muted;
-    margin-bottom: 2.5rem;
-    padding-bottom: 0;
-  }
-}
-
-// ─── Stats Grid ───────────────────────────────────────────────────
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-
-  @media (max-width: 900px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-
-  &--loading {
-    opacity: 0.5;
-  }
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem;
-  background: rgba(238, 232, 223, 0.04);
-  border: 1px solid $hero-divider;
-  border-radius: 12px;
-  transition:
-    border-color 0.2s,
-    background 0.2s;
-
-  &:hover {
-    background: rgba(238, 232, 223, 0.07);
-    border-color: $hero-divider-20;
-  }
-
-  &--warn {
-    border-color: rgba(239, 68, 68, 0.25);
-    background: rgba(239, 68, 68, 0.05);
-
-    .stat-card__icon {
-      background: rgba(239, 68, 68, 0.12);
-      color: var(--error-text);
-    }
-    .stat-card__value {
-      color: var(--error-text);
-    }
-  }
-
-  &--skeleton {
-    min-height: 78px;
-    background: rgba(238, 232, 223, 0.04);
-    border-color: $hero-divider;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
-
-  &__icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: $amber-14;
-    color: $amber;
     display: flex;
     align-items: center;
-    justify-content: center;
-
-    .icon {
-      font-size: 1.25rem;
+    gap: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: $amber-ink;
+    margin: 0 0 0.6rem;
+    &::before {
+      content: '';
+      width: 1.5rem;
+      height: 2px;
+      border-radius: 2px;
+      background: $amber;
     }
   }
-
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  &__value {
-    font-size: 1.6rem;
+  &__title {
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
     font-weight: 800;
-    letter-spacing: -0.04em;
-    color: $hero-text;
     line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--primary-text);
+    margin: 0 0 0.6rem;
+  }
+  &__sub {
+    font-size: 0.975rem;
+    color: var(--secondary-text);
+    margin: 0 0 1rem;
+    padding: 0;
+    max-width: 34rem;
+  }
+  &__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.82rem;
+    color: var(--secondary-text);
+  }
+  &__meta-sep {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: ink(25%);
+  }
+}
+
+.membership-expiry {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  &__date {
+    font-weight: 700;
+    color: var(--primary-text);
+  }
+  &--warn &__date {
+    color: $amber-ink;
+  }
+  &--critical &__date {
+    color: var(--error-text);
+  }
+  &__renew {
+    font-weight: 700;
+    margin-left: 0.25rem;
+    // the global link rule already paints it amber; only fix light contrast
+    &:link,
+    &:visited {
+      color: $amber-ink;
+    }
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Wallet: the balance as the hero's counterweight on the right
+.wallet {
+  display: grid;
+  justify-items: end;
+  text-align: right;
+  gap: 0.3rem;
+  animation: rise 0.6s $ease-out 0.1s both;
+  @media (max-width: 760px) {
+    justify-items: start;
+    text-align: left;
+    grid-template-columns: auto 1fr;
+    align-items: end;
+    column-gap: 1rem;
   }
 
   &__label {
-    font-size: 0.775rem;
-    color: $hero-muted;
-    font-weight: 500;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+    @media (max-width: 760px) {
+      grid-column: 1 / -1;
+    }
+  }
+  &__value {
+    font-size: clamp(3.5rem, 9vw, 5.25rem);
+    font-weight: 800;
+    line-height: 0.85;
+    letter-spacing: -0.06em;
+    font-variant-numeric: tabular-nums;
+    background: var(--wallet-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 10px 30px #{amber(22%)});
+  }
+  &__bonus {
+    font-size: 0.75rem;
+    color: var(--secondary-text);
+    @media (max-width: 760px) {
+      grid-column: 1 / -1;
+      grid-row: 3;
+    }
+  }
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #1a0d00;
+    background: $amber;
+    box-shadow: 0 6px 18px #{amber(30%)};
+    transition:
+      transform 0.2s $ease-out,
+      box-shadow 0.2s ease;
+    .icon-svg {
+      width: 0.95rem;
+      height: 0.95rem;
+      transition: translate 0.2s $ease-out;
+    }
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px #{amber(38%)};
+      .icon-svg {
+        translate: 2px 0;
+      }
+    }
+    &:focus-visible {
+      outline: 2px solid $amber;
+      outline-offset: 3px;
+    }
+    @media (max-width: 760px) {
+      align-self: center;
+      justify-self: start;
+    }
+  }
+
+  &--plain {
+    align-content: end;
+    @media (max-width: 760px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    background: ink(4%);
+    border: 1px solid ink(14%);
+    .icon-svg {
+      width: 1rem;
+      height: 1rem;
+      color: var(--secondary-text);
+    }
+  }
+  &__text {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+  }
+}
+
+// ─── Content ──────────────────────────────────────────────────────
+.dashboard-content {
+  flex: 1;
+  // the loan cards ride up into the hero
+  margin-top: -3.25rem;
+  padding: 0 1.5rem 4rem;
+  position: relative;
+  z-index: 1;
+  @media (max-width: 600px) {
+    padding: 0 1rem 3rem;
+  }
+
+  &__inner {
+    max-width: $content-width;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+}
+
+.count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: $amber-ink;
+  background: amber(10%);
+  border-radius: 999px;
+}
+
+// ─── Active loans ─────────────────────────────────────────────────
+.loans {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  &__title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+    margin: 0;
+  }
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.loan-card {
+  --tone: #{ink(14%)};
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  grid-template-areas: 'cover main due actions';
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding: 1rem 1.25rem 1rem 1rem;
+  background: var(--secondary-background);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  animation: rise 0.55s $ease-out calc(0.15s + var(--i, 0) * 80ms) both;
+
+  // urgency edge
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--tone);
+  }
+  &--soon {
+    --tone: #{$amber};
+  }
+  &--overdue {
+    --tone: var(--error-text);
+    border-color: color-mix(in srgb, var(--error-text) 30%, var(--divider));
+    background:
+      linear-gradient(90deg, var(--danger-tint), transparent 55%), var(--secondary-background);
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'cover main due'
+      'actions actions actions';
+  }
+  @media (max-width: 560px) {
+    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-areas:
+      'cover main'
+      'due due'
+      'actions actions';
+    padding: 1rem;
+    gap: 0.85rem 1rem;
+  }
+
+  &--skeleton {
+    min-height: 104px;
+    background: ink(4%);
+    box-shadow: none;
+    animation: pulse 1.5s ease-in-out infinite;
+    &::before {
+      display: none;
+    }
+  }
+
+  &__cover {
+    grid-area: cover;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 4;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(160deg, #{amber(24%)}, #{amber(6%)});
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  &__initial {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: $amber-ink;
+  }
+
+  &__main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  &__cta {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: var(--primary-text);
+    transition: color 0.2s;
+    &:hover {
+      color: $amber-ink;
+    }
+  }
+
+  &__due {
+    grid-area: due;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.15rem;
+    text-align: right;
+    @media (max-width: 560px) {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: baseline;
+      justify-items: start;
+      column-gap: 0.75rem;
+      text-align: left;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--divider);
+    }
+  }
+  &__due-rel {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+    @media (max-width: 560px) {
+      grid-column: 1 / -1;
+    }
+  }
+  &--soon &__due-rel {
+    color: $amber-ink;
+  }
+  &--overdue &__due-rel {
+    color: var(--error-text);
+  }
+  &__due-date {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-text);
+  }
+
+  &__actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    @media (max-width: 900px) {
+      justify-content: flex-start;
+    }
   }
 }
 
@@ -996,235 +1255,45 @@ $hero-divider-20: var(--divider);
   }
 }
 
-// ─── Content Area ─────────────────────────────────────────────────
-.dashboard-content {
-  flex: 1;
-  padding: 2.5rem 1.5rem 4rem;
-
-  &__inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-}
-
-.dashboard-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-// ─── Sections ─────────────────────────────────────────────────────
-.dash-section {
-  background: var(--secondary-background);
-  border: 1px solid var(--divider);
-  border-radius: 14px;
-  overflow: hidden;
-
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--divider);
-  }
-
-  &__title {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--primary-text);
-    margin: 0;
-  }
-
-  &__count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: $amber;
-    background: $amber-08;
-    border: 1px solid $amber-25;
-    border-radius: 999px;
-  }
-}
-
-// ─── Empty States ─────────────────────────────────────────────────
-.dash-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 3rem 1.5rem;
-  color: var(--secondary-text);
-
-  &__icon {
-    width: 2rem;
-    height: 2rem;
-    opacity: 0.35;
-  }
-
-  &__text {
-    font-size: 0.9rem;
-    padding-bottom: 0;
-  }
-}
-
-// ─── Tables ───────────────────────────────────────────────────────
-.table-wrap {
-  overflow-x: auto;
-
-  @media (max-width: 680px) {
-    overflow-x: unset;
-  }
-}
-
-.dash-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-
-  th {
-    padding: 0.7rem 1.5rem;
-    text-align: left;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--secondary-text);
-    background: var(--background);
-    border-bottom: 1px solid var(--divider);
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 0.9rem 1.5rem;
-    color: var(--primary-text);
-    border-bottom: 1px solid var(--divider);
-    vertical-align: middle;
-  }
-
-  tbody tr:last-child td {
-    border-bottom: none;
-  }
-
-  tbody tr {
-    transition: background 0.15s;
-    &:hover {
-      background: var(--background);
-    }
-  }
-
-  &__link {
-    color: var(--primary-text);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-    &:hover {
-      color: var(--accent-color);
-    }
-  }
-
-  // ── Mobile: table → card list ──────────────────────────────
-  @media (max-width: 680px) {
-    thead {
-      display: none;
-    }
-
-    tbody tr {
-      display: flex;
-      flex-direction: column;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--divider);
-      &:last-child {
-        border-bottom: none;
-      }
-      &:hover {
-        background: transparent;
-      }
-    }
-
-    td {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.25rem 0;
-      border: none;
-
-      &::before {
-        content: attr(data-label);
-        font-size: 0.7rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--secondary-text);
-        flex-shrink: 0;
-        margin-right: 0.75rem;
-      }
-
-      &:last-child {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-        padding-top: 0.75rem;
-        margin-top: 0.25rem;
-        border-top: 1px solid var(--divider);
-
-        &::before {
-          margin-bottom: 0;
-        }
-
-        .action-row {
-          flex-wrap: wrap;
-        }
-      }
-    }
-  }
-}
-
 .loan-location {
   display: inline-flex;
   align-items: flex-start;
-  gap: 0.4rem;
-  font-size: 0.85rem;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--secondary-text);
+  strong {
+    font-weight: 600;
+    color: var(--primary-text);
+  }
   > .icon-svg {
     flex-shrink: 0;
-    width: 1rem;
-    height: 1rem;
-    margin-top: 0.15rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-top: 0.1rem;
     color: $amber;
   }
-  &__name {
-    display: block;
-    font-weight: 600;
-  }
   &__map {
+    margin-left: 0.35rem;
     font-size: 0.75rem;
+    &:link,
+    &:visited {
+      color: $amber-ink;
+    }
   }
 }
 
 .extension-note {
-  flex-basis: 100%;
-  max-width: 18rem;
-  font-size: 0.8rem;
-  text-align: left;
+  max-width: 17rem;
+  font-size: 0.78rem;
   line-height: 1.35;
-  color: var(--accent-color);
+  color: $amber-ink;
 }
 
 .ext-meter {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.3rem;
+  margin-top: 0.15rem;
   font-size: 0.72rem;
   color: var(--secondary-text);
   white-space: nowrap;
@@ -1233,29 +1302,268 @@ $hero-divider-20: var(--divider);
     display: inline-flex;
     gap: 3px;
   }
-
   &__pip {
     width: 0.5rem;
     height: 0.5rem;
-    border: 1px solid rgba(212, 146, 30, 0.55);
+    border: 1.5px solid amber(70%);
     border-radius: 50%;
-    transition:
-      background 0.2s ease,
-      transform 0.2s ease;
-
     &--used {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
+      background: $amber;
+      border-color: $amber;
+    }
+  }
+}
+
+.loans-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: var(--secondary-background);
+  border: 1px dashed ink(18%);
+  border-radius: 16px;
+  animation: rise 0.55s $ease-out 0.15s both;
+
+  &__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    color: $amber;
+  }
+  &__text {
+    margin: 0;
+    padding: 0;
+    color: var(--secondary-text);
+    font-size: 0.95rem;
+  }
+}
+
+// ─── Reservations + history ───────────────────────────────────────
+.dash-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  animation: rise 0.55s $ease-out 0.3s both;
+  @media (max-width: 860px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  border-radius: 16px;
+  background: var(--secondary-background);
+  border: 1px solid var(--divider);
+  overflow: hidden;
+
+  &--quiet {
+    background: transparent;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--divider);
+  }
+  &__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--primary-text);
+    margin: 0;
+  }
+  &__empty {
+    margin: 0;
+    padding: 1.5rem 1.25rem;
+    font-size: 0.875rem;
+    color: var(--secondary-text);
+  }
+  &__note {
+    margin: 0;
+    padding: 0.75rem 1.25rem 1rem;
+    font-size: 0.75rem;
+    color: var(--secondary-text);
+    border-top: 1px dashed var(--divider);
+  }
+}
+
+.queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  &__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    & + & {
+      border-top: 1px solid var(--divider);
+    }
+  }
+  &__pos {
+    min-width: 2.5rem;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.05em;
+    font-variant-numeric: tabular-nums;
+    color: $amber-ink;
+    small {
+      font-size: 0.55em;
+      font-weight: 700;
+      opacity: 0.6;
+      margin-right: 1px;
+    }
+  }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  &__cta {
+    font-weight: 700;
+    color: var(--primary-text);
+    &:hover {
+      color: $amber-ink;
+    }
+  }
+  &__hint {
+    font-size: 0.75rem;
+    color: var(--secondary-text);
+  }
+  @media (max-width: 420px) {
+    &__row {
+      grid-template-columns: auto minmax(0, 1fr);
+      .action-btn {
+        grid-column: 2;
+        justify-self: start;
+      }
+    }
+  }
+}
+
+// History: a quiet timeline
+.history {
+  list-style: none;
+  margin: 0;
+  padding: 0.5rem 1.25rem 0.75rem;
+
+  &__row {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.6rem 0 0.6rem 1.25rem;
+    font-size: 0.875rem;
+    // dot + rail
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 1.05rem;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--secondary-background);
+      border: 1.5px solid ink(30%);
+    }
+    &:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 1.6rem;
+      bottom: -0.55rem;
+      width: 1.5px;
+      background: ink(12%);
+    }
+  }
+  &__title {
+    color: var(--primary-text);
+  }
+  &__date {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--secondary-text);
+    white-space: nowrap;
+  }
+}
+
+// ─── Action buttons ───────────────────────────────────────────────
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--primary-text);
+  background: var(--background);
+  border: 1px solid var(--divider);
+  border-radius: 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s,
+    transform 0.15s ease;
+
+  .icon-svg {
+    width: 0.95rem;
+    height: 0.95rem;
+  }
+  &:hover {
+    border-color: $amber;
+    color: $amber-ink;
+  }
+  &:active {
+    transform: scale(0.97);
+  }
+  &:focus-visible {
+    outline: 2px solid $amber;
+    outline-offset: 2px;
+  }
+
+  &--primary {
+    border-color: amber(55%);
+    background: amber(8%);
+  }
+
+  &--quiet {
+    background: transparent;
+    border-color: transparent;
+    color: var(--secondary-text);
+    &:hover {
+      border-color: color-mix(in srgb, var(--error-text) 35%, transparent);
+      color: var(--error-text);
+    }
+  }
+
+  &--danger {
+    color: var(--error-text);
+    border-color: var(--error-border);
+    background: var(--error-muted);
+    &:hover {
+      border-color: var(--error-text);
+      color: var(--error-text-hover);
     }
   }
 }
 
 .action-btn__price {
-  padding: 0.05rem 0.4rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--accent-color);
-  background: rgba(212, 146, 30, 0.12);
+  padding: 0.05rem 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: $amber-ink;
+  background: amber(14%);
   border-radius: 999px;
 
   &--free {
@@ -1264,152 +1572,45 @@ $hero-divider-20: var(--divider);
   }
 }
 
-.dash-hint {
-  margin: 0.6rem 0 0;
-  font-size: 0.75rem;
-  color: var(--secondary-text);
-}
-
-.extension-cost {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0;
-  padding: 0.6rem 0.85rem;
-  font-size: 0.85rem;
-  color: var(--secondary-text);
-  background: rgba(212, 146, 30, 0.08);
-  border: 1px solid rgba(212, 146, 30, 0.25);
-  border-radius: 8px;
-
-  strong {
-    color: var(--accent-color);
-  }
-
-  &__hint {
-    margin: 0;
-    font-size: 0.8rem;
-    color: var(--secondary-text);
-  }
-}
-
-.extension-round {
-  margin: 0;
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--secondary-text);
-}
-
-.queue-badge {
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--secondary-text);
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 6px;
-}
-
-.text-warn {
-  color: var(--error-text);
-  font-weight: 600;
-}
-
-// ─── Action Buttons ───────────────────────────────────────────────
-.action-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--primary-text);
-  background: var(--background);
-  border: 1px solid var(--divider);
-  border-radius: 7px;
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    color 0.2s;
-  white-space: nowrap;
-
-  .icon {
-    font-size: 0.875rem;
-  }
-
-  &:hover {
-    border-color: var(--accent-color);
-    color: var(--accent-text);
-  }
-
-  &--danger {
-    color: var(--error-text);
-    border-color: rgba(239, 68, 68, 0.25);
-    background: rgba(239, 68, 68, 0.05);
-
-    &:hover {
-      border-color: rgba(239, 68, 68, 0.5);
-      color: var(--error-text-hover);
-    }
-  }
-
-  &--ghost {
-    background: transparent;
-    border-color: transparent;
-    color: var(--secondary-text);
-
-    &:hover {
-      border-color: var(--divider);
-      color: var(--primary-text);
-      background: var(--secondary-background);
-    }
-  }
-}
-
-// ─── Footer Actions ───────────────────────────────────────────────
+// ─── Footer ───────────────────────────────────────────────────────
 .dash-footer-actions {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding-top: 0.5rem;
+  justify-content: center;
 }
 
-.dash-link {
+// `__cta` opts out of the global amber link rule (see _typography.scss)
+.dash-settings__cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.875rem;
+  gap: 0.45rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--secondary-text);
-  text-decoration: none;
-  transition: color 0.2s;
-
-  .icon {
-    font-size: 1rem;
+  transition:
+    color 0.2s,
+    background 0.2s;
+  .icon-svg {
+    width: 1rem;
+    height: 1rem;
+    transition: rotate 0.4s $ease-out;
   }
-
   &:hover {
     color: var(--primary-text);
+    background: ink(5%);
+    .icon-svg {
+      rotate: 60deg;
+    }
   }
 }
 
-// ─── Dialog ────────────────────────────────────────────────────────
+// ─── Dialog ───────────────────────────────────────────────────────
 .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -1418,65 +1619,64 @@ $hero-divider-20: var(--divider);
 }
 
 .dialog {
+  display: flex;
+  flex-direction: column;
   background: var(--secondary-background);
   border: 1px solid var(--divider);
-  border-radius: 16px;
-  padding: 1.75rem;
+  border-radius: 18px;
+  padding: 1.5rem 1.75rem 1.75rem;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+  max-width: 440px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
 
   &__header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.25rem;
+    gap: 1rem;
   }
-
   &__title {
-    font-size: 1.05rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 800;
     letter-spacing: -0.02em;
     color: var(--primary-text);
+    margin: 0;
   }
-
   &__close {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     color: var(--secondary-text);
     cursor: pointer;
     transition:
       background 0.15s,
       color 0.15s;
-    flex-shrink: 0;
-
-    .icon {
-      font-size: 1.125rem;
+    .icon-svg {
+      width: 1.15rem;
+      height: 1.15rem;
     }
-
     &:hover {
-      background: var(--background);
+      background: ink(6%);
       color: var(--primary-text);
     }
   }
-
   &__game {
     font-size: 0.9rem;
-    color: var(--secondary-text);
-    margin-bottom: 1.25rem;
-    padding-bottom: 0;
+    font-weight: 600;
+    color: $amber-ink;
+    margin: 0.15rem 0 1.25rem;
+    padding: 0;
   }
-
   &__location {
     margin-bottom: 1.25rem;
   }
-
   &__label {
     display: block;
     font-size: 0.8rem;
@@ -1485,15 +1685,13 @@ $hero-divider-20: var(--divider);
     margin-bottom: 0.4rem;
     letter-spacing: 0.03em;
   }
-
   // UiVirtualDropdown draws its own complete box (background/border/
   // shadow) — unlike a plain <select>, this must NOT add a second one.
   &__select {
     display: block;
     width: 100%;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
   }
-
   &__actions {
     display: flex;
     gap: 0.75rem;
@@ -1501,171 +1699,60 @@ $hero-divider-20: var(--divider);
   }
 }
 
-// ─── Modal Transition ─────────────────────────────────────────────
+.extension-cost {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 0 0.6rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--secondary-text);
+  background: amber(8%);
+  border: 1px solid amber(30%);
+  border-radius: 10px;
+
+  strong {
+    color: $amber-ink;
+  }
+  &__hint {
+    margin: 0 0 0.5rem;
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+  }
+}
+
+.extension-round {
+  margin: 0 0 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--secondary-text);
+}
+
+// ─── Modal transition ─────────────────────────────────────────────
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.2s ease;
-
   .dialog {
     transition:
       opacity 0.2s ease,
-      transform 0.2s ease;
+      transform 0.25s $ease-out;
   }
 }
-
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
-
   .dialog {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(10px) scale(0.98);
   }
 }
 
-// ── Membership Bar ────────────────────────────────────────────────────
-.membership-bar {
-  margin-top: 1.5rem;
-
-  &__member {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  &__supporter {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
-  }
-
-  &__upgrade {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    background: rgba(212, 146, 30, 0.06);
-    border: 1px solid rgba(212, 146, 30, 0.25);
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    font-size: 0.875rem;
-  }
-
-  &__text {
-    color: $hero-muted;
-    flex: 1;
-  }
-
-  &__cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    color: #1a0d00;
-    background: $amber;
-    font-weight: 700;
-    font-size: 0.8rem;
-    text-decoration: none;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    white-space: nowrap;
-    transition: filter 0.18s;
-
-    &:hover {
-      filter: brightness(1.09);
-    }
-  }
-}
-
-.token-bar {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: rgba(212, 146, 30, 0.1);
-  border: 1px solid $amber-25;
-  border-radius: 20px;
-  padding: 0.3rem 0.85rem;
-
-  &__icon {
-    color: $amber;
-    font-size: 0.9rem;
-  }
-  &__count {
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: $hero-text;
-  }
-  &__bonus {
-    font-size: 0.72rem;
-    color: var(--secondary-text);
-    border-left: 1px solid $amber-25;
-    padding-left: 0.5rem;
-  }
-  &__link {
-    font-size: 0.75rem;
-    color: $amber;
-    text-decoration: none;
-    font-weight: 600;
-    margin-left: 0.2rem;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-.supporter-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: rgba(238, 232, 223, 0.05);
-  border: 1px solid $hero-muted-20;
-  border-radius: 20px;
-  padding: 0.3rem 0.85rem;
-
-  &__icon {
-    color: $hero-muted;
-    font-size: 0.9rem;
-    display: flex;
-  }
-  &__label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: $hero-text;
-  }
-}
-
-.membership-expiry {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.825rem;
-  color: $hero-muted;
-
-  &__label {
-    opacity: 0.7;
-  }
-  &__date {
-    font-weight: 600;
-    color: $hero-text;
-  }
-  &__renew {
-    color: $amber;
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-decoration: none;
-    margin-left: 0.25rem;
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  &--warn .membership-expiry__date {
-    color: #e8a838;
-  }
-  &--critical .membership-expiry__date {
-    color: #e06060;
-  }
+.renew-error {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
 }
 </style>

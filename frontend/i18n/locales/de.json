@@ -201,17 +201,11 @@
   },
   "dashboard": {
     "member_area": "Mitglieder-Bereich",
-    "welcome": "Willkommen, {name}",
+    "welcome": "Hallo, {name}",
     "subtitle": "Deine Ausleihen, Reservierungen und Kontoverwaltung auf einen Blick.",
     "active_loans_title": "Aktive Ausleihen",
     "reservations_title": "Meine Reservierungen",
     "loan_history_title": "Letzte Ausleihen",
-    "stats": {
-      "active_loans": "Aktive Ausleihen",
-      "overdue": "Überfällig",
-      "reservations": "Reservierungen",
-      "total_loans": "Ausleihen gesamt"
-    },
     "membership": {
       "label": "Mitglied bis",
       "not_member": "Du bist noch kein Mitglied.",
@@ -222,14 +216,10 @@
     "tokens": {
       "label": "Token",
       "charge": "Aufladen",
+      "available": "Token verfügbar",
       "bonus_note": "davon {bonus} Bonus (gültig bis {date})"
     },
     "table": {
-      "game": "Spiel",
-      "status": "Status",
-      "due_date": "Fällig am",
-      "location": "Rückgabe an",
-      "actions": "Aktionen",
       "position": "Position in Warteschlange",
       "returned_at": "Zurückgegeben am"
     },
@@ -256,7 +246,15 @@
     "reservation_fee_note": "Die Reservierungsgebühr wird bei Stornierung nicht erstattet.",
     "cancel_reservation": "Stornieren",
     "footer_settings": "Konto-Einstellungen",
-    "footer_logout": "Abmelden"
+    "total_loans_meta": "{n} Ausleihe bisher | {n} Ausleihen bisher",
+    "browse_games": "Spiele entdecken",
+    "return_to": "Rückgabe an",
+    "queue_hint": "Du wirst benachrichtigt, sobald es frei ist.",
+    "due": {
+      "today": "Heute fällig",
+      "in_days": "Fällig in {n} Tag | Fällig in {n} Tagen",
+      "overdue": "Seit {n} Tag überfällig | Seit {n} Tagen überfällig"
+    }
   },
   "pages": {
     "maintenance": {
