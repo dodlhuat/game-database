@@ -178,3 +178,27 @@ declare module '@dodlhuat/basix/js/timepicker' {
     destroy(): void
   }
 }
+
+declare module '@dodlhuat/basix/js/context-menu' {
+  export interface ContextMenuItemDef {
+    label: string
+    icon?: string
+    shortcut?: string
+    disabled?: boolean
+    destructive?: boolean
+    action?: (target: HTMLElement) => void
+    submenu?: ContextMenuInput[]
+  }
+  export type ContextMenuInput = ContextMenuItemDef | 'separator' | { group: string }
+  export interface ContextMenuOptions {
+    spritePath?: string
+  }
+  export class ContextMenu {
+    constructor(
+      selectorOrElement: string | HTMLElement | HTMLElement[],
+      items: ContextMenuInput[],
+      options?: ContextMenuOptions
+    )
+    destroy(): void
+  }
+}

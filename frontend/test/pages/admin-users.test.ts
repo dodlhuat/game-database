@@ -63,9 +63,33 @@ function row(wrapper: Awaited<ReturnType<typeof mountUsersPage>>, i: number) {
   return wrapper.findAll('tbody tr')[i]!
 }
 
+// Secondary actions live in the ⋯ menu (basix ContextMenu), which renders
+// into document.body once its module has loaded.
+async function openMenu(wrapper: Awaited<ReturnType<typeof mountUsersPage>>, i: number) {
+  await row(wrapper, i).find('.row-menu-btn').trigger('click')
+  await flushPromises()
+  await new Promise((r) => setTimeout(r, 0))
+  return modal()
+    .findAll('.context-menu-item')
+    .map((li) => li)
+}
+async function menuLabels(wrapper: Awaited<ReturnType<typeof mountUsersPage>>, i: number) {
+  return (await openMenu(wrapper, i)).map((li) => li.text())
+}
+async function clickMenuItem(
+  wrapper: Awaited<ReturnType<typeof mountUsersPage>>,
+  i: number,
+  label: string
+) {
+  const item = (await openMenu(wrapper, i)).find((li) => li.text() === label)!
+  await item.trigger('click')
+  await flushPromises()
+}
+
 afterEach(() => {
   activeWrapper?.unmount()
   activeWrapper = null
+  document.querySelectorAll('.context-menu').forEach((el) => el.remove())
 })
 
 describe('admin/users.vue — status actions', () => {
@@ -101,11 +125,7 @@ describe('admin/users.vue — status actions', () => {
     patchMock.mockResolvedValue({})
     const wrapper = await mountUsersPage()
 
-    const rejectBtn = row(wrapper, 0)
-      .findAll('button')
-      .find((b: DOMWrapper<Element>) => b.text() === wrapper.vm.$t('admin.users.reject'))!
-    await rejectBtn.trigger('click')
-    await flushPromises()
+    await clickMenuItem(wrapper, 0, wrapper.vm.$t('admin.users.reject'))
 
     expect(patchMock).toHaveBeenCalledWith('/admin/users/1/reject')
     expect(row(wrapper, 0).find('.badge').text()).toBe(wrapper.vm.$t('admin.users.status_rejected'))
@@ -115,11 +135,7 @@ describe('admin/users.vue — status actions', () => {
     patchMock.mockResolvedValue({})
     const wrapper = await mountUsersPage()
 
-    const suspendBtn = row(wrapper, 1)
-      .findAll('button')
-      .find((b: DOMWrapper<Element>) => b.text() === wrapper.vm.$t('admin.users.suspend'))!
-    await suspendBtn.trigger('click')
-    await flushPromises()
+    await clickMenuItem(wrapper, 1, wrapper.vm.$t('admin.users.suspend'))
 
     expect(patchMock).toHaveBeenCalledWith('/admin/users/2/suspend')
     expect(row(wrapper, 1).find('.badge').text()).toBe(
@@ -127,19 +143,39 @@ describe('admin/users.vue — status actions', () => {
     )
   })
 
-  it('does not show approve/reject for an already-active user, nor suspend for a pending one', async () => {
+  it('shows the main action per status and the rest in the row menu', async () => {
     const wrapper = await mountUsersPage()
+    const $t = wrapper.vm.$t
 
-    const pendingLabels = row(wrapper, 0)
-      .findAll('button')
-      .map((b: DOMWrapper<Element>) => b.text())
-    expect(pendingLabels).not.toContain(wrapper.vm.$t('admin.users.suspend'))
+    // Pending: approve is the visible button, reject/edit/history in the menu.
+    expect(row(wrapper, 0).find('.action-btn').text()).toBe($t('admin.users.approve'))
+    const pendingMenu = await menuLabels(wrapper, 0)
+    expect(pendingMenu).toEqual([
+      $t('admin.actions.edit'),
+      $t('admin.actions.token_history'),
+      $t('admin.users.reject'),
+    ])
+    document.querySelectorAll('.context-menu').forEach((el) => el.remove())
 
-    const activeLabels = row(wrapper, 1)
-      .findAll('button')
-      .map((b: DOMWrapper<Element>) => b.text())
-    expect(activeLabels).not.toContain(wrapper.vm.$t('admin.users.approve'))
-    expect(activeLabels).not.toContain(wrapper.vm.$t('admin.users.reject'))
+    // Active: edit is the visible button, history/suspend in the menu.
+    expect(row(wrapper, 1).find('.action-btn').text()).toBe($t('admin.actions.edit'))
+    const activeMenu = await menuLabels(wrapper, 1)
+    expect(activeMenu).toEqual([$t('admin.actions.token_history'), $t('admin.users.suspend')])
+    expect(activeMenu).not.toContain($t('admin.users.approve'))
+  })
+
+  it('shows spendable tokens with bonus and blocked broken out', async () => {
+    getMock.mockResolvedValue({
+      data: [{ ...baseUsers[1], tokens: 10, bonus_tokens: 20, tokens_blocked: 4 }],
+    })
+    activeWrapper = await mountSuspended(AdminUsersPage, {
+      global: { stubs: { UiVirtualDropdown: true } },
+    })
+    await flushPromises()
+
+    const cell = activeWrapper.find('.user-table__tokens')
+    expect(cell.find('.user-table__token-total').text()).toBe('26')
+    expect(cell.find('.user-table__sub').text()).toBe('davon 20 Bonus · 4 blockiert')
   })
 })
 
@@ -232,10 +268,9 @@ describe('admin/users.vue — edit', () => {
     putMock.mockResolvedValue({ data: {} })
     const wrapper = await mountUsersPage()
 
-    await row(wrapper, 0)
-      .findAll('button')
-      .find((b: DOMWrapper<Element>) => b.text() === wrapper.vm.$t('admin.actions.edit'))!
-      .trigger('click')
+    // For a pending user, edit lives in the row menu.
+    await clickMenuItem(wrapper, 0, wrapper.vm.$t('admin.actions.edit'))
+    expect(modal().find('.edit-meta').text()).toContain('Registriert am')
     await modal().find('.modal-box form').trigger('submit')
     await flushPromises()
 

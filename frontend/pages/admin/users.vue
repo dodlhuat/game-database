@@ -34,37 +34,47 @@
             <p class="dash-empty__text">{{ $t('admin.empty.users') }}</p>
           </div>
 
-          <div v-else class="table-wrap">
-            <table class="dash-table">
+          <div
+            v-else
+            ref="tableWrap"
+            class="table-wrap"
+            :class="{ 'table-wrap--more': canScrollRight }"
+            @scroll.passive="updateScrollHint"
+          >
+            <table class="dash-table user-table">
               <thead>
                 <tr>
-                  <th>{{ $t('admin.table.name') }}</th>
-                  <th>{{ $t('admin.table.email') }}</th>
+                  <th>{{ $t('admin.table.member') }}</th>
                   <th>{{ $t('admin.table.role') }}</th>
                   <th>{{ $t('admin.table.status') }}</th>
                   <th>{{ $t('admin.table.tokens') }}</th>
                   <th>{{ $t('admin.table.membership') }}</th>
-                  <th>{{ $t('admin.table.registered') }}</th>
-                  <th>{{ $t('admin.table.actions') }}</th>
+                  <th class="user-table__actions-col">
+                    <span class="sr-only">{{ $t('admin.table.actions') }}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="user in users" :key="user.id">
-                  <td class="dash-table__primary">{{ user.name }}</td>
-                  <td class="text-muted">{{ user.email }}</td>
-                  <td class="text-muted">{{ roleLabel(user.role) }}</td>
-                  <td>
+                  <td class="user-table__who">
+                    <span class="user-table__name">{{ user.name }}</span>
+                    <span class="user-table__email">{{ user.email }}</span>
+                  </td>
+                  <td class="user-table__role text-muted">{{ roleLabel(user.role) }}</td>
+                  <td class="user-table__status">
                     <span class="badge" :class="statusClass(user.status)">{{
                       statusLabel(user.status)
                     }}</span>
                   </td>
-                  <td class="text-muted">
-                    {{ user.tokens ?? 0 }}
-                    <span v-if="user.bonus_tokens" class="text-muted">
-                      + {{ user.bonus_tokens }} {{ $t('admin.table.bonus') }}
+                  <td class="user-table__tokens">
+                    <span class="user-table__label">{{ $t('admin.table.tokens') }}</span>
+                    <span class="user-table__token-total">{{ spendable(user) }}</span>
+                    <span v-if="tokenBreakdown(user)" class="user-table__sub">
+                      {{ tokenBreakdown(user) }}
                     </span>
                   </td>
-                  <td class="text-muted">
+                  <td class="user-table__membership">
+                    <span class="user-table__label">{{ $t('admin.table.membership') }}</span>
                     <span
                       v-if="user.membership_expires_at"
                       :class="membershipClass(user.membership_expires_at)"
@@ -73,28 +83,28 @@
                     </span>
                     <span v-else class="text-muted">—</span>
                   </td>
-                  <td class="text-muted">{{ formatDate(user.created_at) }}</td>
-                  <td>
+                  <td class="user-table__actions">
                     <div class="action-row">
-                      <button class="action-btn" @click="openEdit(user)">
+                      <button
+                        v-if="user.status === 'PENDING'"
+                        class="action-btn action-btn--success"
+                        @click="approve(user.id)"
+                      >
+                        {{ $t('admin.users.approve') }}
+                      </button>
+                      <button v-else class="action-btn" @click="openEdit(user)">
                         {{ $t('admin.actions.edit') }}
                       </button>
-                      <button class="action-btn" @click="openTxPanel(user)">
-                        {{ $t('admin.actions.token_history') }}
+                      <button
+                        class="row-menu-btn"
+                        :aria-label="$t('admin.users.more_actions', { name: user.name })"
+                        aria-haspopup="menu"
+                        @click.stop="openRowMenu($event, user)"
+                      >
+                        <svg class="icon-svg" aria-hidden="true">
+                          <use href="/svg-icons/icons.svg#more_horiz" />
+                        </svg>
                       </button>
-                      <template v-if="user.status === 'PENDING'">
-                        <button class="action-btn action-btn--success" @click="approve(user.id)">
-                          {{ $t('admin.users.approve') }}
-                        </button>
-                        <button class="action-btn action-btn--danger" @click="reject(user.id)">
-                          {{ $t('admin.users.reject') }}
-                        </button>
-                      </template>
-                      <template v-else-if="user.status === 'ACTIVE'">
-                        <button class="action-btn action-btn--danger" @click="suspend(user.id)">
-                          {{ $t('admin.users.suspend') }}
-                        </button>
-                      </template>
                     </div>
                   </td>
                 </tr>
@@ -195,6 +205,9 @@
             </button>
           </header>
           <form class="modal-box__body" @submit.prevent="submitEdit">
+            <p v-if="editRegisteredAt" class="edit-meta">
+              {{ $t('admin.users.registered_at', { date: formatDate(editRegisteredAt) }) }}
+            </p>
             <div class="form-field">
               <label class="form-label">{{ $t('admin.form.name') }}</label>
               <input v-model="editForm.name" class="form-input" type="text" required />
@@ -311,7 +324,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRowMenu, type RowMenuItem } from '~/composables/useRowMenu'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
@@ -375,8 +389,11 @@ const editError = ref('')
 const editUserId = ref<number | null>(null)
 const editForm = ref({ name: '', email: '', role: 'USER', password: '' })
 
+const editRegisteredAt = ref<string | null>(null)
+
 function openEdit(user: User) {
   editUserId.value = user.id
+  editRegisteredAt.value = user.created_at
   editForm.value = { name: user.name, email: user.email, role: user.role, password: '' }
   editError.value = ''
   showEdit.value = true
@@ -459,6 +476,17 @@ function formatTxDate(iso: string) {
   })
 }
 
+// ── Horizontal scroll hint ──────────────────────────────────────
+// The actions column is pinned to the right edge; while more columns are
+// hidden behind it, it casts a shadow so the table visibly continues.
+const tableWrap = ref<HTMLElement | null>(null)
+const canScrollRight = ref(false)
+function updateScrollHint() {
+  const el = tableWrap.value
+  canScrollRight.value = !!el && el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+}
+let resizeObserver: ResizeObserver | null = null
+
 // ── Status actions ──────────────────────────────────────────────
 onMounted(async () => {
   try {
@@ -467,7 +495,59 @@ onMounted(async () => {
   } finally {
     pending.value = false
   }
+  await nextTick()
+  updateScrollHint()
+  if (tableWrap.value && typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(updateScrollHint)
+    resizeObserver.observe(tableWrap.value)
+  }
 })
+onBeforeUnmount(() => resizeObserver?.disconnect())
+
+// ── Row menu ────────────────────────────────────────────────────
+// The visible button is the row's main action (approve while pending,
+// otherwise edit); everything else lives in the ⋯ menu.
+const rowMenu = useRowMenu()
+function openRowMenu(event: MouseEvent, user: User) {
+  const items: RowMenuItem[] = []
+  if (user.status === 'PENDING') {
+    items.push({ label: t('admin.actions.edit'), icon: 'edit', action: () => openEdit(user) })
+  }
+  items.push({
+    label: t('admin.actions.token_history'),
+    icon: 'receipt_long',
+    action: () => openTxPanel(user),
+  })
+  if (user.status === 'PENDING') {
+    items.push({
+      label: t('admin.users.reject'),
+      icon: 'cancel',
+      destructive: true,
+      action: () => reject(user.id),
+    })
+  } else if (user.status === 'ACTIVE') {
+    items.push({
+      label: t('admin.users.suspend'),
+      icon: 'block',
+      destructive: true,
+      action: () => suspend(user.id),
+    })
+  }
+  rowMenu.open(event.currentTarget as HTMLElement, items)
+}
+
+// ── Tokens ──────────────────────────────────────────────────────
+// What the member can actually spend — the same number as "Verfügbar" on
+// their own dashboard — with bonus/blocked broken out underneath.
+function spendable(user: User) {
+  return Math.max(0, (user.tokens ?? 0) + (user.bonus_tokens ?? 0) - (user.tokens_blocked ?? 0))
+}
+function tokenBreakdown(user: User) {
+  const parts: string[] = []
+  if (user.bonus_tokens) parts.push(t('admin.users.tokens_bonus', { n: user.bonus_tokens }))
+  if (user.tokens_blocked) parts.push(t('admin.users.tokens_blocked', { n: user.tokens_blocked }))
+  return parts.join(' · ')
+}
 
 async function approve(id: number) {
   await api.patch(`/admin/users/${id}/approve`)
@@ -720,6 +800,202 @@ $hero-divider: var(--divider);
   }
   &__primary {
     font-weight: 600;
+  }
+}
+
+// ── User table ─────────────────────────────────────────────────────
+.user-table {
+  // Stays a real table cell (display: flex here would break the row's
+  // borders/height); name and email stack as blocks instead.
+  &__who {
+    min-width: 12rem;
+  }
+  &__name,
+  &__email {
+    display: block;
+  }
+  &__name {
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+  &__email,
+  &__sub {
+    font-size: 0.78rem;
+    color: var(--secondary-text);
+  }
+  &__sub {
+    display: block;
+    white-space: nowrap;
+  }
+  &__token-total {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  &__role,
+  &__membership {
+    white-space: nowrap;
+  }
+  // Only shown in the phone card layout, where there are no column headers.
+  &__label {
+    display: none;
+  }
+
+  // Pinned to the right edge so the row actions are always reachable, no
+  // matter how far the table is scrolled sideways (they used to sit at the
+  // far end of a horizontal scroll nobody noticed). Needs an opaque
+  // background so scrolled cells pass underneath it.
+  &__actions-col,
+  &__actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    width: 1%;
+    transition: box-shadow 0.2s ease;
+  }
+  &__actions-col {
+    background: var(--background);
+  }
+  // The pinned cell must always match its row, including the hover tint
+  // (and its transition), so it inherits an explicit row background.
+  tbody tr {
+    background: var(--secondary-background);
+  }
+  &__actions {
+    background: inherit;
+  }
+  .action-row {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+}
+// While columns are hidden behind the pinned actions, cast a shadow so the
+// table visibly continues.
+.table-wrap--more .user-table__actions-col,
+.table-wrap--more .user-table__actions {
+  box-shadow: -14px 0 14px -12px rgba(0, 0, 0, 0.35);
+}
+
+.row-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--secondary-text);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  .icon-svg {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+  &:hover,
+  &:focus-visible {
+    background: var(--background);
+    border-color: var(--divider);
+    color: var(--primary-text);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.edit-meta {
+  font-size: 0.8rem;
+  color: var(--secondary-text);
+  margin: 0 0 1rem;
+  padding-bottom: 0;
+}
+
+// ── Phone: one card per user instead of a table row ────────────────
+// basix already turns every table into stacked label/value cards below
+// $bp-md (td as space-between flex, right-aligned, ::before labels). Keep
+// its card frame for consistency with the other admin tables, but lay the
+// cells out as a small grid instead of one label/value line each.
+@media (max-width: $bp-md) {
+  .table-wrap {
+    overflow: visible;
+  }
+  .user-table {
+    tbody tr {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas:
+        'who status'
+        'tokens membership'
+        'role actions';
+      gap: 0.85rem 1rem;
+      align-items: start;
+      // keep basix's card surface (the desktop rule above sets the row bg)
+      background: var(--background);
+    }
+    td {
+      display: block;
+      padding: 0;
+      border: none;
+      text-align: left;
+      &::before {
+        content: none;
+      }
+    }
+    &__who {
+      grid-area: who;
+      min-width: 0;
+    }
+    &__name,
+    &__email {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    &__status {
+      grid-area: status;
+      justify-self: end;
+    }
+    &__tokens {
+      grid-area: tokens;
+    }
+    &__membership {
+      grid-area: membership;
+      text-align: right;
+    }
+    &__role {
+      grid-area: role;
+      align-self: center;
+      font-size: 0.8rem;
+    }
+    &__label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--secondary-text);
+      margin-bottom: 0.2rem;
+    }
+    &__actions {
+      grid-area: actions;
+      position: static;
+      width: auto;
+      background: transparent;
+      box-shadow: none !important;
+    }
   }
 }
 

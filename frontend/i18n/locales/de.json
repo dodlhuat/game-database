@@ -560,7 +560,8 @@
       "tokens": "Token",
       "bonus": "Bonus",
       "membership": "Mitgliedschaft",
-      "registered": "Registriert"
+      "registered": "Registriert",
+      "member": "Mitglied"
     },
     "actions": {
       "add_user": "Benutzer anlegen",
@@ -729,7 +730,11 @@
       "role_label_member": "Mitglied",
       "create_error": "Fehler beim Anlegen.",
       "edit_error": "Fehler beim Speichern.",
-      "token_history_title": "Token-Transaktionsverlauf"
+      "token_history_title": "Token-Transaktionsverlauf",
+      "more_actions": "Weitere Aktionen für {name}",
+      "tokens_bonus": "davon {n} Bonus",
+      "tokens_blocked": "{n} blockiert",
+      "registered_at": "Registriert am {date}"
     },
     "loans": {
       "title": "Ausleihen",
