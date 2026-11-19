@@ -3,6 +3,7 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { useAuthStore } from '~/stores/auth'
 import type { Package } from '~/composables/useGames'
+import type { ApiPickupLocation } from '~/types/api'
 import PackageDetailPage from '~/pages/packages/[slug].vue'
 
 const fetchPackageMock = vi.fn()
@@ -31,6 +32,25 @@ mockNuxtImport('useApi', () => {
     delete: vi.fn(),
     download: vi.fn(),
   })
+})
+
+function pickupLocation(id: number, name: string): ApiPickupLocation {
+  return {
+    id,
+    name,
+    address: null,
+    opening_hours: null,
+    notes: null,
+    map_url: null,
+    is_active: true,
+    sort_order: id,
+  }
+}
+
+// A single active location is preselected, so the borrow tests can click straight through.
+const fetchActiveLocationsMock = vi.fn()
+mockNuxtImport('usePickupLocations', () => {
+  return () => ({ fetchActiveLocations: fetchActiveLocationsMock })
 })
 
 const basePackage: Package = {
@@ -89,6 +109,13 @@ describe('packages/[slug].vue — borrow CTA', () => {
     getMock.mockReset()
     getMock.mockResolvedValue({ package_loan_cost: 3 })
     navigateToMock.mockReset()
+    fetchActiveLocationsMock.mockReset()
+    fetchActiveLocationsMock.mockResolvedValue([pickupLocation(7, 'Vereinslokal')])
+    try {
+      localStorage.clear()
+    } catch {
+      // no storage in this environment
+    }
   })
 
   it('prompts login when not logged in', async () => {
@@ -161,7 +188,10 @@ describe('packages/[slug].vue — borrow CTA', () => {
     await wrapper.find('.detail__cta button').trigger('click')
     await flushPromises()
 
-    expect(postMock).toHaveBeenCalledWith('/package-loans', { package_id: 42 })
+    expect(postMock).toHaveBeenCalledWith('/package-loans', {
+      package_id: 42,
+      pickup_location_id: 7,
+    })
     expect(auth.user?.tokens).toBe(2)
     expect(navigateToMock).toHaveBeenCalledWith('/dashboard')
   })
@@ -176,5 +206,40 @@ describe('packages/[slug].vue — borrow CTA', () => {
 
     expect(wrapper.find('.alert-error').text()).toBe('Kein Slot mehr frei.')
     expect(auth.user?.tokens).toBe(5)
+  })
+
+  it('requires a pickup location when several are offered and none is preselected', async () => {
+    fetchActiveLocationsMock.mockResolvedValue([
+      pickupLocation(7, 'Vereinslokal'),
+      pickupLocation(8, 'Bibliothek'),
+    ])
+    const auth = setUser({ tokens: 5 })
+
+    const wrapper = await mountPackagePage({ available: true })
+    await wrapper.find('.detail__cta button').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.find('.pickup-picker__error').exists()).toBe(true)
+    expect(postMock).not.toHaveBeenCalled()
+    expect(auth.user?.tokens).toBe(5)
+  })
+
+  it('sends the chosen pickup location when several are offered', async () => {
+    fetchActiveLocationsMock.mockResolvedValue([
+      pickupLocation(7, 'Vereinslokal'),
+      pickupLocation(8, 'Bibliothek'),
+    ])
+    setUser({ tokens: 5 })
+    postMock.mockResolvedValue({})
+
+    const wrapper = await mountPackagePage({ id: 42, available: true })
+    await wrapper.find('.pickup-option__input[value="8"]').setValue(true)
+    await wrapper.find('.detail__cta button').trigger('click')
+    await flushPromises()
+
+    expect(postMock).toHaveBeenCalledWith('/package-loans', {
+      package_id: 42,
+      pickup_location_id: 8,
+    })
   })
 })
