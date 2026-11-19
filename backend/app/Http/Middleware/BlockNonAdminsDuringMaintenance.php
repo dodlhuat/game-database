@@ -19,8 +19,9 @@ class BlockNonAdminsDuringMaintenance
         $user = $request->user();
 
         if (config('app.maintenance_mode') && $user && ! $user->isAdmin()) {
+            // Sanctum typisiert den Token als nie null, ohne Token-Login (z. B. actingAs) ist er es aber.
             $token = $user->currentAccessToken();
-            if ($token instanceof PersonalAccessToken) {
+            if ($token instanceof PersonalAccessToken) { // @phpstan-ignore instanceof.alwaysTrue
                 $token->delete();
             }
 

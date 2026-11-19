@@ -19,8 +19,7 @@
           <h2 class="already-member__title">{{ $t('pages.upgrade.already_member') }}</h2>
           <p class="already-member__text">
             Deine Mitgliedschaft ist gültig bis
-            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong
-            >.
+            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong>.
           </p>
           <NuxtLink to="/dashboard" class="btn-secondary">Zum Dashboard</NuxtLink>
         </div>
@@ -32,8 +31,7 @@
           <h2 class="already-member__title">{{ $t('pages.upgrade.already_supporter_title') }}</h2>
           <p class="already-member__text">
             {{ $t('pages.upgrade.already_supporter_text') }}
-            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong
-            >.
+            <strong>{{ formatDate(auth.user?.membership_expires_at) }}</strong>.
           </p>
 
           <div class="activate-full-card">
