@@ -32,6 +32,13 @@
               <NuxtLink to="/dashboard">{{ $t('nav.dashboard') }}</NuxtLink>
             </li>
             <li>
+              <!-- Exact match only: every /admin/* route would otherwise
+                   keep this link highlighted as well. -->
+              <NuxtLink to="/admin" active-class="" exact-active-class="router-link-active">{{
+                $t('admin.dashboard')
+              }}</NuxtLink>
+            </li>
+            <li>
               <NuxtLink to="/admin/games">{{ $t('admin.games.title') }}</NuxtLink>
             </li>
             <li>
@@ -239,6 +246,14 @@ async function handleLogout() {
 }
 #flyoutMenu .submenu li {
   margin-bottom: 0.4rem;
+}
+/* basix caps an open submenu at max-height: 500px (overflow: hidden, for the
+   accordion animation). The admin submenu is ~600px tall, so its last links
+   were silently cut off — not scrollable either, since they're clipped inside
+   the submenu, not below it. Cap it well above any realistic list instead;
+   .flyout-links still scrolls the whole menu. */
+#flyoutMenu .submenu.is-open {
+  max-height: 80rem;
 }
 
 #flyoutMenu a,
