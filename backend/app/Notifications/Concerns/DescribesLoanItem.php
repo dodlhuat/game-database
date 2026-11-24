@@ -32,6 +32,19 @@ trait DescribesLoanItem
         return e($game->title);
     }
 
+    /** Pickup date — with the time span when it is a personal pickup event. */
+    protected function pickupWhen(Loan|PackageLoan $loan): string
+    {
+        $event = $loan->pickupEvent;
+        if ($event) {
+            $span = substr($event->time ?? '', 0, 5).($event->end_time ? '–'.substr($event->end_time, 0, 5) : '');
+
+            return $event->date->format('d.m.Y').($span !== '' ? ", {$span} Uhr" : '');
+        }
+
+        return $loan->start_date?->format('d.m.Y') ?? '';
+    }
+
     protected function conditionLabel(?string $condition): string
     {
         return match ($condition) {

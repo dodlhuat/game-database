@@ -100,6 +100,7 @@ Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () 
 
     // Ausleihen
     Route::get('/pickup-locations', [PickupLocationController::class, 'index']);
+    Route::get('/pickup-events', [PickupLocationController::class, 'events']);
     Route::get('/loans', [LoanController::class, 'index']);
     Route::post('/loans', [LoanController::class, 'store']);
     Route::get('/loans/{loan}', [LoanController::class, 'show']);

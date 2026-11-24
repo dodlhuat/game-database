@@ -28,7 +28,7 @@ class PickupLocationController extends Controller
     public function forUser(User $user): AnonymousResourceCollection
     {
         return PickupLocationResource::collection(
-            PickupLocation::active()->accessibleTo($user)->ordered()->get()
+            PickupLocation::active()->regular()->accessibleTo($user)->ordered()->get()
         );
     }
 
@@ -36,6 +36,7 @@ class PickupLocationController extends Controller
     {
         $data = $this->payload($request);
         $data['is_active'] = $request->boolean('is_active', true);
+        $data['is_personal'] = $request->boolean('is_personal');
         $maxOrder = PickupLocation::withTrashed()->max('sort_order');
         $data['sort_order'] = (is_numeric($maxOrder) ? (int) $maxOrder : 0) + 1;
 
@@ -53,8 +54,12 @@ class PickupLocationController extends Controller
     {
         $data = $this->payload($request);
         $data['is_active'] = $request->boolean('is_active', $pickupLocation->is_active);
+        $data['is_personal'] = $request->boolean('is_personal', $pickupLocation->is_personal);
 
         if ($pickupLocation->is_active && ! $data['is_active'] && ($blocked = $this->deactivationBlocker($pickupLocation))) {
+            return $blocked;
+        }
+        if ($data['is_personal'] !== $pickupLocation->is_personal && ($blocked = $this->personalSwitchBlocker($pickupLocation, $data['is_personal']))) {
             return $blocked;
         }
 
@@ -104,6 +109,13 @@ class PickupLocationController extends Controller
             return $this->openLoansResponse($pickupLocation->openLoanCount());
         }
 
+        if ($pickupLocation->events()->whereDate('date', '>=', today())->exists()) {
+            return response()->json([
+                'message' => 'An diesem Ort gibt es noch kommende Abholtermine. Bitte diese zuerst verlegen oder löschen.',
+                'reason' => 'upcoming_pickup_events',
+            ], 422);
+        }
+
         $pickupLocation->delete();
 
         return response()->noContent();
@@ -115,8 +127,8 @@ class PickupLocationController extends Controller
      */
     private function deactivationBlocker(PickupLocation $location): ?JsonResponse
     {
-        $othersActive = PickupLocation::active()->whereKeyNot($location->id)->exists();
-        if (! $othersActive) {
+        // Personal locations only work with events, so a regular one must stay
+        if (! $location->is_personal && ! $this->otherRegularActiveExists($location)) {
             return response()->json([
                 'message' => 'Es muss immer mindestens ein aktiver Abholort vorhanden sein.',
                 'reason' => 'last_active_location',
@@ -126,6 +138,35 @@ class PickupLocationController extends Controller
         $open = $location->openLoanCount();
         if ($open > 0) {
             return $this->openLoansResponse($open);
+        }
+
+        return null;
+    }
+
+    private function otherRegularActiveExists(PickupLocation $location): bool
+    {
+        return PickupLocation::active()->regular()->whereKeyNot($location->id)->exists();
+    }
+
+    /**
+     * Turning personal on takes the place out of the regular choice, so one
+     * regular location has to remain. Turning it off would strand the
+     * upcoming pickup events held there.
+     */
+    private function personalSwitchBlocker(PickupLocation $location, bool $toPersonal): ?JsonResponse
+    {
+        if ($toPersonal && $location->is_active && ! $this->otherRegularActiveExists($location)) {
+            return response()->json([
+                'message' => 'Es muss immer mindestens ein regulärer aktiver Abholort bleiben.',
+                'reason' => 'last_active_location',
+            ], 422);
+        }
+
+        if (! $toPersonal && $location->events()->whereDate('date', '>=', today())->exists()) {
+            return response()->json([
+                'message' => 'An diesem Ort gibt es noch kommende Abholtermine. Bitte diese zuerst verlegen oder löschen.',
+                'reason' => 'upcoming_pickup_events',
+            ], 422);
         }
 
         return null;

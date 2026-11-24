@@ -1,4 +1,4 @@
-import type { ApiPickupLocation } from '~/types/api'
+import type { ApiPickupEvent, ApiPickupLocation } from '~/types/api'
 
 export type PickupLocationPayload = {
   name: string
@@ -7,6 +7,8 @@ export type PickupLocationPayload = {
   notes: string | null
   map_url: string | null
   is_active: boolean
+  /** Personal pickup: only offered through pickup events held there. */
+  is_personal: boolean
   /** Restrict the location to these users; empty means open for everyone. */
   user_ids: number[]
 }
@@ -21,7 +23,11 @@ export type PickupLocationUser = {
 }
 
 /** Cache keys: cleared on login/logout so a new user never sees the last one's places. */
-export const PICKUP_LOCATION_STATE_KEYS = ['active-pickup-locations', 'user-pickup-locations']
+export const PICKUP_LOCATION_STATE_KEYS = [
+  'active-pickup-locations',
+  'user-pickup-locations',
+  'pickup-events',
+]
 
 export function usePickupLocations() {
   const api = useApi()
@@ -37,6 +43,16 @@ export function usePickupLocations() {
     if (activeLocations.value && !force) return activeLocations.value
     const res = await api.get<{ data: ApiPickupLocation[] }>('/pickup-locations')
     activeLocations.value = res.data
+    return res.data
+  }
+
+  // Personal pickup events the member can book. Not cached across dialogs for
+  // long: places fill up, so every borrow dialog asks again.
+  const pickupEvents = useState<ApiPickupEvent[] | null>('pickup-events', () => null)
+
+  const fetchPickupEvents = async (): Promise<ApiPickupEvent[]> => {
+    const res = await api.get<{ data: ApiPickupEvent[] }>('/pickup-events')
+    pickupEvents.value = res.data
     return res.data
   }
 
@@ -61,6 +77,7 @@ export function usePickupLocations() {
   const invalidate = () => {
     activeLocations.value = null
     userLocations.value = {}
+    pickupEvents.value = null
   }
 
   const fetchAdminLocations = async (): Promise<ApiPickupLocation[]> => {
@@ -102,6 +119,7 @@ export function usePickupLocations() {
   return {
     activeLocations,
     fetchActiveLocations,
+    fetchPickupEvents,
     fetchAdminLocations,
     fetchUserLocations,
     createLocation,

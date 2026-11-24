@@ -42,6 +42,14 @@ class LoanResource extends JsonResource
             ),
             'user' => new UserResource($this->whenLoaded('user')),
             'pickup_location' => new PickupLocationResource($this->whenLoaded('pickupLocation')),
+            // Personal pickup: the booked appointment with its time
+            'pickup_event' => $this->whenLoaded('pickupEvent', fn () => $this->pickupEvent ? [
+                'id' => $this->pickupEvent->id,
+                'title' => $this->pickupEvent->title,
+                'date' => $this->pickupEvent->date->format('Y-m-d'),
+                'time' => $this->pickupEvent->time ? substr($this->pickupEvent->time, 0, 5) : null,
+                'end_time' => $this->pickupEvent->end_time ? substr($this->pickupEvent->end_time, 0, 5) : null,
+            ] : null),
             'start_date' => $this->start_date,
             'due_date' => $this->due_date,
             'returned_at' => $this->returned_at,

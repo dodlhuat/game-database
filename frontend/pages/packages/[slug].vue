@@ -110,10 +110,10 @@
             <!-- Member, package available -->
             <template v-else-if="pkg.available">
               <PickupLocationPicker
-                v-if="pickupLocations.length"
-                v-model="pickupLocationId"
+                v-if="pickupOptions.length"
+                v-model="pickupKey"
                 class="detail__picker"
-                :locations="pickupLocations"
+                :choices="pickupOptions"
                 :show-error="pickupMissing"
               />
               <p v-else-if="noPickupLocation" class="alert alert-info detail__no-location">
@@ -155,7 +155,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import type { Package } from '~/composables/useGames'
-import type { ApiPickupLocation } from '~/types/api'
+import type { PickupChoice } from '~/utils/pickupLocations'
 
 const route = useRoute()
 const { fetchPackage } = useGames()
@@ -180,13 +180,14 @@ const loaning = ref(false)
 const loanError = ref('')
 const packageCost = ref<number | null>(null)
 
-const { fetchActiveLocations } = usePickupLocations()
-const pickupLocations = ref<ApiPickupLocation[]>([])
-const pickupLocationId = ref<number | null>(null)
+const { fetchActiveLocations, fetchPickupEvents } = usePickupLocations()
+// Regular locations plus bookable personal pickup events
+const pickupOptions = ref<PickupChoice[]>([])
+const pickupKey = ref<string | null>(null)
 const pickupMissing = ref(false)
-// Loaded fine, but every active location is reserved for other members
+// Loaded fine, but nothing is open to this member
 const noPickupLocation = ref(false)
-watch(pickupLocationId, () => (pickupMissing.value = false))
+watch(pickupKey, () => (pickupMissing.value = false))
 
 onMounted(async () => {
   try {
@@ -196,9 +197,10 @@ onMounted(async () => {
   }
   if (auth.canBorrow) {
     try {
-      pickupLocations.value = await fetchActiveLocations()
-      pickupLocationId.value = initialPickupLocationId(pickupLocations.value)
-      noPickupLocation.value = pickupLocations.value.length === 0
+      const [locations, events] = await Promise.all([fetchActiveLocations(), fetchPickupEvents()])
+      pickupOptions.value = pickupChoices(locations, events)
+      pickupKey.value = initialPickupChoice(pickupOptions.value)
+      noPickupLocation.value = pickupOptions.value.length === 0
     } catch {
       // the backend still rejects a loan without a valid location
     }
@@ -207,8 +209,9 @@ onMounted(async () => {
 
 async function borrowPackage() {
   if (!pkg.value) return
-  if (!pickupLocationId.value) {
-    if (pickupLocations.value.length) pickupMissing.value = true
+  const choice = pickupOptions.value.find((c) => c.key === pickupKey.value)
+  if (!choice) {
+    if (pickupOptions.value.length) pickupMissing.value = true
     else if (!noPickupLocation.value) loanError.value = t('pickup.load_error')
     return
   }
@@ -217,9 +220,9 @@ async function borrowPackage() {
   try {
     await api.post('/package-loans', {
       package_id: pkg.value.id,
-      pickup_location_id: pickupLocationId.value,
+      ...pickupPayload(choice),
     })
-    rememberPickupLocation(pickupLocationId.value)
+    rememberPickupChoice(choice)
     auth.spendTokens(packageCost.value ?? 0)
     await navigateTo('/dashboard')
   } catch (err: unknown) {

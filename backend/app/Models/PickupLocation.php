@@ -27,11 +27,13 @@ class PickupLocation extends Model
         'notes',
         'map_url',
         'is_active',
+        'is_personal',
         'sort_order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_personal' => 'boolean',
         'sort_order' => 'integer',
     ];
 
@@ -51,6 +53,18 @@ class PickupLocation extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Regular locations, offered directly when borrowing. Personal pickup
+     * locations only show up through their pickup events.
+     *
+     * @param  Builder<PickupLocation>  $query
+     * @return Builder<PickupLocation>
+     */
+    public function scopeRegular(Builder $query): Builder
+    {
+        return $query->where('is_personal', false);
     }
 
     /**
@@ -77,12 +91,13 @@ class PickupLocation extends Model
     }
 
     /**
-     * The location a new loan uses: the chosen one if it is active and open
-     * to the user, or — when no choice was sent — the only such location.
+     * The regular location a new loan uses: the chosen one if it is active
+     * and open to the user, or — when no choice was sent — the only such one.
+     * Personal locations are booked through their pickup events instead.
      */
     public static function forNewLoan(mixed $id, User $user): ?self
     {
-        $candidates = self::active()->accessibleTo($user);
+        $candidates = self::active()->regular()->accessibleTo($user);
 
         if ($id === null || $id === '') {
             $usable = $candidates->limit(2)->get();
@@ -107,6 +122,16 @@ class PickupLocation extends Model
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
+    }
+
+    /**
+     * Pickup events held here (personal locations only).
+     *
+     * @return HasMany<Event, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
     }
 
     /** @return HasMany<PackageLoan, $this> */

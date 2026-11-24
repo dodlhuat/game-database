@@ -19,13 +19,14 @@ class PackageLoan extends Model
     /** @use HasFactory<PackageLoanFactory> */
     use HasFactory;
 
-    /** Every loan view shows where the game goes back to. */
-    protected $with = ['pickupLocation'];
+    /** Every loan view shows where the game goes back to — and the pickup appointment, if booked. */
+    protected $with = ['pickupLocation', 'pickupEvent'];
 
     protected $fillable = [
         'package_id',
         'user_id',
         'pickup_location_id',
+        'pickup_event_id',
         'start_date',
         'due_date',
         'returned_at',
@@ -45,6 +46,16 @@ class PackageLoan extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
+    }
+
+    /**
+     * The personal pickup event this loan was booked for, if any.
+     *
+     * @return BelongsTo<Event, $this>
+     */
+    public function pickupEvent(): BelongsTo
+    {
+        return $this->belongsTo(Event::class, 'pickup_event_id');
     }
 
     /** @return BelongsTo<User, $this> */

@@ -2,6 +2,8 @@ export interface LoanSettings {
   start_date: string
   interval_days: number
   grace_days: number
+  /** Booking for a personal pickup event closes this many hours before it starts. */
+  pickup_event_lead_hours?: number
   loan_duration_weeks: number
   max_extensions: number
   loan_cost_small: number

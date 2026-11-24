@@ -8,21 +8,24 @@ use App\Models\Game;
 use App\Models\LoanSetting;
 use App\Models\Package;
 use App\Models\PackageLoan;
-use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
 use App\Notifications\LoanConfirmation;
 use App\Services\LoanReturnService;
+use App\Services\PickupScheduler;
 use App\Services\TokenWallet;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class PackageLoanController extends Controller
 {
-    public function __construct(private TokenWallet $wallet) {}
+    public function __construct(
+        private TokenWallet $wallet,
+        private PickupScheduler $pickups,
+    ) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -42,12 +45,15 @@ class PackageLoanController extends Controller
             'package_id' => ['required', 'integer', 'exists:packages,id'],
             // Optional only while a single location is active — then it is implied.
             'pickup_location_id' => ['nullable', 'integer'],
+            // Alternative to a location: a personal pickup event (brings place and date)
+            'pickup_event_id' => ['nullable', 'integer'],
         ]);
 
         /** @var User $user */
         $user = $request->user();
-        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'), $user);
-        if (! $location) {
+        $setting = LoanSetting::instance();
+        $pickup = $this->pickups->resolve($request->input('pickup_location_id'), $request->input('pickup_event_id'), $user, $setting);
+        if (! $pickup) {
             return response()->json([
                 'message' => 'Bitte wähle einen gültigen Abholort.',
                 'reason' => 'invalid_pickup_location',
@@ -55,11 +61,9 @@ class PackageLoanController extends Controller
             ], 422);
         }
 
-        /** @var User $user */
-        $user = $request->user();
+        ['location' => $location, 'event' => $event] = $pickup;
         /** @var Package $package */
         $package = Package::with('games')->findOrFail($request->package_id);
-        $setting = LoanSetting::instance();
 
         if (! $package->is_active) {
             return response()->json(['message' => 'Paket nicht verfügbar.'], 422);
@@ -120,59 +124,70 @@ class PackageLoanController extends Controller
             $totalDeposit = 0;
         }
 
-        $startDate = $this->calcNextAppointment($setting);
+        $startDate = $this->pickups->startDate($event, $setting);
         $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
 
-        $packageLoan = PackageLoan::create([
-            'package_id' => $package->id,
-            'user_id' => $user->id,
-            'pickup_location_id' => $location->id,
-            'start_date' => $startDate->toDateString(),
-            'due_date' => $dueDate->toDateString(),
-            'status' => 'ACTIVE',
-        ]);
+        // One transaction, so a full pickup event or a failure halfway leaves nothing behind
+        $packageLoan = DB::transaction(function () use ($event, $package, $user, $location, $startDate, $dueDate, $selectedCopies, $setting, $totalDeposit) {
+            if ($event) {
+                $this->pickups->claimSpot($event);
+            }
 
-        foreach ($selectedCopies as $copy) {
-            /** @var Game $copyGame */
-            $copyGame = $copy->game;
-            $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($copyGame, $setting);
-            $packageLoan->loans()->create([
-                'copy_id' => $copy->id,
+            $packageLoan = PackageLoan::create([
+                'package_id' => $package->id,
                 'user_id' => $user->id,
                 'pickup_location_id' => $location->id,
+                'pickup_event_id' => $event?->id,
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
-                'deposit_tokens' => $deposit,
-            ]);
-            $copy->increment('borrow_count');
-        }
-
-        if (! $user->isAdmin()) {
-            $loanCost = $setting->package_loan_cost;
-
-            $this->wallet->spend($user, $loanCost);
-            TokenTransaction::create([
-                'user_id' => $user->id,
-                'loan_id' => null,
-                'type' => 'BORROW',
-                'amount' => -$loanCost,
-                'description' => "Leihgebühr: Paket {$package->name}",
             ]);
 
-            if ($totalDeposit > 0) {
-                $user->increment('tokens_blocked', $totalDeposit);
+            foreach ($selectedCopies as $copy) {
+                /** @var Game $copyGame */
+                $copyGame = $copy->game;
+                $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($copyGame, $setting);
+                $packageLoan->loans()->create([
+                    'copy_id' => $copy->id,
+                    'user_id' => $user->id,
+                    'pickup_location_id' => $location->id,
+                    'pickup_event_id' => $event?->id,
+                    'start_date' => $startDate->toDateString(),
+                    'due_date' => $dueDate->toDateString(),
+                    'status' => 'ACTIVE',
+                    'deposit_tokens' => $deposit,
+                ]);
+                $copy->increment('borrow_count');
+            }
+
+            if (! $user->isAdmin()) {
+                $loanCost = $setting->package_loan_cost;
+
+                $this->wallet->spend($user, $loanCost);
                 TokenTransaction::create([
                     'user_id' => $user->id,
                     'loan_id' => null,
-                    'type' => 'DEPOSIT_BLOCK',
-                    'amount' => -$totalDeposit,
-                    'description' => "Kaution blockiert: Paket {$package->name}",
+                    'type' => 'BORROW',
+                    'amount' => -$loanCost,
+                    'description' => "Leihgebühr: Paket {$package->name}",
                 ]);
-            }
-        }
 
-        $packageLoan->load(['package', 'loans.copy.game', 'pickupLocation']);
+                if ($totalDeposit > 0) {
+                    $user->increment('tokens_blocked', $totalDeposit);
+                    TokenTransaction::create([
+                        'user_id' => $user->id,
+                        'loan_id' => null,
+                        'type' => 'DEPOSIT_BLOCK',
+                        'amount' => -$totalDeposit,
+                        'description' => "Kaution blockiert: Paket {$package->name}",
+                    ]);
+                }
+            }
+
+            return $packageLoan;
+        });
+
+        $packageLoan->load(['package', 'loans.copy.game', 'pickupLocation', 'pickupEvent']);
 
         LoanConfirmation::sendSafely($user, $packageLoan);
 
@@ -198,21 +213,5 @@ class PackageLoanController extends Controller
         $returns->returnPackage($packageLoan, $validated['return_condition'], $user);
 
         return new PackageLoanResource($packageLoan);
-    }
-
-    private function calcNextAppointment(LoanSetting $setting): Carbon
-    {
-        $today = Carbon::today();
-        $deadline = $today->copy()->addDays($setting->grace_days);
-        $startDate = Carbon::parse($setting->start_date);
-
-        if ($setting->interval_days <= 0) {
-            return $deadline->copy()->addDay();
-        }
-
-        $daysSinceStart = (int) $startDate->diffInDays($deadline, false);
-        $n = $daysSinceStart < 0 ? 0 : (int) floor($daysSinceStart / $setting->interval_days) + 1;
-
-        return $startDate->copy()->addDays($n * $setting->interval_days);
     }
 }

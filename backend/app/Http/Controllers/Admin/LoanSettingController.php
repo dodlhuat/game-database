@@ -20,6 +20,8 @@ class LoanSettingController extends Controller
             'start_date' => ['required', 'date'],
             'interval_days' => ['required', 'integer', 'min:1'],
             'grace_days' => ['required', 'integer', 'min:0'],
+            // Booking for a personal pickup event closes this many hours before it starts
+            'pickup_event_lead_hours' => ['sometimes', 'integer', 'min:0', 'max:336'],
             'loan_duration_weeks' => ['required', 'integer', 'min:1'],
             'max_extensions' => ['required', 'integer', 'min:0'],
             'loan_cost_small' => ['required', 'integer', 'min:0'],

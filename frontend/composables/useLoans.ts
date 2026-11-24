@@ -23,6 +23,14 @@ export interface Loan {
   /** Set when the game is part of a package — it can only go back with the whole package. */
   package_loan_id?: number | null
   package?: { id: number; name: string } | null
+  /** Personal pickup: the booked appointment. */
+  pickup_event?: {
+    id: number
+    title: string
+    date: string
+    time: string | null
+    end_time: string | null
+  } | null
   /** Where the game is picked up — and has to be returned. */
   pickup_location?: ApiPickupLocation | null
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED'
@@ -93,7 +101,9 @@ export function useLoans() {
 
   const createLoan = (payload: {
     copy_id: number
-    pickup_location_id: number
+    pickup_location_id?: number
+    /** Personal pickup event instead of a location — brings place, date and time. */
+    pickup_event_id?: number
     start_date: string
     due_date: string
   }) => api.post<{ data: Loan }>('/loans', payload)

@@ -1,39 +1,48 @@
 <template>
   <fieldset class="pickup-picker">
     <legend class="pickup-picker__legend">
-      {{ locations.length === 1 ? $t('pickup.legend_single') : $t('pickup.legend') }}
+      {{ choices.length === 1 ? $t('pickup.legend_single') : $t('pickup.legend') }}
     </legend>
     <p class="pickup-picker__hint">{{ $t('pickup.hint') }}</p>
 
     <div class="pickup-picker__options">
-      <template v-if="locations.length === 1">
-        <div class="pickup-option pickup-option--static">
+      <template v-for="(choice, i) in ordered" :key="choice.key">
+        <p
+          v-if="choice.kind === 'event' && i === firstEventIndex && firstEventIndex > 0"
+          class="pickup-picker__group"
+        >
+          {{ $t('pickup.personal_group') }}
+        </p>
+
+        <div
+          v-if="choices.length === 1"
+          class="pickup-option pickup-option--static"
+          :class="{ 'pickup-option--event': choice.kind === 'event' }"
+        >
           <span class="pickup-option__card">
-            <span class="pickup-option__pin" aria-hidden="true">
-              <svg class="icon-svg"><use href="/svg-icons/icons.svg#location_on" /></svg>
-            </span>
-            <PickupLocationDetails :location="locations[0]!" />
+            <PickupChoiceCard :choice="choice" />
           </span>
         </div>
-      </template>
 
-      <label v-for="location in locations" v-else :key="location.id" class="pickup-option">
-        <input
-          class="pickup-option__input"
-          type="radio"
-          :name="name"
-          :value="location.id"
-          :checked="modelValue === location.id"
-          @change="emit('update:modelValue', location.id)"
-        />
-        <span class="pickup-option__card">
-          <span class="pickup-option__pin" aria-hidden="true">
-            <svg class="icon-svg"><use href="/svg-icons/icons.svg#location_on" /></svg>
+        <label
+          v-else
+          class="pickup-option"
+          :class="{ 'pickup-option--event': choice.kind === 'event' }"
+        >
+          <input
+            class="pickup-option__input"
+            type="radio"
+            :name="name"
+            :value="choice.key"
+            :checked="modelValue === choice.key"
+            @change="emit('update:modelValue', choice.key)"
+          />
+          <span class="pickup-option__card">
+            <PickupChoiceCard :choice="choice" />
+            <span class="pickup-option__check" aria-hidden="true" />
           </span>
-          <PickupLocationDetails :location="location" />
-          <span class="pickup-option__check" aria-hidden="true" />
-        </span>
-      </label>
+        </label>
+      </template>
     </div>
 
     <p v-if="showError" class="pickup-picker__error" role="alert">{{ $t('pickup.required') }}</p>
@@ -41,15 +50,23 @@
 </template>
 
 <script setup lang="ts">
-import type { ApiPickupLocation } from '~/types/api'
+import { computed } from 'vue'
+import type { PickupChoice } from '~/utils/pickupLocations'
 
-defineProps<{
-  locations: ApiPickupLocation[]
-  modelValue: number | null
+const props = defineProps<{
+  choices: PickupChoice[]
+  modelValue: string | null
   showError?: boolean
 }>()
 
-const emit = defineEmits<{ 'update:modelValue': [id: number] }>()
+const emit = defineEmits<{ 'update:modelValue': [key: string] }>()
 
 const name = `pickup-${useId()}`
+
+// Regular locations first, then the dated pickup events under their own heading
+const ordered = computed(() => [
+  ...props.choices.filter((c) => c.kind === 'location'),
+  ...props.choices.filter((c) => c.kind === 'event'),
+])
+const firstEventIndex = computed(() => ordered.value.findIndex((c) => c.kind === 'event'))
 </script>

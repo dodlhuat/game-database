@@ -18,6 +18,8 @@ class StoreLoanRequest extends FormRequest
             'copy_id' => ['required', 'integer', 'exists:copies,id'],
             // Optional only while a single location is active — then it is implied.
             'pickup_location_id' => ['nullable', 'integer'],
+            // Alternative to a location: a personal pickup event (brings place and date)
+            'pickup_event_id' => ['nullable', 'integer'],
         ];
     }
 }

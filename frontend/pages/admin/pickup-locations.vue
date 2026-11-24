@@ -107,6 +107,12 @@
                   </td>
                   <td class="location-cell">
                     <span class="location-cell__name">{{ location.name }}</span>
+                    <span v-if="location.is_personal" class="access-badge access-badge--personal">
+                      <svg class="icon-svg" aria-hidden="true">
+                        <use href="/svg-icons/icons.svg#event" />
+                      </svg>
+                      {{ $t('admin.pickup_locations.personal.badge') }}
+                    </span>
                     <span
                       v-if="location.users?.length"
                       class="access-badge"
@@ -250,6 +256,14 @@
                   />
                 </div>
 
+                <div class="form-grid__full personal">
+                  <UiSwitch
+                    v-model="form.is_personal"
+                    :label="$t('admin.pickup_locations.personal.label')"
+                  />
+                  <p class="form-hint">{{ $t('admin.pickup_locations.personal.hint') }}</p>
+                </div>
+
                 <fieldset class="form-grid__full access">
                   <legend class="access__legend">
                     {{ $t('admin.pickup_locations.access.title') }}
@@ -338,16 +352,21 @@ const form = reactive({
   wasActive: true,
   restricted: false,
   users: [] as PickupLocationUser[],
+  is_personal: false,
 })
 
 // ── Rules (mirrored from the backend, which enforces them) ──────
 // At least one location must stay active, and a location can only be
 // switched off once every game borrowed from it has come back.
-const activeCount = computed(() => locations.value.filter((l) => l.is_active).length)
+// Personal locations only work through events, so they never count as the last one
+const activeCount = computed(
+  () => locations.value.filter((l) => l.is_active && !l.is_personal).length
+)
 
 function lockReason(location: ApiPickupLocation): string | null {
   if (!location.is_active) return null
-  if (activeCount.value <= 1) return t('admin.pickup_locations.lock.last_active')
+  if (!location.is_personal && activeCount.value <= 1)
+    return t('admin.pickup_locations.lock.last_active')
   const open = location.open_loans_count ?? 0
   if (open > 0) return t('admin.pickup_locations.lock.open_loans', { n: open }, open)
   return null
@@ -384,6 +403,7 @@ function openCreate() {
     wasActive: true,
     restricted: false,
     users: [],
+    is_personal: false,
   })
   formError.value = ''
 }
@@ -401,6 +421,7 @@ function openEdit(location: ApiPickupLocation) {
     wasActive: location.is_active,
     restricted: !!location.users?.length,
     users: [...(location.users ?? [])],
+    is_personal: location.is_personal,
   })
   formError.value = ''
 }
@@ -431,6 +452,7 @@ async function save() {
     notes: orNull(form.notes),
     map_url: orNull(form.map_url),
     is_active: form.is_active,
+    is_personal: form.is_personal,
     // Switching the restriction off, or leaving it without users, opens the place up
     user_ids: form.restricted ? form.users.map((u) => u.id) : [],
   }
@@ -1056,6 +1078,17 @@ $amber-ink: var(--amber-ink);
     width: 0.8rem;
     height: 0.8rem;
   }
+}
+
+.access-badge--personal {
+  color: var(--primary-text);
+  background: color-mix(in srgb, var(--primary-text) 6%, transparent);
+  border-color: var(--divider);
+  cursor: default;
+}
+
+.personal .form-hint {
+  margin: 0.35rem 0 0;
 }
 
 .access {

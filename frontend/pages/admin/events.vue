@@ -52,7 +52,23 @@
               </thead>
               <tbody>
                 <tr v-for="event in events" :key="event.id">
-                  <td class="dash-table__primary">{{ event.title }}</td>
+                  <td class="dash-table__primary">
+                    {{ event.title }}
+                    <span v-if="event.is_pickup" class="pickup-tag">
+                      <svg class="icon-svg" aria-hidden="true">
+                        <use href="/svg-icons/icons.svg#location_on" />
+                      </svg>
+                      {{ event.pickup_location?.name }} ·
+                      {{
+                        event.max_loans
+                          ? $t('admin.events.pickup.booked_of', {
+                              n: event.bookings_count ?? 0,
+                              max: event.max_loans,
+                            })
+                          : $t('admin.events.pickup.booked', { n: event.bookings_count ?? 0 })
+                      }}
+                    </span>
+                  </td>
                   <td>{{ formatDate(event.date) }}</td>
                   <td>
                     {{
@@ -110,7 +126,11 @@
                 </div>
 
                 <div class="form-grid__center">
-                  <UiSwitch v-model="form.is_all_day" :label="$t('events.all_day')" />
+                  <UiSwitch
+                    v-if="!form.is_pickup"
+                    v-model="form.is_all_day"
+                    :label="$t('events.all_day')"
+                  />
                 </div>
 
                 <div v-if="!form.is_all_day" class="form-grid__full">
@@ -122,6 +142,43 @@
                     :to-label="$t('admin.events.form.time_to')"
                   />
                 </div>
+
+                <fieldset class="form-grid__full pickup-box" :class="{ 'is-on': form.is_pickup }">
+                  <legend class="pickup-box__legend">
+                    {{ $t('admin.events.pickup.title') }}
+                  </legend>
+                  <UiSwitch
+                    v-model="form.is_pickup"
+                    :disabled="!personalLocations.length && !form.is_pickup"
+                    :label="$t('admin.events.pickup.toggle')"
+                  />
+                  <p class="form-hint">
+                    {{
+                      personalLocations.length || form.is_pickup
+                        ? $t('admin.events.pickup.hint')
+                        : $t('admin.events.pickup.no_locations')
+                    }}
+                  </p>
+                  <div v-if="form.is_pickup" class="pickup-box__fields">
+                    <div>
+                      <label class="form-label">{{ $t('admin.events.pickup.location') }}</label>
+                      <UiVirtualDropdown
+                        v-model="form.pickup_location_id"
+                        :options="personalLocationOptions"
+                        :placeholder="$t('admin.events.pickup.location_placeholder')"
+                      />
+                    </div>
+                    <div>
+                      <UiInput
+                        v-model="form.max_loans"
+                        type="number"
+                        min="1"
+                        :label="$t('admin.events.pickup.max_loans')"
+                        :placeholder="$t('admin.events.pickup.max_loans_placeholder')"
+                      />
+                    </div>
+                  </div>
+                </fieldset>
 
                 <div class="form-grid__full">
                   <label class="form-label">{{ $t('admin.events.form.description') }}</label>
@@ -208,12 +265,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
-import type { ApiEvent } from '~/types/api'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
+import type { ApiEvent, ApiPickupLocation } from '~/types/api'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
+const { t } = useI18n()
 const { fetchAdminEvents, createEvent, updateEvent, deleteEvent } = useEvents()
+const { fetchAdminLocations } = usePickupLocations()
+
+// Only personal locations host pickup events; the current one stays selectable
+// even if it was switched off since, so editing an old event keeps working.
+const locations = ref<ApiPickupLocation[]>([])
+const personalLocations = computed(() =>
+  locations.value.filter((l) => l.is_personal && l.is_active)
+)
+const personalLocationOptions = computed(() => {
+  const list = locations.value.filter(
+    (l) => l.is_personal && (l.is_active || String(l.id) === form.pickup_location_id)
+  )
+  return list.map((l) => ({ label: l.name, value: String(l.id) }))
+})
 
 const events = ref<ApiEvent[]>([])
 const loading = ref(true)
@@ -234,7 +306,18 @@ const form = reactive({
   imageFile: null as File | null,
   existingImageUrl: null as string | null,
   removeImage: false,
+  is_pickup: false,
+  pickup_location_id: '' as string,
+  max_loans: '' as string,
 })
+
+// A pickup is an appointment: it always has a start and an end
+watch(
+  () => form.is_pickup,
+  (on) => {
+    if (on) form.is_all_day = false
+  }
+)
 
 const imagePreviewUrl = computed(() =>
   form.imageFile ? URL.createObjectURL(form.imageFile) : null
@@ -272,6 +355,9 @@ function openCreate() {
     imageFile: null,
     existingImageUrl: null,
     removeImage: false,
+    is_pickup: false,
+    pickup_location_id: '',
+    max_loans: '',
   })
   formError.value = ''
 }
@@ -289,6 +375,9 @@ function openEdit(event: ApiEvent) {
     imageFile: null,
     existingImageUrl: event.image_url,
     removeImage: false,
+    is_pickup: event.is_pickup,
+    pickup_location_id: event.pickup_location?.id ? String(event.pickup_location.id) : '',
+    max_loans: event.max_loans ? String(event.max_loans) : '',
   })
   formError.value = ''
 }
@@ -333,6 +422,9 @@ function buildFormData() {
   if (form.description) fd.append('description', form.description)
   if (form.imageFile) fd.append('image', form.imageFile)
   if (form.removeImage) fd.append('remove_image', '1')
+  // Empty strings arrive as null, which turns a pickup event back into a regular one
+  fd.append('pickup_location_id', form.is_pickup ? form.pickup_location_id : '')
+  fd.append('max_loans', form.is_pickup ? String(form.max_loans).trim() : '')
   return fd
 }
 
@@ -349,6 +441,10 @@ async function save() {
     formError.value = 'Die Endzeit muss nach der Startzeit liegen.'
     return
   }
+  if (form.is_pickup && !form.pickup_location_id) {
+    formError.value = t('admin.events.pickup.location_required')
+    return
+  }
   formError.value = ''
   saving.value = true
   try {
@@ -362,8 +458,9 @@ async function save() {
       events.value.sort((a, b) => a.date.localeCompare(b.date))
     }
     closeForm()
-  } catch {
-    formError.value = 'Fehler beim Speichern.'
+  } catch (err: unknown) {
+    const message = (err as { message?: unknown })?.message
+    formError.value = typeof message === 'string' && message ? message : 'Fehler beim Speichern.'
   } finally {
     saving.value = false
   }
@@ -374,14 +471,19 @@ async function remove(id: number) {
   try {
     await deleteEvent(id)
     events.value = events.value.filter((e) => e.id !== id)
-  } catch {
-    alert('Fehler beim Löschen.')
+  } catch (err: unknown) {
+    // e.g. a pickup event that still has bookings
+    const message = (err as { message?: unknown })?.message
+    alert(typeof message === 'string' && message ? message : 'Fehler beim Löschen.')
   }
 }
 
 onMounted(async () => {
   try {
-    events.value = await fetchAdminEvents()
+    ;[events.value, locations.value] = await Promise.all([
+      fetchAdminEvents(),
+      fetchAdminLocations(),
+    ])
   } finally {
     loading.value = false
   }
@@ -770,6 +872,74 @@ $hero-muted: var(--secondary-text);
     width: 15px;
     height: 15px;
     cursor: pointer;
+  }
+}
+
+.form-hint {
+  margin: 0;
+  padding: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--secondary-text);
+}
+
+// Pickup appointment: a framed block that lights up once switched on
+.pickup-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0.25rem 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  &.is-on {
+    border-color: $amber-25;
+    background: $amber-08;
+  }
+  &__legend {
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+  }
+  &__fields {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0.75rem 1rem;
+    margin-top: 0.25rem;
+    animation: pickup-in 0.25s ease-out;
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@keyframes pickup-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.pickup-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: fit-content;
+  margin-top: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--secondary-text);
+  .icon-svg {
+    width: 0.85rem;
+    height: 0.85rem;
+    color: $amber;
   }
 }
 

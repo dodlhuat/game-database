@@ -315,6 +315,10 @@ export interface paths {
       path?: never
       cookie?: never
     }
+    /**
+     * All events, pickup events included — except those at a location the
+     *     user has no access to, which would only tease an unbookable date
+     */
     get: operations['event.index']
     put?: never
     post?: never
@@ -1140,6 +1144,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/pickup-events': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Personal pickup events this user can book right now, soonest first */
+    get: operations['pickupLocation.events']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/users/{user}/pickup-locations': {
     parameters: {
       query?: never
@@ -1763,6 +1784,9 @@ export interface components {
       is_all_day?: boolean
       time?: string | null
       end_time?: string | null
+      /** @description Set = personal pickup event at this location, bookable when borrowing */
+      pickup_location_id?: number | null
+      max_loans?: number | null
       description?: string | null
       /**
        * Format: binary
@@ -1778,6 +1802,11 @@ export interface components {
       time: string | null
       end_time: string | null
       is_all_day: boolean
+      /** @description Personal pickup event: where it happens and how full it is */
+      is_pickup: boolean
+      pickup_location?: components['schemas']['PickupLocationResource'] | null
+      max_loans: number | null
+      bookings_count?: number
       description: string | null
       image_url: string | null
     }
@@ -1886,6 +1915,14 @@ export interface components {
       } | null
       user?: components['schemas']['UserResource']
       pickup_location?: components['schemas']['PickupLocationResource'] | null
+      /** @description Personal pickup: the booked appointment with its time */
+      pickup_event?: {
+        id: number
+        title: string
+        date: string
+        time: string | null
+        end_time: string | null
+      } | null
       /** Format: date-time */
       start_date: string | null
       /** Format: date-time */
@@ -1916,6 +1953,7 @@ export interface components {
       start_date: string
       interval_days: number
       grace_days: number
+      pickup_event_lead_hours: number
       loan_duration_weeks: number
       max_extensions: number
       loan_cost_small: number
@@ -1983,6 +2021,14 @@ export interface components {
       }
       user?: components['schemas']['UserResource']
       pickup_location?: components['schemas']['PickupLocationResource'] | null
+      /** @description Personal pickup: the booked appointment with its time */
+      pickup_event?: {
+        id: number
+        title: string
+        date: string
+        time: string | null
+        end_time: string | null
+      } | null
       /** Format: date-time */
       start_date: string | null
       /** Format: date-time */
@@ -1995,6 +2041,17 @@ export interface components {
       /** Format: date-time */
       created_at: string | null
     }
+    /** PickupEventResource */
+    PickupEventResource: {
+      id: number
+      title: string
+      date: string
+      time: string | null
+      end_time: string | null
+      spots_left: number | null
+      booking_closes_at: string
+      location?: components['schemas']['PickupLocationResource'] | null
+    }
     /** PickupLocationRequest */
     PickupLocationRequest: {
       name: string
@@ -2004,6 +2061,8 @@ export interface components {
       /** Format: uri */
       map_url?: string | null
       is_active?: boolean
+      /** @description Personal pickup: only offered through pickup events held there */
+      is_personal?: boolean
       /** @description Restrict the location to these users; an empty list opens it for everyone */
       user_ids?: number[]
     }
@@ -2016,6 +2075,8 @@ export interface components {
       notes: string | null
       map_url: string | null
       is_active: boolean
+      /** @description Personal pickup: only offered through pickup events held there */
+      is_personal: boolean
       sort_order: number
       /** @description Admin list only: borrowed games that still have to come back here. */
       open_loans_count?: number
@@ -2115,6 +2176,8 @@ export interface components {
       copy_id: number
       /** @description Optional only while a single location is active — then it is implied. */
       pickup_location_id?: number | null
+      /** @description Alternative to a location: a personal pickup event (brings place and date) */
+      pickup_event_id?: number | null
     }
     /** StoreReviewRequest */
     StoreReviewRequest: {
@@ -3103,7 +3166,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['EventResource']
+            data: components['schemas']['EventResource'] & Record<string, never>
           }
         }
       }
@@ -3133,9 +3196,11 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            data: components['schemas']['EventResource']
-          }
+          'application/json':
+            | {
+                data: components['schemas']['EventResource']
+              }
+            | Record<string, never>
         }
       }
       401: components['responses']['AuthenticationException']
@@ -3164,6 +3229,18 @@ export interface operations {
       }
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            message: string
+            /** @constant */
+            reason: 'has_bookings'
+          }
+        }
+      }
     }
   }
   'extension.store': {
@@ -4144,6 +4221,8 @@ export interface operations {
           start_date: string
           interval_days: number
           grace_days: number
+          /** @description Booking for a personal pickup event closes this many hours before it starts */
+          pickup_event_lead_hours?: number
           loan_duration_weeks: number
           max_extensions: number
           loan_cost_small: number
@@ -5113,6 +5192,8 @@ export interface operations {
           package_id: number
           /** @description Optional only while a single location is active — then it is implied. */
           pickup_location_id?: number | null
+          /** @description Alternative to a location: a personal pickup event (brings place and date) */
+          pickup_event_id?: number | null
         }
       }
     }
@@ -5317,6 +5398,29 @@ export interface operations {
         content: {
           'application/json': {
             data: components['schemas']['PickupLocationResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+    }
+  }
+  'pickupLocation.events': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `PickupEventResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: (components['schemas']['PickupEventResource'] & Record<string, never>)[]
           }
         }
       }

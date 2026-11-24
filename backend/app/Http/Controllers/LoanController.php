@@ -9,13 +9,12 @@ use App\Models\Copy;
 use App\Models\Game;
 use App\Models\Loan;
 use App\Models\LoanSetting;
-use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
 use App\Notifications\LoanConfirmation;
 use App\Services\LoanReturnService;
+use App\Services\PickupScheduler;
 use App\Services\TokenWallet;
-use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -26,6 +25,7 @@ class LoanController extends Controller
     public function __construct(
         private TokenWallet $wallet,
         private LoanReturnService $returns,
+        private PickupScheduler $pickups,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -52,12 +52,12 @@ class LoanController extends Controller
             ], 403);
         }
 
-        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'), $user);
-        if (! $location) {
+        $setting = LoanSetting::instance();
+        $pickup = $this->pickups->resolve($request->input('pickup_location_id'), $request->input('pickup_event_id'), $user, $setting);
+        if (! $pickup) {
             return $this->invalidLocationResponse();
         }
-
-        $setting = LoanSetting::instance();
+        ['location' => $location, 'event' => $event] = $pickup;
 
         // Vorzeitige Token-Prüfung außerhalb der Transaktion, damit wir früh abbrechen können
         if (! $user->isAdmin()) {
@@ -78,7 +78,11 @@ class LoanController extends Controller
             }
         }
 
-        $loan = DB::transaction(function () use ($request, $user, $setting, $location) {
+        $loan = DB::transaction(function () use ($request, $user, $setting, $location, $event) {
+            if ($event) {
+                $this->pickups->claimSpot($event);
+            }
+
             // Kopie mit Lock holen, damit kein zweiter Request dieselbe Kopie gleichzeitig verleiht
             /** @var Copy $copy */
             $copy = Copy::with('game')->lockForUpdate()->findOrFail($request->copy_id);
@@ -105,13 +109,14 @@ class LoanController extends Controller
             $loanCost = $user->isAdmin() ? 0 : $setting->costFor($game->size_category);
             $deposit = $user->isAdmin() ? 0 : $copy->calculateDeposit($game, $setting);
 
-            $startDate = $this->calcNextAppointment($setting);
+            $startDate = $this->pickups->startDate($event, $setting);
             $dueDate = $startDate->copy()->addWeeks($setting->loan_duration_weeks);
 
             $loan = Loan::create([
                 'copy_id' => $copy->id,
                 'user_id' => $user->id,
                 'pickup_location_id' => $location->id,
+                'pickup_event_id' => $event?->id,
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
@@ -145,7 +150,7 @@ class LoanController extends Controller
             return $loan;
         });
 
-        $loan->load(['copy.game', 'extensions', 'pickupLocation']);
+        $loan->load(['copy.game', 'extensions', 'pickupLocation', 'pickupEvent']);
 
         LoanConfirmation::sendSafely($user, $loan);
 
@@ -159,22 +164,6 @@ class LoanController extends Controller
             'reason' => 'invalid_pickup_location',
             'errors' => ['pickup_location_id' => ['Bitte wähle einen gültigen Abholort.']],
         ], 422);
-    }
-
-    private function calcNextAppointment(LoanSetting $setting): Carbon
-    {
-        $today = Carbon::today();
-        $deadline = $today->copy()->addDays($setting->grace_days);
-        $startDate = Carbon::parse($setting->start_date);
-
-        if ($setting->interval_days <= 0) {
-            return $deadline->copy()->addDay();
-        }
-
-        $daysSinceStart = (int) $startDate->diffInDays($deadline, false);
-        $n = $daysSinceStart < 0 ? 0 : (int) floor($daysSinceStart / $setting->interval_days) + 1;
-
-        return $startDate->copy()->addDays($n * $setting->interval_days);
     }
 
     public function show(Request $request, Loan $loan): LoanResource

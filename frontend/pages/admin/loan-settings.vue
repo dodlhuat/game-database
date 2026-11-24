@@ -58,6 +58,22 @@
                 </div>
                 <div class="form-field">
                   <label class="form-label">{{
+                    $t('admin.loan_settings.pickup_event_lead_hours')
+                  }}</label>
+                  <input
+                    v-model.number="form.pickup_event_lead_hours"
+                    class="form-input"
+                    type="number"
+                    min="0"
+                    max="336"
+                    required
+                  />
+                  <p class="form-hint">
+                    {{ $t('admin.loan_settings.pickup_event_lead_hours_hint') }}
+                  </p>
+                </div>
+                <div class="form-field">
+                  <label class="form-label">{{
                     $t('admin.loan_settings.loan_duration_weeks')
                   }}</label>
                   <input
@@ -273,6 +289,7 @@ const form = ref<LoanSettings>({
   start_date: '',
   interval_days: 14,
   grace_days: 3,
+  pickup_event_lead_hours: 24,
   loan_duration_weeks: 2,
   max_extensions: 2,
   loan_cost_small: 3,
@@ -319,6 +336,7 @@ onMounted(async () => {
       start_date: String(data.start_date).slice(0, 10),
       interval_days: data.interval_days,
       grace_days: data.grace_days,
+      pickup_event_lead_hours: data.pickup_event_lead_hours ?? 24,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
       loan_cost_small: data.loan_cost_small,
@@ -350,6 +368,7 @@ async function save() {
       start_date: String(data.start_date).slice(0, 10),
       interval_days: data.interval_days,
       grace_days: data.grace_days,
+      pickup_event_lead_hours: data.pickup_event_lead_hours ?? 24,
       loan_duration_weeks: data.loan_duration_weeks,
       max_extensions: data.max_extensions,
       loan_cost_small: data.loan_cost_small,

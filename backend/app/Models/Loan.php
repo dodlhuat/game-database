@@ -23,14 +23,15 @@ class Loan extends Model
     /** Statuses in which the game has not come back yet. */
     public const OPEN_STATUSES = ['ACTIVE', 'EXTENDED', 'OVERDUE'];
 
-    /** Every loan view shows where the game goes back to. */
-    protected $with = ['pickupLocation'];
+    /** Every loan view shows where the game goes back to — and the pickup appointment, if booked. */
+    protected $with = ['pickupLocation', 'pickupEvent'];
 
     protected $fillable = [
         'copy_id',
         'user_id',
         'package_loan_id',
         'pickup_location_id',
+        'pickup_event_id',
         'start_date',
         'due_date',
         'returned_at',
@@ -70,6 +71,16 @@ class Loan extends Model
     public function pickupLocation(): BelongsTo
     {
         return $this->belongsTo(PickupLocation::class)->withTrashed();
+    }
+
+    /**
+     * The personal pickup event this loan was booked for, if any.
+     *
+     * @return BelongsTo<Event, $this>
+     */
+    public function pickupEvent(): BelongsTo
+    {
+        return $this->belongsTo(Event::class, 'pickup_event_id');
     }
 
     /** @return BelongsTo<User, $this> */

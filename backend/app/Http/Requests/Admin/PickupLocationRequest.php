@@ -21,6 +21,8 @@ class PickupLocationRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:1000'],
             'map_url' => ['nullable', 'url:http,https', 'max:2048'],
             'is_active' => ['boolean'],
+            // Personal pickup: only offered through pickup events held there
+            'is_personal' => ['boolean'],
             // Restrict the location to these users; an empty list opens it for everyone
             'user_ids' => ['sometimes', 'array'],
             'user_ids.*' => ['integer', 'distinct', 'exists:users,id'],

@@ -36,6 +36,27 @@
     gap: 0.5rem;
   }
 
+  // Heading above the personal pickup events, set off by a hairline
+  &__group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0.6rem 0 0.1rem;
+    padding: 0;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--divider);
+    }
+  }
+
   &__error {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
@@ -179,6 +200,63 @@
   &__input:focus-visible + &__card {
     outline: 2px solid $amber;
     outline-offset: 2px;
+  }
+
+  // ── Personal pickup event: a little ticket with a tear-off date stub ──
+  &__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.6rem;
+    padding: 0.3rem 0.2rem 0.35rem;
+    border-radius: 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--secondary-text);
+    background: color-mix(in srgb, var(--secondary-text) 10%, transparent);
+    transition:
+      color 0.2s ease,
+      background-color 0.2s ease;
+
+    strong {
+      margin-bottom: 0.15rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--primary-text);
+    }
+  }
+
+  &__when {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $amber;
+  }
+
+  &__spots {
+    align-self: flex-start;
+    margin-top: 0.2rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--secondary-text);
+    border: 1px dashed var(--divider);
+  }
+
+  &__input:checked + &__card &__date,
+  &--static &__date {
+    color: #1a0d00;
+    background: $amber;
+    strong {
+      color: #1a0d00;
+    }
   }
 
   &--static {

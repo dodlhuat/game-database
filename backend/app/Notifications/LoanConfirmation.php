@@ -46,7 +46,7 @@ class LoanConfirmation extends Notification
         return $this->buildFromTemplate('loan_confirmation', [
             'name' => $notifiable->name,
             'game' => $this->itemTitle($loan),
-            'start_date' => $loan->start_date?->format('d.m.Y') ?? '',
+            'start_date' => $this->pickupWhen($loan),
             'due_date' => $loan->due_date->format('d.m.Y'),
             ...$this->locationVars($loan->pickupLocation),
         ], config()->string('frontend.url').'/dashboard', $notifiable);

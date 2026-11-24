@@ -12,6 +12,7 @@ export type ApiReservation = components['schemas']['ReservationResource']
 export type ApiReview = components['schemas']['ReviewResource']
 export type ApiSponsor = components['schemas']['SponsorResource']
 export type ApiPickupLocation = components['schemas']['PickupLocationResource']
+export type ApiPickupEvent = components['schemas']['PickupEventResource']
 
 // ─── Request bodies ───────────────────────────────────────────────
 export type EventStoreBody = operations['events.store']['requestBody'] extends {

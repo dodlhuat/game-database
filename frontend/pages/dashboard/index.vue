@@ -151,6 +151,13 @@
                 <span v-if="loan.package" class="loan-package">{{
                   $t('dashboard.package_badge', { name: loan.package.name })
                 }}</span>
+                <span v-if="upcomingPickup(loan)" class="loan-pickup">
+                  <svg class="icon-svg" aria-hidden="true">
+                    <use href="/svg-icons/icons.svg#event" />
+                  </svg>
+                  {{ $t('dashboard.pickup_at') }}
+                  <strong>{{ upcomingPickup(loan) }}</strong>
+                </span>
                 <span v-if="loan.pickup_location" class="loan-location">
                   <svg class="icon-svg" aria-hidden="true">
                     <use href="/svg-icons/icons.svg#location_on" />
@@ -745,6 +752,19 @@ function loanStatusLabel(loan: Loan) {
   return map[loan.status] ?? loan.status
 }
 
+// Personal pickup still ahead: "Do., 10.12. · 18:00–20:00 Uhr"
+function upcomingPickup(loan: Loan): string | null {
+  const event = loan.pickup_event
+  if (!event || new Date(`${event.date}T23:59:59`) < new Date()) return null
+  const day = new Date(`${event.date}T00:00:00`).toLocaleDateString('de-AT', {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+  })
+  const time = event.time ? ` · ${event.time}${event.end_time ? `–${event.end_time}` : ''} Uhr` : ''
+  return `${day}${time}`
+}
+
 function formatDate(iso: string | null | undefined) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('de-DE')
@@ -1327,6 +1347,23 @@ $amber-ink: var(--amber-ink);
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+.loan-pickup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: var(--secondary-text);
+  strong {
+    font-weight: 700;
+    color: $amber-ink;
+  }
+  .icon-svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: $amber;
   }
 }
 

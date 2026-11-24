@@ -6,6 +6,8 @@
     "required": "Bitte wähle einen Abholort.",
     "load_error": "Die Abholorte konnten nicht geladen werden. Bitte lade die Seite neu.",
     "none_available": "Für dich ist aktuell kein Abholort freigegeben. Bitte wende dich an uns.",
+    "personal_group": "Persönliche Abholung",
+    "spots_left": "Noch {n} Platz frei | Noch {n} Plätze frei",
     "map_link": "Auf der Karte ansehen"
   },
   "footer": {
@@ -278,6 +280,7 @@
     "total_loans_meta": "{n} Ausleihe bisher | {n} Ausleihen bisher",
     "browse_games": "Spiele entdecken",
     "return_to": "Rückgabe an",
+    "pickup_at": "Abholung",
     "queue_hint": "Du wirst benachrichtigt, sobald es frei ist.",
     "due": {
       "today": "Heute fällig",
@@ -808,6 +811,8 @@
       "interval_days_hint": "Abstand zwischen zwei Abholterminen in Tagen.",
       "grace_days": "Vorlauf (Tage)",
       "grace_days_hint": "Wie viele Tage vor einem Termin dieser noch wählbar ist.",
+      "pickup_event_lead_hours": "Buchungsschluss Abholtermine (Stunden)",
+      "pickup_event_lead_hours_hint": "Bis wie viele Stunden vor Beginn ein persönlicher Abholtermin noch gebucht werden kann.",
       "loan_duration_weeks": "Ausleihdauer (Wochen)",
       "loan_duration_weeks_hint": "Anzahl Wochen bis zum Rückgabedatum. Gilt auch als maximale Dauer einer einzelnen Verlängerung.",
       "max_extensions": "Max. Verlängerungen pro Ausleihe",
@@ -909,6 +914,19 @@
         "description": "Beschreibung (optional)",
         "image": "Bild (optional)",
         "image_current": "Aktuelles Bild"
+      },
+      "pickup": {
+        "title": "Persönliche Abholung",
+        "toggle": "Als Abholtermin anbieten",
+        "hint": "Mitglieder können beim Ausleihen diesen Termin wählen und holen ihre Spiele dann hier zur angegebenen Zeit ab.",
+        "no_locations": "Lege zuerst unter „Abholorte“ einen Ort mit „Persönliche Abholung“ an.",
+        "location": "Ort",
+        "location_placeholder": "Ort wählen",
+        "location_required": "Bitte einen Ort für den Abholtermin wählen.",
+        "max_loans": "Max. Ausleihen (optional)",
+        "max_loans_placeholder": "unbegrenzt",
+        "booked": "{n} gebucht",
+        "booked_of": "{n}/{max} gebucht"
       }
     },
     "sponsors": {
@@ -985,6 +1003,11 @@
         "map_url": "Karten-Link (optional)",
         "active": "Beim Ausleihen zur Auswahl anbieten"
       },
+      "personal": {
+        "label": "Persönliche Abholung",
+        "hint": "Wird beim Ausleihen nicht direkt angeboten, sondern nur über Abholtermine (Events) an diesem Ort – mit Datum und Uhrzeit.",
+        "badge": "Persönliche Abholung"
+      },
       "access": {
         "title": "Zugang",
         "restrict": "Nur für ausgewählte Mitglieder",
@@ -1005,7 +1028,11 @@
   "events": {
     "eyebrow": "Mitgliederbereich",
     "title": "Events & Veranstaltungen",
-    "all_day": "Ganztägig"
+    "all_day": "Ganztägig",
+    "pickup": {
+      "badge": "Abholtermin",
+      "hint": "Persönliche Abholung: Wenn du ein Spiel ausleihst, kannst du diesen Termin als Abholung wählen."
+    }
   },
   "sponsors": {
     "eyebrow": "Mit Unterstützung von",

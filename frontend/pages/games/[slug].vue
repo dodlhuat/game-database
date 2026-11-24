@@ -368,14 +368,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Game } from '~/composables/useGames'
-import type { ApiPickupLocation } from '~/types/api'
+import type { PickupChoice } from '~/utils/pickupLocations'
 import { Modal } from '@dodlhuat/basix/js/modal'
 import { Lightbox } from '@dodlhuat/basix/js/lightbox'
 
 const route = useRoute()
 const { fetchGame } = useGames()
 const { createLoan, addReservation } = useLoans()
-const { fetchActiveLocations } = usePickupLocations()
+const { fetchActiveLocations, fetchPickupEvents } = usePickupLocations()
 const auth = useAuthStore()
 const { fetchSettings, getNextAppointment, getDueDate, formatDate, toIsoDate } = useLoanSettings()
 const { t } = useI18n()
@@ -434,8 +434,9 @@ function openLightbox(i: number) {
 }
 
 const loanDates = { start_date: '', due_date: '' }
-let pickupLocations: ApiPickupLocation[] = []
-// Loaded fine but empty: every active location is reserved for other members
+// Regular locations plus bookable personal pickup events
+let pickupOptions: PickupChoice[] = []
+// Loaded fine but empty: nothing is open to this member
 let noPickupLocation = false
 
 useHead({
@@ -454,6 +455,7 @@ async function openLoanModal() {
 
   let startLabel = '…'
   let dueLabel = '…'
+  let loanWeeks = 2
 
   try {
     const settings = await fetchSettings()
@@ -463,6 +465,7 @@ async function openLoanModal() {
     loanDates.due_date = toIsoDate(due)
     startLabel = formatDate(appointment)
     dueLabel = formatDate(due)
+    loanWeeks = settings.loan_duration_weeks
   } catch {
     loanDates.start_date = new Date().toISOString().slice(0, 10)
     loanDates.due_date = new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10)
@@ -472,13 +475,15 @@ async function openLoanModal() {
 
   noPickupLocation = false
   try {
-    pickupLocations = await fetchActiveLocations()
-    noPickupLocation = pickupLocations.length === 0
+    const [locations, events] = await Promise.all([fetchActiveLocations(), fetchPickupEvents()])
+    pickupOptions = pickupChoices(locations, events)
+    noPickupLocation = pickupOptions.length === 0
   } catch {
-    pickupLocations = []
+    pickupOptions = []
   }
-  const pickerHtml = pickupLocations.length
-    ? renderPickupPickerHtml(pickupLocations, initialPickupLocationId(pickupLocations), t)
+  const preselected = initialPickupChoice(pickupOptions)
+  const pickerHtml = pickupOptions.length
+    ? renderPickupPickerHtml(pickupOptions, preselected, t)
     : noPickupLocation
       ? `<p class="alert alert-info" style="margin:0">${t('pickup.none_available')}</p>`
       : ''
@@ -497,11 +502,11 @@ async function openLoanModal() {
       <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${game.value.title}</p>
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.start_label')}</label>
-        <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${startLabel}</p>
+        <p id="loan-start" style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${startLabel}</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.due_label')}</label>
-        <p style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
+        <p id="loan-due" style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${dueLabel}</p>
       </div>
       ${pickerHtml}
       <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(212,146,30,0.08);border:1px solid rgba(212,146,30,0.25);border-radius:8px;padding:.6rem .85rem">
@@ -531,10 +536,27 @@ async function openLoanModal() {
     requestAnimationFrame(() => {
       document.getElementById('loan-cancel')?.addEventListener('click', () => modal.hide())
       document.getElementById('loan-submit')?.addEventListener('click', () => submitLoan(modal))
-      document.querySelectorAll('input[name="pickup_location"]').forEach((input) =>
+      // A pickup event brings its own date and time — the labels follow the choice
+      const showDates = (key: string | null) => {
+        const choice = pickupOptions.find((c) => c.key === key)
+        const start = document.getElementById('loan-start')
+        const due = document.getElementById('loan-due')
+        if (!start || !due) return
+        if (choice?.kind === 'event') {
+          const day = new Date(`${choice.event.date}T00:00:00`)
+          start.textContent = `${formatDate(day)}, ${formatEventTime(choice.event)}`
+          due.textContent = formatDate(new Date(day.getTime() + loanWeeks * 7 * 86400000))
+        } else {
+          start.textContent = startLabel
+          due.textContent = dueLabel
+        }
+      }
+      showDates(pickupOptions.length === 1 ? pickupOptions[0]!.key : preselected)
+      document.querySelectorAll<HTMLInputElement>('input[name="pickup_choice"]').forEach((input) =>
         input.addEventListener('change', () => {
           const pickupError = document.getElementById('pickup-error')
           if (pickupError) pickupError.hidden = true
+          showDates(input.value)
         })
       )
     })
@@ -557,9 +579,9 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
     return
   }
 
-  const pickupLocationId = readPickupPickerChoice(pickupLocations)
+  const pickupChoice = readPickupPickerChoice(pickupOptions)
   const pickupError = document.getElementById('pickup-error')
-  if (!pickupLocationId) {
+  if (!pickupChoice) {
     if (pickupError) {
       pickupError.hidden = false
     } else if (msgEl) {
@@ -582,14 +604,14 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
   try {
     await createLoan({
       copy_id: copy.id,
-      pickup_location_id: pickupLocationId,
+      ...pickupPayload(pickupChoice),
       start_date: loanDates.start_date,
       due_date: loanDates.due_date,
     })
     if (msgEl) {
       msgEl.style.color = 'var(--success)'
       msgEl.textContent = t('pages.game.confirm_borrow.success')
-      rememberPickupLocation(pickupLocationId)
+      rememberPickupChoice(pickupChoice)
       msgEl.style.display = 'block'
     }
     game.value.available_copies_count = Math.max(0, game.value.available_copies_count - 1)

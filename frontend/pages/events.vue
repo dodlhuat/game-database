@@ -59,6 +59,30 @@
               </span>
             </div>
 
+            <!-- Personal pickup: where to go, and that it is bookable when borrowing -->
+            <section v-if="selected.is_pickup && selected.pickup_location" class="event-pickup">
+              <span class="event-pickup__tag">
+                <svg class="icon-svg" aria-hidden="true">
+                  <use href="/svg-icons/icons.svg#location_on" />
+                </svg>
+                {{ $t('events.pickup.badge') }}
+              </span>
+              <div class="pickup-option pickup-option--static event-pickup__place">
+                <span class="pickup-option__card">
+                  <span class="pickup-option__pin" aria-hidden="true">
+                    <svg class="icon-svg"><use href="/svg-icons/icons.svg#location_on" /></svg>
+                  </span>
+                  <PickupLocationDetails :location="selected.pickup_location" />
+                </span>
+              </div>
+              <p class="event-pickup__hint">
+                {{ $t('events.pickup.hint') }}
+                <template v-if="spotsLeft(selected) !== null">
+                  {{ $t('pickup.spots_left', { n: spotsLeft(selected) }, spotsLeft(selected)!) }}.
+                </template>
+              </p>
+            </section>
+
             <!-- eslint-disable vue/no-v-html -->
             <div
               v-if="selected.description"
@@ -80,6 +104,7 @@ import type { Calendar } from '@dodlhuat/basix/js/calendar'
 
 definePageMeta({ middleware: 'auth' })
 
+const { t } = useI18n()
 const { fetchEvents } = useEvents()
 const calendarEl = ref<HTMLElement | null>(null)
 const loading = ref(true)
@@ -114,7 +139,13 @@ function toCalendarEvent(e: ApiEvent) {
     start,
     end,
     allDay: e.is_all_day,
+    ...(e.is_pickup ? { badge: t('events.pickup.badge'), badgeClassName: 'badge-warning' } : {}),
   }
+}
+
+function spotsLeft(e: ApiEvent): number | null {
+  if (!e.max_loans) return null
+  return Math.max(0, e.max_loans - (e.bookings_count ?? 0))
 }
 
 function formatDate(iso: string) {
@@ -387,9 +418,47 @@ $hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
   }
 
   &__description {
+    margin-top: 1rem;
     font-size: 0.9rem;
     line-height: 1.65;
     color: var(--primary-text);
+  }
+}
+
+// ─── Pickup event block ───────────────────────────────────────────
+.event-pickup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem 1rem 1rem;
+  border-radius: 14px;
+  background: color-mix(in srgb, #{$amber} 7%, transparent);
+  border: 1px solid color-mix(in srgb, #{$amber} 30%, transparent);
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    width: fit-content;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $amber;
+    .icon-svg {
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+  }
+  &__place {
+    cursor: default;
+  }
+  &__hint {
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--secondary-text);
   }
 }
 

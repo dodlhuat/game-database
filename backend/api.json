@@ -1750,6 +1750,7 @@
         "/events": {
             "get": {
                 "operationId": "event.index",
+                "summary": "All events, pickup events included \u2014 except those at a location the\nuser has no access to, which would only tease an unbookable date",
                 "tags": [
                     "Event"
                 ],
@@ -1838,7 +1839,17 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/components/schemas/EventResource"
+                                            "allOf": [
+                                                {
+                                                    "$ref": "#/components/schemas/EventResource"
+                                                },
+                                                {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "pickup_location"
+                                                    ]
+                                                }
+                                            ]
                                         }
                                     },
                                     "required": [
@@ -1890,14 +1901,21 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/components/schemas/EventResource"
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "data": {
+                                                    "$ref": "#/components/schemas/EventResource"
+                                                }
+                                            },
+                                            "required": [
+                                                "data"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object"
                                         }
-                                    },
-                                    "required": [
-                                        "data"
                                     ]
                                 }
                             }
@@ -1933,6 +1951,29 @@
                 "responses": {
                     "204": {
                         "description": "No content"
+                    },
+                    "422": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "reason": {
+                                            "type": "string",
+                                            "const": "has_bookings"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "reason"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -3376,6 +3417,7 @@
                                                     "required": [
                                                         "copy",
                                                         "pickup_location",
+                                                        "pickup_event",
                                                         "extensions"
                                                     ]
                                                 }
@@ -4119,6 +4161,12 @@
                                     "grace_days": {
                                         "type": "integer",
                                         "minimum": 0
+                                    },
+                                    "pickup_event_lead_hours": {
+                                        "type": "integer",
+                                        "description": "Booking for a personal pickup event closes this many hours before it starts",
+                                        "minimum": 0,
+                                        "maximum": 336
                                     },
                                     "loan_duration_weeks": {
                                         "type": "integer",
@@ -6138,6 +6186,13 @@
                                             "null"
                                         ],
                                         "description": "Optional only while a single location is active \u2014 then it is implied."
+                                    },
+                                    "pickup_event_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "description": "Alternative to a location: a personal pickup event (brings place and date)"
                                     }
                                 },
                                 "required": [
@@ -6164,6 +6219,7 @@
                                                     "type": "object",
                                                     "required": [
                                                         "pickup_location",
+                                                        "pickup_event",
                                                         "loans"
                                                     ]
                                                 }
@@ -6383,6 +6439,7 @@
                                                         "required": [
                                                             "user",
                                                             "pickup_location",
+                                                            "pickup_event",
                                                             "loans"
                                                         ]
                                                     }
@@ -6619,6 +6676,51 @@
                                             "type": "array",
                                             "items": {
                                                 "$ref": "#/components/schemas/PickupLocationResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/pickup-events": {
+            "get": {
+                "operationId": "pickupLocation.events",
+                "summary": "Personal pickup events this user can book right now, soonest first",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `PickupEventResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "allOf": [
+                                                    {
+                                                        "$ref": "#/components/schemas/PickupEventResource"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "required": [
+                                                            "location"
+                                                        ]
+                                                    }
+                                                ]
                                             }
                                         }
                                     },
@@ -9736,6 +9838,21 @@
                             "null"
                         ]
                     },
+                    "pickup_location_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Set = personal pickup event at this location, bookable when borrowing"
+                    },
+                    "max_loans": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 1,
+                        "maximum": 999
+                    },
                     "description": {
                         "type": [
                             "string",
@@ -9785,6 +9902,29 @@
                     "is_all_day": {
                         "type": "boolean"
                     },
+                    "is_pickup": {
+                        "type": "boolean",
+                        "description": "Personal pickup event: where it happens and how full it is"
+                    },
+                    "pickup_location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PickupLocationResource"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "max_loans": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "bookings_count": {
+                        "type": "integer"
+                    },
                     "description": {
                         "type": [
                             "string",
@@ -9805,6 +9945,8 @@
                     "time",
                     "end_time",
                     "is_all_day",
+                    "is_pickup",
+                    "max_loans",
                     "description",
                     "image_url"
                 ],
@@ -10323,6 +10465,43 @@
                             }
                         ]
                     },
+                    "pickup_event": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Personal pickup: the booked appointment with its time",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "date": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "end_time": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "date",
+                            "time",
+                            "end_time"
+                        ]
+                    },
                     "start_date": {
                         "type": [
                             "string",
@@ -10432,6 +10611,9 @@
                     "grace_days": {
                         "type": "integer"
                     },
+                    "pickup_event_lead_hours": {
+                        "type": "integer"
+                    },
                     "loan_duration_weeks": {
                         "type": "integer"
                     },
@@ -10488,6 +10670,7 @@
                     "start_date",
                     "interval_days",
                     "grace_days",
+                    "pickup_event_lead_hours",
                     "loan_duration_weeks",
                     "max_extensions",
                     "loan_cost_small",
@@ -10689,6 +10872,43 @@
                             }
                         ]
                     },
+                    "pickup_event": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "Personal pickup: the booked appointment with its time",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "title": {
+                                "type": "string"
+                            },
+                            "date": {
+                                "type": "string"
+                            },
+                            "time": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            },
+                            "end_time": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "date",
+                            "time",
+                            "end_time"
+                        ]
+                    },
                     "start_date": {
                         "type": [
                             "string",
@@ -10748,6 +10968,61 @@
                 ],
                 "title": "PackageLoanResource"
             },
+            "PickupEventResource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "date": {
+                        "type": "string"
+                    },
+                    "time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "end_time": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "spots_left": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
+                    },
+                    "booking_closes_at": {
+                        "type": "string"
+                    },
+                    "location": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PickupLocationResource"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id",
+                    "title",
+                    "date",
+                    "time",
+                    "end_time",
+                    "spots_left",
+                    "booking_closes_at"
+                ],
+                "title": "PickupEventResource"
+            },
             "PickupLocationRequest": {
                 "type": "object",
                 "properties": {
@@ -10786,6 +11061,10 @@
                     },
                     "is_active": {
                         "type": "boolean"
+                    },
+                    "is_personal": {
+                        "type": "boolean",
+                        "description": "Personal pickup: only offered through pickup events held there"
                     },
                     "user_ids": {
                         "type": "array",
@@ -10837,6 +11116,10 @@
                     "is_active": {
                         "type": "boolean"
                     },
+                    "is_personal": {
+                        "type": "boolean",
+                        "description": "Personal pickup: only offered through pickup events held there"
+                    },
                     "sort_order": {
                         "type": "integer"
                     },
@@ -10881,6 +11164,7 @@
                     "notes",
                     "map_url",
                     "is_active",
+                    "is_personal",
                     "sort_order"
                 ],
                 "title": "PickupLocationResource"
@@ -11187,6 +11471,13 @@
                             "null"
                         ],
                         "description": "Optional only while a single location is active \u2014 then it is implied."
+                    },
+                    "pickup_event_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Alternative to a location: a personal pickup event (brings place and date)"
                     }
                 },
                 "required": [

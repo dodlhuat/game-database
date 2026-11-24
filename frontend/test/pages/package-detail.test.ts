@@ -3,7 +3,7 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { useAuthStore } from '~/stores/auth'
 import type { Package } from '~/composables/useGames'
-import type { ApiPickupLocation } from '~/types/api'
+import type { ApiPickupEvent, ApiPickupLocation } from '~/types/api'
 import PackageDetailPage from '~/pages/packages/[slug].vue'
 
 const fetchPackageMock = vi.fn()
@@ -43,14 +43,32 @@ function pickupLocation(id: number, name: string): ApiPickupLocation {
     notes: null,
     map_url: null,
     is_active: true,
+    is_personal: false,
     sort_order: id,
+  }
+}
+
+function pickupEvent(id: number, location: ApiPickupLocation): ApiPickupEvent {
+  return {
+    id,
+    title: 'Abholabend',
+    date: '2026-12-10',
+    time: '18:00',
+    end_time: '20:00',
+    spots_left: 3,
+    booking_closes_at: '2026-12-09T18:00:00+01:00',
+    location: { ...location, is_personal: true },
   }
 }
 
 // A single active location is preselected, so the borrow tests can click straight through.
 const fetchActiveLocationsMock = vi.fn()
+const fetchPickupEventsMock = vi.fn()
 mockNuxtImport('usePickupLocations', () => {
-  return () => ({ fetchActiveLocations: fetchActiveLocationsMock })
+  return () => ({
+    fetchActiveLocations: fetchActiveLocationsMock,
+    fetchPickupEvents: fetchPickupEventsMock,
+  })
 })
 
 const basePackage: Package = {
@@ -111,6 +129,8 @@ describe('packages/[slug].vue — borrow CTA', () => {
     navigateToMock.mockReset()
     fetchActiveLocationsMock.mockReset()
     fetchActiveLocationsMock.mockResolvedValue([pickupLocation(7, 'Vereinslokal')])
+    fetchPickupEventsMock.mockReset()
+    fetchPickupEventsMock.mockResolvedValue([])
     try {
       localStorage.clear()
     } catch {
@@ -233,13 +253,34 @@ describe('packages/[slug].vue — borrow CTA', () => {
     postMock.mockResolvedValue({})
 
     const wrapper = await mountPackagePage({ id: 42, available: true })
-    await wrapper.find('.pickup-option__input[value="8"]').setValue(true)
+    await wrapper.find('.pickup-option__input[value="l:8"]').setValue(true)
     await wrapper.find('.detail__cta button').trigger('click')
     await flushPromises()
 
     expect(postMock).toHaveBeenCalledWith('/package-loans', {
       package_id: 42,
       pickup_location_id: 8,
+    })
+  })
+
+  it('offers personal pickup events with date and time and books the chosen one', async () => {
+    fetchPickupEventsMock.mockResolvedValue([pickupEvent(12, pickupLocation(9, 'Spieleabend'))])
+    setUser({ tokens: 5 })
+    postMock.mockResolvedValue({})
+
+    const wrapper = await mountPackagePage({ id: 42, available: true })
+    const eventOption = wrapper.find('.pickup-option--event')
+    expect(eventOption.text()).toContain('18:00–20:00 Uhr')
+    expect(eventOption.text()).toContain('Spieleabend')
+    expect(wrapper.find('.pickup-picker__group').exists()).toBe(true)
+
+    await wrapper.find('.pickup-option__input[value="e:12"]').setValue(true)
+    await wrapper.find('.detail__cta button').trigger('click')
+    await flushPromises()
+
+    expect(postMock).toHaveBeenCalledWith('/package-loans', {
+      package_id: 42,
+      pickup_event_id: 12,
     })
   })
 })
