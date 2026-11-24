@@ -56,7 +56,7 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), Art. 6 Abs. 1 
 
 e) Mitgliedsbeitrag, Zahlungs- und Token-Transaktionen
 Für die Verwaltung von Mitgliedsbeiträgen und Token-Guthaben speichern wir Transaktionsdaten (Betrag, Zeitpunkt, Art der Transaktion, Status der Zahlung). Das Token-Guthaben wird getrennt nach gekauften Token und geschenkten Bonus-Token geführt; für Bonus-Token speichern wir zusätzlich das Ablaufdatum.
-Online-Zahlungen (Mitgliedsbeitrag, Token-Pakete) werden über den Zahlungsdienstleister Mollie (Mollie B.V., Niederlande) abgewickelt. Zum Bezahlen wirst du auf eine Seite von Mollie weitergeleitet; Zahlungsdaten wie Kartennummern gibst du direkt dort ein, sie werden von uns nicht gespeichert. Wir erhalten lediglich eine Bestätigung über die erfolgte Zahlung samt Referenz.
+Online-Zahlungen (Mitgliedsbeitrag, Token-Pakete) werden über den Zahlungsdienstleister Mollie (Mollie B.V., Niederlande) abgewickelt. Zum Bezahlen werden Sie auf eine Seite von Mollie weitergeleitet; Zahlungsdaten wie Kartennummern geben Sie direkt dort ein, sie werden von uns nicht gespeichert. Wir erhalten lediglich eine Bestätigung über die erfolgte Zahlung samt Referenz.
 Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), Art. 6 Abs. 1 lit. c DSGVO (rechtliche Verpflichtung)
 
 f) Kündigung der Mitgliedschaft und Rückerstattung

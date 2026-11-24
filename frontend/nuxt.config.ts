@@ -17,6 +17,9 @@ export default defineNuxtConfig({
     defaultLocale: 'de',
     langDir: 'locales/',
     strategy: 'no_prefix',
+    // One language only: no browser-language detection, so no i18n_redirected
+    // cookie (which was the only cookie the site set)
+    detectBrowserLanguage: false,
   },
 
   app: {

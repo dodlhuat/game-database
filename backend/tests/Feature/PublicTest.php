@@ -184,6 +184,23 @@ class PublicTest extends TestCase
             ->assertJsonStructure(['version', 'content']);
     }
 
+    public function test_cookie_policy_matches_what_the_site_stores(): void
+    {
+        $content = $this->getJson('/api/cookies')->assertOk()->assertJsonPath('version', '1.0')->json('content');
+
+        // Every key the frontend writes to localStorage/sessionStorage is listed
+        foreach (['auth_token', 'auth_user', 'theme', 'last_pickup_location', 'payment_return_to'] as $key) {
+            $this->assertStringContainsString("Name: {$key}", $content);
+        }
+        // Gone: cookies the site never set, and leftover placeholders
+        foreach (['XSRF-TOKEN', 'nuxt-color-mode', 'i18n', '[Vereinsname]', 'beispiel.at'] as $stale) {
+            $this->assertStringNotContainsString($stale, $content);
+        }
+        $this->assertStringContainsString('Mollie B.V.', $content);
+        $this->assertStringContainsString('alle.unsere.abenteuer@gmail.com', $content);
+        $this->assertStringContainsString('AUA-Alle.Unsere.Abenteuer', $content);
+    }
+
     public function test_events_requires_auth(): void
     {
         $this->getJson('/api/events')->assertUnauthorized();

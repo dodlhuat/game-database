@@ -366,6 +366,10 @@
 </template>
 
 <script setup lang="ts">
+// Cinzel for the title, served from our own bundle — loading it from Google
+// Fonts would send every visitor's IP address to Google.
+import '@fontsource/cinzel/700.css'
+import '@fontsource/cinzel/900.css'
 import { ref, computed } from 'vue'
 import type { Game } from '~/composables/useGames'
 import type { PickupChoice } from '~/utils/pickupLocations'
@@ -438,17 +442,6 @@ const loanDates = { start_date: '', due_date: '' }
 let pickupOptions: PickupChoice[] = []
 // Loaded fine but empty: nothing is open to this member
 let noPickupLocation = false
-
-useHead({
-  link: [
-    { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-    { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap',
-    },
-  ],
-})
 
 async function openLoanModal() {
   if (!game.value) return
