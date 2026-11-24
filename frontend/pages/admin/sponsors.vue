@@ -295,6 +295,7 @@ import type { ApiSponsor } from '~/types/api'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const {
   fetchAdminSponsors,
   createSponsor,
@@ -464,7 +465,7 @@ async function toggle(sponsor: ApiSponsor) {
     const updated = await toggleSponsor(sponsor.id)
     sponsor.is_active = updated.is_active
   } catch {
-    alert(t('admin.sponsors.errors.save'))
+    notify(t('admin.sponsors.errors.save'), 'error')
   } finally {
     togglingId.value = null
   }
@@ -515,18 +516,25 @@ async function commitOrder(list: ApiSponsor[]) {
     await reorderSponsors(list.map((s) => s.id))
   } catch {
     sponsors.value = previous
-    alert(t('admin.sponsors.errors.order'))
+    notify(t('admin.sponsors.errors.order'), 'error')
   }
 }
 
 // ── Delete (soft) ───────────────────────────────────────────────
 async function remove(sponsor: ApiSponsor) {
-  if (!confirm(t('admin.sponsors.confirm_delete', { name: sponsor.name }))) return
+  const ok = await confirmDialog({
+    title: t('admin.sponsors.delete_title'),
+    message: t('admin.sponsors.confirm_delete', { name: sponsor.name }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
   try {
     await deleteSponsor(sponsor.id)
     sponsors.value = sponsors.value.filter((s) => s.id !== sponsor.id)
+    notify(t('admin.sponsors.deleted', { name: sponsor.name }))
   } catch {
-    alert(t('admin.sponsors.errors.delete'))
+    notify(t('admin.sponsors.errors.delete'), 'error')
   }
 }
 

@@ -89,7 +89,7 @@
                       <button class="action-btn" @click="openEdit(event)">
                         {{ $t('admin.actions.edit') }}
                       </button>
-                      <button class="action-btn action-btn--danger" @click="remove(event.id)">
+                      <button class="action-btn action-btn--danger" @click="remove(event)">
                         {{ $t('admin.actions.delete') }}
                       </button>
                     </div>
@@ -283,6 +283,7 @@ import type { ApiEvent, ApiPickupLocation } from '~/types/api'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const { fetchAdminEvents, createEvent, updateEvent, deleteEvent } = useEvents()
 const { fetchAdminLocations } = usePickupLocations()
 
@@ -482,15 +483,25 @@ async function save() {
   }
 }
 
-async function remove(id: number) {
-  if (!confirm('Event wirklich löschen?')) return
+async function remove(event: ApiEvent) {
+  const ok = await confirmDialog({
+    title: t('admin.events.delete_title'),
+    message: t('admin.events.confirm_delete', { name: event.title }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
   try {
-    await deleteEvent(id)
-    events.value = events.value.filter((e) => e.id !== id)
+    await deleteEvent(event.id)
+    events.value = events.value.filter((e) => e.id !== event.id)
+    notify(t('admin.events.deleted', { name: event.title }))
   } catch (err: unknown) {
     // e.g. a pickup event that still has bookings
     const message = (err as { message?: unknown })?.message
-    alert(typeof message === 'string' && message ? message : 'Fehler beim Löschen.')
+    notify(
+      typeof message === 'string' && message ? message : t('admin.events.delete_error'),
+      'error'
+    )
   }
 }
 

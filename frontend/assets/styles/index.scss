@@ -17,6 +17,8 @@
 
 // Shared by the game modal (HTML string) and the package page
 @use 'pickup-picker';
+// Styled confirm dialog (basix Modal appended to <body>)
+@use 'confirm-dialog';
 
 // 7. Bibliotheks-Overrides
 // basix push-menu.scss wendet position:fixed + transform:translateX(-100%)

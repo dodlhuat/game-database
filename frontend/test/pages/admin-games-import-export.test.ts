@@ -32,6 +32,11 @@ mockNuxtImport('useAdmin', () => {
   })
 })
 
+const notifyMock = vi.fn()
+mockNuxtImport('useDialogs', () => {
+  return () => ({ confirmDialog: vi.fn().mockResolvedValue(true), notify: notifyMock })
+})
+
 mockNuxtImport('useGames', () => {
   return () => ({
     fetchGames: vi.fn(),
@@ -68,9 +73,7 @@ describe('admin/games.vue — export', () => {
   beforeEach(() => {
     fetchAdminGamesMock.mockReset()
     exportGamesMock.mockReset()
-    // happy-dom does not implement window.alert — plain assignment, since
-    // there's no existing function for vi.spyOn to wrap.
-    window.alert = vi.fn()
+    notifyMock.mockReset()
   })
 
   it('exports games and toggles the loading state', async () => {
@@ -93,14 +96,14 @@ describe('admin/games.vue — export', () => {
     expect(exportBtn.text()).toContain(wrapper.vm.$t('btn.export'))
   })
 
-  it('alerts with the error message when export fails', async () => {
+  it('shows the error message as a toast when export fails', async () => {
     exportGamesMock.mockRejectedValue({ message: 'Export fehlgeschlagen.' })
     const wrapper = await mountGamesPage()
 
     await wrapper.find('.hero-btn--secondary').trigger('click')
     await flushPromises()
 
-    expect(window.alert).toHaveBeenCalledWith('Export fehlgeschlagen.')
+    expect(notifyMock).toHaveBeenCalledWith('Export fehlgeschlagen.', 'error')
   })
 })
 

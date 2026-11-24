@@ -51,8 +51,6 @@
             </button>
           </section>
 
-          <div v-if="actionError" class="alert alert-error" role="alert">{{ actionError }}</div>
-
           <!-- Returns handed in here: scan the sticker, pick the condition -->
           <section class="intake" :aria-label="$t('admin.packing.intake_title')">
             <header class="intake__head">
@@ -217,11 +215,11 @@ interface PackingList {
 const route = useRoute()
 const api = useApi()
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 
 const data = ref<PackingList | null>(null)
 const loading = ref(true)
 const loadError = ref('')
-const actionError = ref('')
 const busyKey = ref<string | null>(null)
 
 const handedOutCount = computed(
@@ -267,7 +265,6 @@ async function toggle(booking: Booking) {
       ? `/admin/package-loans/${booking.id}/hand-out`
       : `/admin/loans/${booking.id}/hand-out`
   busyKey.value = key
-  actionError.value = ''
   try {
     const res = await api.patch<{ handed_out_at: string | null }>(path, {
       handed_out: !booking.handed_out_at,
@@ -275,7 +272,7 @@ async function toggle(booking: Booking) {
     booking.handed_out_at = res.handed_out_at
   } catch (err: unknown) {
     const message = (err as { message?: unknown })?.message
-    actionError.value = typeof message === 'string' && message ? message : t('common.error.generic')
+    notify(typeof message === 'string' && message ? message : t('common.error.generic'), 'error')
   } finally {
     busyKey.value = null
   }
@@ -285,19 +282,25 @@ async function toggle(booking: Booking) {
 async function cancel(booking: Booking) {
   if (!data.value) return
   const name = booking.member?.name ?? ''
-  if (!confirm(t('admin.packing.no_show_confirm', { name }))) return
+  const ok = await confirmDialog({
+    title: t('admin.packing.no_show_title'),
+    message: t('admin.packing.no_show_confirm', { name }),
+    confirmLabel: t('admin.packing.no_show_action'),
+    danger: true,
+  })
+  if (!ok || !data.value) return
   const path =
     booking.type === 'package'
       ? `/admin/package-loans/${booking.id}/cancel-pickup`
       : `/admin/loans/${booking.id}/cancel-pickup`
   busyKey.value = `${booking.type}-${booking.id}`
-  actionError.value = ''
   try {
     await api.post(path)
     data.value.bookings = data.value.bookings.filter((b) => b !== booking)
+    notify(t('admin.packing.no_show_done', { name }))
   } catch (err: unknown) {
     const message = (err as { message?: unknown })?.message
-    actionError.value = typeof message === 'string' && message ? message : t('common.error.generic')
+    notify(typeof message === 'string' && message ? message : t('common.error.generic'), 'error')
   } finally {
     busyKey.value = null
   }

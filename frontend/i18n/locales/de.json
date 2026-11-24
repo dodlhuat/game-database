@@ -671,6 +671,12 @@
     },
     "games": {
       "title": "Spiele verwalten",
+      "delete_title": "Spiel löschen",
+      "confirm_delete": "„{name}“ mit allen Exemplaren wirklich löschen? Das lässt sich nicht rückgängig machen.",
+      "deleted": "„{name}“ wurde gelöscht.",
+      "copy_delete_title": "Exemplar löschen",
+      "copy_confirm_delete": "Exemplar {code} wirklich löschen?",
+      "copy_deleted": "Exemplar gelöscht.",
       "all": "Alle Spiele",
       "copies_title": "Kopien verwalten",
       "add_copy": "Kopie hinzufügen",
@@ -908,6 +914,10 @@
       "all": "Alle Events",
       "add": "Event hinzufügen",
       "edit": "Event bearbeiten",
+      "delete_title": "Event löschen",
+      "confirm_delete": "„{name}“ wirklich löschen?",
+      "deleted": "„{name}“ wurde gelöscht.",
+      "delete_error": "Das Event konnte nicht gelöscht werden.",
       "empty": "Noch keine Events vorhanden.",
       "date_col": "Datum",
       "time_col": "Uhrzeit",
@@ -950,7 +960,9 @@
       "active_col": "Aktiv",
       "move_up": "{name} nach oben verschieben",
       "move_down": "{name} nach unten verschieben",
+      "delete_title": "Sponsor löschen",
       "confirm_delete": "Sponsor „{name}“ wirklich löschen?",
+      "deleted": "„{name}“ wurde gelöscht.",
       "form": {
         "name": "Name",
         "url": "Link (optional)",
@@ -987,7 +999,10 @@
       "intake_title": "Rückgaben annehmen",
       "intake_placeholder": "QR-Code scannen oder eintippen",
       "intake_submit": "Zurücknehmen",
-      "no_show_confirm": "{name} hat nicht abgeholt? Die Buchung wird storniert, Leihgebühr und Kaution werden zurückgebucht und das Mitglied bekommt eine E-Mail."
+      "no_show_title": "Nicht abgeholt?",
+      "no_show_confirm": "Die Buchung von {name} wird storniert. Leihgebühr und Kaution werden zurückgebucht, und {name} bekommt eine E-Mail.",
+      "no_show_action": "Stornieren",
+      "no_show_done": "Buchung von {name} storniert."
     },
     "user_picker": {
       "placeholder": "Mitglied nach Name oder E-Mail suchen …",
@@ -1012,7 +1027,10 @@
       "map": "Karte",
       "move_up": "{name} nach oben verschieben",
       "move_down": "{name} nach unten verschieben",
-      "confirm_delete": "Abholort „{name}“ wirklich löschen? Vergangene Ausleihen behalten den Ort.",
+      "delete_title": "Abholort löschen",
+      "confirm_delete": "„{name}“ wirklich löschen? Vergangene Ausleihen behalten den Ort.",
+      "deleted": "„{name}“ wurde gelöscht.",
+      "saved": "„{name}“ wurde gespeichert.",
       "rule_note": "Es muss immer mindestens ein Ort aktiv sein. Ein Ort lässt sich erst deaktivieren oder löschen, wenn alle dort ausgeliehenen Spiele zurück sind.",
       "lock": {
         "last_active": "Letzter aktiver Ort – es muss immer mindestens einer aktiv sein.",

@@ -132,8 +132,29 @@ declare module '@dodlhuat/basix/js/modal' {
     })
     show(): void
     hide(): void
+    isVisible(): boolean
     destroy(): void
   }
+}
+
+declare module '@dodlhuat/basix/js/toast' {
+  export type ToastType = 'success' | 'error' | 'warning' | 'info'
+  export class Toast {
+    constructor(options: {
+      content: string
+      header?: string
+      type?: ToastType
+      closeable?: boolean
+      iconBasePath?: string
+    })
+    show(ms?: number): void
+    hide(): void
+    destroy(): void
+  }
+}
+
+declare module '@dodlhuat/basix/js/utils' {
+  export function escapeHtml(text: string): string
 }
 
 declare module '@dodlhuat/basix/js/lightbox' {

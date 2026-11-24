@@ -37,8 +37,6 @@
             </span>
           </header>
 
-          <div v-if="pageError" class="form-error page-error" role="alert">{{ pageError }}</div>
-
           <div class="table-wrap">
             <table class="dash-table">
               <thead>
@@ -337,7 +335,7 @@ const locations = ref<ApiPickupLocation[]>([])
 const loading = ref(true)
 const saving = ref(false)
 const formError = ref('')
-const pageError = ref('')
+const { confirmDialog, notify } = useDialogs()
 const togglingId = ref<number | null>(null)
 
 const form = reactive({
@@ -467,6 +465,7 @@ async function save() {
       locations.value.push(await createLocation(payload))
     }
     closeForm()
+    notify(t('admin.pickup_locations.saved', { name: payload.name }))
   } catch (err) {
     formError.value = apiMessage(err, t('admin.pickup_locations.errors.save'))
   } finally {
@@ -476,13 +475,12 @@ async function save() {
 
 // ── Active toggle ───────────────────────────────────────────────
 async function toggle(location: ApiPickupLocation) {
-  pageError.value = ''
   togglingId.value = location.id
   try {
     const updated = await toggleLocation(location.id)
     location.is_active = updated.is_active
   } catch (err) {
-    pageError.value = apiMessage(err, t('admin.pickup_locations.errors.save'))
+    notify(apiMessage(err, t('admin.pickup_locations.errors.save')), 'error')
   } finally {
     togglingId.value = null
   }
@@ -532,19 +530,25 @@ async function commitOrder(list: ApiPickupLocation[]) {
     await reorderLocations(list.map((l) => l.id))
   } catch {
     locations.value = previous
-    pageError.value = t('admin.pickup_locations.errors.order')
+    notify(t('admin.pickup_locations.errors.order'), 'error')
   }
 }
 
 // ── Delete (soft) ───────────────────────────────────────────────
 async function remove(location: ApiPickupLocation) {
-  if (!confirm(t('admin.pickup_locations.confirm_delete', { name: location.name }))) return
-  pageError.value = ''
+  const ok = await confirmDialog({
+    title: t('admin.pickup_locations.delete_title'),
+    message: t('admin.pickup_locations.confirm_delete', { name: location.name }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
   try {
     await deleteLocation(location.id)
     locations.value = locations.value.filter((l) => l.id !== location.id)
+    notify(t('admin.pickup_locations.deleted', { name: location.name }))
   } catch (err) {
-    pageError.value = apiMessage(err, t('admin.pickup_locations.errors.delete'))
+    notify(apiMessage(err, t('admin.pickup_locations.errors.delete')), 'error')
   }
 }
 
@@ -989,10 +993,6 @@ $amber-ink: var(--amber-ink);
   @media (max-width: 600px) {
     display: none;
   }
-}
-
-.page-error {
-  margin: 1rem 1.5rem 0;
 }
 
 .location-row {

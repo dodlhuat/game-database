@@ -92,7 +92,7 @@
                         {{ $t('admin.actions.copies_manage') }}
                         <span class="action-btn__badge">{{ game.copies_count }}</span>
                       </button>
-                      <button class="action-btn action-btn--danger" @click="remove(game.id)">
+                      <button class="action-btn action-btn--danger" @click="remove(game)">
                         {{ $t('admin.actions.delete') }}
                       </button>
                     </div>
@@ -692,6 +692,7 @@ import QRCode from 'qrcode'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const {
   fetchAdminGames,
   createGame,
@@ -987,9 +988,21 @@ async function save() {
   }
 }
 
-async function remove(id: number) {
-  await deleteGame(id)
-  await load()
+async function remove(game: Game) {
+  const ok = await confirmDialog({
+    title: t('admin.games.delete_title'),
+    message: t('admin.games.confirm_delete', { name: game.title }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  try {
+    await deleteGame(game.id)
+    await load()
+    notify(t('admin.games.deleted', { name: game.title }))
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 
 // ── Kopien ────────────────────────────────────────────────────────
@@ -1097,14 +1110,22 @@ async function saveCopy() {
   }
 }
 
-async function removeCopy(id: number) {
+async function removeCopy(id: number, code: string | null) {
+  const ok = await confirmDialog({
+    title: t('admin.games.copy_delete_title'),
+    message: t('admin.games.copy_confirm_delete', { code: code ?? '—' }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
   try {
     await deleteCopy(id)
     copiesPanel.copies = copiesPanel.copies.filter((c) => c.id !== id)
     const game = games.value.find((g) => g.id === copiesPanel.gameId)
     if (game) game.copies_count = copiesPanel.copies.length
+    notify(t('admin.games.copy_deleted'))
   } catch (err: unknown) {
-    alert((err as { message?: string }).message ?? t('common.error.generic'))
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
   }
 }
 
@@ -1143,8 +1164,9 @@ function handleEditCopy() {
 }
 
 function handleDeleteCopy() {
-  if (activeActionsCopy.value) removeCopy(activeActionsCopy.value.id)
+  const copy = activeActionsCopy.value
   closeActions()
+  if (copy) removeCopy(copy.id, copy.qr_code)
 }
 
 // ── Bilder ────────────────────────────────────────────────────────
@@ -1221,7 +1243,7 @@ async function doExport() {
   try {
     await exportGames()
   } catch (err: unknown) {
-    alert((err as { message?: string }).message ?? t('common.error.export_failed'))
+    notify((err as { message?: string }).message ?? t('common.error.export_failed'), 'error')
   } finally {
     exporting.value = false
   }
