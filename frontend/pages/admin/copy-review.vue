@@ -83,33 +83,91 @@
             <p class="dash-empty__text">{{ $t('admin.empty.copy_review') }}</p>
           </div>
 
-          <ul v-else class="queue-list">
-            <li
-              v-for="(copy, i) in copies"
-              :key="copy.id"
-              class="queue-card"
-              :class="ageClass(copy)"
-              :style="{ '--i': i }"
-              tabindex="0"
-              role="button"
-              @click="openDetail(copy)"
-              @keydown.enter="openDetail(copy)"
+          <template v-else>
+            <!-- Where things wait: one chip per pickup location -->
+            <div
+              v-if="groups.length > 1"
+              class="location-filter"
+              role="group"
+              :aria-label="$t('admin.copy_review.filter_label')"
             >
-              <div class="queue-card__main">
-                <span class="queue-card__title">{{ copy.game?.title ?? '—' }}</span>
-                <span class="queue-card__code text-mono">{{ copy.qr_code ?? '—' }}</span>
-              </div>
-              <div class="queue-card__meta">
-                <span class="badge" :class="reportedConditionClass(copy)">{{
-                  reportedConditionLabel(copy)
+              <button
+                type="button"
+                class="location-filter__chip"
+                :class="{ 'is-active': locationFilter === null }"
+                :aria-pressed="locationFilter === null"
+                @click="locationFilter = null"
+              >
+                {{ $t('admin.copy_review.filter_all') }}
+                <span class="location-filter__count">{{ copies.length }}</span>
+              </button>
+              <button
+                v-for="group in groups"
+                :key="group.key"
+                type="button"
+                class="location-filter__chip"
+                :class="{ 'is-active': locationFilter === group.key }"
+                :aria-pressed="locationFilter === group.key"
+                @click="locationFilter = group.key"
+              >
+                {{ group.name }}
+                <span class="location-filter__count">{{ group.copies.length }}</span>
+              </button>
+            </div>
+
+            <section
+              v-for="group in visibleGroups"
+              :key="group.key"
+              class="location-group"
+              :aria-label="group.name"
+            >
+              <header class="location-group__header">
+                <span class="location-group__pin" aria-hidden="true">
+                  <svg class="icon-svg"><use href="/svg-icons/icons.svg#location_on" /></svg>
+                </span>
+                <div class="location-group__text">
+                  <h3 class="location-group__name">{{ group.name }}</h3>
+                  <p v-if="group.oldest" class="location-group__since">
+                    {{ $t('admin.copy_review.group_since', { date: formatDate(group.oldest) }) }}
+                  </p>
+                </div>
+                <span class="location-group__count">{{
+                  $t(
+                    'admin.copy_review.group_count',
+                    { n: group.copies.length },
+                    group.copies.length
+                  )
                 }}</span>
-                <span v-if="copy.last_return?.user_name" class="queue-card__borrower">{{
-                  copy.last_return.user_name
-                }}</span>
-                <span class="queue-card__wait">{{ waitingLabel(copy) }}</span>
-              </div>
-            </li>
-          </ul>
+              </header>
+              <ul class="queue-list">
+                <li
+                  v-for="(copy, i) in group.copies"
+                  :key="copy.id"
+                  class="queue-card"
+                  :class="ageClass(copy)"
+                  :style="{ '--i': i }"
+                  tabindex="0"
+                  role="button"
+                  @click="openDetail(copy)"
+                  @keydown.enter="openDetail(copy)"
+                >
+                  <div class="queue-card__main">
+                    <span class="queue-card__title">{{ copy.game?.title ?? '—' }}</span>
+                    <span class="queue-card__code text-mono">{{ copy.qr_code ?? '—' }}</span>
+                  </div>
+                  <div class="queue-card__meta">
+                    <span class="badge" :class="reportedConditionClass(copy)">{{
+                      reportedConditionLabel(copy)
+                    }}</span>
+                    <span v-if="copy.last_return?.user_name" class="queue-card__borrower">{{
+                      copy.last_return.user_name
+                    }}</span>
+                    <span class="queue-card__wait">{{ waitingLabel(copy) }}</span>
+                  </div>
+                </li>
+              </ul>
+            </section>
+          </template>
         </section>
       </div>
     </div>
@@ -159,6 +217,10 @@
                   <p class="detail-return__row">
                     <strong>{{ $t('admin.copy_review.returned_at') }}:</strong>
                     {{ formatDate(detail.copy.last_return.returned_at) }}
+                  </p>
+                  <p v-if="detail.copy.last_return.pickup_location" class="detail-return__row">
+                    <strong>{{ $t('admin.copy_review.location') }}:</strong>
+                    {{ detail.copy.last_return.pickup_location.name }}
                   </p>
                   <p v-if="detail.copy.last_return.user_name" class="detail-return__row">
                     <strong>{{ $t('admin.copy_review.borrower') }}:</strong>
@@ -212,7 +274,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import type { AdminCopy } from '~/composables/useAdmin'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
@@ -269,6 +331,57 @@ async function submitCode() {
 }
 
 // ── Warteschlange ──────────────────────────────────────────────────
+// Grouped by the place the game was returned to, so whoever drives out
+// sees what to collect where. Longest-waiting location first.
+interface LocationGroup {
+  key: string
+  name: string
+  oldest: string | null
+  copies: AdminCopy[]
+}
+
+const NO_LOCATION = 'none'
+const locationFilter = ref<string | null>(null)
+
+const returnedAt = (c: AdminCopy) => c.last_return?.returned_at ?? ''
+
+const groups = computed<LocationGroup[]>(() => {
+  const map = new Map<string, LocationGroup>()
+  for (const copy of copies.value) {
+    const loc = copy.last_return?.pickup_location
+    const key = loc ? String(loc.id) : NO_LOCATION
+    let group = map.get(key)
+    if (!group) {
+      group = {
+        key,
+        name: loc?.name ?? t('admin.copy_review.no_location'),
+        oldest: null,
+        copies: [],
+      }
+      map.set(key, group)
+    }
+    group.copies.push(copy)
+  }
+  for (const group of map.values()) {
+    group.copies.sort((a, b) => returnedAt(a).localeCompare(returnedAt(b)))
+    group.oldest = group.copies.find((c) => c.last_return)?.last_return?.returned_at ?? null
+  }
+  return [...map.values()].sort((a, b) => (a.oldest ?? '~').localeCompare(b.oldest ?? '~'))
+})
+
+const visibleGroups = computed(() =>
+  locationFilter.value === null
+    ? groups.value
+    : groups.value.filter((g) => g.key === locationFilter.value)
+)
+
+// A location whose last copy was approved disappears — fall back to all
+watch(groups, (list) => {
+  if (locationFilter.value !== null && !list.some((g) => g.key === locationFilter.value)) {
+    locationFilter.value = null
+  }
+})
+
 function waitingDays(copy: AdminCopy): number | null {
   if (!copy.last_return) return null
   const returned = new Date(copy.last_return.returned_at).getTime()
@@ -280,7 +393,7 @@ function waitingLabel(copy: AdminCopy) {
   if (days === null) return ''
   return days === 0
     ? t('admin.copy_review.waiting_today')
-    : t('admin.copy_review.waiting_since', { days })
+    : t('admin.copy_review.waiting_since', { days }, days)
 }
 
 function ageClass(copy: AdminCopy) {
@@ -758,6 +871,119 @@ $hero-divider: var(--divider);
   &__text {
     font-size: 0.9rem;
     padding-bottom: 0;
+  }
+}
+
+.location-filter {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.9rem 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--divider);
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &__chip {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.55rem 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--secondary-text);
+    background: transparent;
+    border: 1px solid var(--divider);
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background 0.15s;
+    &:hover {
+      color: var(--primary-text);
+      border-color: $amber-25;
+    }
+    &:focus-visible {
+      outline: 2px solid $amber;
+      outline-offset: 2px;
+    }
+    &.is-active {
+      color: var(--primary-text);
+      background: $amber-08;
+      border-color: $amber;
+    }
+  }
+  &__count {
+    min-width: 1.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-align: center;
+    color: $amber;
+    background: $amber-08;
+  }
+}
+
+// One block per pickup location: the pin column anchors the stop on a route
+.location-group {
+  & + & {
+    border-top: 6px solid var(--background);
+  }
+
+  &__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1.5rem;
+    background: color-mix(in srgb, var(--secondary-background) 92%, #{$amber});
+    border-bottom: 1px solid var(--divider);
+  }
+  &__pin {
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 10px 10px 10px 2px;
+    color: #1a0d00;
+    background: $amber;
+    box-shadow: 0 4px 14px $amber-25;
+    .icon-svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+  }
+  &__text {
+    min-width: 0;
+  }
+  &__name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--primary-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  &__since {
+    margin: 0;
+    padding: 0;
+    font-size: 0.75rem;
+    color: var(--secondary-text);
+  }
+  &__count {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: $amber;
+    white-space: nowrap;
   }
 }
 

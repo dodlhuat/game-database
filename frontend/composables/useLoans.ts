@@ -20,6 +20,9 @@ export interface Loan {
   returned_at: string | null
   return_condition: string | null
   deposit_tokens: number
+  /** Set when the game is part of a package — it can only go back with the whole package. */
+  package_loan_id?: number | null
+  package?: { id: number; name: string } | null
   /** Where the game is picked up — and has to be returned. */
   pickup_location?: ApiPickupLocation | null
   status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED'
@@ -98,6 +101,9 @@ export function useLoans() {
   const returnLoan = (loanId: number, returnCondition: string) =>
     api.post<{ data: Loan }>(`/loans/${loanId}/return`, { return_condition: returnCondition })
 
+  const returnPackageLoan = (packageLoanId: number, returnCondition: string) =>
+    api.post(`/package-loans/${packageLoanId}/return`, { return_condition: returnCondition })
+
   const requestExtension = (loanId: number, requestedDueDate: string) =>
     api.post(`/loans/${loanId}/extend`, { requested_due_date: requestedDueDate })
 
@@ -128,6 +134,7 @@ export function useLoans() {
     fetchLoans,
     createLoan,
     returnLoan,
+    returnPackageLoan,
     requestExtension,
     addFavorite,
     removeFavorite,

@@ -158,10 +158,31 @@
                                     "properties": {
                                         "verified": {
                                             "type": "boolean"
+                                        },
+                                        "status": {}
+                                    },
+                                    "required": [
+                                        "verified",
+                                        "status"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
                                         }
                                     },
                                     "required": [
-                                        "verified"
+                                        "message"
                                     ]
                                 }
                             }
@@ -1229,10 +1250,30 @@
                                                 "to_review": {
                                                     "type": "integer",
                                                     "minimum": 0
+                                                },
+                                                "to_review_by_location": {
+                                                    "type": "array",
+                                                    "description": "What waits where: the location of each copy's last return",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "location": {
+                                                                "type": "string"
+                                                            },
+                                                            "count": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "location",
+                                                            "count"
+                                                        ]
+                                                    }
                                                 }
                                             },
                                             "required": [
-                                                "to_review"
+                                                "to_review",
+                                                "to_review_by_location"
                                             ]
                                         }
                                     },
@@ -1613,6 +1654,25 @@
                                 }
                             }
                         }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1653,6 +1713,25 @@
                                         "message": {
                                             "type": "string",
                                             "const": "Best\u00e4tigungs-E-Mail wurde erneut gesendet."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
                                         }
                                     },
                                     "required": [
@@ -2110,6 +2189,25 @@
                                         "message": {
                                             "type": "string",
                                             "const": "Falls ein Konto mit dieser E-Mail-Adresse existiert, wurde ein Link zum Zur\u00fccksetzen gesendet."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
                                         }
                                     },
                                     "required": [
@@ -4232,6 +4330,30 @@
                             }
                         }
                     },
+                    "503": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Wegen Wartungsarbeiten ist die Anmeldung gerade nicht m\u00f6glich."
+                                        },
+                                        "reason": {
+                                            "type": "string",
+                                            "const": "maintenance"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "reason"
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "401": {
                         "description": "",
                         "content": {
@@ -4242,6 +4364,25 @@
                                         "message": {
                                             "type": "string",
                                             "const": "E-Mail oder Passwort ist falsch."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
                                         }
                                     },
                                     "required": [
@@ -4837,15 +4978,31 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Nur au\u00dferordentliche Mitglieder k\u00f6nnen auf ein Vollmitglied upgraden."
+                                    "anyOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Deine Mitgliedschaft ist abgelaufen. Bitte verl\u00e4ngere sie zuerst."
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ]
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "const": "Nur au\u00dferordentliche Mitglieder k\u00f6nnen auf ein Vollmitglied upgraden."
+                                                }
+                                            },
+                                            "required": [
+                                                "message"
+                                            ]
                                         }
-                                    },
-                                    "required": [
-                                        "message"
                                     ]
                                 }
                             }
@@ -6127,6 +6284,29 @@
                         }
                     }
                 ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "return_condition": {
+                                        "type": "string",
+                                        "enum": [
+                                            "GOOD",
+                                            "WORN",
+                                            "DAMAGED"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "return_condition"
+                                ]
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "`PackageLoanResource`",
@@ -6136,17 +6316,7 @@
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "allOf": [
-                                                {
-                                                    "$ref": "#/components/schemas/PackageLoanResource"
-                                                },
-                                                {
-                                                    "type": "object",
-                                                    "required": [
-                                                        "loans"
-                                                    ]
-                                                }
-                                            ]
+                                            "$ref": "#/components/schemas/PackageLoanResource"
                                         }
                                     },
                                     "required": [
@@ -6157,23 +6327,7 @@
                         }
                     },
                     "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Dieses Paket ist bereits zur\u00fcckgegeben."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "403": {
                         "description": "",
@@ -6842,6 +6996,49 @@
                             }
                         }
                     },
+                    "503": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Wegen Wartungsarbeiten sind Registrierungen gerade nicht m\u00f6glich."
+                                        },
+                                        "reason": {
+                                            "type": "string",
+                                            "const": "maintenance"
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "reason"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
                     }
@@ -7119,6 +7316,25 @@
                                         "message": {
                                             "type": "string",
                                             "const": "Passwort wurde erfolgreich zur\u00fcckgesetzt."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
                                         }
                                     },
                                     "required": [
@@ -9205,12 +9421,31 @@
                             },
                             "user_name": {
                                 "type": "string"
+                            },
+                            "pickup_location": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "name": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "id",
+                                    "name"
+                                ]
                             }
                         },
                         "required": [
                             "return_condition",
                             "returned_at",
-                            "user_name"
+                            "user_name",
+                            "pickup_location"
                         ]
                     },
                     "is_available": {
@@ -10007,6 +10242,25 @@
                             "null"
                         ]
                     },
+                    "package": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "description": "A package goes back as a whole; the dashboard needs its name for that",
+                        "properties": {
+                            "id": {
+                                "type": "integer"
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "name"
+                        ]
+                    },
                     "user": {
                         "$ref": "#/components/schemas/UserResource"
                     },
@@ -10617,7 +10871,12 @@
                         ]
                     },
                     "website": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "description": "Honeypot, checked silently in RegisterController.",
+                        "maxLength": 255
                     },
                     "form_loaded_at": {
                         "type": "integer"

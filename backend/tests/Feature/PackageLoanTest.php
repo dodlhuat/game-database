@@ -99,7 +99,7 @@ class PackageLoanTest extends TestCase
         $packageLoan = PackageLoan::factory()->create(['user_id' => $user->id, 'status' => 'ACTIVE']);
 
         $this->actingAs($user)
-            ->postJson("/api/package-loans/{$packageLoan->id}/return")
+            ->postJson("/api/package-loans/{$packageLoan->id}/return", ['return_condition' => 'GOOD'])
             ->assertOk()
             ->assertJsonPath('data.status', 'RETURNED');
     }
@@ -110,7 +110,7 @@ class PackageLoanTest extends TestCase
         $packageLoan = PackageLoan::factory()->create(['user_id' => $user->id, 'status' => 'RETURNED']);
 
         $this->actingAs($user)
-            ->postJson("/api/package-loans/{$packageLoan->id}/return")
+            ->postJson("/api/package-loans/{$packageLoan->id}/return", ['return_condition' => 'GOOD'])
             ->assertStatus(422);
     }
 }

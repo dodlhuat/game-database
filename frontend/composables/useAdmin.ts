@@ -1,7 +1,10 @@
 export interface AdminStats {
   users: { total: number; pending: number; active: number }
   loans: { active: number; overdue: number; returned_today: number }
-  copies: { to_review: number }
+  copies: {
+    to_review: number
+    to_review_by_location?: { location: string; count: number }[]
+  }
 }
 
 export interface AdminCopy {
@@ -18,6 +21,7 @@ export interface AdminCopy {
     return_condition: string
     returned_at: string
     user_name: string | null
+    pickup_location: { id: number; name: string } | null
   } | null
 }
 

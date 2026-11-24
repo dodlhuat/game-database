@@ -39,6 +39,10 @@ class CopyResource extends JsonResource
                     'return_condition' => $loan->return_condition,
                     'returned_at' => $loan->returned_at,
                     'user_name' => $loan->user?->name,
+                    'pickup_location' => $loan->pickupLocation ? [
+                        'id' => $loan->pickupLocation->id,
+                        'name' => $loan->pickupLocation->name,
+                    ] : null,
                 ] : null;
             }),
             'is_available' => $this->when(

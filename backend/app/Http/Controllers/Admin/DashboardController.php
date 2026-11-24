@@ -27,6 +27,14 @@ class DashboardController extends Controller
             ],
             'copies' => [
                 'to_review' => Copy::where('condition', 'REVIEW')->count(),
+                // What waits where: the location of each copy's last return
+                'to_review_by_location' => Copy::where('condition', 'REVIEW')
+                    ->with('lastReturnedLoan')
+                    ->get()
+                    ->countBy(fn (Copy $c) => $c->lastReturnedLoan?->pickupLocation->name ?? 'Ohne Abholort')
+                    ->sortKeys()
+                    ->map(fn (int $count, string $name) => ['location' => $name, 'count' => $count])
+                    ->values(),
             ],
         ]);
     }

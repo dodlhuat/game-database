@@ -173,6 +173,24 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'schedule',
     vars: ['name', 'game', 'due_date', 'location', 'location_details'],
   },
+  loan_returned: {
+    label: 'Rückgabe erfasst',
+    recipient: 'Mitglied',
+    icon: 'assignment_return',
+    vars: ['name', 'game', 'returned_at', 'location', 'location_details'],
+  },
+  loan_returned_admin: {
+    label: 'Rückgabe bestätigt',
+    recipient: 'Admin',
+    icon: 'location_on',
+    vars: ['member', 'game', 'location', 'condition', 'returned_at'],
+  },
+  pickup_digest_admin: {
+    label: 'Tägliche Abholliste',
+    recipient: 'Admin',
+    icon: 'checklist',
+    vars: ['count', 'date', 'pickup_list'],
+  },
   reservation_available: {
     label: 'Spiel wieder verfügbar',
     recipient: 'Mitglied',

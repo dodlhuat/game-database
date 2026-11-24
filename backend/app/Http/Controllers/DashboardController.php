@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
         $activeLoans = $user->loans()
             ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
-            ->with(['copy.game.reservations', 'extensions'])
+            ->with(['copy.game.reservations', 'extensions', 'packageLoan.package'])
             ->orderBy('due_date')
             ->get();
 

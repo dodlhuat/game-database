@@ -1683,6 +1683,10 @@ export interface components {
         /** Format: date-time */
         returned_at: string | null
         user_name: string
+        pickup_location: {
+          id: number
+          name: string
+        } | null
       } | null
       is_available?: boolean
     }
@@ -1858,6 +1862,11 @@ export interface components {
       copy?: components['schemas']['CopyResource'] & Record<string, never>
       game?: components['schemas']['GameResource'] | null
       package_loan_id: number | null
+      /** @description A package goes back as a whole; the dashboard needs its name for that */
+      package?: {
+        id: number
+        name: string
+      } | null
       user?: components['schemas']['UserResource']
       pickup_location?: components['schemas']['PickupLocationResource'] | null
       /** Format: date-time */
@@ -2013,7 +2022,8 @@ export interface components {
       newsletter_opt_in?: boolean
       /** @enum {unknown} */
       terms_accepted: 'yes' | 'on' | '1' | 1 | 'true' | true
-      website?: string
+      /** @description Honeypot, checked silently in RegisterController. */
+      website?: string | null
       form_loaded_at: number
       password_confirmation: string
     }
@@ -2287,11 +2297,24 @@ export interface operations {
         content: {
           'application/json': {
             verified: boolean
+            status: unknown
           }
         }
       }
       401: components['responses']['AuthenticationException']
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
     }
   }
   'cookie.show': {
@@ -2750,6 +2773,11 @@ export interface operations {
             }
             copies: {
               to_review: number
+              /** @description What waits where: the location of each copy's last return */
+              to_review_by_location: {
+                location: string
+                count: number
+              }[]
             }
           }
         }
@@ -2926,6 +2954,18 @@ export interface operations {
         }
         content?: never
       }
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
     }
   }
   'emailVerification.resend': {
@@ -2956,6 +2996,18 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
     }
   }
   'event.index': {
@@ -3230,6 +3282,18 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
     }
   }
   'game.index': {
@@ -4149,6 +4213,31 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Wegen Wartungsarbeiten ist die Anmeldung gerade nicht möglich.'
+            /** @constant */
+            reason: 'maintenance'
+          }
+        }
+      }
     }
   }
   'login.destroy': {
@@ -4493,10 +4582,15 @@ export interface operations {
           [name: string]: unknown
         }
         content: {
-          'application/json': {
-            /** @constant */
-            message: 'Nur außerordentliche Mitglieder können auf ein Vollmitglied upgraden.'
-          }
+          'application/json':
+            | {
+                /** @constant */
+                message: 'Deine Mitgliedschaft ist abgelaufen. Bitte verlängere sie zuerst.'
+              }
+            | {
+                /** @constant */
+                message: 'Nur außerordentliche Mitglieder können auf ein Vollmitglied upgraden.'
+              }
         }
       }
     }
@@ -5061,7 +5155,14 @@ export interface operations {
       }
       cookie?: never
     }
-    requestBody?: never
+    requestBody: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          return_condition: 'GOOD' | 'WORN' | 'DAMAGED'
+        }
+      }
+    }
     responses: {
       /** @description `PackageLoanResource` */
       200: {
@@ -5070,7 +5171,7 @@ export interface operations {
         }
         content: {
           'application/json': {
-            data: components['schemas']['PackageLoanResource'] & Record<string, never>
+            data: components['schemas']['PackageLoanResource']
           }
         }
       }
@@ -5087,17 +5188,7 @@ export interface operations {
         }
       }
       404: components['responses']['ModelNotFoundException']
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Dieses Paket ist bereits zurückgegeben.'
-          }
-        }
-      }
+      422: components['responses']['ValidationException']
     }
   }
   'admin.packageLoan.index': {
@@ -5426,6 +5517,31 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
+      503: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Wegen Wartungsarbeiten sind Registrierungen gerade nicht möglich.'
+            /** @constant */
+            reason: 'maintenance'
+          }
+        }
+      }
     }
   }
   'reservation.index': {
@@ -5576,6 +5692,18 @@ export interface operations {
         }
       }
       422: components['responses']['ValidationException']
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
+          }
+        }
+      }
     }
   }
   'review.store': {

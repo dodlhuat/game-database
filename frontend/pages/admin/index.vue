@@ -70,7 +70,10 @@
               >
                 <span class="attention-item__dot" />
                 <span class="attention-item__text">
-                  <strong>{{ stats.copies.to_review }}</strong> Kopien nach Rückgabe zu prüfen
+                  <strong>{{ stats.copies.to_review }}</strong> Kopien zum Abholen &amp;
+                  Prüfen<template v-if="reviewLocations.length > 1">
+                    an {{ reviewLocations.length }} Orten</template
+                  >
                 </span>
                 <svg class="icon-svg attention-item__arrow" aria-hidden="true">
                   <use href="/svg-icons/icons.svg#chevron_right" />
@@ -149,7 +152,12 @@
               </div>
               <span class="ops-card__value">{{ stats.copies.to_review }}</span>
               <span class="ops-card__label">Zu prüfen</span>
-              <span class="ops-card__sub">Kopien nach Rückgabe</span>
+              <span v-if="reviewLocations.length" class="ops-card__sub ops-card__sub--places">
+                <span v-for="place in reviewLocations" :key="place.location" class="ops-card__place"
+                  >{{ place.location }} <strong>{{ place.count }}</strong></span
+                >
+              </span>
+              <span v-else class="ops-card__sub">Kopien nach Rückgabe</span>
             </NuxtLink>
           </div>
 
@@ -311,6 +319,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 const { fetchStats } = useAdmin()
 const stats = ref<AdminStats | null>(null)
 const loading = ref(true)
+const reviewLocations = computed(() => stats.value?.copies.to_review_by_location ?? [])
 const year = new Date().getFullYear()
 
 const today = new Date().toLocaleDateString('de-AT', {
@@ -717,6 +726,18 @@ $hero-div: var(--divider);
     color: var(--secondary-text);
     &--red {
       color: var(--error-text);
+    }
+  }
+  &__sub--places {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.6rem;
+  }
+  &__place {
+    white-space: nowrap;
+    strong {
+      color: $amber;
+      font-weight: 800;
     }
   }
 }

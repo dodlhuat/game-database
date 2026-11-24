@@ -53,6 +53,27 @@ class EmailTemplateController extends Controller
             'body' => '<p>Deine Ausleihe von <strong>{game}</strong> war am <strong>{due_date}</strong> zur Rückgabe fällig und ist derzeit überfällig.</p><p>Bitte bring das Spiel so bald wie möglich dorthin zurück, wo du es abgeholt hast:</p>{location_details}<p>Bei Fragen wende dich an uns.</p>',
             'action_text' => 'Zum Dashboard',
         ],
+        'loan_returned' => [
+            'key' => 'loan_returned',
+            'subject' => 'Rückgabe erfasst: {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>danke! Wir haben deine Rückgabe von <strong>{game}</strong> am {returned_at} erfasst. Abgegeben hast du es hier:</p>{location_details}<p>Wir holen das Spiel dort ab und prüfen es. Falls für die Ausleihe eine Kaution blockiert ist, wird sie danach freigegeben — darüber bekommst du eine eigene E-Mail.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
+        'loan_returned_admin' => [
+            'key' => 'loan_returned_admin',
+            'subject' => 'Rückgabe bei {location}: {game}',
+            'greeting' => 'Hallo,',
+            'body' => '<p>{member} hat die Rückgabe von <strong>{game}</strong> bestätigt.</p><p><strong>Abholort:</strong> {location}<br><strong>Zurückgegeben:</strong> {returned_at}<br><strong>Gemeldeter Zustand:</strong> {condition}</p><p>Das Spiel liegt dort zur Abholung und Prüfung bereit.</p>',
+            'action_text' => 'Zur Prüfliste',
+        ],
+        'pickup_digest_admin' => [
+            'key' => 'pickup_digest_admin',
+            'subject' => 'Abholliste: {count} Spiel(e) warten auf Abholung',
+            'greeting' => 'Guten Morgen,',
+            'body' => '<p>Stand {date} liegen diese zurückgegebenen Spiele an den Abholorten bereit und warten auf Abholung und Prüfung:</p>{pickup_list}',
+            'action_text' => 'Zur Prüfliste',
+        ],
         'reservation_available' => [
             'key' => 'reservation_available',
             'subject' => '„{game}" ist jetzt verfügbar!',

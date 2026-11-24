@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LoanResource;
-use App\Models\Copy;
 use App\Models\Loan;
 use App\Models\User;
 use App\Notifications\LoanOverdueReminder;
+use App\Services\LoanReturnService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -57,25 +57,25 @@ class LoanController extends Controller
         return new LoanResource($loan);
     }
 
-    public function return(Request $request, Loan $loan): JsonResponse|LoanResource
+    public function return(Request $request, Loan $loan, LoanReturnService $returns): JsonResponse|LoanResource
     {
         $request->validate([
             'return_condition' => ['required', Rule::in(['GOOD', 'WORN', 'DAMAGED'])],
         ]);
 
-        if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
+        if (! in_array($loan->status, Loan::OPEN_STATUSES)) {
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
         }
 
-        $loan->update([
-            'status' => 'RETURNED',
-            'returned_at' => now(),
-            'return_condition' => $request->return_condition,
-        ]);
+        if ($loan->package_loan_id !== null) {
+            return response()->json([
+                'message' => 'Dieses Spiel gehört zu einer Paket-Ausleihe. Bitte das ganze Paket zurückgeben.',
+            ], 422);
+        }
 
-        /** @var Copy $loanCopy */
-        $loanCopy = $loan->copy;
-        $loanCopy->update(['condition' => 'REVIEW']);
+        /** @var User $admin */
+        $admin = $request->user();
+        $returns->returnLoan($loan, $request->string('return_condition')->toString(), $admin);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions']));
     }

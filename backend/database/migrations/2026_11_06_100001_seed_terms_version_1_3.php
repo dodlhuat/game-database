@@ -24,13 +24,14 @@ Diese Nutzungsbedingungen gelten für alle Mitglieder der Spielothek des Vereins
 Spiele können für 14 Tage ausgeliehen werden. Der Leihpreis richtet sich nach der Kategorie des Spiels (derzeit klein 3 Token, mittel 6 Token, groß 10 Token; Pakete 3 Token). Zusätzlich wird je nach Spiel und Zustand eine Kaution in Token blockiert, die nach der Rückgabeprüfung wieder freigegeben wird.
 Eine Ausleihe kann im Konto bis zu zweimal verlängert werden, jeweils um höchstens 14 Tage, sofern das Spiel nicht von einem anderen Mitglied reserviert ist. Die erste Verlängerung ist kostenlos, die zweite kostet derzeit 2 Token. Danach ist eine weitere Verlängerung erst nach Rückgabe und erneuter Ausleihe möglich.
 Ausgeliehene Spiele können reserviert werden. Eine Reservierung kostet derzeit 1 Token; die Gebühr wird beim Reservieren abgebucht und bei Stornierung der Reservierung nicht erstattet.
+Ausgeliehene Spiele sind an dem Abholort zurückzugeben, an dem sie abgeholt wurden; Pakete werden vollständig gemeinsam zurückgegeben. Die Rückgabe ist anschließend im Konto zu bestätigen. Erst mit dieser Bestätigung ist ersichtlich, dass das Spiel zur Abholung und Prüfung bereitliegt; bis dahin gilt die Ausleihe als offen.
 
 §3 Haftung
 Bei Beschädigung oder Verlust ist der Zeitwert des Spiels zu ersetzen. Die blockierte Kaution kann bei Beschädigung oder Verlust einbehalten werden.
 
 §4 Mitgliedschaft und Mitgliedsbeitrag
 Die Mitgliedschaft im Verein AUA-Alle.Unsere.Abenteuer richtet sich nach den Vereinsstatuten; dort sind insbesondere die Mitgliedsarten (ordentliche, außerordentliche und Ehrenmitglieder) sowie die Rechte und Pflichten der Mitglieder geregelt. Ehrenmitglieder werden vom Vorstand ernannt, eine Ernennung ist über diese Plattform nicht möglich. Über diese Plattform werden Sie als Vollmitglied oder als außerordentliches Mitglied geführt.
-Die Höhe des Mitgliedsbeitrags beschließt die Generalversammlung; derzeit beträgt er 24,00 € pro Jahr. Der Beitrag wird online per Zahlungsdienstleister bezahlt; die Mitgliedschaft wird erst nach erfolgreicher Zahlung aktiviert und gilt für 12 Monate. Eine Verlängerung ist ab 3 Monate vor Ablauf möglich. Außerordentliche Mitglieder erhalten keine Token und können keine Spiele ausleihen; sie können jederzeit zum Vollmitglied werden.
+Die Höhe des Mitgliedsbeitrags beschließt die Generalversammlung; derzeit beträgt er 24,00 € pro Jahr. Der Beitrag wird online per Zahlungsdienstleister bezahlt; die Mitgliedschaft wird erst nach erfolgreicher Zahlung aktiviert und gilt für 12 Monate. Eine Verlängerung ist ab 3 Monate vor Ablauf und auch nach Ablauf möglich. Ist die Mitgliedschaft abgelaufen, können bis zur Verlängerung keine Spiele ausgeliehen oder reserviert und keine Ausleihen verlängert werden. Außerordentliche Mitglieder erhalten keine Token und können keine Spiele ausleihen; sie können jederzeit zum Vollmitglied werden.
 
 §5 Token
 Ein Token hat einen Wert von 0,50 €. Token können in Paketen gekauft werden (derzeit 20 Token für 10,00 €, 30 Token für 14,50 €, 40 Token für 18,50 €). Gekaufte Token verfallen nicht und sind nicht übertragbar.

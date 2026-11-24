@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property Carbon $due_date
  * @property Carbon|null $start_date
+ * @property Carbon|null $returned_at
  */
 class PackageLoan extends Model
 {

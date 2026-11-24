@@ -2,12 +2,10 @@
 
 namespace App\Notifications;
 
-use App\Models\Copy;
-use App\Models\Game;
 use App\Models\Loan;
-use App\Models\Package;
 use App\Models\PackageLoan;
 use App\Models\User;
+use App\Notifications\Concerns\DescribesLoanItem;
 use App\Notifications\Concerns\DescribesPickupLocation;
 use App\Notifications\Concerns\UsesEmailTemplate;
 use Illuminate\Bus\Queueable;
@@ -18,7 +16,7 @@ use Throwable;
 /** Sent right after a game or package was borrowed: what, when and where. */
 class LoanConfirmation extends Notification
 {
-    use DescribesPickupLocation, Queueable, UsesEmailTemplate;
+    use DescribesLoanItem, DescribesPickupLocation, Queueable, UsesEmailTemplate;
 
     public function __construct(private Loan|PackageLoan $loan) {}
 
@@ -47,31 +45,10 @@ class LoanConfirmation extends Notification
 
         return $this->buildFromTemplate('loan_confirmation', [
             'name' => $notifiable->name,
-            'game' => $this->title(),
+            'game' => $this->itemTitle($loan),
             'start_date' => $loan->start_date?->format('d.m.Y') ?? '',
             'due_date' => $loan->due_date->format('d.m.Y'),
             ...$this->locationVars($loan->pickupLocation),
         ], config()->string('frontend.url').'/dashboard', $notifiable);
-    }
-
-    private function title(): string
-    {
-        if ($this->loan instanceof PackageLoan) {
-            /** @var Package $package */
-            $package = $this->loan->package;
-            $games = $this->loan->loans
-                ->map(fn (Loan $l) => $l->copy?->game?->title)
-                ->filter()
-                ->implode(', ');
-
-            return e('Paket „'.$package->name.'“'.($games !== '' ? " ({$games})" : ''));
-        }
-
-        /** @var Copy $copy */
-        $copy = $this->loan->copy;
-        /** @var Game $game */
-        $game = $copy->game;
-
-        return e($game->title);
     }
 }

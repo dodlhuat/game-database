@@ -148,6 +148,9 @@
                 <NuxtLink :to="`/games/${loan.game?.slug}`" class="loan-card__cta">
                   {{ loan.game?.title }}
                 </NuxtLink>
+                <span v-if="loan.package" class="loan-package">{{
+                  $t('dashboard.package_badge', { name: loan.package.name })
+                }}</span>
                 <span v-if="loan.pickup_location" class="loan-location">
                   <svg class="icon-svg" aria-hidden="true">
                     <use href="/svg-icons/icons.svg#location_on" />
@@ -216,7 +219,7 @@
                   </button>
                 </template>
                 <button class="action-btn" @click="openReturn(loan)">
-                  {{ $t('btn.return') }}
+                  {{ loan.package_loan_id ? $t('btn.return_package') : $t('btn.return') }}
                 </button>
                 <button class="action-btn action-btn--quiet" @click="openDamage(loan)">
                   <svg class="icon-svg" aria-hidden="true">
@@ -300,16 +303,37 @@
       <div v-if="returnLoan" class="modal-overlay" @click.self="returnLoan = null">
         <div class="dialog">
           <div class="dialog__header">
-            <h3 class="dialog__title">{{ $t('dashboard.return_title') }}</h3>
+            <h3 class="dialog__title">
+              {{
+                returnLoan.package_loan_id
+                  ? $t('dashboard.return_package_title')
+                  : $t('dashboard.return_title')
+              }}
+            </h3>
             <button class="dialog__close" :aria-label="$t('btn.close')" @click="returnLoan = null">
               <svg class="icon-svg" aria-hidden="true">
                 <use href="/svg-icons/icons.svg#close" />
               </svg>
             </button>
           </div>
-          <p class="dialog__game">{{ returnLoan.game?.title }}</p>
+          <template v-if="returnLoan.package_loan_id">
+            <p class="dialog__game">{{ returnLoan.package?.name }}</p>
+            <p class="dialog__label">{{ $t('dashboard.return_package_games') }}</p>
+            <ul class="return-games">
+              <li v-for="item in returnPackageItems" :key="item.id" class="return-games__item">
+                {{ item.game?.title }}
+              </li>
+            </ul>
+          </template>
+          <p v-else class="dialog__game">{{ returnLoan.game?.title }}</p>
           <div v-if="returnLoan.pickup_location" class="dialog__location">
-            <p class="pickup-picker__hint">{{ $t('dashboard.return_location_hint') }}</p>
+            <p class="pickup-picker__hint">
+              {{
+                returnLoan.package_loan_id
+                  ? $t('dashboard.return_package_location_hint')
+                  : $t('dashboard.return_location_hint')
+              }}
+            </p>
             <div class="pickup-option pickup-option--static">
               <span class="pickup-option__card">
                 <span class="pickup-option__pin" aria-hidden="true">
@@ -329,8 +353,14 @@
               { label: $t('common.badge.damaged'), value: 'DAMAGED' },
             ]"
           />
+          <p class="return-note">{{ $t('dashboard.return_note') }}</p>
+          <div v-if="returnError" class="alert alert-error">{{ returnError }}</div>
           <div class="dialog__actions">
-            <UiButton :loading="returning" @click="submitReturn">{{ $t('btn.confirm') }}</UiButton>
+            <UiButton :loading="returning" @click="submitReturn">{{
+              returnLoan.package_loan_id
+                ? $t('dashboard.return_confirm_package')
+                : $t('dashboard.return_confirm')
+            }}</UiButton>
             <button class="action-btn" @click="returnLoan = null">{{ $t('btn.cancel') }}</button>
           </div>
         </div>
@@ -485,6 +515,7 @@ const { t } = useI18n()
 const {
   fetchDashboard,
   returnLoan: doReturn,
+  returnPackageLoan,
   requestExtension,
   removeReservation,
   reportDamage,
@@ -496,6 +527,14 @@ const data = ref<DashboardData | null>(null)
 const returnLoan = ref<Loan | null>(null)
 const returnCondition = ref('GOOD')
 const returning = ref(false)
+const returnError = ref('')
+
+// All open games of the package the dialog is about — they go back together
+const returnPackageItems = computed(() => {
+  const id = returnLoan.value?.package_loan_id
+  if (!id) return []
+  return (data.value?.active_loans ?? []).filter((l) => l.package_loan_id === id)
+})
 
 const extensionLoan = ref<Loan | null>(null)
 const extensionError = ref('')
@@ -550,15 +589,24 @@ useAsyncData(
 function openReturn(loan: Loan) {
   returnLoan.value = loan
   returnCondition.value = 'GOOD'
+  returnError.value = ''
 }
 
 async function submitReturn() {
   if (!returnLoan.value) return
   returning.value = true
+  returnError.value = ''
   try {
-    await doReturn(returnLoan.value.id, returnCondition.value)
+    const packageLoanId = returnLoan.value.package_loan_id
+    if (packageLoanId) {
+      await returnPackageLoan(packageLoanId, returnCondition.value)
+    } else {
+      await doReturn(returnLoan.value.id, returnCondition.value)
+    }
     data.value = await fetchDashboard()
     returnLoan.value = null
+  } catch (err: unknown) {
+    returnError.value = (err as { message?: string }).message ?? t('common.error.generic')
   } finally {
     returning.value = false
   }
@@ -1282,6 +1330,18 @@ $amber-ink: var(--amber-ink);
   }
 }
 
+.loan-package {
+  align-self: flex-start;
+  padding: 0.1rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: $amber-ink;
+  background: amber(10%);
+  border: 1px dashed amber(40%);
+}
+
 .loan-location {
   display: inline-flex;
   align-items: flex-start;
@@ -1724,6 +1784,26 @@ $amber-ink: var(--amber-ink);
     gap: 0.75rem;
     margin-top: 1.5rem;
   }
+}
+
+.return-games {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border-left: 2px solid amber(35%);
+  &__item {
+    padding: 0.2rem 0 0.2rem 0.75rem;
+    font-size: 0.85rem;
+    color: var(--primary-text);
+  }
+}
+
+.return-note {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--secondary-text);
 }
 
 .extension-cost {

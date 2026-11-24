@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Resources\PackageLoanResource;
 use App\Models\Copy;
 use App\Models\Game;
-use App\Models\Loan;
 use App\Models\LoanSetting;
 use App\Models\Package;
 use App\Models\PackageLoan;
@@ -13,11 +12,13 @@ use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
 use App\Notifications\LoanConfirmation;
+use App\Services\LoanReturnService;
 use App\Services\TokenWallet;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class PackageLoanController extends Controller
 {
@@ -176,7 +177,7 @@ class PackageLoanController extends Controller
         return new PackageLoanResource($packageLoan);
     }
 
-    public function return(Request $request, PackageLoan $packageLoan): JsonResponse|PackageLoanResource
+    public function return(Request $request, PackageLoan $packageLoan, LoanReturnService $returns): JsonResponse|PackageLoanResource
     {
         /** @var User $user */
         $user = $request->user();
@@ -188,21 +189,11 @@ class PackageLoanController extends Controller
             return response()->json(['message' => 'Dieses Paket ist bereits zurückgegeben.'], 422);
         }
 
-        // Update each individual loan and set copy to REVIEW
-        $packageLoan->loans()
-            ->with('copy')
-            ->whereIn('status', ['ACTIVE', 'EXTENDED', 'OVERDUE'])
-            ->get()
-            ->each(function (Loan $loan) {
-                $loan->update(['status' => 'RETURNED', 'returned_at' => now()]);
-                /** @var Copy $loanCopy */
-                $loanCopy = $loan->copy;
-                $loanCopy->update(['condition' => 'REVIEW']);
-            });
+        $validated = $request->validate([
+            'return_condition' => ['required', Rule::in(['GOOD', 'WORN', 'DAMAGED'])],
+        ]);
 
-        $packageLoan->update(['status' => 'RETURNED', 'returned_at' => now()]);
-
-        $packageLoan->load(['package', 'loans.copy.game']);
+        $returns->returnPackage($packageLoan, $validated['return_condition'], $user);
 
         return new PackageLoanResource($packageLoan);
     }

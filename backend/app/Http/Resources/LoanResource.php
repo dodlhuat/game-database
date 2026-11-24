@@ -32,6 +32,14 @@ class LoanResource extends JsonResource
                 }
             ),
             'package_loan_id' => $this->package_loan_id,
+            // A package goes back as a whole; the dashboard needs its name for that
+            'package' => $this->when(
+                $this->relationLoaded('packageLoan') && $this->packageLoan?->relationLoaded('package'),
+                fn () => $this->packageLoan?->package ? [
+                    'id' => $this->packageLoan->package->id,
+                    'name' => $this->packageLoan->package->name,
+                ] : null
+            ),
             'user' => new UserResource($this->whenLoaded('user')),
             'pickup_location' => new PickupLocationResource($this->whenLoaded('pickupLocation')),
             'start_date' => $this->start_date,

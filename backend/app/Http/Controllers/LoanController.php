@@ -13,6 +13,7 @@ use App\Models\PickupLocation;
 use App\Models\TokenTransaction;
 use App\Models\User;
 use App\Notifications\LoanConfirmation;
+use App\Services\LoanReturnService;
 use App\Services\TokenWallet;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,10 @@ use Illuminate\Support\Facades\DB;
 
 class LoanController extends Controller
 {
-    public function __construct(private TokenWallet $wallet) {}
+    public function __construct(
+        private TokenWallet $wallet,
+        private LoanReturnService $returns,
+    ) {}
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -186,22 +190,20 @@ class LoanController extends Controller
     {
         $this->authorize('return', $loan);
 
-        if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
+        if (! in_array($loan->status, Loan::OPEN_STATUSES)) {
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
         }
 
-        $loan->update([
-            'status' => 'RETURNED',
-            'returned_at' => now(),
-            'return_condition' => $request->return_condition,
-        ]);
+        if ($loan->package_loan_id !== null) {
+            return response()->json([
+                'message' => 'Dieses Spiel gehört zu einem Paket. Bitte gib das ganze Paket zurück.',
+            ], 422);
+        }
 
-        /** @var Copy $copy */
-        $copy = $loan->copy;
-        $copy->update(['condition' => 'REVIEW']);
+        /** @var User $user */
+        $user = $request->user();
+        $this->returns->returnLoan($loan, $request->string('return_condition')->toString(), $user);
 
-        $loan->load(['copy.game', 'extensions']);
-
-        return new LoanResource($loan);
+        return new LoanResource($loan->load(['copy.game', 'extensions']));
     }
 }
