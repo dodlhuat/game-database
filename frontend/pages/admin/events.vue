@@ -166,6 +166,11 @@
                         : $t('admin.events.pickup.no_locations')
                     }}
                   </p>
+                  <p v-if="form.is_pickup && editingBookings > 0" class="pickup-box__note">
+                    {{
+                      $t('admin.events.pickup.booked_note', { n: editingBookings }, editingBookings)
+                    }}
+                  </p>
                   <div v-if="form.is_pickup" class="pickup-box__fields">
                     <div>
                       <label class="form-label">{{ $t('admin.events.pickup.location') }}</label>
@@ -284,6 +289,10 @@ const { fetchAdminLocations } = usePickupLocations()
 // Only personal locations host pickup events; the current one stays selectable
 // even if it was switched off since, so editing an old event keeps working.
 const locations = ref<ApiPickupLocation[]>([])
+// Bookings of the event being edited: place is fixed, a new time is mailed out
+const editingBookings = computed(
+  () => events.value.find((e) => e.id === form.id)?.bookings_count ?? 0
+)
 const personalLocations = computed(() =>
   locations.value.filter((l) => l.is_personal && l.is_active)
 )
@@ -925,6 +934,15 @@ $hero-muted: var(--secondary-text);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--secondary-text);
+  }
+  &__note {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--primary-text);
+    background: color-mix(in srgb, #{$amber} 12%, transparent);
   }
   &__fields {
     display: grid;

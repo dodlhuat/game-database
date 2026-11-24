@@ -93,14 +93,21 @@ class TokenWallet
      * Consume tokens: bonus first (earliest expiry), then normal tokens
      * (worthless legacy first, then oldest lot). Callers must check the
      * balance beforehand.
+     *
+     * Returns a receipt of what was taken from where, so a later refund can
+     * put every token back into the lot it came from (see restore()).
+     *
+     * @return list<array{lot_id: int|null, amount: int}>
      */
-    public function spend(User $user, int $amount): void
+    public function spend(User $user, int $amount): array
     {
         if ($amount <= 0) {
-            return;
+            return [];
         }
 
-        DB::transaction(function () use ($user, $amount) {
+        /** @var list<array{lot_id: int|null, amount: int}> $receipt */
+        $receipt = DB::transaction(function () use ($user, $amount) {
+            $receipt = [];
             /** @var User $locked */
             $locked = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
 
@@ -129,6 +136,7 @@ class TokenWallet
                 $lot->decrement('remaining', $take);
                 $left -= $take;
                 $bonusUsed += $take;
+                $receipt[] = ['lot_id' => $lot->id, 'amount' => $take];
             }
 
             if ($left > 0) {
@@ -145,6 +153,9 @@ class TokenWallet
                 $take = min($left, $legacy);
                 $left -= $take;
                 $normalUsed += $take;
+                if ($take > 0) {
+                    $receipt[] = ['lot_id' => null, 'amount' => $take];
+                }
 
                 foreach ($normalLots as $lot) {
                     if ($left === 0) {
@@ -154,6 +165,7 @@ class TokenWallet
                     $lot->decrement('remaining', $take);
                     $left -= $take;
                     $normalUsed += $take;
+                    $receipt[] = ['lot_id' => $lot->id, 'amount' => $take];
                 }
             }
 
@@ -163,9 +175,70 @@ class TokenWallet
             if ($normalUsed > 0) {
                 $locked->decrement('tokens', $normalUsed);
             }
+
+            return $receipt;
         });
 
         $user->refresh();
+
+        return $receipt;
+    }
+
+    /**
+     * Puts tokens back where spend() took them from. Bonus tokens return to
+     * their lot and keep its expiry; a lot that has expired in the meantime
+     * gets nothing back, as those tokens would be gone by now anyway.
+     *
+     * @param  list<array{lot_id: int|null, amount: int}>  $receipt
+     * @return int tokens actually restored
+     */
+    public function restore(User $user, array $receipt): int
+    {
+        $restored = DB::transaction(function () use ($user, $receipt) {
+            $normal = 0;
+            $bonus = 0;
+
+            foreach ($receipt as $line) {
+                $amount = $line['amount'];
+                if ($amount <= 0) {
+                    continue;
+                }
+                if ($line['lot_id'] === null) {
+                    $normal += $amount; // legacy tokens have no lot
+
+                    continue;
+                }
+
+                /** @var TokenLot|null $lot */
+                $lot = TokenLot::whereKey($line['lot_id'])->where('user_id', $user->id)->lockForUpdate()->first();
+                if (! $lot) {
+                    continue;
+                }
+                if ($lot->kind === TokenLot::KIND_BONUS) {
+                    if ($lot->expired_at !== null) {
+                        continue;
+                    }
+                    $lot->increment('remaining', $amount);
+                    $bonus += $amount;
+                } else {
+                    $lot->increment('remaining', $amount);
+                    $normal += $amount;
+                }
+            }
+
+            if ($normal > 0) {
+                User::whereKey($user->id)->increment('tokens', $normal);
+            }
+            if ($bonus > 0) {
+                User::whereKey($user->id)->increment('bonus_tokens', $bonus);
+            }
+
+            return $normal + $bonus;
+        });
+
+        $user->refresh();
+
+        return $restored;
     }
 
     /**

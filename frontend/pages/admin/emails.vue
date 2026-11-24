@@ -197,6 +197,18 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'event',
     vars: ['name', 'date', 'time', 'games', 'location', 'location_details'],
   },
+  loan_cancelled_no_show: {
+    label: 'Nicht abgeholt – storniert',
+    recipient: 'Mitglied',
+    icon: 'event_busy',
+    vars: ['name', 'game', 'pickup'],
+  },
+  pickup_event_moved: {
+    label: 'Abholtermin verschoben',
+    recipient: 'Mitglied',
+    icon: 'update',
+    vars: ['name', 'pickup', 'previously', 'location', 'location_details'],
+  },
   reservation_available: {
     label: 'Spiel wieder verfügbar',
     recipient: 'Mitglied',

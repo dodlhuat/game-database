@@ -126,7 +126,8 @@ class LoanController extends Controller
             ]);
 
             if (! $user->isAdmin()) {
-                $this->wallet->spend($user, $loanCost);
+                // Kept so a cancelled pickup can refund every token to where it came from
+                $loan->update(['spend_receipt' => $this->wallet->spend($user, $loanCost)]);
                 TokenTransaction::create([
                     'user_id' => $user->id,
                     'loan_id' => $loan->id,

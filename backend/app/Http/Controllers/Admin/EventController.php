@@ -6,10 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\EventRequest;
 use App\Http\Resources\EventResource;
 use App\Models\Event;
+use App\Models\Loan;
+use App\Models\LoanSetting;
+use App\Models\PackageLoan;
+use App\Models\User;
+use App\Notifications\PickupEventMoved;
 use App\Services\ImageUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class EventController extends Controller
 {
@@ -50,6 +57,7 @@ class EventController extends Controller
         if ($blocked = $this->bookedChangeBlocker($event, $data)) {
             return $blocked;
         }
+        $previously = PickupEventMoved::when($event);
 
         if ($request->hasFile('image')) {
             $data['image_url'] = $this->imageUpload->uploadEventImage(
@@ -59,6 +67,10 @@ class EventController extends Controller
         }
 
         $event->update($data);
+
+        if ($event->isPickup() && $event->wasChanged(['date', 'time', 'end_time'])) {
+            $this->moveBookings($event->refresh(), $previously);
+        }
 
         return new EventResource($event->load('pickupLocation'));
     }
@@ -82,15 +94,23 @@ class EventController extends Controller
 
         $time = fn (mixed $v): ?string => is_string($v) && $v !== '' ? substr($v, 0, 5) : null;
         $locationId = is_numeric($data['pickup_location_id'] ?? null) ? (int) $data['pickup_location_id'] : null;
-        $moved = $locationId !== $event->pickup_location_id
-            || ($data['date'] ?? null) !== $event->date->format('Y-m-d')
+
+        if ($locationId !== $event->pickup_location_id) {
+            return response()->json([
+                'message' => "Für diesen Abholtermin gibt es {$bookings} Buchung(en). Der Ort kann daher nicht mehr geändert werden.",
+                'reason' => 'has_bookings',
+            ], 422);
+        }
+
+        $moved = ($data['date'] ?? null) !== $event->date->format('Y-m-d')
             || $time($data['time'] ?? null) !== $time($event->time)
             || $time($data['end_time'] ?? null) !== $time($event->end_time);
+        $handedOut = Loan::where('pickup_event_id', $event->id)->whereNotNull('handed_out_at')->exists();
 
-        if ($moved) {
+        if ($moved && $handedOut) {
             return response()->json([
-                'message' => "Für diesen Abholtermin gibt es {$bookings} Buchung(en). Ort, Datum und Uhrzeit können daher nicht mehr geändert werden.",
-                'reason' => 'has_bookings',
+                'message' => 'Bei diesem Abholtermin wurden schon Spiele ausgegeben. Datum und Uhrzeit können daher nicht mehr geändert werden.',
+                'reason' => 'handed_out',
             ], 422);
         }
 
@@ -105,6 +125,34 @@ class EventController extends Controller
         return null;
     }
 
+    /**
+     * The event moved: bookings follow with pickup and due date, the day-before
+     * reminder is sent again for the new date, and every member hears about it.
+     */
+    private function moveBookings(Event $event, string $previously): void
+    {
+        $start = $event->date->copy()->startOfDay();
+        $due = $start->copy()->addWeeks(LoanSetting::instance()->loan_duration_weeks);
+        $dates = ['start_date' => $start->toDateString(), 'due_date' => $due->toDateString()];
+
+        $members = DB::transaction(function () use ($event, $dates) {
+            $loans = Loan::where('pickup_event_id', $event->id)->whereIn('status', Loan::OPEN_STATUSES);
+            $userIds = (clone $loans)->pluck('user_id')->unique();
+            $loans->update([...$dates, 'pickup_reminder_sent_at' => null]);
+            PackageLoan::where('pickup_event_id', $event->id)->where('status', 'ACTIVE')->update($dates);
+
+            return User::whereKey($userIds)->get();
+        });
+
+        foreach ($members as $member) {
+            try {
+                $member->notify(new PickupEventMoved($event, $previously));
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
+    }
+
     public function destroy(Event $event): Response|JsonResponse
     {
         $bookings = $event->bookingsCount();
@@ -114,6 +162,10 @@ class EventController extends Controller
                 'reason' => 'has_bookings',
             ], 422);
         }
+
+        // Cancelled no-shows only keep the reference for history; let the event go
+        Loan::where('pickup_event_id', $event->id)->where('status', 'CANCELLED')->update(['pickup_event_id' => null]);
+        PackageLoan::where('pickup_event_id', $event->id)->where('status', 'CANCELLED')->update(['pickup_event_id' => null]);
 
         $this->imageUpload->delete($event->image_url);
 

@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $returned_at
  * @property Carbon|null $handed_out_at
  * @property int|null $pickup_event_id
+ * @property list<array{lot_id: int|null, amount: int}>|null $spend_receipt
  */
 class PackageLoan extends Model
 {
@@ -30,6 +31,8 @@ class PackageLoan extends Model
         'pickup_location_id',
         'pickup_event_id',
         'handed_out_at',
+        'spend_receipt',
+        'cancelled_at',
         'start_date',
         'due_date',
         'returned_at',
@@ -43,6 +46,8 @@ class PackageLoan extends Model
             'due_date' => 'date',
             'returned_at' => 'datetime',
             'handed_out_at' => 'datetime',
+            'spend_receipt' => 'array',
+            'cancelled_at' => 'datetime',
         ];
     }
 

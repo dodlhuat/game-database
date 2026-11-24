@@ -6981,6 +6981,100 @@
                 }
             }
         },
+        "/admin/loans/{loan}/cancel-pickup": {
+            "post": {
+                "operationId": "pickupEvent.cancelLoan",
+                "summary": "No-show: cancels and refunds a single-game booking",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "loan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Ausleihe storniert, Token erstattet."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/package-loans/{packageLoan}/cancel-pickup": {
+            "post": {
+                "operationId": "pickupEvent.cancelPackage",
+                "summary": "No-show: cancels and refunds a package booking with all its games",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "packageLoan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The package loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Paket-Ausleihe storniert, Token erstattet."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/pickup-locations": {
             "get": {
                 "operationId": "pickupLocation.index",

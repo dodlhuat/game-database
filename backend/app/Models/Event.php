@@ -64,13 +64,15 @@ class Event extends Model
      */
     public function loans(): HasMany
     {
-        return $this->hasMany(Loan::class, 'pickup_event_id')->whereNull('package_loan_id');
+        return $this->hasMany(Loan::class, 'pickup_event_id')
+            ->whereNull('package_loan_id')
+            ->where('status', '!=', 'CANCELLED');
     }
 
     /** @return HasMany<PackageLoan, $this> */
     public function packageLoans(): HasMany
     {
-        return $this->hasMany(PackageLoan::class, 'pickup_event_id');
+        return $this->hasMany(PackageLoan::class, 'pickup_event_id')->where('status', '!=', 'CANCELLED');
     }
 
     public function isPickup(): bool

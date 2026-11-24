@@ -33,7 +33,7 @@ export interface Loan {
   } | null
   /** Where the game is picked up — and has to be returned. */
   pickup_location?: ApiPickupLocation | null
-  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED'
+  status: 'ACTIVE' | 'RETURNED' | 'OVERDUE' | 'EXTENDED' | 'CANCELLED'
   is_overdue: boolean
   extensions: {
     id: number

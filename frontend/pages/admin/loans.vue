@@ -225,6 +225,7 @@ function statusLabel(s: string) {
     EXTENDED: t('admin.loans.filter_extended'),
     OVERDUE: t('admin.loans.filter_overdue'),
     RETURNED: t('admin.loans.filter_returned'),
+    CANCELLED: t('admin.loans.status_cancelled'),
   }
   return m[s] ?? s
 }

@@ -1177,6 +1177,40 @@ export interface paths {
     patch: operations['pickupEvent.handOutPackage']
     trace?: never
   }
+  '/admin/loans/{loan}/cancel-pickup': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** No-show: cancels and refunds a single-game booking */
+    post: operations['pickupEvent.cancelLoan']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/package-loans/{packageLoan}/cancel-pickup': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** No-show: cancels and refunds a package booking with all its games */
+    post: operations['pickupEvent.cancelPackage']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/pickup-locations': {
     parameters: {
       query?: never
@@ -5559,6 +5593,60 @@ export interface operations {
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
+    }
+  }
+  'pickupEvent.cancelLoan': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The loan ID */
+        loan: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Ausleihe storniert, Token erstattet.'
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'pickupEvent.cancelPackage': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The package loan ID */
+        packageLoan: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Paket-Ausleihe storniert, Token erstattet.'
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
     }
   }
   'pickupLocation.index': {

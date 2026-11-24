@@ -81,6 +81,20 @@ class EmailTemplateController extends Controller
             'body' => '<p>morgen, am <strong>{date}</strong>, kannst du deine Spiele persönlich abholen – <strong>{time}</strong> hier:</p>{location_details}<p>Für dich liegt bereit:</p>{games}<p>Kannst du doch nicht kommen? Gib uns bitte rechtzeitig Bescheid.</p>',
             'action_text' => 'Zum Dashboard',
         ],
+        'loan_cancelled_no_show' => [
+            'key' => 'loan_cancelled_no_show',
+            'subject' => 'Ausleihe storniert: {game}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>du hast <strong>{game}</strong> beim Abholtermin am {pickup} nicht abgeholt. Wir haben die Ausleihe deshalb storniert.</p><p>Die Leihgebühr und eine allfällige Kaution haben wir dir zurückgebucht – Bonus-Token behalten ihr ursprüngliches Ablaufdatum.</p><p>Du kannst das Spiel jederzeit erneut ausleihen.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
+        'pickup_event_moved' => [
+            'key' => 'pickup_event_moved',
+            'subject' => 'Dein Abholtermin hat sich geändert',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>dein Abholtermin wurde verschoben:</p><p><strong>Neu:</strong> {pickup}<br><span>Bisher: {previously}</span></p>{location_details}<p>Das Rückgabedatum deiner Ausleihe verschiebt sich entsprechend mit. Passt dir der neue Termin nicht, melde dich bitte bei uns.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
         'reservation_available' => [
             'key' => 'reservation_available',
             'subject' => '„{game}" ist jetzt verfügbar!',

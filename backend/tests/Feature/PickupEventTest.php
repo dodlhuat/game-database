@@ -218,13 +218,14 @@ class PickupEventTest extends TestCase
             ->assertJsonPath('data.max_loans', 8);
     }
 
-    public function test_booked_event_keeps_place_and_time_and_cannot_be_deleted(): void
+    public function test_booked_event_keeps_its_place_and_cannot_be_deleted(): void
     {
         $event = $this->event([], 5);
         $this->borrow($this->member, ['pickup_event_id' => $event->id])->assertCreated();
         $base = ['title' => 'Abholabend', 'date' => '2026-12-10', 'time' => '18:00', 'end_time' => '20:00', 'pickup_location_id' => $this->personal->id];
 
-        $this->actingAs($this->admin)->putJson("/api/admin/events/{$event->id}", [...$base, 'date' => '2026-12-11'])
+        $other = PickupLocation::factory()->create(['is_personal' => true]);
+        $this->actingAs($this->admin)->putJson("/api/admin/events/{$event->id}", [...$base, 'pickup_location_id' => $other->id])
             ->assertUnprocessable()->assertJsonPath('reason', 'has_bookings');
         $this->actingAs($this->admin)->putJson("/api/admin/events/{$event->id}", [...$base, 'max_loans' => 0])
             ->assertUnprocessable();

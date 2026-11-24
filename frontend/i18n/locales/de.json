@@ -776,6 +776,7 @@
       "filter_extended": "Verlängert",
       "filter_overdue": "Überfällig",
       "filter_returned": "Zurückgegeben",
+      "status_cancelled": "Storniert",
       "member_col": "Mitglied",
       "loaned_at": "Ausgeliehen am",
       "due_at": "Fällig am",
@@ -927,7 +928,8 @@
         "max_loans": "Max. Ausleihen (optional)",
         "max_loans_placeholder": "unbegrenzt",
         "booked": "{n} gebucht",
-        "booked_of": "{n}/{max} gebucht"
+        "booked_of": "{n}/{max} gebucht",
+        "booked_note": "Eine Buchung: Der Ort bleibt fest. Änderst du Datum oder Uhrzeit, wandert die Ausleihe mit und das Mitglied bekommt eine E-Mail. | {n} Buchungen: Der Ort bleibt fest. Änderst du Datum oder Uhrzeit, wandern die Ausleihen mit und die Mitglieder bekommen eine E-Mail."
       }
     },
     "sponsors": {
@@ -976,7 +978,9 @@
       "empty": "Für diesen Termin hat noch niemand gebucht.",
       "package": "Paket: {name}",
       "hand_out": "Ausgeben",
-      "done": "Ausgegeben"
+      "done": "Ausgegeben",
+      "no_show": "Nicht abgeholt",
+      "no_show_confirm": "{name} hat nicht abgeholt? Die Buchung wird storniert, Leihgebühr und Kaution werden zurückgebucht und das Mitglied bekommt eine E-Mail."
     },
     "user_picker": {
       "placeholder": "Mitglied nach Name oder E-Mail suchen …",

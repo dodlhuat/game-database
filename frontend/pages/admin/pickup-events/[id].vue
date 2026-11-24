@@ -84,6 +84,16 @@
               </ul>
 
               <button
+                v-if="!booking.handed_out_at"
+                type="button"
+                class="booking__noshow"
+                :disabled="busyKey === `${booking.type}-${booking.id}`"
+                @click="cancel(booking)"
+              >
+                {{ $t('admin.packing.no_show') }}
+              </button>
+
+              <button
                 type="button"
                 class="booking__toggle"
                 :aria-pressed="!!booking.handed_out_at"
@@ -194,6 +204,28 @@ async function toggle(booking: Booking) {
       handed_out: !booking.handed_out_at,
     })
     booking.handed_out_at = res.handed_out_at
+  } catch (err: unknown) {
+    const message = (err as { message?: unknown })?.message
+    actionError.value = typeof message === 'string' && message ? message : t('common.error.generic')
+  } finally {
+    busyKey.value = null
+  }
+}
+
+// No-show: cancel and refund, the booking leaves the list
+async function cancel(booking: Booking) {
+  if (!data.value) return
+  const name = booking.member?.name ?? ''
+  if (!confirm(t('admin.packing.no_show_confirm', { name }))) return
+  const path =
+    booking.type === 'package'
+      ? `/admin/package-loans/${booking.id}/cancel-pickup`
+      : `/admin/loans/${booking.id}/cancel-pickup`
+  busyKey.value = `${booking.type}-${booking.id}`
+  actionError.value = ''
+  try {
+    await api.post(path)
+    data.value.bookings = data.value.bookings.filter((b) => b !== booking)
   } catch (err: unknown) {
     const message = (err as { message?: unknown })?.message
     actionError.value = typeof message === 'string' && message ? message : t('common.error.generic')
@@ -479,9 +511,32 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     color: var(--secondary-text);
   }
 
+  // Quiet on purpose: a no-show is the exception, not the flow
+  &__noshow {
+    grid-column: 1;
+    justify-self: start;
+    padding: 0.2rem 0;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--error-text);
+    background: none;
+    border: 0;
+    border-bottom: 1px dashed currentColor;
+    cursor: pointer;
+    opacity: 0.8;
+    &:hover {
+      opacity: 1;
+    }
+    &:disabled {
+      opacity: 0.4;
+      cursor: progress;
+    }
+  }
+
   &__toggle {
     grid-column: 2;
-    grid-row: 1 / span 2;
+    grid-row: 1 / span 3;
     align-self: center;
     display: inline-flex;
     align-items: center;
@@ -524,6 +579,9 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
       grid-column: 1;
       grid-row: auto;
       justify-content: center;
+    }
+    &__noshow {
+      order: 3;
     }
   }
 }
@@ -576,7 +634,8 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     break-inside: avoid;
     opacity: 1 !important;
     animation: none;
-    &__toggle {
+    &__toggle,
+    &__noshow {
       display: none;
     }
     &__box {

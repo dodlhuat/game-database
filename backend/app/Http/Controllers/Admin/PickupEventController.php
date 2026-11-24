@@ -10,6 +10,7 @@ use App\Models\Game;
 use App\Models\Loan;
 use App\Models\PackageLoan;
 use App\Models\User;
+use App\Services\LoanCancellationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +102,22 @@ class PickupEventController extends Controller
         });
 
         return response()->json(['handed_out_at' => $at?->toIso8601String()]);
+    }
+
+    /** No-show: cancels and refunds a single-game booking. */
+    public function cancelLoan(Loan $loan, LoanCancellationService $cancellations): JsonResponse
+    {
+        $cancellations->cancelLoan($loan);
+
+        return response()->json(['message' => 'Ausleihe storniert, Token erstattet.']);
+    }
+
+    /** No-show: cancels and refunds a package booking with all its games. */
+    public function cancelPackage(PackageLoan $packageLoan, LoanCancellationService $cancellations): JsonResponse
+    {
+        $cancellations->cancelPackage($packageLoan);
+
+        return response()->json(['message' => 'Paket-Ausleihe storniert, Token erstattet.']);
     }
 
     /** @return array{id: int, name: string, email: string}|null */

@@ -199,6 +199,7 @@ function statusLabel(s: string) {
   const m: Record<string, string> = {
     ACTIVE: t('admin.package_loans.tab_active'),
     RETURNED: t('admin.package_loans.tab_returned'),
+    CANCELLED: t('admin.loans.status_cancelled'),
     OVERDUE: t('admin.package_loans.tab_overdue'),
   }
   return m[s] ?? s

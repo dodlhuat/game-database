@@ -233,6 +233,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/events/{event}/packing-list', [PickupEventController::class, 'show']);
     Route::patch('/loans/{loan}/hand-out', [PickupEventController::class, 'handOutLoan']);
     Route::patch('/package-loans/{packageLoan}/hand-out', [PickupEventController::class, 'handOutPackage']);
+    Route::post('/loans/{loan}/cancel-pickup', [PickupEventController::class, 'cancelLoan']);
+    Route::post('/package-loans/{packageLoan}/cancel-pickup', [PickupEventController::class, 'cancelPackage']);
 
     // Sponsoren
     Route::put('/sponsors/order', [App\Http\Controllers\Admin\SponsorController::class, 'reorder']);

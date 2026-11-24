@@ -167,7 +167,8 @@ class PackageLoanController extends Controller
             if (! $user->isAdmin()) {
                 $loanCost = $setting->package_loan_cost;
 
-                $this->wallet->spend($user, $loanCost);
+                // Kept so a cancelled pickup can refund every token to where it came from
+                $packageLoan->update(['spend_receipt' => $this->wallet->spend($user, $loanCost)]);
                 TokenTransaction::create([
                     'user_id' => $user->id,
                     'loan_id' => null,
