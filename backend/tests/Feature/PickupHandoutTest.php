@@ -153,8 +153,9 @@ class PickupHandoutTest extends TestCase
             ->assertJsonPath('active_loans.0.extension_blocked_reason', 'awaiting_pickup');
 
         $this->handOut("/api/admin/loans/{$loan->id}/hand-out");
+        $main = PickupLocation::where('name', 'Hauptstandort')->firstOrFail();
         $this->actingAs($this->member)
-            ->postJson("/api/loans/{$loan->id}/return", ['return_condition' => 'GOOD'])
+            ->postJson("/api/loans/{$loan->id}/return", ['return_condition' => 'GOOD', 'return_location_id' => $main->id])
             ->assertOk();
     }
 

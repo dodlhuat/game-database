@@ -632,6 +632,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/loans/{loan}/return-options': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Where this loan may be returned — the member picks one when confirming the return */
+    get: operations['loan.returnOptions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/loans': {
     parameters: {
       query?: never
@@ -1094,6 +1111,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/package-loans/{packageLoan}/return-options': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Where this package may be returned — the member picks one when confirming the return */
+    get: operations['packageLoan.returnOptions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/admin/package-loans': {
     parameters: {
       query?: never
@@ -1137,6 +1171,26 @@ export interface paths {
     get: operations['pickupEvent.show']
     put?: never
     post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/events/{event}/returns': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /**
+     * A member hands a game back at the event: scanning one copy books the
+     *     return here — for a package, the whole package
+     */
+    post: operations['pickupEvent.returnAtEvent']
     delete?: never
     options?: never
     head?: never
@@ -1805,6 +1859,7 @@ export interface components {
         /** Format: date-time */
         returned_at: string | null
         user_name: string
+        /** @description Where to collect it: the recorded return place, else the pickup place */
         pickup_location: {
           id: number
           name: string
@@ -2222,6 +2277,14 @@ export interface components {
     ReturnLoanRequest: {
       /** @enum {string} */
       return_condition: 'GOOD' | 'WORN' | 'DAMAGED'
+      /** @description Where it came back (checked against the loan's options); one of them */
+      return_location_id?: number | null
+      return_event_id?: number | null
+    }
+    /** ReturnPlacesResource */
+    ReturnPlacesResource: {
+      locations: components['schemas']['PickupLocationResource'][]
+      events: string
     }
     /** ReviewResource */
     ReviewResource: {
@@ -4067,6 +4130,32 @@ export interface operations {
       422: components['responses']['ValidationException']
     }
   }
+  'loan.returnOptions': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The loan ID */
+        loan: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `ReturnPlacesResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ReturnPlacesResource']
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      403: components['responses']['AuthorizationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
   'admin.loan.index': {
     parameters: {
       query?: never
@@ -5360,6 +5449,8 @@ export interface operations {
         'application/json': {
           /** @enum {string} */
           return_condition: 'GOOD' | 'WORN' | 'DAMAGED'
+          return_location_id?: number | null
+          return_event_id?: number | null
         }
       }
     }
@@ -5389,6 +5480,42 @@ export interface operations {
       }
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
+    }
+  }
+  'packageLoan.returnOptions': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The package loan ID */
+        packageLoan: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description `ReturnPlacesResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ReturnPlacesResource']
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Keine Berechtigung.'
+          }
+        }
+      }
+      404: components['responses']['ModelNotFoundException']
     }
   }
   'admin.packageLoan.index': {
@@ -5522,11 +5649,48 @@ export interface operations {
                 }
               | string
             )[]
+            returns: unknown[]
           }
         }
       }
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'pickupEvent.returnAtEvent': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The event ID */
+        event: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          qr_code: string
+          /** @enum {string|null} */
+          return_condition?: 'GOOD' | 'WORN' | 'DAMAGED' | null
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            message: string
+            returns: unknown[]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
     }
   }
   'pickupEvent.handOutLoan': {

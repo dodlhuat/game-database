@@ -114,6 +114,7 @@
                 v-model="pickupKey"
                 class="detail__picker"
                 :choices="pickupOptions"
+                :group-hint="$t('pickup.personal_return_hint')"
                 :show-error="pickupMissing"
               />
               <p v-else-if="noPickupLocation" class="alert alert-info detail__no-location">

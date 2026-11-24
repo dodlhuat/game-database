@@ -3629,6 +3629,47 @@
                 }
             }
         },
+        "/loans/{loan}/return-options": {
+            "get": {
+                "operationId": "loan.returnOptions",
+                "summary": "Where this loan may be returned \u2014 the member picks one when confirming the return",
+                "tags": [
+                    "Loan"
+                ],
+                "parameters": [
+                    {
+                        "name": "loan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ReturnPlacesResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReturnPlacesResource"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/AuthorizationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/admin/loans": {
             "get": {
                 "operationId": "admin.loan.index",
@@ -6354,6 +6395,18 @@
                                             "WORN",
                                             "DAMAGED"
                                         ]
+                                    },
+                                    "return_location_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
+                                    },
+                                    "return_event_id": {
+                                        "type": [
+                                            "integer",
+                                            "null"
+                                        ]
                                     }
                                 },
                                 "required": [
@@ -6384,6 +6437,63 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
+                    },
+                    "403": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Keine Berechtigung."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/package-loans/{packageLoan}/return-options": {
+            "get": {
+                "operationId": "packageLoan.returnOptions",
+                "summary": "Where this package may be returned \u2014 the member picks one when confirming the return",
+                "tags": [
+                    "PackageLoan"
+                ],
+                "parameters": [
+                    {
+                        "name": "packageLoan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The package loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "`ReturnPlacesResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReturnPlacesResource"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "",
@@ -6822,15 +6932,105 @@
                                                     }
                                                 ]
                                             }
+                                        },
+                                        "returns": {
+                                            "type": "array",
+                                            "items": {}
                                         }
                                     },
                                     "required": [
                                         "event",
-                                        "bookings"
+                                        "bookings",
+                                        "returns"
                                     ]
                                 }
                             }
                         }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/events/{event}/returns": {
+            "post": {
+                "operationId": "pickupEvent.returnAtEvent",
+                "summary": "A member hands a game back at the event: scanning one copy books the\nreturn here \u2014 for a package, the whole package",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "event",
+                        "in": "path",
+                        "required": true,
+                        "description": "The event ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "qr_code": {
+                                        "type": "string",
+                                        "maxLength": 64
+                                    },
+                                    "return_condition": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "GOOD",
+                                            "WORN",
+                                            "DAMAGED",
+                                            null
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "qr_code"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "returns": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "required": [
+                                        "message",
+                                        "returns"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
@@ -9996,6 +10196,7 @@
                                     "object",
                                     "null"
                                 ],
+                                "description": "Where to collect it: the recorded return place, else the pickup place",
                                 "properties": {
                                     "id": {
                                         "type": "integer"
@@ -11757,12 +11958,44 @@
                             "WORN",
                             "DAMAGED"
                         ]
+                    },
+                    "return_location_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "description": "Where it came back (checked against the loan's options); one of them"
+                    },
+                    "return_event_id": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ]
                     }
                 },
                 "required": [
                     "return_condition"
                 ],
                 "title": "ReturnLoanRequest"
+            },
+            "ReturnPlacesResource": {
+                "type": "object",
+                "properties": {
+                    "locations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PickupLocationResource"
+                        }
+                    },
+                    "events": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "locations",
+                    "events"
+                ],
+                "title": "ReturnPlacesResource"
             },
             "ReviewResource": {
                 "type": "object",

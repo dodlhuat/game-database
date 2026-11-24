@@ -53,6 +53,69 @@
 
           <div v-if="actionError" class="alert alert-error" role="alert">{{ actionError }}</div>
 
+          <!-- Returns handed in here: scan the sticker, pick the condition -->
+          <section class="intake" :aria-label="$t('admin.packing.intake_title')">
+            <header class="intake__head">
+              <h2 class="intake__title">{{ $t('admin.packing.intake_title') }}</h2>
+              <span v-if="data.returns.length" class="intake__count">{{
+                data.returns.length
+              }}</span>
+            </header>
+            <form class="intake__form" @submit.prevent="takeBack">
+              <input
+                v-model="scanCode"
+                class="intake__input"
+                type="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                enterkeyhint="go"
+                :placeholder="$t('admin.packing.intake_placeholder')"
+                :aria-label="$t('admin.packing.intake_placeholder')"
+              />
+              <div
+                class="intake__conditions"
+                role="radiogroup"
+                :aria-label="$t('dashboard.return_condition')"
+              >
+                <button
+                  v-for="c in conditions"
+                  :key="c.value"
+                  type="button"
+                  role="radio"
+                  class="intake__condition"
+                  :class="`intake__condition--${c.value.toLowerCase()}`"
+                  :aria-checked="scanCondition === c.value"
+                  @click="scanCondition = c.value"
+                >
+                  {{ c.label }}
+                </button>
+              </div>
+              <button
+                type="submit"
+                class="button button-primary intake__submit"
+                :disabled="!scanCode.trim() || scanning"
+              >
+                {{ $t('admin.packing.intake_submit') }}
+              </button>
+            </form>
+            <p
+              v-if="scanMessage"
+              class="intake__message"
+              :class="{ 'is-error': scanFailed }"
+              role="status"
+            >
+              {{ scanMessage }}
+            </p>
+            <ul v-if="data.returns.length" class="intake__list">
+              <li v-for="r in data.returns" :key="r.loan_id" class="intake__item">
+                <span class="intake__game">{{ r.game_title ?? '—' }}</span>
+                <span class="intake__member">{{ r.member ?? '' }}</span>
+                <span class="intake__state">{{ conditionLabel(r.condition) }}</span>
+              </li>
+            </ul>
+          </section>
+
           <div v-if="!data.bookings.length" class="dash-empty">
             <svg class="icon-svg dash-empty__icon" aria-hidden="true">
               <use href="/svg-icons/icons.svg#inventory_2" />
@@ -143,6 +206,12 @@ interface PackingList {
     location: ApiPickupLocation | null
   }
   bookings: Booking[]
+  returns: {
+    loan_id: number
+    game_title: string | null
+    member: string | null
+    condition: string | null
+  }[]
 }
 
 const route = useRoute()
@@ -231,6 +300,45 @@ async function cancel(booking: Booking) {
     actionError.value = typeof message === 'string' && message ? message : t('common.error.generic')
   } finally {
     busyKey.value = null
+  }
+}
+
+// ── Returns at the event ───────────────────────────────────────
+const conditions = computed(() => [
+  { value: 'GOOD', label: t('common.badge.good') },
+  { value: 'WORN', label: t('common.badge.worn') },
+  { value: 'DAMAGED', label: t('common.badge.damaged') },
+])
+const scanCode = ref('')
+const scanCondition = ref('GOOD')
+const scanning = ref(false)
+const scanMessage = ref('')
+const scanFailed = ref(false)
+
+function conditionLabel(c: string | null) {
+  return conditions.value.find((x) => x.value === c)?.label ?? ''
+}
+
+async function takeBack() {
+  if (!data.value || !scanCode.value.trim()) return
+  scanning.value = true
+  scanMessage.value = ''
+  try {
+    const res = await api.post<{ message: string; returns: PackingList['returns'] }>(
+      `/admin/events/${data.value.event.id}/returns`,
+      { qr_code: scanCode.value.trim(), return_condition: scanCondition.value }
+    )
+    data.value.returns = res.returns
+    scanMessage.value = res.message
+    scanFailed.value = false
+    scanCode.value = ''
+    scanCondition.value = 'GOOD'
+  } catch (err: unknown) {
+    const message = (err as { message?: unknown })?.message
+    scanMessage.value = typeof message === 'string' && message ? message : t('common.error.generic')
+    scanFailed.value = true
+  } finally {
+    scanning.value = false
   }
 }
 
@@ -424,6 +532,131 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     &:hover {
       border-color: $amber;
     }
+  }
+}
+
+// ── Returns at the event ──────────────────────────────────────────
+.intake {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: 14px;
+  background: var(--secondary-background);
+  border: 1px dashed color-mix(in srgb, #{$amber} 45%, var(--divider));
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  &__title {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+  }
+  &__count {
+    min-width: 1.4rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-align: center;
+    color: $amber;
+    background: color-mix(in srgb, #{$amber} 12%, transparent);
+  }
+  &__form {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.6rem;
+    align-items: center;
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  &__input {
+    min-width: 0;
+    padding: 0.7rem 0.9rem;
+    font-family: monospace;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--primary-text);
+    background: var(--background);
+    border: 1px solid var(--divider);
+    border-radius: 10px;
+    &:focus {
+      outline: none;
+      border-color: $amber;
+    }
+  }
+  &__conditions {
+    display: flex;
+    gap: 0.3rem;
+  }
+  &__condition {
+    flex: 1;
+    padding: 0.55rem 0.7rem;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--secondary-text);
+    background: transparent;
+    border: 1px solid var(--divider);
+    cursor: pointer;
+    &[aria-checked='true'] {
+      color: var(--primary-text);
+      border-color: $amber;
+      background: color-mix(in srgb, #{$amber} 10%, transparent);
+    }
+    &--damaged[aria-checked='true'] {
+      color: var(--error-text);
+      border-color: var(--error-border);
+      background: var(--error-muted);
+    }
+  }
+  &__submit {
+    margin: 0;
+    white-space: nowrap;
+  }
+  &__message {
+    margin: 0;
+    padding: 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary-text);
+    &.is-error {
+      color: var(--error-text);
+    }
+  }
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--divider);
+  }
+  &__item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--divider);
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+  &__game {
+    font-weight: 600;
+    color: var(--primary-text);
+  }
+  &__member,
+  &__state {
+    color: var(--secondary-text);
   }
 }
 
@@ -622,6 +855,9 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   .admin-content {
     margin-top: 0;
     padding: 0;
+  }
+  .intake {
+    display: none;
   }
   .tally {
     box-shadow: none;

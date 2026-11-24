@@ -31,7 +31,7 @@ class DashboardController extends Controller
                 'to_review_by_location' => Copy::where('condition', 'REVIEW')
                     ->with('lastReturnedLoan')
                     ->get()
-                    ->countBy(fn (Copy $c) => $c->lastReturnedLoan?->pickupLocation->name ?? 'Ohne Abholort')
+                    ->countBy(fn (Copy $c) => $c->lastReturnedLoan?->returnPlace()->name ?? 'Ohne Abholort')
                     ->sortKeys()
                     ->map(fn (int $count, string $name) => ['location' => $name, 'count' => $count])
                     ->values(),

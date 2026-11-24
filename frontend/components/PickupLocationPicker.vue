@@ -1,9 +1,9 @@
 <template>
   <fieldset class="pickup-picker">
     <legend class="pickup-picker__legend">
-      {{ choices.length === 1 ? $t('pickup.legend_single') : $t('pickup.legend') }}
+      {{ legend ?? (choices.length === 1 ? $t('pickup.legend_single') : $t('pickup.legend')) }}
     </legend>
-    <p class="pickup-picker__hint">{{ $t('pickup.hint') }}</p>
+    <p class="pickup-picker__hint">{{ hint ?? $t('pickup.hint') }}</p>
 
     <div class="pickup-picker__options">
       <template v-for="(choice, i) in ordered" :key="choice.key">
@@ -11,7 +11,13 @@
           v-if="choice.kind === 'event' && i === firstEventIndex && firstEventIndex > 0"
           class="pickup-picker__group"
         >
-          {{ $t('pickup.personal_group') }}
+          {{ groupLabel ?? $t('pickup.personal_group') }}
+        </p>
+        <p
+          v-if="choice.kind === 'event' && i === firstEventIndex && groupHint"
+          class="pickup-picker__group-hint"
+        >
+          {{ groupHint }}
         </p>
 
         <div
@@ -57,6 +63,11 @@ const props = defineProps<{
   choices: PickupChoice[]
   modelValue: string | null
   showError?: boolean
+  /** Overrides for other uses than the borrow dialog, e.g. choosing the return place. */
+  legend?: string
+  hint?: string
+  groupLabel?: string
+  groupHint?: string
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [key: string] }>()

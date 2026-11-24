@@ -18,7 +18,7 @@ class SendPickupDigest extends Command
     public function handle(): int
     {
         $copies = Copy::where('condition', 'REVIEW')
-            ->with(['game', 'lastReturnedLoan.user', 'lastReturnedLoan.pickupLocation'])
+            ->with(['game', 'lastReturnedLoan.user', 'lastReturnedLoan.pickupLocation', 'lastReturnedLoan.returnLocation'])
             ->get();
 
         if ($copies->isEmpty()) {
@@ -39,7 +39,7 @@ class SendPickupDigest extends Command
     private function renderList(Collection $copies): string
     {
         return $copies
-            ->groupBy(fn (Copy $c) => $c->lastReturnedLoan?->pickupLocation->name ?? 'Ohne Abholort')
+            ->groupBy(fn (Copy $c) => $c->lastReturnedLoan?->returnPlace()->name ?? 'Ohne Abholort')
             ->sortKeys()
             ->map(function (Collection $group, string $location) {
                 $items = $group

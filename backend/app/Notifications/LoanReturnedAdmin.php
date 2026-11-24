@@ -36,7 +36,7 @@ class LoanReturnedAdmin extends Notification
         return $this->buildFromTemplate('loan_returned_admin', [
             'member' => e($member->name),
             'game' => $this->itemTitle($loan),
-            'location' => e($loan->pickupLocation->name ?? '—'),
+            'location' => e($this->returnPlaceOf($loan)->name ?? '—'),
             'condition' => $this->conditionLabel($condition),
             'returned_at' => $loan->returned_at?->format('d.m.Y H:i') ?? '',
         ], config()->string('frontend.url').'/admin/copy-review', $notifiable);

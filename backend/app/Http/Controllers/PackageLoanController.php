@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\PackageLoanResource;
+use App\Http\Resources\ReturnPlacesResource;
 use App\Models\Copy;
 use App\Models\Game;
 use App\Models\LoanSetting;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Notifications\LoanConfirmation;
 use App\Services\LoanReturnService;
 use App\Services\PickupScheduler;
+use App\Services\ReturnPlaces;
 use App\Services\TokenWallet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -199,7 +201,7 @@ class PackageLoanController extends Controller
         return new PackageLoanResource($packageLoan);
     }
 
-    public function return(Request $request, PackageLoan $packageLoan, LoanReturnService $returns): JsonResponse|PackageLoanResource
+    public function return(Request $request, PackageLoan $packageLoan, LoanReturnService $returns, ReturnPlaces $places): JsonResponse|PackageLoanResource
     {
         /** @var User $user */
         $user = $request->user();
@@ -217,10 +219,33 @@ class PackageLoanController extends Controller
 
         $validated = $request->validate([
             'return_condition' => ['required', Rule::in(['GOOD', 'WORN', 'DAMAGED'])],
+            'return_location_id' => ['nullable', 'integer'],
+            'return_event_id' => ['nullable', 'integer'],
         ]);
 
-        $returns->returnPackage($packageLoan, $validated['return_condition'], $user);
+        $place = $places->resolve($packageLoan, $user, $request->input('return_location_id'), $request->input('return_event_id'));
+        if (! $place) {
+            return response()->json([
+                'message' => 'Bitte wähle, wo du das Spiel zurückgegeben hast.',
+                'reason' => 'invalid_return_place',
+                'errors' => ['return_location_id' => ['Bitte wähle, wo du das Spiel zurückgegeben hast.']],
+            ], 422);
+        }
+
+        $returns->returnPackage($packageLoan, $validated['return_condition'], $user, $place['location'], $place['event']);
 
         return new PackageLoanResource($packageLoan);
+    }
+
+    /** Where this package may be returned — the member picks one when confirming the return. */
+    public function returnOptions(Request $request, PackageLoan $packageLoan, ReturnPlaces $places): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        if ($packageLoan->user_id !== $user->id && ! $user->isAdmin()) {
+            return response()->json(['message' => 'Keine Berechtigung.'], 403);
+        }
+
+        return response()->json(ReturnPlacesResource::make($places->optionsFor($packageLoan, $user)));
     }
 }

@@ -180,7 +180,7 @@ export function renderPickupPickerHtml(
     list.map((c) => optionHtml(c, selectedKey, t, single)).join('')
 
   const eventsHtml = events.length
-    ? `${regular.length ? `<p class="pickup-picker__group">${esc(t('pickup.personal_group'))}</p>` : ''}${group(events)}`
+    ? `${regular.length ? `<p class="pickup-picker__group">${esc(t('pickup.personal_group'))}</p>` : ''}<p class="pickup-picker__group-hint">${esc(t('pickup.personal_return_hint'))}</p>${group(events)}`
     : ''
 
   return `<fieldset class="pickup-picker">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Loan\ReturnLoanRequest;
 use App\Http\Requests\Loan\StoreLoanRequest;
 use App\Http\Resources\LoanResource;
+use App\Http\Resources\ReturnPlacesResource;
 use App\Models\Copy;
 use App\Models\Game;
 use App\Models\Loan;
@@ -14,6 +15,7 @@ use App\Models\User;
 use App\Notifications\LoanConfirmation;
 use App\Services\LoanReturnService;
 use App\Services\PickupScheduler;
+use App\Services\ReturnPlaces;
 use App\Services\TokenWallet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,6 +28,7 @@ class LoanController extends Controller
         private TokenWallet $wallet,
         private LoanReturnService $returns,
         private PickupScheduler $pickups,
+        private ReturnPlaces $returnPlaces,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -198,8 +201,27 @@ class LoanController extends Controller
 
         /** @var User $user */
         $user = $request->user();
-        $this->returns->returnLoan($loan, $request->string('return_condition')->toString(), $user);
+        $place = $this->returnPlaces->resolve($loan, $user, $request->input('return_location_id'), $request->input('return_event_id'));
+        if (! $place) {
+            return response()->json([
+                'message' => 'Bitte wähle, wo du das Spiel zurückgegeben hast.',
+                'reason' => 'invalid_return_place',
+                'errors' => ['return_location_id' => ['Bitte wähle, wo du das Spiel zurückgegeben hast.']],
+            ], 422);
+        }
+
+        $this->returns->returnLoan($loan, $request->string('return_condition')->toString(), $user, $place['location'], $place['event']);
 
         return new LoanResource($loan->load(['copy.game', 'extensions']));
+    }
+
+    /** Where this loan may be returned — the member picks one when confirming the return. */
+    public function returnOptions(Request $request, Loan $loan): JsonResponse
+    {
+        $this->authorize('return', $loan);
+        /** @var User $user */
+        $user = $request->user();
+
+        return response()->json(ReturnPlacesResource::make($this->returnPlaces->optionsFor($loan, $user)));
     }
 }

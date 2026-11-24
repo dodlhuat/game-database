@@ -336,7 +336,22 @@
             </ul>
           </template>
           <p v-else class="dialog__game">{{ returnLoan.game?.title }}</p>
-          <div v-if="returnLoan.pickup_location" class="dialog__location">
+          <!-- From a pickup event: it may come back at a later event or any regular place -->
+          <div v-if="returnLoan.pickup_event" class="dialog__location">
+            <div v-if="returnOptionsLoading" class="return-options-loading">
+              <div class="spinner" />
+            </div>
+            <PickupLocationPicker
+              v-else
+              v-model="returnKey"
+              :choices="returnChoices"
+              :show-error="returnPlaceMissing"
+              :legend="$t('dashboard.return_where')"
+              :hint="$t('dashboard.return_where_hint')"
+              :group-label="$t('dashboard.return_at_event')"
+            />
+          </div>
+          <div v-else-if="returnLoan.pickup_location" class="dialog__location">
             <p class="pickup-picker__hint">
               {{
                 returnLoan.package_loan_id
@@ -515,8 +530,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import type { Loan, Reservation, DashboardData } from '~/composables/useLoans'
+import { ref, computed, watch } from 'vue'
+import type { Loan, Reservation, DashboardData, ReturnPlace } from '~/composables/useLoans'
+import type { PickupChoice } from '~/utils/pickupLocations'
 
 definePageMeta({ middleware: ['auth'] })
 
@@ -526,6 +542,7 @@ const {
   fetchDashboard,
   returnLoan: doReturn,
   returnPackageLoan,
+  fetchReturnOptions,
   requestExtension,
   removeReservation,
   reportDamage,
@@ -538,6 +555,12 @@ const returnLoan = ref<Loan | null>(null)
 const returnCondition = ref('GOOD')
 const returning = ref(false)
 const returnError = ref('')
+// Return place for games from a pickup event
+const returnChoices = ref<PickupChoice[]>([])
+const returnKey = ref<string | null>(null)
+const returnOptionsLoading = ref(false)
+const returnPlaceMissing = ref(false)
+watch(returnKey, () => (returnPlaceMissing.value = false))
 
 // All open games of the package the dialog is about — they go back together
 const returnPackageItems = computed(() => {
@@ -596,22 +619,56 @@ useAsyncData(
   { server: false }
 )
 
-function openReturn(loan: Loan) {
+async function openReturn(loan: Loan) {
   returnLoan.value = loan
   returnCondition.value = 'GOOD'
   returnError.value = ''
+  returnChoices.value = []
+  returnKey.value = null
+  returnPlaceMissing.value = false
+  if (!loan.pickup_event) return
+
+  returnOptionsLoading.value = true
+  try {
+    const options = await fetchReturnOptions(loan)
+    // Reuse the borrow picker: events come without capacity or booking deadline
+    returnChoices.value = pickupChoices(
+      options.locations,
+      options.events.map((e) => ({ ...e, spots_left: null, booking_closes_at: '' }))
+    )
+    // The most recent pickup event is the likeliest place
+    returnKey.value = returnChoices.value.find((c) => c.kind === 'event')?.key ?? null
+  } catch {
+    returnError.value = t('common.error.generic')
+  } finally {
+    returnOptionsLoading.value = false
+  }
+}
+
+function returnPlacePayload(): ReturnPlace | null {
+  if (!returnLoan.value?.pickup_event) return {}
+  const choice = returnChoices.value.find((c) => c.key === returnKey.value)
+  if (!choice) return null
+  return choice.kind === 'event'
+    ? { return_event_id: choice.event.id }
+    : { return_location_id: choice.location.id }
 }
 
 async function submitReturn() {
   if (!returnLoan.value) return
+  const place = returnPlacePayload()
+  if (!place) {
+    returnPlaceMissing.value = true
+    return
+  }
   returning.value = true
   returnError.value = ''
   try {
     const packageLoanId = returnLoan.value.package_loan_id
     if (packageLoanId) {
-      await returnPackageLoan(packageLoanId, returnCondition.value)
+      await returnPackageLoan(packageLoanId, returnCondition.value, place)
     } else {
-      await doReturn(returnLoan.value.id, returnCondition.value)
+      await doReturn(returnLoan.value.id, returnCondition.value, place)
     }
     data.value = await fetchDashboard()
     returnLoan.value = null
@@ -1822,8 +1879,15 @@ $amber-ink: var(--amber-ink);
   }
   &__actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.75rem;
     margin-top: 1.5rem;
+    // long confirm labels ("Ich habe es am Abholort abgegeben") wrap on phones
+    :deep(.button) {
+      max-width: 100%;
+      white-space: normal;
+      text-align: center;
+    }
   }
 }
 
@@ -1837,6 +1901,12 @@ $amber-ink: var(--amber-ink);
     font-size: 0.85rem;
     color: var(--primary-text);
   }
+}
+
+.return-options-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
 }
 
 .return-note {

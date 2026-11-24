@@ -95,6 +95,20 @@ export interface DashboardData {
   }
 }
 
+export type ReturnPlace = { return_location_id?: number } | { return_event_id?: number }
+
+export interface ReturnOptions {
+  locations: ApiPickupLocation[]
+  events: {
+    id: number
+    title: string
+    date: string
+    time: string | null
+    end_time: string | null
+    location: ApiPickupLocation | null
+  }[]
+}
+
 export function useLoans() {
   const api = useApi()
 
@@ -111,11 +125,30 @@ export function useLoans() {
     due_date: string
   }) => api.post<{ data: Loan }>('/loans', payload)
 
-  const returnLoan = (loanId: number, returnCondition: string) =>
-    api.post<{ data: Loan }>(`/loans/${loanId}/return`, { return_condition: returnCondition })
+  // `place` says where it came back — required for games from a pickup event
+  const returnLoan = (loanId: number, returnCondition: string, place: ReturnPlace = {}) =>
+    api.post<{ data: Loan }>(`/loans/${loanId}/return`, {
+      return_condition: returnCondition,
+      ...place,
+    })
 
-  const returnPackageLoan = (packageLoanId: number, returnCondition: string) =>
-    api.post(`/package-loans/${packageLoanId}/return`, { return_condition: returnCondition })
+  const returnPackageLoan = (
+    packageLoanId: number,
+    returnCondition: string,
+    place: ReturnPlace = {}
+  ) =>
+    api.post(`/package-loans/${packageLoanId}/return`, {
+      return_condition: returnCondition,
+      ...place,
+    })
+
+  /** Where a loan (or a whole package) may be returned. */
+  const fetchReturnOptions = (loan: Loan) =>
+    api.get<ReturnOptions>(
+      loan.package_loan_id
+        ? `/package-loans/${loan.package_loan_id}/return-options`
+        : `/loans/${loan.id}/return-options`
+    )
 
   const requestExtension = (loanId: number, requestedDueDate: string) =>
     api.post(`/loans/${loanId}/extend`, { requested_due_date: requestedDueDate })
@@ -148,6 +181,7 @@ export function useLoans() {
     createLoan,
     returnLoan,
     returnPackageLoan,
+    fetchReturnOptions,
     requestExtension,
     addFavorite,
     removeFavorite,

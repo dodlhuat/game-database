@@ -33,7 +33,7 @@ class LoanReturnConfirmation extends Notification
             'name' => e($notifiable->name),
             'game' => $this->itemTitle($loan),
             'returned_at' => $loan->returned_at?->format('d.m.Y') ?? '',
-            ...$this->locationVars($loan->pickupLocation),
+            ...$this->locationVars($this->returnPlaceOf($loan)),
         ], config()->string('frontend.url').'/dashboard', $notifiable);
     }
 }

@@ -16,6 +16,9 @@ class ReturnLoanRequest extends FormRequest
     {
         return [
             'return_condition' => ['required', 'in:GOOD,WORN,DAMAGED'],
+            // Where it came back (checked against the loan's options); one of them
+            'return_location_id' => ['nullable', 'integer'],
+            'return_event_id' => ['nullable', 'integer'],
         ];
     }
 }

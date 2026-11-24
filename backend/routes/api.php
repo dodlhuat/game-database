@@ -106,6 +106,7 @@ Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () 
     Route::post('/loans', [LoanController::class, 'store']);
     Route::get('/loans/{loan}', [LoanController::class, 'show']);
     Route::post('/loans/{loan}/return', [LoanController::class, 'return']);
+    Route::get('/loans/{loan}/return-options', [LoanController::class, 'returnOptions']);
     Route::post('/loans/{loan}/extend', [ExtensionController::class, 'store']);
 
     // Reservierungen
@@ -149,6 +150,7 @@ Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () 
     Route::get('/package-loans', [PackageLoanController::class, 'index']);
     Route::post('/package-loans', [PackageLoanController::class, 'store']);
     Route::post('/package-loans/{packageLoan}/return', [PackageLoanController::class, 'return']);
+    Route::get('/package-loans/{packageLoan}/return-options', [PackageLoanController::class, 'returnOptions']);
 
     // Token-Transaktionen
     Route::get('/token-transactions', [TokenTransactionController::class, 'index']);
@@ -231,6 +233,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Events
     Route::apiResource('events', App\Http\Controllers\Admin\EventController::class)->except(['show']);
     Route::get('/events/{event}/packing-list', [PickupEventController::class, 'show']);
+    Route::post('/events/{event}/returns', [PickupEventController::class, 'returnAtEvent']);
     Route::patch('/loans/{loan}/hand-out', [PickupEventController::class, 'handOutLoan']);
     Route::patch('/package-loans/{packageLoan}/hand-out', [PickupEventController::class, 'handOutPackage']);
     Route::post('/loans/{loan}/cancel-pickup', [PickupEventController::class, 'cancelLoan']);

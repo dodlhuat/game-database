@@ -43,6 +43,8 @@ class Loan extends Model
         'start_date',
         'due_date',
         'returned_at',
+        'return_location_id',
+        'return_event_id',
         'overdue_reminder_sent_at',
         'return_condition',
         'deposit_tokens',
@@ -105,6 +107,32 @@ class Loan extends Model
     public function scopeHandedOut(Builder $query): Builder
     {
         return $query->where(fn (Builder $q) => $q->whereNull('pickup_event_id')->orWhereNotNull('handed_out_at'));
+    }
+
+    /**
+     * Where the game actually came back, if that was recorded.
+     *
+     * @return BelongsTo<PickupLocation, $this>
+     */
+    public function returnLocation(): BelongsTo
+    {
+        return $this->belongsTo(PickupLocation::class, 'return_location_id')->withTrashed();
+    }
+
+    /**
+     * The pickup event it was handed back at, if any.
+     *
+     * @return BelongsTo<Event, $this>
+     */
+    public function returnEvent(): BelongsTo
+    {
+        return $this->belongsTo(Event::class, 'return_event_id');
+    }
+
+    /** Where to collect a returned game: the recorded return place, else the pickup place. */
+    public function returnPlace(): ?PickupLocation
+    {
+        return $this->returnLocation ?? $this->pickupLocation;
     }
 
     /**

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Copy;
+use App\Models\Event;
 use App\Models\Loan;
 use App\Models\PackageLoan;
+use App\Models\PickupLocation;
 use App\Models\User;
 use App\Notifications\LoanReturnConfirmation;
 use App\Notifications\LoanReturnedAdmin;
@@ -22,42 +24,48 @@ class LoanReturnService
 {
     public const AWAITING_PICKUP_MESSAGE = 'Dieses Spiel wurde noch nicht abgeholt und kann daher nicht zurückgegeben werden.';
 
-    public function returnLoan(Loan $loan, string $condition, User $actor): Loan
+    /**
+     * @param  PickupLocation|null  $where  where it came back; defaults to the pickup place
+     * @param  Event|null  $atEvent  the pickup event it was handed back at
+     */
+    public function returnLoan(Loan $loan, string $condition, User $actor, ?PickupLocation $where = null, ?Event $atEvent = null): Loan
     {
-        DB::transaction(function () use ($loan, $condition) {
-            $this->close($loan, $condition);
+        DB::transaction(function () use ($loan, $condition, $where, $atEvent) {
+            $this->close($loan, $condition, $where, $atEvent);
         });
 
-        $loan->load(['copy.game', 'user', 'pickupLocation']);
+        $loan->load(['copy.game', 'user', 'pickupLocation', 'returnLocation']);
         $this->notify($loan, $actor);
 
         return $loan;
     }
 
-    public function returnPackage(PackageLoan $packageLoan, string $condition, User $actor): PackageLoan
+    public function returnPackage(PackageLoan $packageLoan, string $condition, User $actor, ?PickupLocation $where = null, ?Event $atEvent = null): PackageLoan
     {
-        DB::transaction(function () use ($packageLoan, $condition) {
+        DB::transaction(function () use ($packageLoan, $condition, $where, $atEvent) {
             $packageLoan->loans()
                 ->with('copy')
                 ->whereIn('status', Loan::OPEN_STATUSES)
                 ->get()
-                ->each(fn (Loan $loan) => $this->close($loan, $condition));
+                ->each(fn (Loan $loan) => $this->close($loan, $condition, $where, $atEvent));
 
             $packageLoan->update(['status' => 'RETURNED', 'returned_at' => now()]);
         });
 
-        $packageLoan->load(['package', 'loans.copy.game', 'user', 'pickupLocation']);
+        $packageLoan->load(['package', 'loans.copy.game', 'loans.returnLocation', 'user', 'pickupLocation']);
         $this->notify($packageLoan, $actor);
 
         return $packageLoan;
     }
 
-    private function close(Loan $loan, string $condition): void
+    private function close(Loan $loan, string $condition, ?PickupLocation $where, ?Event $atEvent): void
     {
         $loan->update([
             'status' => 'RETURNED',
             'returned_at' => now(),
             'return_condition' => $condition,
+            'return_location_id' => $where->id ?? $loan->pickup_location_id,
+            'return_event_id' => $atEvent?->id,
         ]);
 
         /** @var Copy $copy */

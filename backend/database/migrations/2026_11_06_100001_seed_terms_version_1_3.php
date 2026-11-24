@@ -25,6 +25,7 @@ Spiele können für 14 Tage ausgeliehen werden. Der Leihpreis richtet sich nach 
 Eine Ausleihe kann im Konto bis zu zweimal verlängert werden, jeweils um höchstens 14 Tage, sofern das Spiel nicht von einem anderen Mitglied reserviert ist. Die erste Verlängerung ist kostenlos, die zweite kostet derzeit 2 Token. Danach ist eine weitere Verlängerung erst nach Rückgabe und erneuter Ausleihe möglich.
 Ausgeliehene Spiele können reserviert werden. Eine Reservierung kostet derzeit 1 Token; die Gebühr wird beim Reservieren abgebucht und bei Stornierung der Reservierung nicht erstattet.
 Ausgeliehene Spiele sind an dem Abholort zurückzugeben, an dem sie abgeholt wurden; Pakete werden vollständig gemeinsam zurückgegeben. Die Rückgabe ist anschließend im Konto zu bestätigen. Erst mit dieser Bestätigung ist ersichtlich, dass das Spiel zur Abholung und Prüfung bereitliegt; bis dahin gilt die Ausleihe als offen.
+Bei persönlicher Abholung über einen Abholtermin kann das Spiel auch bei einem späteren Abholtermin am selben Ort oder an einem regulären Abholort zurückgegeben werden. Wird ein für einen Abholtermin gebuchtes Spiel nicht abgeholt, wird die Ausleihe storniert; Leihgebühr und Kaution werden erstattet.
 
 §3 Haftung
 Bei Beschädigung oder Verlust ist der Zeitwert des Spiels zu ersetzen. Die blockierte Kaution kann bei Beschädigung oder Verlust einbehalten werden.

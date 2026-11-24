@@ -7,6 +7,7 @@
     "load_error": "Die Abholorte konnten nicht geladen werden. Bitte lade die Seite neu.",
     "none_available": "Für dich ist aktuell kein Abholort freigegeben. Bitte wende dich an uns.",
     "personal_group": "Persönliche Abholung",
+    "personal_return_hint": "Zurückgeben kannst du bei einem späteren Abholtermin am selben Ort oder an einem regulären Abholort.",
     "spots_left": "Noch {n} Platz frei | Noch {n} Plätze frei",
     "map_link": "Auf der Karte ansehen"
   },
@@ -253,6 +254,9 @@
     "return_package_location_hint": "Bitte bring alle Spiele des Pakets gemeinsam dorthin zurück, wo du sie abgeholt hast:",
     "return_package_games": "Enthaltene Spiele",
     "return_condition": "Zustand",
+    "return_where": "Wo hast du es zurückgegeben?",
+    "return_where_hint": "Bei einem Abholtermin am selben Ort oder an einem regulären Abholort.",
+    "return_at_event": "Beim Abholtermin",
     "return_confirm": "Ich habe es am Abholort abgegeben",
     "return_confirm_package": "Ich habe das Paket am Abholort abgegeben",
     "return_note": "Erst mit deiner Bestätigung wissen wir, dass wir das Spiel dort abholen können. Du bekommst eine Bestätigung per E-Mail.",
@@ -980,6 +984,9 @@
       "hand_out": "Ausgeben",
       "done": "Ausgegeben",
       "no_show": "Nicht abgeholt",
+      "intake_title": "Rückgaben annehmen",
+      "intake_placeholder": "QR-Code scannen oder eintippen",
+      "intake_submit": "Zurücknehmen",
       "no_show_confirm": "{name} hat nicht abgeholt? Die Buchung wird storniert, Leihgebühr und Kaution werden zurückgebucht und das Mitglied bekommt eine E-Mail."
     },
     "user_picker": {

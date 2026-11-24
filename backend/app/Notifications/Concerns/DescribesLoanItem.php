@@ -7,6 +7,7 @@ use App\Models\Game;
 use App\Models\Loan;
 use App\Models\Package;
 use App\Models\PackageLoan;
+use App\Models\PickupLocation;
 
 /** {game} for a mail: the game title, or the package with its games. Already HTML-escaped. */
 trait DescribesLoanItem
@@ -30,6 +31,16 @@ trait DescribesLoanItem
         $game = $copy->game;
 
         return e($game->title);
+    }
+
+    /** Where the game (or package) actually came back — falls back to the pickup place. */
+    protected function returnPlaceOf(Loan|PackageLoan $loan): ?PickupLocation
+    {
+        if ($loan instanceof PackageLoan) {
+            return $loan->loans->first()?->returnPlace() ?? $loan->pickupLocation;
+        }
+
+        return $loan->returnPlace();
     }
 
     /** Pickup date — with the time span when it is a personal pickup event. */

@@ -11,9 +11,11 @@ use App\Models\Loan;
 use App\Models\PackageLoan;
 use App\Models\User;
 use App\Services\LoanCancellationService;
+use App\Services\LoanReturnService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /**
  * What to bring to a personal pickup event and who gets what: one booking
@@ -68,7 +70,69 @@ class PickupEventController extends Controller
                 'location' => $event->pickupLocation ? new PickupLocationResource($event->pickupLocation) : null,
             ],
             'bookings' => $bookings,
+            'returns' => $this->returnsAt($event),
         ]);
+    }
+
+    /**
+     * A member hands a game back at the event: scanning one copy books the
+     * return here — for a package, the whole package.
+     */
+    public function returnAtEvent(Request $request, Event $event, LoanReturnService $returns): JsonResponse
+    {
+        $request->validate([
+            'qr_code' => ['required', 'string', 'max:64'],
+            'return_condition' => ['nullable', Rule::in(['GOOD', 'WORN', 'DAMAGED'])],
+        ]);
+
+        if (! $event->isPickup() || ! $event->pickupLocation) {
+            return response()->json(['message' => 'Dieses Event ist kein Abholtermin.'], 404);
+        }
+
+        $code = strtoupper(trim($request->string('qr_code')->toString()));
+        /** @var Copy|null $copy */
+        $copy = Copy::whereRaw('UPPER(qr_code) = ?', [$code])->first();
+        /** @var Loan|null $loan */
+        $loan = $copy?->loans()->whereIn('status', Loan::OPEN_STATUSES)->with(['packageLoan', 'copy.game'])->first();
+
+        if (! $loan) {
+            return response()->json(['message' => "Zu Code {$code} gibt es keine offene Ausleihe.", 'reason' => 'not_found'], 404);
+        }
+        if ($loan->isAwaitingPickup()) {
+            return response()->json(['message' => LoanReturnService::AWAITING_PICKUP_MESSAGE, 'reason' => 'awaiting_pickup'], 422);
+        }
+
+        /** @var User $admin */
+        $admin = $request->user();
+        $condition = $request->string('return_condition', 'GOOD')->toString();
+        $place = $event->pickupLocation;
+
+        if ($loan->packageLoan) {
+            $returns->returnPackage($loan->packageLoan, $condition, $admin, $place, $event);
+        } else {
+            $returns->returnLoan($loan, $condition, $admin, $place, $event);
+        }
+
+        return response()->json([
+            'message' => ($loan->packageLoan ? 'Paket' : ($loan->copy->game->title ?? 'Spiel')).' zurückgenommen.',
+            'returns' => $this->returnsAt($event),
+        ]);
+    }
+
+    /** @return list<array{loan_id: int, game_title: string|null, member: string|null, condition: string|null}> */
+    private function returnsAt(Event $event): array
+    {
+        return array_values(Loan::where('return_event_id', $event->id)
+            ->with(['copy.game', 'user'])
+            ->orderByDesc('returned_at')
+            ->get()
+            ->map(fn (Loan $loan) => [
+                'loan_id' => $loan->id,
+                'game_title' => $loan->copy->game->title ?? null,
+                'member' => $loan->user->name ?? null,
+                'condition' => $loan->return_condition,
+            ])
+            ->all());
     }
 
     /** Ticks a single-game booking off (or back on, after a mis-tap). */

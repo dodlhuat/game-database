@@ -57,6 +57,14 @@
     }
   }
 
+  &__group-hint {
+    margin: -0.2rem 0 0.1rem;
+    padding: 0;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--secondary-text);
+  }
+
   &__error {
     margin: 0.5rem 0 0;
     font-size: 0.8rem;
