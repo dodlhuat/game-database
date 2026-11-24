@@ -32,14 +32,15 @@ use App\Http\Controllers\LoanSettingController;
 use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\MembershipCancellationController;
 use App\Http\Controllers\MembershipController;
+use App\Http\Controllers\MollieWebhookController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PickupLocationController;
 use App\Http\Controllers\PrivacyController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SponsorController;
-use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\TokenTransactionController;
@@ -87,9 +88,9 @@ Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/sponsors', [SponsorController::class, 'index']);
 Route::get('/events', [EventController::class, 'index'])->middleware(['auth:sanctum', 'maintenance', 'active']);
 
-// Stripe ruft diesen Endpoint direkt an — kein Sanctum-Token, Authentizität
-// wird stattdessen über die Webhook-Signatur (siehe StripeWebhookController) geprüft.
-Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
+// Mollie ruft diesen Endpoint direkt an — kein Sanctum-Token. Der Body enthält nur
+// die Zahlungs-ID; der Status wird immer mit unserem API-Key bei Mollie abgefragt.
+Route::post('/webhooks/mollie', [MollieWebhookController::class, 'handle'])->middleware('throttle:60,1');
 
 // ----------------------------------------------------------------
 // Authentifizierte Routen (aktive Mitglieder)
@@ -139,12 +140,13 @@ Route::middleware(['auth:sanctum', 'maintenance', 'active'])->group(function () 
 
     // Mitgliedschaft & Token
     Route::post('/membership/checkout', [MembershipController::class, 'checkout']);
-    Route::post('/membership/confirm/{paymentIntentId}', [MembershipController::class, 'confirm']);
     Route::get('/membership/cancel/preview', [MembershipCancellationController::class, 'preview']);
     Route::post('/membership/cancel', [MembershipCancellationController::class, 'store']);
     Route::post('/membership/activate-full', [MembershipController::class, 'activateFullMembership']);
     Route::post('/tokens/checkout', [TokenController::class, 'checkout']);
-    Route::post('/tokens/confirm/{paymentIntentId}', [TokenController::class, 'confirm']);
+    // Rückkehr von der Mollie-Bezahlseite: Status abfragen und verbuchen
+    Route::get('/payments/{kind}/{id}', [PaymentController::class, 'show'])
+        ->whereIn('kind', ['tokens', 'membership'])->whereNumber('id');
 
     // Paket-Ausleihen
     Route::get('/package-loans', [PackageLoanController::class, 'index']);

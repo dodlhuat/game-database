@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property string $provider mollie | stripe (older payments)
+ * @property string|null $provider_payment_id
+ * @property string $status
+ * @property int $price_cents
+ * @property string $currency
+ */
 class TokenPurchase extends Model
 {
     /** @use HasFactory<TokenPurchaseFactory> */
@@ -15,7 +22,8 @@ class TokenPurchase extends Model
 
     protected $fillable = [
         'user_id',
-        'provider_payment_intent_id',
+        'provider',
+        'provider_payment_id',
         'provider_charge_id',
         'token_amount',
         'price_cents',

@@ -11,40 +11,21 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
+use Tests\Concerns\FakesMollie;
 use Tests\TestCase;
 
 class MembershipPaymentTest extends TestCase
 {
-    use RefreshDatabase;
+    use FakesMollie, RefreshDatabase;
 
     private const ADDRESS = ['street' => 'Hauptstraße 1', 'postal_code' => '1010', 'city' => 'Wien'];
 
-    private function fakeStripe(string $id = 'pi_m1', string $status = 'succeeded'): void
+    /** The member coming back from the Mollie checkout to the return page. */
+    private function returnFromMollie(User $user): TestResponse
     {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents' => Http::response([
-                'id' => $id,
-                'client_secret' => "{$id}_secret",
-                'status' => 'requires_payment_method',
-            ]),
-            "api.stripe.com/v1/payment_intents/{$id}" => Http::response([
-                'id' => $id,
-                'status' => $status,
-                'latest_charge' => 'ch_m1',
-            ]),
-        ]);
-    }
+        $payment = MembershipPayment::where('user_id', $user->id)->latest('id')->firstOrFail();
 
-    private function signedWebhook(array $event): TestResponse
-    {
-        $timestamp = time();
-        $payload = json_encode($event);
-        $signature = hash_hmac('sha256', "{$timestamp}.{$payload}", config('services.stripe.webhook_secret'));
-
-        return $this->call('POST', '/api/webhooks/stripe', [], [], [], [
-            'HTTP_STRIPE_SIGNATURE' => "t={$timestamp},v1={$signature}",
-            'CONTENT_TYPE' => 'application/json',
-        ], $payload);
+        return $this->actingAs($user)->getJson("/api/payments/membership/{$payment->id}");
     }
 
     public function test_pricing_comes_from_config(): void
@@ -71,14 +52,13 @@ class MembershipPaymentTest extends TestCase
 
     public function test_checkout_creates_intent_with_config_price_and_does_not_activate(): void
     {
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER']);
 
         $this->actingAs($user)
             ->postJson('/api/membership/checkout', ['type' => 'MEMBER', 'price_cents' => 1] + self::ADDRESS)
             ->assertOk()
-            ->assertJsonPath('clientSecret', 'pi_m1_secret')
-            ->assertJsonPath('price_cents', 2400);
+            ->assertJsonPath('checkoutUrl', 'https://www.mollie.com/checkout/tr_test1');
 
         $this->assertDatabaseHas('membership_payments', [
             'user_id' => $user->id,
@@ -88,12 +68,16 @@ class MembershipPaymentTest extends TestCase
             'city' => 'Wien',
         ]);
         $this->assertSame('USER', $user->fresh()->role);
-        Http::assertSent(fn ($r) => $r['amount'] === 2400 && $r['metadata']['kind'] === 'membership');
+        $this->assertDatabaseHas('membership_payments', ['provider' => 'mollie', 'provider_payment_id' => 'tr_test1']);
+        Http::assertSent(fn ($r) => $r->method() === 'POST'
+            && $r['amount'] === ['currency' => 'EUR', 'value' => '24.00']
+            && $r['metadata']['kind'] === 'membership'
+            && str_contains($r['redirectUrl'], '/zahlung?art=membership&id='));
     }
 
     public function test_checkout_requires_address_for_new_membership(): void
     {
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER']);
 
         $this->actingAs($user)
@@ -104,7 +88,7 @@ class MembershipPaymentTest extends TestCase
 
     public function test_checkout_rejects_existing_members_for_new_membership(): void
     {
-        $this->fakeStripe();
+        $this->fakeMollie();
 
         $this->actingAs(User::factory()->member()->create())
             ->postJson('/api/membership/checkout', ['type' => 'MEMBER'] + self::ADDRESS)
@@ -114,13 +98,13 @@ class MembershipPaymentTest extends TestCase
     public function test_confirm_activates_member_with_tokens_and_bonus(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER', 'tokens' => 0]);
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'MEMBER'] + self::ADDRESS)->assertOk();
 
-        $this->actingAs($user)
-            ->postJson('/api/membership/confirm/pi_m1')
+        $this->returnFromMollie($user)
             ->assertOk()
+            ->assertJsonPath('status', 'paid')
             ->assertJsonPath('user.role', 'MEMBER')
             ->assertJsonPath('user.tokens', 0)
             ->assertJsonPath('user.bonus_tokens', 20)
@@ -130,7 +114,7 @@ class MembershipPaymentTest extends TestCase
         $user->refresh();
         $this->assertTrue($user->membership_expires_at->isFuture());
         $this->assertSame('Wien', $user->city);
-        $this->assertDatabaseHas('membership_payments', ['status' => 'COMPLETED', 'provider_charge_id' => 'ch_m1']);
+        $this->assertDatabaseHas('membership_payments', ['status' => 'COMPLETED', 'provider_charge_id' => 'tr_test1']);
 
         $this->assertFalse(TokenLot::where('user_id', $user->id)->where('kind', 'NORMAL')->exists());
         $bonus = TokenLot::where('user_id', $user->id)->where('kind', 'BONUS')->firstOrFail();
@@ -141,11 +125,11 @@ class MembershipPaymentTest extends TestCase
     public function test_confirm_activates_supporter_without_tokens(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER', 'tokens' => 0]);
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'SUPPORTER'] + self::ADDRESS)->assertOk();
 
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')
+        $this->returnFromMollie($user)
             ->assertOk()
             ->assertJsonPath('user.role', 'SUPPORTER');
 
@@ -153,13 +137,13 @@ class MembershipPaymentTest extends TestCase
         Notification::assertSentTo($user, WelcomeSupporterNotification::class);
     }
 
-    public function test_confirm_does_not_activate_unpaid_intent(): void
+    public function test_cancelled_payment_does_not_activate(): void
     {
-        $this->fakeStripe(status: 'requires_payment_method');
+        $this->fakeMollie(status: 'canceled');
         $user = User::factory()->create(['role' => 'USER']);
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'MEMBER'] + self::ADDRESS)->assertOk();
 
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertUnprocessable();
+        $this->returnFromMollie($user)->assertOk()->assertJsonPath('status', 'failed');
 
         $this->assertSame('USER', $user->fresh()->role);
         $this->assertDatabaseHas('membership_payments', ['status' => 'FAILED']);
@@ -168,30 +152,31 @@ class MembershipPaymentTest extends TestCase
     public function test_confirm_is_idempotent_and_other_users_cannot_confirm(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER', 'tokens' => 0]);
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'MEMBER'] + self::ADDRESS)->assertOk();
 
+        $payment = MembershipPayment::where('user_id', $user->id)->firstOrFail();
         $this->actingAs(User::factory()->create(['role' => 'USER']))
-            ->postJson('/api/membership/confirm/pi_m1')->assertNotFound();
+            ->getJson("/api/payments/membership/{$payment->id}")->assertNotFound();
 
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
+        $this->returnFromMollie($user)->assertOk();
+        $this->returnFromMollie($user)->assertOk();
 
         $this->assertSame(0, $user->fresh()->tokens);
         $this->assertSame(20, $user->fresh()->bonus_tokens);
     }
 
-    public function test_webhook_activates_membership_once_even_after_confirm(): void
+    public function test_webhook_and_return_page_activate_the_membership_only_once(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->create(['role' => 'USER', 'tokens' => 0]);
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'MEMBER'] + self::ADDRESS)->assertOk();
 
-        $event = ['type' => 'payment_intent.succeeded', 'data' => ['object' => ['id' => 'pi_m1', 'latest_charge' => 'ch_m1']]];
-        $this->signedWebhook($event)->assertOk();
-        $this->signedWebhook($event)->assertOk();
+        $this->mollieWebhook('tr_test1')->assertOk();
+        $this->returnFromMollie($user)->assertOk();
+        $this->mollieWebhook('tr_test1')->assertOk();
 
         $user->refresh();
         $this->assertSame('MEMBER', $user->role);
@@ -202,12 +187,12 @@ class MembershipPaymentTest extends TestCase
     public function test_renewal_extends_from_expiry_and_grants_package_to_members(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $expires = now()->addMonths(2);
         $user = User::factory()->member()->create(['tokens' => 3, 'membership_expires_at' => $expires]);
 
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertOk();
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
+        $this->returnFromMollie($user)->assertOk();
 
         $user->refresh();
         $this->assertEqualsWithDelta($expires->copy()->addYear()->timestamp, $user->membership_expires_at->timestamp, 5);
@@ -217,7 +202,7 @@ class MembershipPaymentTest extends TestCase
 
     public function test_renewal_is_rejected_more_than_three_months_before_expiry(): void
     {
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->member()->create(['membership_expires_at' => now()->addMonths(6)]);
 
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertUnprocessable();
@@ -226,12 +211,12 @@ class MembershipPaymentTest extends TestCase
     public function test_expired_membership_can_be_renewed_and_restarts_from_today(): void
     {
         Notification::fake();
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->member()->create(['tokens' => 3, 'membership_expires_at' => now()->subMonths(2)]);
         $this->assertFalse($user->isMember());
 
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertOk();
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
+        $this->returnFromMollie($user)->assertOk();
 
         $user->refresh();
         $this->assertTrue($user->isMember());
@@ -242,11 +227,11 @@ class MembershipPaymentTest extends TestCase
 
     public function test_supporter_renewal_grants_no_tokens(): void
     {
-        $this->fakeStripe();
+        $this->fakeMollie();
         $user = User::factory()->supporter()->create(['membership_expires_at' => now()->addMonth()]);
 
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertOk();
-        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
+        $this->returnFromMollie($user)->assertOk();
 
         $this->assertSame(0, $user->fresh()->tokens);
         $this->assertSame(0, $user->fresh()->bonus_tokens);
@@ -275,16 +260,17 @@ class MembershipPaymentTest extends TestCase
         $this->assertSame(0, $user->bonus_tokens);
     }
 
-    public function test_refunded_charge_marks_membership_payment(): void
+    public function test_refund_at_mollie_marks_membership_payment(): void
     {
+        $this->fakeMollie('tr_x', 'paid', ['amountRefunded' => ['currency' => 'EUR', 'value' => '24.00']]);
         $user = User::factory()->create();
         MembershipPayment::create([
-            'user_id' => $user->id, 'type' => 'MEMBER', 'provider_payment_intent_id' => 'pi_x',
-            'provider_charge_id' => 'ch_x', 'price_cents' => 2400, 'status' => 'COMPLETED',
+            'user_id' => $user->id, 'type' => 'MEMBER', 'provider' => 'mollie', 'provider_payment_id' => 'tr_x',
+            'provider_charge_id' => 'tr_x', 'price_cents' => 2400, 'status' => 'COMPLETED',
         ]);
 
-        $this->signedWebhook(['type' => 'charge.refunded', 'data' => ['object' => ['id' => 'ch_x']]])->assertOk();
+        $this->mollieWebhook('tr_x')->assertOk();
 
-        $this->assertDatabaseHas('membership_payments', ['provider_charge_id' => 'ch_x', 'status' => 'REFUNDED']);
+        $this->assertDatabaseHas('membership_payments', ['provider_payment_id' => 'tr_x', 'status' => 'REFUNDED']);
     }
 }

@@ -8,11 +8,11 @@ export interface RenewalCheckout {
 
 /**
  * Renewal flow shared by dashboard, account and upgrade page: loads the
- * price, hands it to <StripeCheckoutModal> and stores the refreshed user.
+ * price and hands it to <PaymentCheckoutModal>, which sends the member to
+ * Mollie. The outcome is shown on /zahlung.
  */
 export function useMembershipRenewal() {
   const api = useApi()
-  const auth = useAuthStore()
   const { t } = useI18n()
 
   const renewCheckout = ref<RenewalCheckout | null>(null)
@@ -37,10 +37,5 @@ export function useMembershipRenewal() {
     }
   }
 
-  function onRenewed(result: { user: unknown }) {
-    renewCheckout.value = null
-    if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
-  }
-
-  return { renewCheckout, renewError, renewLoading, renew, onRenewed }
+  return { renewCheckout, renewError, renewLoading, renew }
 }

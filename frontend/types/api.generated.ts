@@ -885,32 +885,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * Creates a Stripe PaymentIntent for a membership (new member, new
-     *     supporter or renewal). The price always comes from config — the client
-     *     only picks the type. The membership itself is only activated once the
-     *     payment is confirmed (see confirm() and the Stripe webhook)
+     * Opens a Mollie checkout for a membership (new member, new supporter or
+     *     renewal). The price always comes from config — the client only picks
+     *     the type. The membership itself is only activated once Mollie reports
+     *     the payment as paid (return page or webhook, see PaymentService)
      */
     post: operations['membership.checkout']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/membership/confirm/{paymentIntentId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Confirms a previously created PaymentIntent and activates the
-     *     membership. Idempotent. The status is always re-fetched from Stripe
-     */
-    post: operations['membership.confirm']
     delete?: never
     options?: never
     head?: never
@@ -997,6 +977,22 @@ export interface paths {
     options?: never
     head?: never
     patch: operations['membershipCancellation.markRefunded']
+    trace?: never
+  }
+  '/webhooks/mollie': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post: operations['mollieWebhook.handle']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   '/admin/newsletters': {
@@ -1159,6 +1155,22 @@ export interface paths {
     head?: never
     /** Moves the package — and every game in it — to another pickup location */
     patch: operations['packageLoan.updatePickupLocation']
+    trace?: never
+  }
+  '/payments/{kind}/{id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['payment.show']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
     trace?: never
   }
   '/admin/events/{event}/packing-list': {
@@ -1574,22 +1586,6 @@ export interface paths {
     patch?: never
     trace?: never
   }
-  '/webhooks/stripe': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    post: operations['stripeWebhook.handle']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
   '/admin/tags': {
     parameters: {
       query?: never
@@ -1669,34 +1665,12 @@ export interface paths {
     get?: never
     put?: never
     /**
-     * Creates a Stripe PaymentIntent for a token package. The price is
-     *     looked up server-side from config('tokens.packages') — the client only
-     *     ever picks a token amount, never a price
+     * Opens a Mollie checkout for a token package. The price is looked up
+     *     server-side from config('tokens.packages') — the client only ever
+     *     picks a token amount, never a price. Tokens are credited once Mollie
+     *     reports the payment as paid (return page or webhook)
      */
     post: operations['token.checkout']
-    delete?: never
-    options?: never
-    head?: never
-    patch?: never
-    trace?: never
-  }
-  '/tokens/confirm/{paymentIntentId}': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    get?: never
-    put?: never
-    /**
-     * Confirms a previously created Stripe PaymentIntent and credits the
-     *     tokens. Idempotent: calling this again for an already-completed
-     *     purchase just returns the current state instead of crediting twice
-     * @description The client only tells us which payment intent to check — the actual
-     *     status is always re-fetched from Stripe, never trusted from the client.
-     */
-    post: operations['token.confirm']
     delete?: never
     options?: never
     head?: never
@@ -4756,9 +4730,8 @@ export interface operations {
         }
         content: {
           'application/json': {
-            clientSecret: unknown
-            price_cents: string
-            currency: string
+            checkoutUrl: string
+            id: number
           }
         }
       }
@@ -4772,72 +4745,6 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Zahlung konnte nicht vorbereitet werden.'
-          }
-        }
-      }
-    }
-  }
-  'membership.confirm': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        paymentIntentId: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json':
-            | {
-                /** @enum {string} */
-                message:
-                  'Mitgliedschaft verlängert!' | 'Willkommen! Deine Mitgliedschaft ist aktiv.'
-                user: components['schemas']['UserResource']
-              }
-            | {
-                /** @constant */
-                message: 'Die Mitgliedschaft ist bereits aktiv.'
-                user: components['schemas']['UserResource']
-              }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Zahlung nicht gefunden.'
-          }
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Zahlung wurde nicht abgeschlossen.'
-          }
-        }
-      }
-      502: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Zahlung konnte nicht überprüft werden.'
           }
         }
       }
@@ -5041,6 +4948,35 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Diese Kündigung ist nicht offen.'
+          }
+        }
+      }
+    }
+  }
+  'mollieWebhook.handle': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Too many requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @description Error overview. */
+            message: string
           }
         }
       }
@@ -5598,6 +5534,64 @@ export interface operations {
       401: components['responses']['AuthenticationException']
       404: components['responses']['ModelNotFoundException']
       422: components['responses']['ValidationException']
+    }
+  }
+  'payment.show': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        kind: string
+        id: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @enum {string} */
+            status: 'paid' | 'failed' | 'refunded' | 'pending'
+            message:
+              | string
+              | (
+                  | 'Deine Mitgliedschaft wurde verlängert.'
+                  | 'Willkommen! Deine Mitgliedschaft ist aktiv.'
+                  | 'Die Zahlung wurde abgebrochen oder ist fehlgeschlagen. Es wurde nichts abgebucht.'
+                  | 'Diese Zahlung wurde erstattet.'
+                  | 'Deine Zahlung wird noch geprüft.'
+                )
+            user: components['schemas']['UserResource']
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung nicht gefunden.'
+          }
+        }
+      }
+      502: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            /** @constant */
+            message: 'Zahlung konnte nicht überprüft werden.'
+          }
+        }
+      }
     }
   }
   'pickupEvent.show': {
@@ -6589,39 +6583,6 @@ export interface operations {
       404: components['responses']['ModelNotFoundException']
     }
   }
-  'stripeWebhook.handle': {
-    parameters: {
-      query?: never
-      header?: never
-      path?: never
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            status: 'ok'
-          }
-        }
-      }
-      400: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Invalid signature.'
-          }
-        }
-      }
-    }
-  }
   'tags.index': {
     parameters: {
       query?: never
@@ -6813,7 +6774,8 @@ export interface operations {
         }
         content: {
           'application/json': {
-            clientSecret: unknown
+            checkoutUrl: string
+            id: number
           }
         }
       }
@@ -6838,70 +6800,6 @@ export interface operations {
           'application/json': {
             /** @constant */
             message: 'Zahlung konnte nicht vorbereitet werden.'
-          }
-        }
-      }
-    }
-  }
-  'token.confirm': {
-    parameters: {
-      query?: never
-      header?: never
-      path: {
-        paymentIntentId: string
-      }
-      cookie?: never
-    }
-    requestBody?: never
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json':
-            | {
-                message: string
-                user: components['schemas']['UserResource']
-              }
-            | {
-                /** @constant */
-                message: 'Token wurden bereits gutgeschrieben.'
-                user: components['schemas']['UserResource']
-              }
-        }
-      }
-      401: components['responses']['AuthenticationException']
-      404: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Bestellung nicht gefunden.'
-          }
-        }
-      }
-      422: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Zahlung wurde nicht abgeschlossen.'
-          }
-        }
-      }
-      502: {
-        headers: {
-          [name: string]: unknown
-        }
-        content: {
-          'application/json': {
-            /** @constant */
-            message: 'Zahlung konnte nicht überprüft werden.'
           }
         }
       }

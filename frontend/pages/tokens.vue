@@ -269,9 +269,8 @@
       </div>
     </div>
 
-    <StripeCheckoutModal
+    <PaymentCheckoutModal
       :pkg="checkoutPackage"
-      @success="onPurchaseSuccess"
       @error="onPurchaseError"
       @close="checkoutPackage = null"
     />
@@ -394,14 +393,6 @@ async function loadPackages() {
   }
 }
 
-function onPurchaseSuccess(payload: { message: string; user: unknown }) {
-  if (payload.user) auth.setUser(payload.user as Parameters<typeof auth.setUser>[0])
-  success.value = payload.message
-  error.value = ''
-  checkoutPackage.value = null
-  loadTx(1)
-}
-
 function onPurchaseError(message: string) {
   error.value = message
   success.value = ''
@@ -465,11 +456,12 @@ async function loadTx(page: number) {
   }
 }
 
-// Provider references (Stripe payment intent ids) mean nothing to members.
+// The type label already says "purchase"; provider references (old Stripe
+// payment intent ids) and the token count repeat what the row shows anyway.
 function txDetail(tx: TokenTransaction): string | null {
   if (!tx.description) return null
   const cleaned = tx.description.replace(/\s*\(Payment Intent[^)]*\)/i, '').trim()
-  if (tx.type === 'PURCHASE' && /^stripe-kauf$/i.test(cleaned)) return null
+  if (tx.type === 'PURCHASE' && /^(stripe|token)-kauf\b/i.test(cleaned)) return null
   return cleaned || null
 }
 

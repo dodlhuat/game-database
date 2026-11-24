@@ -4,7 +4,7 @@
 
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data seed-taxonomy \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
-        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy \
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy deploy-env-set \
         server-update server-update-install server-update-install-all \
         maintenance-on maintenance-off
 
@@ -194,6 +194,18 @@ maintenance-off:
 	ssh $(DEPLOY_SERVER) 'NUXT_PUBLIC_MAINTENANCE_MODE=false pm2 restart alle-unsere-abenteuer-frontend --update-env && pm2 save'
 	ssh $(DEPLOY_SERVER) '$(call MAINTENANCE_BACKEND,false)'
 	@echo "✓ Wartungsmodus AUS (Backend + Frontend) — $(DEPLOY_URL)"
+
+## Eine Variable in backend/.env auf dem Server setzen, z. B.:
+##   make deploy-env-set KEY=MOLLIE_KEY
+##   make deploy-env-set KEY=MOLLIE_WEBHOOK_URL
+## Der Wert wird verdeckt abgefragt und per SSH über stdin übertragen — er landet
+## weder in der Shell-History noch in der Prozessliste. Bestehende Zeile wird
+## ersetzt, fehlende angehängt; danach wird der Config-Cache neu gebaut.
+deploy-env-set:
+	@printf '%s' "$(KEY)" | grep -Eq '^[A-Z][A-Z0-9_]*$$' || { echo "Aufruf: make deploy-env-set KEY=NAME (Großbuchstaben, Ziffern, _)"; exit 1; }
+	@printf 'Wert für %s: ' "$(KEY)"; stty -echo; read -r value; stty echo; echo; \
+	[ -n "$$value" ] || { echo "Leerer Wert — abgebrochen."; exit 1; }; \
+	printf '%s' "$$value" | ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && v=$$(cat) && { grep -v "^$(KEY)=" .env; printf "%s=%s\n" "$(KEY)" "$$v"; } > .env.new && cat .env.new > .env && rm .env.new && php artisan config:cache >/dev/null && echo "✓ $(KEY) gesetzt, Config-Cache neu gebaut"'
 
 # ============================================================
 # Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)

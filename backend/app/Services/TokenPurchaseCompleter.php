@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Credits tokens for a completed Stripe charge. Idempotent and safe to call
+ * Credits tokens for a completed payment. Idempotent and safe to call
  * from both the confirm endpoint and the webhook handler for the same
  * purchase — e.g. if the client's confirm call never reaches the server
  * (tab closed, network drop), the webhook is the fallback; if both fire,
@@ -49,7 +49,7 @@ class TokenPurchaseCompleter
                 'token_purchase_id' => $locked->id,
                 'type' => 'PURCHASE',
                 'amount' => $locked->token_amount,
-                'description' => "Stripe-Kauf (Payment Intent {$locked->provider_payment_intent_id})",
+                'description' => "Token-Kauf ({$locked->token_amount} Token)",
             ]);
 
             return $locked;

@@ -4825,7 +4825,7 @@
         "/membership/checkout": {
             "post": {
                 "operationId": "membership.checkout",
-                "summary": "Creates a Stripe PaymentIntent for a membership (new member, new\nsupporter or renewal). The price always comes from config \u2014 the client\nonly picks the type. The membership itself is only activated once the\npayment is confirmed (see confirm() and the Stripe webhook)",
+                "summary": "Opens a Mollie checkout for a membership (new member, new supporter or\nrenewal). The price always comes from config \u2014 the client only picks\nthe type. The membership itself is only activated once Mollie reports\nthe payment as paid (return page or webhook, see PaymentService)",
                 "tags": [
                     "Membership"
                 ],
@@ -4860,18 +4860,16 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "clientSecret": {},
-                                        "price_cents": {
+                                        "checkoutUrl": {
                                             "type": "string"
                                         },
-                                        "currency": {
-                                            "type": "string"
+                                        "id": {
+                                            "type": "integer"
                                         }
                                     },
                                     "required": [
-                                        "clientSecret",
-                                        "price_cents",
-                                        "currency"
+                                        "checkoutUrl",
+                                        "id"
                                     ]
                                 }
                             }
@@ -4898,133 +4896,6 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
-        "/membership/confirm/{paymentIntentId}": {
-            "post": {
-                "operationId": "membership.confirm",
-                "summary": "Confirms a previously created PaymentIntent and activates the\nmembership. Idempotent. The status is always re-fetched from Stripe",
-                "tags": [
-                    "Membership"
-                ],
-                "parameters": [
-                    {
-                        "name": "paymentIntentId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "enum": [
-                                                        "Mitgliedschaft verl\u00e4ngert!",
-                                                        "Willkommen! Deine Mitgliedschaft ist aktiv."
-                                                    ]
-                                                },
-                                                "user": {
-                                                    "$ref": "#/components/schemas/UserResource"
-                                                }
-                                            },
-                                            "required": [
-                                                "message",
-                                                "user"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Die Mitgliedschaft ist bereits aktiv."
-                                                },
-                                                "user": {
-                                                    "$ref": "#/components/schemas/UserResource"
-                                                }
-                                            },
-                                            "required": [
-                                                "message",
-                                                "user"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Zahlung wurde nicht abgeschlossen."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "502": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Zahlung konnte nicht \u00fcberpr\u00fcft werden."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Zahlung nicht gefunden."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -5488,6 +5359,38 @@
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/webhooks/mollie": {
+            "post": {
+                "operationId": "mollieWebhook.handle",
+                "tags": [
+                    "MollieWebhook"
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "429": {
+                        "description": "Too many requests",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Error overview."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -6760,6 +6663,121 @@
                     },
                     "404": {
                         "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/payments/{kind}/{id}": {
+            "get": {
+                "operationId": "payment.show",
+                "tags": [
+                    "Payment"
+                ],
+                "parameters": [
+                    {
+                        "name": "kind",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "paid",
+                                                "failed",
+                                                "refunded",
+                                                "pending"
+                                            ]
+                                        },
+                                        "message": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "Deine Mitgliedschaft wurde verl\u00e4ngert.",
+                                                        "Willkommen! Deine Mitgliedschaft ist aktiv.",
+                                                        "Die Zahlung wurde abgebrochen oder ist fehlgeschlagen. Es wurde nichts abgebucht.",
+                                                        "Diese Zahlung wurde erstattet.",
+                                                        "Deine Zahlung wird noch gepr\u00fcft."
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/UserResource"
+                                        }
+                                    },
+                                    "required": [
+                                        "status",
+                                        "message",
+                                        "user"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung konnte nicht \u00fcberpr\u00fcft werden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "const": "Zahlung nicht gefunden."
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -8614,54 +8632,6 @@
                 }
             }
         },
-        "/webhooks/stripe": {
-            "post": {
-                "operationId": "stripeWebhook.handle",
-                "tags": [
-                    "StripeWebhook"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "status": {
-                                            "type": "string",
-                                            "const": "ok"
-                                        }
-                                    },
-                                    "required": [
-                                        "status"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Invalid signature."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/admin/tags": {
             "get": {
                 "operationId": "tags.index",
@@ -8955,7 +8925,7 @@
         "/tokens/checkout": {
             "post": {
                 "operationId": "token.checkout",
-                "summary": "Creates a Stripe PaymentIntent for a token package. The price is\nlooked up server-side from config('tokens.packages') \u2014 the client only\never picks a token amount, never a price",
+                "summary": "Opens a Mollie checkout for a token package. The price is looked up\nserver-side from config('tokens.packages') \u2014 the client only ever\npicks a token amount, never a price. Tokens are credited once Mollie\nreports the payment as paid (return page or webhook)",
                 "tags": [
                     "Token"
                 ],
@@ -8990,10 +8960,16 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "clientSecret": {}
+                                        "checkoutUrl": {
+                                            "type": "string"
+                                        },
+                                        "id": {
+                                            "type": "integer"
+                                        }
                                     },
                                     "required": [
-                                        "clientSecret"
+                                        "checkoutUrl",
+                                        "id"
                                     ]
                                 }
                             }
@@ -9039,130 +9015,6 @@
                     },
                     "422": {
                         "$ref": "#/components/responses/ValidationException"
-                    },
-                    "401": {
-                        "$ref": "#/components/responses/AuthenticationException"
-                    }
-                }
-            }
-        },
-        "/tokens/confirm/{paymentIntentId}": {
-            "post": {
-                "operationId": "token.confirm",
-                "description": "The client only tells us which payment intent to check \u2014 the actual\nstatus is always re-fetched from Stripe, never trusted from the client.",
-                "summary": "Confirms a previously created Stripe PaymentIntent and credits the\ntokens. Idempotent: calling this again for an already-completed\npurchase just returns the current state instead of crediting twice",
-                "tags": [
-                    "Token"
-                ],
-                "parameters": [
-                    {
-                        "name": "paymentIntentId",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "anyOf": [
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string"
-                                                },
-                                                "user": {
-                                                    "$ref": "#/components/schemas/UserResource"
-                                                }
-                                            },
-                                            "required": [
-                                                "message",
-                                                "user"
-                                            ]
-                                        },
-                                        {
-                                            "type": "object",
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "const": "Token wurden bereits gutgeschrieben."
-                                                },
-                                                "user": {
-                                                    "$ref": "#/components/schemas/UserResource"
-                                                }
-                                            },
-                                            "required": [
-                                                "message",
-                                                "user"
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Zahlung wurde nicht abgeschlossen."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "502": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Zahlung konnte nicht \u00fcberpr\u00fcft werden."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string",
-                                            "const": "Bestellung nicht gefunden."
-                                        }
-                                    },
-                                    "required": [
-                                        "message"
-                                    ]
-                                }
-                            }
-                        }
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"

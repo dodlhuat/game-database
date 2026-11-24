@@ -71,10 +71,6 @@ export default defineNuxtConfig({
       // überschreibt den Wert zur Laufzeit aus der Umgebung — kein Rebuild nötig.
       maintenanceMode: false,
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000/api',
-      // Publishable Key ist per Design öffentlich (wird an Stripe.js
-      // übergeben) — kein Secret. Test-/Live-Umschaltung passiert rein über
-      // diesen Wert (pk_test_... vs. pk_live_...).
-      stripePublishableKey: process.env.NUXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '',
     },
   },
 })

@@ -50,7 +50,7 @@ let activeWrapper: Awaited<ReturnType<typeof mountSuspended>> | null = null
 
 async function mountTokensPage() {
   activeWrapper = await mountSuspended(TokensPage, {
-    global: { stubs: { StripeCheckoutModal: true, NuxtLink: true } },
+    global: { stubs: { PaymentCheckoutModal: true, NuxtLink: true } },
   })
   return activeWrapper
 }
@@ -95,7 +95,7 @@ describe('tokens.vue', () => {
     const wrapper = await mountTokensPage()
     await flushPromises()
 
-    const modalStub = wrapper.findComponent({ name: 'StripeCheckoutModal' })
+    const modalStub = wrapper.findComponent({ name: 'PaymentCheckoutModal' })
     expect(modalStub.props('pkg')).toBeNull()
 
     await wrapper.findAll('.token-card__buy')[0]!.trigger('click')
@@ -108,31 +108,11 @@ describe('tokens.vue', () => {
     })
   })
 
-  it('shows a success alert, credits the user, and closes the modal on success', async () => {
-    const auth = useAuthStore()
-    const wrapper = await mountTokensPage()
-    await flushPromises()
-    fetchTokenTransactionsMock.mockClear()
-
-    await wrapper.findAll('.token-card__buy')[0]!.trigger('click')
-    const modalStub = wrapper.findComponent({ name: 'StripeCheckoutModal' })
-    await modalStub.vm.$emit('success', {
-      message: 'Token wurden gutgeschrieben.',
-      user: { ...auth.user, tokens: 99 },
-    })
-    await flushPromises()
-
-    expect(wrapper.find('.alert-success').text()).toBe('Token wurden gutgeschrieben.')
-    expect(auth.user?.tokens).toBe(99)
-    expect(fetchTokenTransactionsMock).toHaveBeenCalledWith(1)
-    expect(modalStub.props('pkg')).toBeNull()
-  })
-
   it('shows an error alert when the checkout modal emits error', async () => {
     const wrapper = await mountTokensPage()
     await flushPromises()
 
-    const modalStub = wrapper.findComponent({ name: 'StripeCheckoutModal' })
+    const modalStub = wrapper.findComponent({ name: 'PaymentCheckoutModal' })
     await modalStub.vm.$emit('error', 'Zahlung wurde abgelehnt.')
     await flushPromises()
 
@@ -267,7 +247,7 @@ describe('tokens.vue — derived figures', () => {
     expect(counts).toEqual(['6×', '3×', '2×'])
   })
 
-  it('hides Stripe payment references in the history', async () => {
+  it('hides provider payment references in the history', async () => {
     getMock.mockResolvedValue({ data: [] })
     fetchTokenTransactionsMock.mockResolvedValue({
       data: [

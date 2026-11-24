@@ -7,11 +7,12 @@ use App\Models\TokenTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Tests\Concerns\FakesMollie;
 use Tests\TestCase;
 
 class TokenControllerTest extends TestCase
 {
-    use RefreshDatabase;
+    use FakesMollie, RefreshDatabase;
 
     public function test_packages_returns_price_list(): void
     {
@@ -26,49 +27,50 @@ class TokenControllerTest extends TestCase
             ]);
     }
 
-    public function test_checkout_creates_stripe_payment_intent(): void
+    public function test_checkout_opens_a_mollie_payment(): void
     {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents' => Http::response([
-                'id' => 'pi_123',
-                'client_secret' => 'pi_123_secret_abc',
-                'status' => 'requires_payment_method',
-            ]),
-        ]);
-
+        $this->fakeMollie('tr_123');
         $user = User::factory()->member()->create();
 
         $this->actingAs($user)
             ->postJson('/api/tokens/checkout', ['amount' => 20])
             ->assertOk()
-            ->assertJsonPath('clientSecret', 'pi_123_secret_abc');
+            ->assertJsonPath('checkoutUrl', 'https://www.mollie.com/checkout/tr_123');
 
         $this->assertDatabaseHas('token_purchases', [
             'user_id' => $user->id,
-            'provider_payment_intent_id' => 'pi_123',
+            'provider' => 'mollie',
+            'provider_payment_id' => 'tr_123',
             'token_amount' => 20,
             'price_cents' => 1000,
             'currency' => 'EUR',
             'status' => 'CREATED',
         ]);
+        Http::assertSent(fn ($r) => $r->method() === 'POST'
+            && $r['amount'] === ['currency' => 'EUR', 'value' => '10.00']
+            && $r['webhookUrl'] === 'https://api.example.test/api/webhooks/mollie');
     }
 
-    public function test_checkout_creates_stripe_payment_intent_for_admin(): void
+    public function test_checkout_works_for_admins(): void
     {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents' => Http::response([
-                'id' => 'pi_456',
-                'client_secret' => 'pi_456_secret_abc',
-                'status' => 'requires_payment_method',
-            ]),
-        ]);
+        $this->fakeMollie('tr_456');
 
-        $admin = User::factory()->admin()->create();
-
-        $this->actingAs($admin)
+        $this->actingAs(User::factory()->admin()->create())
             ->postJson('/api/tokens/checkout', ['amount' => 40])
             ->assertOk()
-            ->assertJsonPath('clientSecret', 'pi_456_secret_abc');
+            ->assertJsonPath('checkoutUrl', 'https://www.mollie.com/checkout/tr_456');
+    }
+
+    public function test_checkout_omits_the_webhook_without_a_public_url(): void
+    {
+        $this->fakeMollie();
+        config(['services.mollie.webhook_url' => '']);
+
+        $this->actingAs(User::factory()->member()->create())
+            ->postJson('/api/tokens/checkout', ['amount' => 20])
+            ->assertOk();
+
+        Http::assertSent(fn ($r) => $r->method() === 'POST' && ! isset($r['webhookUrl']));
     }
 
     public function test_checkout_fails_for_non_member(): void
@@ -89,133 +91,89 @@ class TokenControllerTest extends TestCase
             ->assertStatus(422);
     }
 
-    public function test_checkout_returns_bad_gateway_when_stripe_fails(): void
+    public function test_checkout_returns_bad_gateway_when_mollie_fails(): void
     {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents' => Http::response(['error' => 'server_error'], 500),
-        ]);
-
+        config(['services.mollie.key' => 'test_dummy']);
+        Http::fake(['api.mollie.com/*' => Http::response(['detail' => 'server error'], 500)]);
         $user = User::factory()->member()->create();
 
         $this->actingAs($user)
             ->postJson('/api/tokens/checkout', ['amount' => 20])
             ->assertStatus(502);
 
-        $this->assertDatabaseCount('token_purchases', 0);
+        $this->assertDatabaseHas('token_purchases', ['user_id' => $user->id, 'status' => 'FAILED']);
     }
 
-    public function test_confirm_requires_auth(): void
+    public function test_return_page_requires_auth(): void
     {
-        $this->postJson('/api/tokens/confirm/pi_1')->assertUnauthorized();
+        $this->getJson('/api/payments/tokens/1')->assertUnauthorized();
     }
 
-    public function test_confirm_credits_tokens_and_creates_transaction(): void
+    public function test_return_page_credits_tokens_once_mollie_says_paid(): void
     {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents/pi_1' => Http::response([
-                'id' => 'pi_1',
-                'status' => 'succeeded',
-                'latest_charge' => 'ch_1',
-            ]),
-        ]);
-
+        $this->fakeMollie('tr_1', 'paid');
         $user = User::factory()->member()->create(['tokens' => 5]);
         $purchase = TokenPurchase::factory()->create([
             'user_id' => $user->id,
-            'provider_payment_intent_id' => 'pi_1',
+            'provider_payment_id' => 'tr_1',
             'token_amount' => 20,
             'price_cents' => 1000,
             'status' => 'CREATED',
         ]);
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/confirm/pi_1')
+            ->getJson("/api/payments/tokens/{$purchase->id}")
             ->assertOk()
+            ->assertJsonPath('status', 'paid')
             ->assertJsonPath('user.tokens', 25);
+        $this->actingAs($user)->getJson("/api/payments/tokens/{$purchase->id}")->assertOk();
 
-        $this->assertDatabaseHas('token_purchases', [
-            'id' => $purchase->id,
-            'status' => 'COMPLETED',
-            'provider_charge_id' => 'ch_1',
-        ]);
-        $this->assertDatabaseHas('token_transactions', [
-            'user_id' => $user->id,
-            'token_purchase_id' => $purchase->id,
-            'type' => 'PURCHASE',
-            'amount' => 20,
-        ]);
+        $this->assertDatabaseHas('token_purchases', ['id' => $purchase->id, 'status' => 'COMPLETED', 'provider_charge_id' => 'tr_1']);
+        $this->assertSame(1, TokenTransaction::where('token_purchase_id', $purchase->id)->where('type', 'PURCHASE')->count());
+        $this->assertSame(25, $user->fresh()->tokens);
     }
 
-    public function test_confirm_is_idempotent_when_already_completed(): void
+    public function test_return_page_reports_open_payments_as_pending(): void
     {
-        $user = User::factory()->member()->create(['tokens' => 25]);
-        TokenPurchase::factory()->create([
-            'user_id' => $user->id,
-            'provider_payment_intent_id' => 'pi_1',
-            'token_amount' => 20,
-            'status' => 'COMPLETED',
-            'provider_charge_id' => 'ch_1',
-        ]);
-
-        $this->actingAs($user)
-            ->postJson('/api/tokens/confirm/pi_1')
-            ->assertOk()
-            ->assertJsonPath('user.tokens', 25);
-
-        $this->assertDatabaseCount('token_transactions', 0);
-        $this->assertEquals(25, $user->fresh()->tokens);
-    }
-
-    public function test_confirm_returns_404_for_unknown_payment_intent(): void
-    {
-        $user = User::factory()->member()->create();
-
-        $this->actingAs($user)
-            ->postJson('/api/tokens/confirm/pi_does-not-exist')
-            ->assertStatus(404);
-    }
-
-    public function test_confirm_returns_404_for_other_users_payment_intent(): void
-    {
-        $owner = User::factory()->member()->create();
-        $other = User::factory()->member()->create();
-        TokenPurchase::factory()->create([
-            'user_id' => $owner->id,
-            'provider_payment_intent_id' => 'pi_1',
-            'status' => 'CREATED',
-        ]);
-
-        $this->actingAs($other)
-            ->postJson('/api/tokens/confirm/pi_1')
-            ->assertStatus(404);
-    }
-
-    public function test_confirm_marks_failed_when_stripe_payment_not_succeeded(): void
-    {
-        Http::fake([
-            'api.stripe.com/v1/payment_intents/pi_1' => Http::response([
-                'id' => 'pi_1',
-                'status' => 'requires_payment_method',
-            ]),
-        ]);
-
+        $this->fakeMollie('tr_1', 'open');
         $user = User::factory()->member()->create(['tokens' => 5]);
-        TokenPurchase::factory()->create([
-            'user_id' => $user->id,
-            'provider_payment_intent_id' => 'pi_1',
-            'token_amount' => 20,
-            'status' => 'CREATED',
-        ]);
+        $purchase = TokenPurchase::factory()->create(['user_id' => $user->id, 'provider_payment_id' => 'tr_1']);
 
         $this->actingAs($user)
-            ->postJson('/api/tokens/confirm/pi_1')
-            ->assertStatus(422);
+            ->getJson("/api/payments/tokens/{$purchase->id}")
+            ->assertOk()
+            ->assertJsonPath('status', 'pending');
 
-        $this->assertDatabaseHas('token_purchases', [
-            'provider_payment_intent_id' => 'pi_1',
-            'status' => 'FAILED',
-        ]);
-        $this->assertEquals(5, $user->fresh()->tokens);
+        $this->assertSame('CREATED', $purchase->fresh()->status);
+    }
+
+    public function test_return_page_marks_cancelled_and_expired_payments_failed(): void
+    {
+        foreach (['canceled', 'expired', 'failed'] as $i => $status) {
+            $this->fakeMollie("tr_{$i}", $status);
+            $user = User::factory()->member()->create(['tokens' => 5]);
+            $purchase = TokenPurchase::factory()->create(['user_id' => $user->id, 'provider_payment_id' => "tr_{$i}"]);
+
+            $this->actingAs($user)
+                ->getJson("/api/payments/tokens/{$purchase->id}")
+                ->assertOk()
+                ->assertJsonPath('status', 'failed');
+
+            $this->assertSame('FAILED', $purchase->fresh()->status);
+            $this->assertSame(5, $user->fresh()->tokens);
+        }
+    }
+
+    public function test_return_page_returns_404_for_other_users_and_unknown_ids(): void
+    {
+        $this->fakeMollie('tr_1');
+        $owner = User::factory()->member()->create();
+        $purchase = TokenPurchase::factory()->create(['user_id' => $owner->id, 'provider_payment_id' => 'tr_1']);
+
+        $this->actingAs(User::factory()->member()->create())
+            ->getJson("/api/payments/tokens/{$purchase->id}")->assertNotFound();
+        $this->actingAs($owner)->getJson('/api/payments/tokens/99999')->assertNotFound();
+        $this->actingAs($owner)->getJson('/api/payments/stripe/1')->assertNotFound();
     }
 
     public function test_token_transactions_returns_paginated_meta(): void

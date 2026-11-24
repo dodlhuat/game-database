@@ -8,8 +8,7 @@ use App\Models\User;
 use App\Notifications\WelcomeMemberNotification;
 use App\Rules\AustrianPostalCode;
 use App\Services\MembershipGrant;
-use App\Services\MembershipPaymentCompleter;
-use App\Services\StripeClient;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -18,8 +17,7 @@ use Throwable;
 class MembershipController extends Controller
 {
     public function __construct(
-        private StripeClient $stripe,
-        private MembershipPaymentCompleter $completer,
+        private PaymentService $payments,
         private MembershipGrant $grant,
     ) {}
 
@@ -36,10 +34,10 @@ class MembershipController extends Controller
     }
 
     /**
-     * Creates a Stripe PaymentIntent for a membership (new member, new
-     * supporter or renewal). The price always comes from config — the client
-     * only picks the type. The membership itself is only activated once the
-     * payment is confirmed (see confirm() and the Stripe webhook).
+     * Opens a Mollie checkout for a membership (new member, new supporter or
+     * renewal). The price always comes from config — the client only picks
+     * the type. The membership itself is only activated once Mollie reports
+     * the payment as paid (return page or webhook, see PaymentService).
      */
     public function checkout(Request $request): JsonResponse
     {
@@ -79,89 +77,32 @@ class MembershipController extends Controller
             ]);
         }
 
-        $priceCents = config()->integer('membership.fee_cents');
-        $currency = config()->string('tokens.currency');
-
-        try {
-            $intent = $this->stripe->createPaymentIntent($priceCents, $currency, [
-                'user_id' => (string) $user->id,
-                'kind' => 'membership',
-                'membership_type' => $type,
-            ]);
-        } catch (Throwable $e) {
-            report($e);
-
-            return response()->json(['message' => 'Zahlung konnte nicht vorbereitet werden.'], 502);
-        }
-
-        MembershipPayment::create([
+        $payment = MembershipPayment::create([
             'user_id' => $user->id,
+            'provider' => 'mollie',
             'type' => $type,
-            'provider_payment_intent_id' => $intent['id'],
-            'price_cents' => $priceCents,
-            'currency' => $currency,
+            'price_cents' => config()->integer('membership.fee_cents'),
+            'currency' => config()->string('tokens.currency'),
             'status' => 'CREATED',
             'street' => $address['street'] ?? null,
             'postal_code' => $address['postal_code'] ?? null,
             'city' => $address['city'] ?? null,
-            'payload' => $intent,
         ]);
 
-        return response()->json([
-            'clientSecret' => $intent['client_secret'],
-            'price_cents' => $priceCents,
-            'currency' => $currency,
-        ]);
-    }
-
-    /**
-     * Confirms a previously created PaymentIntent and activates the
-     * membership. Idempotent. The status is always re-fetched from Stripe.
-     */
-    public function confirm(Request $request, string $paymentIntentId): JsonResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        $payment = MembershipPayment::where('provider_payment_intent_id', $paymentIntentId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (! $payment) {
-            return response()->json(['message' => 'Zahlung nicht gefunden.'], 404);
-        }
-
-        if ($payment->status === 'COMPLETED') {
-            return response()->json([
-                'message' => 'Die Mitgliedschaft ist bereits aktiv.',
-                'user' => new UserResource($user->fresh()),
-            ]);
-        }
+        $description = $type === MembershipPayment::TYPE_RENEWAL
+            ? 'AUA Spieleausleihe · Verlängerung Mitgliedschaft'
+            : 'AUA Spieleausleihe · Mitgliedsbeitrag';
 
         try {
-            $intent = $this->stripe->retrievePaymentIntent($paymentIntentId);
+            $checkoutUrl = $this->payments->startCheckout($payment, $description);
         } catch (Throwable $e) {
             report($e);
+            $payment->update(['status' => 'FAILED']);
 
-            return response()->json(['message' => 'Zahlung konnte nicht überprüft werden.'], 502);
+            return response()->json(['message' => 'Zahlung konnte nicht vorbereitet werden.'], 502);
         }
 
-        $chargeId = $intent['latest_charge'] ?? null;
-
-        if (($intent['status'] ?? null) !== 'succeeded' || ! is_string($chargeId)) {
-            $payment->update(['status' => 'FAILED', 'payload' => $intent]);
-
-            return response()->json(['message' => 'Zahlung wurde nicht abgeschlossen.'], 422);
-        }
-
-        $this->completer->complete($payment, $chargeId, $intent);
-
-        return response()->json([
-            'message' => $payment->type === MembershipPayment::TYPE_RENEWAL
-                ? 'Mitgliedschaft verlängert!'
-                : 'Willkommen! Deine Mitgliedschaft ist aktiv.',
-            'user' => new UserResource($user->fresh()),
-        ]);
+        return response()->json(['checkoutUrl' => $checkoutUrl, 'id' => $payment->id]);
     }
 
     /** Supporter who already paid the fee upgrades to a full membership. */

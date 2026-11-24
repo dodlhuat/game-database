@@ -270,9 +270,8 @@
       @close="cancelOpen = false"
       @cancelled="onCancelled"
     />
-    <StripeCheckoutModal
+    <PaymentCheckoutModal
       :membership="renewCheckout"
-      @success="onRenewed"
       @error="renewError = $event"
       @close="renewCheckout = null"
     />
@@ -418,7 +417,7 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect())
 
 // Renew membership (same flow as the dashboard)
-const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
+const { renewCheckout, renewError, renewLoading, renew } = useMembershipRenewal()
 
 // Cancel membership
 const cancelOpen = ref(false)

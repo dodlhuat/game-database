@@ -9,7 +9,7 @@ use App\Notifications\WelcomeSupporterNotification;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Activates a membership for a completed Stripe charge. Idempotent: the
+ * Activates a membership for a completed payment. Idempotent: the
  * confirm endpoint and the webhook may both call this for the same payment,
  * only the first one to acquire the row lock applies the membership.
  */

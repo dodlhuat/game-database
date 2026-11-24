@@ -207,15 +207,13 @@
       </div>
     </div>
 
-    <StripeCheckoutModal
+    <PaymentCheckoutModal
       :membership="checkout"
-      @success="onPaid"
       @error="onCheckoutError"
       @close="checkout = null"
     />
-    <StripeCheckoutModal
+    <PaymentCheckoutModal
       :membership="renewCheckout"
-      @success="onRenewedHere"
       @error="renewError = $event"
       @close="renewCheckout = null"
     />
@@ -256,12 +254,7 @@ const checkout = ref<{
 } | null>(null)
 const activateLoading = ref(false)
 const activateError = ref('')
-const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
-
-async function onRenewedHere(result: { user: unknown }) {
-  onRenewed(result)
-  await navigateTo('/dashboard')
-}
+const { renewCheckout, renewError, renewLoading, renew } = useMembershipRenewal()
 
 // Admins cannot become members
 if (auth.isAdmin) {
@@ -290,12 +283,6 @@ function formatPrice(cents: number): string {
     style: 'currency',
     currency: pricing.value?.currency ?? 'EUR',
   }).format(cents / 100)
-}
-
-async function onPaid(result: { user: unknown }) {
-  checkout.value = null
-  if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
-  await navigateTo('/dashboard')
 }
 
 function onCheckoutError(message: string) {

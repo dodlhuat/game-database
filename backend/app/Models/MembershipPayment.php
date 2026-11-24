@@ -5,6 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $provider mollie | stripe (older payments)
+ * @property string|null $provider_payment_id
+ * @property string $status
+ * @property int $price_cents
+ * @property string $currency
+ */
 class MembershipPayment extends Model
 {
     public const TYPE_MEMBER = 'MEMBER';
@@ -16,7 +23,8 @@ class MembershipPayment extends Model
     protected $fillable = [
         'user_id',
         'type',
-        'provider_payment_intent_id',
+        'provider',
+        'provider_payment_id',
         'provider_charge_id',
         'price_cents',
         'currency',

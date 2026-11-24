@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
 use App\Models\TokenPurchase;
 use App\Models\User;
-use App\Services\StripeClient;
-use App\Services\TokenPurchaseCompleter;
+use App\Services\PaymentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,10 +12,7 @@ use Throwable;
 
 class TokenController extends Controller
 {
-    public function __construct(
-        private StripeClient $stripe,
-        private TokenPurchaseCompleter $completer,
-    ) {}
+    public function __construct(private PaymentService $payments) {}
 
     /**
      * Public price list for the token packages — token amount + price, read
@@ -41,9 +36,10 @@ class TokenController extends Controller
     }
 
     /**
-     * Creates a Stripe PaymentIntent for a token package. The price is
-     * looked up server-side from config('tokens.packages') — the client only
-     * ever picks a token amount, never a price.
+     * Opens a Mollie checkout for a token package. The price is looked up
+     * server-side from config('tokens.packages') — the client only ever
+     * picks a token amount, never a price. Tokens are credited once Mollie
+     * reports the payment as paid (return page or webhook).
      */
     public function checkout(Request $request): JsonResponse
     {
@@ -61,82 +57,25 @@ class TokenController extends Controller
         }
 
         $amount = $request->integer('amount');
-        $priceCents = config()->integer("tokens.packages.{$amount}");
-        $currency = config()->string('tokens.currency');
+
+        $purchase = TokenPurchase::create([
+            'user_id' => $user->id,
+            'provider' => 'mollie',
+            'token_amount' => $amount,
+            'price_cents' => config()->integer("tokens.packages.{$amount}"),
+            'currency' => config()->string('tokens.currency'),
+            'status' => 'CREATED',
+        ]);
 
         try {
-            $intent = $this->stripe->createPaymentIntent($priceCents, $currency, [
-                'user_id' => (string) $user->id,
-                'token_amount' => (string) $amount,
-            ]);
+            $checkoutUrl = $this->payments->startCheckout($purchase, "AUA Spieleausleihe · {$amount} Token");
         } catch (Throwable $e) {
             report($e);
+            $purchase->update(['status' => 'FAILED']);
 
             return response()->json(['message' => 'Zahlung konnte nicht vorbereitet werden.'], 502);
         }
 
-        TokenPurchase::create([
-            'user_id' => $user->id,
-            'provider_payment_intent_id' => $intent['id'],
-            'token_amount' => $amount,
-            'price_cents' => $priceCents,
-            'currency' => $currency,
-            'status' => 'CREATED',
-            'payload' => $intent,
-        ]);
-
-        return response()->json(['clientSecret' => $intent['client_secret']]);
-    }
-
-    /**
-     * Confirms a previously created Stripe PaymentIntent and credits the
-     * tokens. Idempotent: calling this again for an already-completed
-     * purchase just returns the current state instead of crediting twice.
-     *
-     * The client only tells us which payment intent to check — the actual
-     * status is always re-fetched from Stripe, never trusted from the client.
-     */
-    public function confirm(Request $request, string $paymentIntentId): JsonResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-
-        $purchase = TokenPurchase::where('provider_payment_intent_id', $paymentIntentId)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if (! $purchase) {
-            return response()->json(['message' => 'Bestellung nicht gefunden.'], 404);
-        }
-
-        if ($purchase->status === 'COMPLETED') {
-            return response()->json([
-                'message' => 'Token wurden bereits gutgeschrieben.',
-                'user' => new UserResource($user->fresh()),
-            ]);
-        }
-
-        try {
-            $intent = $this->stripe->retrievePaymentIntent($paymentIntentId);
-        } catch (Throwable $e) {
-            report($e);
-
-            return response()->json(['message' => 'Zahlung konnte nicht überprüft werden.'], 502);
-        }
-
-        $chargeId = $intent['latest_charge'] ?? null;
-
-        if (($intent['status'] ?? null) !== 'succeeded' || ! is_string($chargeId)) {
-            $purchase->update(['status' => 'FAILED', 'payload' => $intent]);
-
-            return response()->json(['message' => 'Zahlung wurde nicht abgeschlossen.'], 422);
-        }
-
-        $this->completer->complete($purchase, $chargeId, $intent);
-
-        return response()->json([
-            'message' => "{$purchase->token_amount} Token wurden deinem Konto hinzugefügt.",
-            'user' => new UserResource($user->fresh()),
-        ]);
+        return response()->json(['checkoutUrl' => $checkoutUrl, 'id' => $purchase->id]);
     }
 }

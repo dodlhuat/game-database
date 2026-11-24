@@ -520,9 +520,8 @@
 
     <div v-if="renewError" class="alert alert-error renew-error">{{ renewError }}</div>
 
-    <StripeCheckoutModal
+    <PaymentCheckoutModal
       :membership="renewCheckout"
-      @success="onRenewed"
       @error="renewError = $event"
       @close="renewCheckout = null"
     />
@@ -832,7 +831,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 // Membership helpers
-const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
+const { renewCheckout, renewError, renewLoading, renew } = useMembershipRenewal()
 
 const canRenew = computed(() => {
   const exp = auth.user?.membership_expires_at
