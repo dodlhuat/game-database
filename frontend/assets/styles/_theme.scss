@@ -84,6 +84,16 @@ body {
   font-size: 2.5rem;
 }
 
+// ─── Lightbox buttons ─────────────────────────────────────────────
+// The global button padding (20px left/right) is wider than these 40px
+// round buttons, which left the icon 0px of room — and `svg { max-width:
+// 100% }` squeezed it to nothing. They centre their icon via flexbox.
+.lightbox-close,
+.lightbox-prev,
+.lightbox-next {
+  padding: 0;
+}
+
 // ─── File uploader icon ───────────────────────────────────────────
 // Icon-svg inherits font-size (see above), which is too small for the
 // 40×40 icon-container in the drop zone. Restore an appropriate size.
