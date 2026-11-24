@@ -121,6 +121,8 @@ $muted: var(--secondary-text);
     font-weight: 700;
     letter-spacing: 0.01em;
     line-height: 1.3;
+    // basix colours headings with a fixed dark tone; follow the theme instead
+    color: var(--primary-text);
     scroll-margin-top: calc(#{$nav-height} + 1rem);
     animation: legal-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: calc(var(--i, 0) * 45ms);
@@ -145,6 +147,7 @@ $muted: var(--secondary-text);
     font-size: 0.95rem;
     font-weight: 600;
     line-height: 1.4;
+    color: var(--primary-text);
   }
 
   &__letter {
