@@ -89,13 +89,15 @@
           </div>
           <p class="empty-state__text">
             {{
-              auth.isSupporter
-                ? $t('pages.tokens.not_member_supporter')
-                : $t('pages.tokens.not_member')
+              auth.isMembershipExpired
+                ? $t('pages.tokens.expired')
+                : auth.isSupporter
+                  ? $t('pages.tokens.not_member_supporter')
+                  : $t('pages.tokens.not_member')
             }}
           </p>
           <NuxtLink to="/upgrade" class="button button-primary empty-state__cta">
-            {{ $t('btn.upgrade') }} →
+            {{ auth.isMembershipExpired ? $t('btn.renew') : $t('btn.upgrade') }} →
           </NuxtLink>
         </div>
 

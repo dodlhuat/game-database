@@ -14,11 +14,18 @@
           <p v-if="!loading" class="greeting__meta">
             <span>{{ $t('dashboard.total_loans_meta', { n: totalLoans }, totalLoans) }}</span>
             <template
-              v-if="(auth.canBorrow || auth.isSupporter) && auth.user?.membership_expires_at"
+              v-if="
+                (auth.canBorrow || auth.isSupporter || auth.isMembershipExpired) &&
+                auth.user?.membership_expires_at
+              "
             >
               <span class="greeting__meta-sep" aria-hidden="true" />
               <span class="membership-expiry" :class="expiryClass">
-                {{ $t('dashboard.membership.label') }}
+                {{
+                  auth.isMembershipExpired
+                    ? $t('dashboard.membership.expired_label')
+                    : $t('dashboard.membership.label')
+                }}
                 <strong class="membership-expiry__date">{{
                   formatDate(auth.user?.membership_expires_at)
                 }}</strong>
@@ -61,6 +68,20 @@
           <NuxtLink to="/upgrade" class="wallet__cta">{{
             $t('dashboard.membership.activate_full')
           }}</NuxtLink>
+        </div>
+        <div v-else-if="auth.isMembershipExpired" class="wallet wallet--expired">
+          <span class="wallet__badge wallet__badge--locked">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#lock" />
+            </svg>
+            {{ $t('dashboard.membership.expired') }}
+          </span>
+          <span v-if="auth.user?.role === 'MEMBER'" class="wallet__value wallet__value--frozen">{{
+            auth.totalTokens
+          }}</span>
+          <button type="button" class="wallet__cta" :disabled="renewLoading" @click="renew">
+            {{ $t('dashboard.membership.renew_cta') }}
+          </button>
         </div>
         <div v-else-if="auth.isRegisteredUser" class="wallet wallet--plain">
           <span class="wallet__text">{{ $t('dashboard.membership.not_member') }}</span>
@@ -682,8 +703,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 // Membership helpers
-const api = useApi()
-const renewLoading = ref(false)
+const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
 
 const canRenew = computed(() => {
   const exp = auth.user?.membership_expires_at
@@ -696,36 +716,11 @@ const expiryClass = computed(() => {
   const exp = auth.user?.membership_expires_at
   if (!exp) return ''
   const days = (new Date(exp).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  if (days <= 0) return 'membership-expiry--critical membership-expiry--expired'
   if (days < 30) return 'membership-expiry--critical'
   if (days < 90) return 'membership-expiry--warn'
   return ''
 })
-
-const renewCheckout = ref<{ type: 'RENEWAL'; price_cents: number; currency: string } | null>(null)
-const renewError = ref('')
-
-async function renew() {
-  if (renewLoading.value) return
-  renewLoading.value = true
-  renewError.value = ''
-  try {
-    const pricing = await api.get<{ fee_cents: number; currency: string }>('/membership/pricing')
-    renewCheckout.value = {
-      type: 'RENEWAL',
-      price_cents: pricing.fee_cents,
-      currency: pricing.currency,
-    }
-  } catch {
-    renewError.value = 'Der Mitgliedsbeitrag konnte nicht geladen werden.'
-  } finally {
-    renewLoading.value = false
-  }
-}
-
-function onRenewed(result: { user: unknown }) {
-  renewCheckout.value = null
-  if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
-}
 </script>
 
 <style lang="scss" scoped>
@@ -1024,6 +1019,34 @@ $amber-ink: var(--amber-ink);
   &__text {
     font-size: 0.9rem;
     color: var(--secondary-text);
+  }
+
+  // Lapsed membership: the balance is still there but frozen until renewal
+  &--expired {
+    align-content: end;
+    @media (max-width: 760px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  &__badge--locked {
+    color: var(--error-text);
+    background: var(--error-muted);
+    border-color: var(--error-border);
+    .icon-svg {
+      color: currentColor;
+    }
+  }
+  &__value--frozen {
+    background: none;
+    color: ink(22%);
+    filter: none;
+    text-decoration: line-through;
+    text-decoration-thickness: 0.06em;
+    text-decoration-color: var(--error-border);
+  }
+  &__cta:disabled {
+    opacity: 0.6;
+    cursor: progress;
   }
 }
 

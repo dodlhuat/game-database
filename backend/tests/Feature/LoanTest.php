@@ -77,6 +77,23 @@ class LoanTest extends TestCase
             ->assertJsonPath('reason', 'membership_required');
     }
 
+    public function test_store_fails_for_expired_member(): void
+    {
+        LoanSetting::factory()->create(['deposit_pct_very_good' => 0]);
+        $user = User::factory()->member()->create([
+            'tokens' => 20,
+            'membership_expires_at' => now()->subDay(),
+        ]);
+        $copy = Copy::factory()->create(['condition' => 'NEW']);
+
+        $this->actingAs($user)
+            ->postJson('/api/loans', ['copy_id' => $copy->id])
+            ->assertStatus(403)
+            ->assertJsonPath('reason', 'membership_required');
+
+        $this->assertSame(0, Loan::count());
+    }
+
     public function test_store_fails_for_locked_copy(): void
     {
         LoanSetting::factory()->create();

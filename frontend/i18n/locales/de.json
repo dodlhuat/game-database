@@ -212,6 +212,8 @@
     "membership_full": "Vollmitglied",
     "membership_active_until": "Aktiv bis {date}",
     "no_membership": "Kein Mitglied",
+    "membership_expired_on": "Abgelaufen am {date}",
+    "membership_expired_hint": "Ausleihen ist gesperrt, bis du verlängerst.",
     "role_admin": "Administrator"
   },
   "dashboard": {
@@ -226,7 +228,10 @@
       "not_member": "Du bist noch kein Mitglied.",
       "upgrade": "Jetzt Mitglied werden →",
       "supporter_label": "Außerordentliches Mitglied",
-      "activate_full": "Zum Vollmitglied upgraden →"
+      "activate_full": "Zum Vollmitglied upgraden →",
+      "expired_label": "Mitgliedschaft abgelaufen am",
+      "expired": "Deine Mitgliedschaft ist abgelaufen — Ausleihen ist gesperrt.",
+      "renew_cta": "Jetzt verlängern →"
     },
     "tokens": {
       "label": "Token",
@@ -360,6 +365,7 @@
       },
       "login_to_borrow": "Anmelden zum Ausleihen",
       "membership_required": "Mitgliedschaft erforderlich",
+      "membership_expired": "Mitgliedschaft abgelaufen — verlängern",
       "already_borrowed": "Bereits ausgeliehen",
       "confirm_borrow_title": "Spiel ausleihen",
       "confirm_borrow": {
@@ -419,6 +425,7 @@
       "game_loaned": "Ausgeliehen",
       "cta_login": "Melde dich an um dieses Paket auszuleihen.",
       "cta_not_member": "Nur Mitglieder können Pakete ausleihen.",
+      "cta_expired": "Deine Mitgliedschaft ist abgelaufen. Verlängere sie, um wieder Pakete auszuleihen.",
       "cta_unavailable": "Dieses Paket ist aktuell nicht vollständig verfügbar.",
       "borrow": "Paket ausleihen ({cost} Token)",
       "borrowing": "Wird ausgeliehen…"
@@ -455,12 +462,17 @@
       "activate_full_title": "Bereit, richtig einzusteigen?",
       "activate_full_text": "Werde Vollmitglied und erhalte sofort {bonus} Bonus-Token, um Spiele aus unserer Sammlung auszuleihen.",
       "activate_full_note": "Kein neuer Beitrag nötig — dein Ablaufdatum bleibt gleich.",
-      "activate_full_btn": "Jetzt zum Vollmitglied upgraden"
+      "activate_full_btn": "Jetzt zum Vollmitglied upgraden",
+      "expired_title": "Deine Mitgliedschaft ist abgelaufen",
+      "expired_text": "Sie ist am {date} ausgelaufen. Verlängere sie um ein weiteres Jahr — dein Konto und deine Daten bleiben unverändert.",
+      "expired_blocked": "Bis zur Verlängerung kannst du keine Spiele ausleihen, reservieren oder verlängern.",
+      "expired_btn": "Mitgliedschaft verlängern · {price}"
     },
     "tokens": {
       "my_account": "Mein Konto",
       "title": "Token aufladen",
       "not_member": "Nur Mitglieder können Token kaufen.",
+      "expired": "Deine Mitgliedschaft ist abgelaufen. Verlängere sie, um wieder Token zu kaufen und Spiele auszuleihen.",
       "not_member_supporter": "Als außerordentliches Mitglied hast du kein Token-Guthaben. Werde Vollmitglied, um Token zu erhalten und Spiele auszuleihen.",
       "popular": "Beliebt",
       "costs_title": "Token-Kosten",

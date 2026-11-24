@@ -66,6 +66,31 @@ describe('auth store — canBorrow', () => {
   })
 })
 
+describe('auth store — isMembershipExpired', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
+
+  it('is true for a member or supporter whose expiry has passed', () => {
+    expect(setUser({ role: 'MEMBER', membership_expires_at: past }).isMembershipExpired).toBe(true)
+    setActivePinia(createPinia())
+    expect(setUser({ role: 'SUPPORTER', membership_expires_at: past }).isMembershipExpired).toBe(
+      true
+    )
+  })
+
+  it('is false while the membership is still running', () => {
+    const auth = setUser({ role: 'MEMBER', membership_expires_at: future })
+    expect(auth.isMembershipExpired).toBe(false)
+  })
+
+  it('is false for plain users and admins', () => {
+    expect(setUser({ role: 'USER', membership_expires_at: past }).isMembershipExpired).toBe(false)
+    setActivePinia(createPinia())
+    expect(setUser({ role: 'ADMIN' }).isMembershipExpired).toBe(false)
+  })
+})
+
 describe('auth store — bonus tokens', () => {
   beforeEach(() => {
     setActivePinia(createPinia())

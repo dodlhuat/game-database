@@ -46,6 +46,15 @@ export const useAuthStore = defineStore('auth', {
       if (!state.user.membership_expires_at) return false
       return new Date(state.user.membership_expires_at) > new Date()
     },
+    // Member or supporter whose year ran out without a renewal: borrowing is
+    // blocked until they renew, a fresh sign-up is not possible either.
+    isMembershipExpired: (state) => {
+      if (!state.user || (state.user.role !== 'MEMBER' && state.user.role !== 'SUPPORTER')) {
+        return false
+      }
+      if (!state.user.membership_expires_at) return false
+      return new Date(state.user.membership_expires_at) <= new Date()
+    },
     bonusTokens: (state) => state.user?.bonus_tokens ?? 0,
     // Normal plus bonus tokens
     totalTokens: (state) => (state.user?.tokens ?? 0) + (state.user?.bonus_tokens ?? 0),

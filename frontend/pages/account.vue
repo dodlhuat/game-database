@@ -208,18 +208,24 @@
               <h2 class="account-section__title">{{ $t('account.membership_title') }}</h2>
             </header>
 
-            <template v-if="hasMembership">
+            <template v-if="hasMembership || auth.isMembershipExpired">
               <div class="membership" :class="`membership--${expiryTone}`">
                 <div class="membership__status">
                   <span class="membership__kind">{{
-                    auth.isSupporter
+                    auth.user?.role === 'SUPPORTER'
                       ? $t('dashboard.membership.supporter_label')
                       : $t('account.membership_full')
                   }}</span>
                   <span class="membership__until">{{
-                    $t('account.membership_active_until', {
-                      date: formatDate(auth.user?.membership_expires_at),
-                    })
+                    $t(
+                      auth.isMembershipExpired
+                        ? 'account.membership_expired_on'
+                        : 'account.membership_active_until',
+                      { date: formatDate(auth.user?.membership_expires_at) }
+                    )
+                  }}</span>
+                  <span v-if="auth.isMembershipExpired" class="membership__hint">{{
+                    $t('account.membership_expired_hint')
                   }}</span>
                 </div>
                 <div class="membership__actions">
@@ -348,6 +354,7 @@ const daysLeft = computed(() => {
 })
 const expiryTone = computed(() => {
   if (daysLeft.value === null) return 'ok'
+  if (auth.isMembershipExpired) return 'expired'
   if (daysLeft.value < 30) return 'critical'
   if (daysLeft.value < 90) return 'warn'
   return 'ok'
@@ -363,6 +370,14 @@ const statusChip = computed(() => {
         ? `${t('dashboard.membership.supporter_label')} · ${date}`
         : t('account.membership_active_until', { date }),
       tone: expiryTone.value === 'ok' ? 'active' : expiryTone.value,
+    }
+  }
+  if (auth.isMembershipExpired) {
+    return {
+      label: t('account.membership_expired_on', {
+        date: formatDate(auth.user?.membership_expires_at),
+      }),
+      tone: 'critical',
     }
   }
   return { label: t('account.no_membership'), tone: 'neutral' }
@@ -403,32 +418,7 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect())
 
 // Renew membership (same flow as the dashboard)
-const renewCheckout = ref<{ type: 'RENEWAL'; price_cents: number; currency: string } | null>(null)
-const renewError = ref('')
-const renewLoading = ref(false)
-
-async function renew() {
-  if (renewLoading.value) return
-  renewLoading.value = true
-  renewError.value = ''
-  try {
-    const pricing = await api.get<{ fee_cents: number; currency: string }>('/membership/pricing')
-    renewCheckout.value = {
-      type: 'RENEWAL',
-      price_cents: pricing.fee_cents,
-      currency: pricing.currency,
-    }
-  } catch {
-    renewError.value = t('common.error.generic')
-  } finally {
-    renewLoading.value = false
-  }
-}
-
-function onRenewed(result: { user: unknown }) {
-  renewCheckout.value = null
-  if (result.user) auth.setUser(result.user as NonNullable<typeof auth.user>)
-}
+const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
 
 // Cancel membership
 const cancelOpen = ref(false)
@@ -1121,6 +1111,32 @@ $amber-ink: var(--amber-ink);
   &--critical &__until {
     color: var(--error-text);
     font-weight: 600;
+  }
+  // Lapsed: same urgency as critical, plus a hatched edge so it reads as
+  // "stopped", not just "running out"
+  &--expired {
+    position: relative;
+    overflow: hidden;
+    padding-left: 1.6rem;
+    background: var(--error-muted);
+    border-color: var(--error-border);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 6px;
+      background: repeating-linear-gradient(-45deg, var(--error-text) 0 4px, transparent 4px 8px);
+      opacity: 0.7;
+    }
+  }
+  &--expired &__until {
+    color: var(--error-text);
+    font-weight: 700;
+  }
+  &__hint {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
   }
   &__actions {
     display: flex;

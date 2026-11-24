@@ -173,6 +173,11 @@ class MembershipController extends Controller
         if ($user->role !== 'SUPPORTER') {
             return response()->json(['message' => 'Nur außerordentliche Mitglieder können auf ein Vollmitglied upgraden.'], 422);
         }
+        // An expired supporter has to renew first, otherwise the upgrade would
+        // hand out the bonus package without a paid membership behind it.
+        if (! $user->isSupporter()) {
+            return response()->json(['message' => 'Deine Mitgliedschaft ist abgelaufen. Bitte verlängere sie zuerst.'], 422);
+        }
 
         $user->role = 'MEMBER';
         $user->save();

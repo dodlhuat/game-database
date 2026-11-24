@@ -223,6 +223,23 @@ class MembershipPaymentTest extends TestCase
         $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertUnprocessable();
     }
 
+    public function test_expired_membership_can_be_renewed_and_restarts_from_today(): void
+    {
+        Notification::fake();
+        $this->fakeStripe();
+        $user = User::factory()->member()->create(['tokens' => 3, 'membership_expires_at' => now()->subMonths(2)]);
+        $this->assertFalse($user->isMember());
+
+        $this->actingAs($user)->postJson('/api/membership/checkout', ['type' => 'RENEWAL'])->assertOk();
+        $this->actingAs($user)->postJson('/api/membership/confirm/pi_m1')->assertOk();
+
+        $user->refresh();
+        $this->assertTrue($user->isMember());
+        $this->assertEqualsWithDelta(now()->addYear()->timestamp, $user->membership_expires_at->timestamp, 5);
+        $this->assertSame(3, $user->tokens);
+        $this->assertSame(20, $user->bonus_tokens);
+    }
+
     public function test_supporter_renewal_grants_no_tokens(): void
     {
         $this->fakeStripe();
@@ -245,6 +262,17 @@ class MembershipPaymentTest extends TestCase
             ->assertJsonPath('user.role', 'MEMBER')
             ->assertJsonPath('user.tokens', 0)
             ->assertJsonPath('user.bonus_tokens', 20);
+    }
+
+    public function test_activate_full_membership_is_rejected_for_expired_supporter(): void
+    {
+        $user = User::factory()->supporter()->create(['membership_expires_at' => now()->subDay()]);
+
+        $this->actingAs($user)->postJson('/api/membership/activate-full')->assertUnprocessable();
+
+        $user->refresh();
+        $this->assertSame('SUPPORTER', $user->role);
+        $this->assertSame(0, $user->bonus_tokens);
     }
 
     public function test_refunded_charge_marks_membership_payment(): void

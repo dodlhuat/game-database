@@ -182,7 +182,9 @@
           </template>
           <template v-else-if="auth.isActive && !auth.canBorrow">
             <NuxtLink to="/upgrade" class="gd-btn gd-btn--secondary">{{
-              $t('pages.game.membership_required')
+              auth.isMembershipExpired
+                ? $t('pages.game.membership_expired')
+                : $t('pages.game.membership_required')
             }}</NuxtLink>
           </template>
           <template v-else-if="auth.canBorrow && game.already_borrowed">
@@ -309,7 +311,9 @@
           </template>
           <template v-else-if="auth.isActive && !auth.canBorrow">
             <NuxtLink to="/upgrade" class="gd-bar__btn gd-bar__btn--sec">{{
-              $t('pages.game.membership_required')
+              auth.isMembershipExpired
+                ? $t('pages.game.membership_expired')
+                : $t('pages.game.membership_required')
             }}</NuxtLink>
           </template>
           <template v-else-if="auth.canBorrow && game.already_borrowed">

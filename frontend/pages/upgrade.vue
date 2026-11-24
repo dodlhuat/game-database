@@ -47,6 +47,29 @@
           </div>
         </div>
 
+        <div v-else-if="auth.isMembershipExpired" class="already-member already-member--expired">
+          <div class="already-member__icon">
+            <svg class="icon-svg" aria-hidden="true">
+              <use href="/svg-icons/icons.svg#lock" />
+            </svg>
+          </div>
+          <h2 class="already-member__title">{{ $t('pages.upgrade.expired_title') }}</h2>
+          <p class="already-member__text">
+            {{
+              $t('pages.upgrade.expired_text', {
+                date: formatDate(auth.user?.membership_expires_at),
+              })
+            }}
+          </p>
+          <p class="already-member__blocked">{{ $t('pages.upgrade.expired_blocked') }}</p>
+          <div v-if="renewError" class="alert alert-error">{{ renewError }}</div>
+          <UiButton :loading="renewLoading" :disabled="!pricing" @click="renew">{{
+            $t('pages.upgrade.expired_btn', {
+              price: pricing ? formatPrice(pricing.fee_cents) : '',
+            })
+          }}</UiButton>
+        </div>
+
         <div v-else class="upgrade-layout">
           <!-- Tier selector -->
           <div class="tier-selector">
@@ -190,6 +213,12 @@
       @error="onCheckoutError"
       @close="checkout = null"
     />
+    <StripeCheckoutModal
+      :membership="renewCheckout"
+      @success="onRenewedHere"
+      @error="renewError = $event"
+      @close="renewCheckout = null"
+    />
   </div>
 </template>
 
@@ -227,6 +256,12 @@ const checkout = ref<{
 } | null>(null)
 const activateLoading = ref(false)
 const activateError = ref('')
+const { renewCheckout, renewError, renewLoading, renew, onRenewed } = useMembershipRenewal()
+
+async function onRenewedHere(result: { user: unknown }) {
+  onRenewed(result)
+  await navigateTo('/dashboard')
+}
 
 // Admins cannot become members
 if (auth.isAdmin) {
@@ -402,6 +437,34 @@ $border: var(--divider);
   &__text {
     color: $hero-muted;
     margin-bottom: 1.5rem;
+  }
+  &__blocked {
+    margin: -0.75rem 0 1.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--error-text);
+  }
+
+  &--expired {
+    border-color: var(--error-border);
+    background:
+      radial-gradient(120% 80% at 50% 0%, var(--error-muted), transparent 70%),
+      #{$surface};
+  }
+  &--expired &__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 4rem;
+    height: 4rem;
+    margin-bottom: 1.25rem;
+    border-radius: 50%;
+    color: var(--error-text);
+    background: var(--error-muted);
+    border: 1px solid var(--error-border);
+    .icon-svg {
+      width: 1.75rem;
+      height: 1.75rem;
+    }
   }
 }
 
