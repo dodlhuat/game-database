@@ -191,6 +191,12 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'checklist',
     vars: ['count', 'date', 'pickup_list'],
   },
+  pickup_event_reminder: {
+    label: 'Abholtermin morgen',
+    recipient: 'Mitglied',
+    icon: 'event',
+    vars: ['name', 'date', 'time', 'games', 'location', 'location_details'],
+  },
   reservation_available: {
     label: 'Spiel wieder verfügbar',
     recipient: 'Mitglied',

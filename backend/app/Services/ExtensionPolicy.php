@@ -16,6 +16,8 @@ class ExtensionPolicy
 
     public const BLOCK_RESERVED = 'reserved';
 
+    public const BLOCK_AWAITING_PICKUP = 'awaiting_pickup';
+
     /** The first extension of a loan is free, every further one costs `extension_cost`. */
     public function nextCost(Loan $loan, LoanSetting $setting): int
     {
@@ -44,6 +46,10 @@ class ExtensionPolicy
     {
         if (! in_array($loan->status, ['ACTIVE', 'EXTENDED', 'OVERDUE'])) {
             return self::BLOCK_NOT_EXTENDABLE;
+        }
+
+        if ($loan->isAwaitingPickup()) {
+            return self::BLOCK_AWAITING_PICKUP;
         }
 
         if ($this->used($loan) >= $setting->max_extensions) {

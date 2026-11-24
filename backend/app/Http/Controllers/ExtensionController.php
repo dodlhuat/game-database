@@ -89,6 +89,10 @@ class ExtensionController extends Controller
                     .'Eine weitere Verlängerung ist erst möglich, wenn du es zurückgibst und neu ausborgst.',
                 'reason' => 'max_extensions_reached',
             ], 422),
+            ExtensionPolicy::BLOCK_AWAITING_PICKUP => response()->json([
+                'message' => 'Diese Ausleihe kann erst nach der Abholung verlängert werden.',
+                'reason' => 'awaiting_pickup',
+            ], 422),
             ExtensionPolicy::BLOCK_RESERVED => response()->json([
                 'message' => 'Dieses Spiel ist bereits reserviert und kann deshalb nicht verlängert werden.',
                 'reason' => 'game_reserved',

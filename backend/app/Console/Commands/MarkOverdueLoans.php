@@ -14,7 +14,9 @@ class MarkOverdueLoans extends Command
 
     public function handle(): int
     {
+        // Not handed out yet means not overdue — that is a no-show, handled at the event
         $count = Loan::whereIn('status', ['ACTIVE', 'EXTENDED'])
+            ->handedOut()
             ->where('due_date', '<', Carbon::today())
             ->update(['status' => 'OVERDUE']);
 

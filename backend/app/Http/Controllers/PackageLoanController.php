@@ -138,6 +138,8 @@ class PackageLoanController extends Controller
                 'user_id' => $user->id,
                 'pickup_location_id' => $location->id,
                 'pickup_event_id' => $event?->id,
+                // Regular loans are out right away; event loans wait for the hand-out
+                'handed_out_at' => $event ? null : now(),
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
@@ -152,6 +154,8 @@ class PackageLoanController extends Controller
                     'user_id' => $user->id,
                     'pickup_location_id' => $location->id,
                     'pickup_event_id' => $event?->id,
+                    // Regular loans are out right away; event loans wait for the hand-out
+                    'handed_out_at' => $event ? null : now(),
                     'start_date' => $startDate->toDateString(),
                     'due_date' => $dueDate->toDateString(),
                     'status' => 'ACTIVE',
@@ -204,6 +208,10 @@ class PackageLoanController extends Controller
 
         if ($packageLoan->status !== 'ACTIVE') {
             return response()->json(['message' => 'Dieses Paket ist bereits zurückgegeben.'], 422);
+        }
+
+        if ($packageLoan->isAwaitingPickup()) {
+            return response()->json(['message' => LoanReturnService::AWAITING_PICKUP_MESSAGE, 'reason' => 'awaiting_pickup'], 422);
         }
 
         $validated = $request->validate([

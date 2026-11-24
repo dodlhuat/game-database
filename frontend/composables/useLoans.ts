@@ -42,7 +42,10 @@ export interface Loan {
     admin_note: string | null
   }[]
   can_extend?: boolean
-  extension_blocked_reason?: 'not_extendable' | 'max_reached' | 'reserved' | null
+  extension_blocked_reason?:
+    'not_extendable' | 'max_reached' | 'reserved' | 'awaiting_pickup' | null
+  /** Booked for a pickup event, not handed out yet: no extending, returning or damage report. */
+  awaiting_pickup?: boolean
   next_extension_cost?: number
   extensions_used?: number
   max_extensions?: number

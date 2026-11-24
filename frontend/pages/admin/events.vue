@@ -79,6 +79,13 @@
                   </td>
                   <td>
                     <div class="action-row">
+                      <NuxtLink
+                        v-if="event.is_pickup"
+                        :to="`/admin/pickup-events/${event.id}`"
+                        class="action-btn action-btn--accent"
+                      >
+                        {{ $t('admin.packing.open') }}
+                      </NuxtLink>
                       <button class="action-btn" @click="openEdit(event)">
                         {{ $t('admin.actions.edit') }}
                       </button>
@@ -730,6 +737,17 @@ $hero-muted: var(--secondary-text);
   &:hover {
     border-color: var(--accent-color);
     color: var(--accent-text);
+  }
+  &--accent {
+    color: #1a0d00;
+    background: $amber;
+    border-color: $amber;
+    text-decoration: none;
+    &:hover {
+      color: #1a0d00;
+      border-color: $amber;
+      filter: brightness(1.05);
+    }
   }
   &--danger {
     color: var(--error-text);

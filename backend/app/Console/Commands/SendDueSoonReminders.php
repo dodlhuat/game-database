@@ -21,6 +21,7 @@ class SendDueSoonReminders extends Command
 
         $loans = Loan::with(['user', 'copy.game'])
             ->whereIn('status', ['ACTIVE', 'EXTENDED'])
+            ->handedOut()
             ->whereDate('due_date', $targetDate)
             ->get();
 

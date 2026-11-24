@@ -117,6 +117,8 @@ class LoanController extends Controller
                 'user_id' => $user->id,
                 'pickup_location_id' => $location->id,
                 'pickup_event_id' => $event?->id,
+                // Regular loans are out right away; event loans wait for the hand-out
+                'handed_out_at' => $event ? null : now(),
                 'start_date' => $startDate->toDateString(),
                 'due_date' => $dueDate->toDateString(),
                 'status' => 'ACTIVE',
@@ -181,6 +183,10 @@ class LoanController extends Controller
 
         if (! in_array($loan->status, Loan::OPEN_STATUSES)) {
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
+        }
+
+        if ($loan->isAwaitingPickup()) {
+            return response()->json(['message' => LoanReturnService::AWAITING_PICKUP_MESSAGE, 'reason' => 'awaiting_pickup'], 422);
         }
 
         if ($loan->package_loan_id !== null) {

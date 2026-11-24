@@ -74,6 +74,13 @@ class EmailTemplateController extends Controller
             'body' => '<p>Stand {date} liegen diese zurückgegebenen Spiele an den Abholorten bereit und warten auf Abholung und Prüfung:</p>{pickup_list}',
             'action_text' => 'Zur Prüfliste',
         ],
+        'pickup_event_reminder' => [
+            'key' => 'pickup_event_reminder',
+            'subject' => 'Morgen: Abholung bei {location}',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>morgen, am <strong>{date}</strong>, kannst du deine Spiele persönlich abholen – <strong>{time}</strong> hier:</p>{location_details}<p>Für dich liegt bereit:</p>{games}<p>Kannst du doch nicht kommen? Gib uns bitte rechtzeitig Bescheid.</p>',
+            'action_text' => 'Zum Dashboard',
+        ],
         'reservation_available' => [
             'key' => 'reservation_available',
             'subject' => '„{game}" ist jetzt verfügbar!',

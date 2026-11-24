@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\GameImageController;
 use App\Http\Controllers\Admin\GameImportExportController;
 use App\Http\Controllers\Admin\MechanicController as AdminMechanicController;
 use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\PickupEventController;
 use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\EmailVerificationController;
@@ -229,6 +230,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // Events
     Route::apiResource('events', App\Http\Controllers\Admin\EventController::class)->except(['show']);
+    Route::get('/events/{event}/packing-list', [PickupEventController::class, 'show']);
+    Route::patch('/loans/{loan}/hand-out', [PickupEventController::class, 'handOutLoan']);
+    Route::patch('/package-loans/{packageLoan}/hand-out', [PickupEventController::class, 'handOutPackage']);
 
     // Sponsoren
     Route::put('/sponsors/order', [App\Http\Controllers\Admin\SponsorController::class, 'reorder']);

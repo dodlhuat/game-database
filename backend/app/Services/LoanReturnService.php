@@ -20,6 +20,8 @@ use Throwable;
  */
 class LoanReturnService
 {
+    public const AWAITING_PICKUP_MESSAGE = 'Dieses Spiel wurde noch nicht abgeholt und kann daher nicht zurückgegeben werden.';
+
     public function returnLoan(Loan $loan, string $condition, User $actor): Loan
     {
         DB::transaction(function () use ($loan, $condition) {

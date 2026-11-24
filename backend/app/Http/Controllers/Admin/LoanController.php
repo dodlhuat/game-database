@@ -68,6 +68,10 @@ class LoanController extends Controller
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
         }
 
+        if ($loan->isAwaitingPickup()) {
+            return response()->json(['message' => LoanReturnService::AWAITING_PICKUP_MESSAGE, 'reason' => 'awaiting_pickup'], 422);
+        }
+
         if ($loan->package_loan_id !== null) {
             return response()->json([
                 'message' => 'Dieses Spiel gehört zu einer Paket-Ausleihe. Bitte das ganze Paket zurückgeben.',

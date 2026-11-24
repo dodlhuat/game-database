@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\LoanFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon $due_date
  * @property Carbon|null $start_date
  * @property Carbon|null $returned_at
+ * @property Carbon|null $handed_out_at
+ * @property int|null $pickup_event_id
  */
 class Loan extends Model
 {
@@ -32,6 +35,8 @@ class Loan extends Model
         'package_loan_id',
         'pickup_location_id',
         'pickup_event_id',
+        'handed_out_at',
+        'pickup_reminder_sent_at',
         'start_date',
         'due_date',
         'returned_at',
@@ -47,6 +52,8 @@ class Loan extends Model
             'start_date' => 'date',
             'due_date' => 'date',
             'returned_at' => 'datetime',
+            'handed_out_at' => 'datetime',
+            'pickup_reminder_sent_at' => 'datetime',
             'overdue_reminder_sent_at' => 'datetime',
         ];
     }
@@ -71,6 +78,28 @@ class Loan extends Model
     public function pickupLocation(): BelongsTo
     {
         return $this->belongsTo(PickupLocation::class)->withTrashed();
+    }
+
+    /**
+     * Booked for a pickup event that has not handed the game out yet: it
+     * cannot be extended or returned, and it is not overdue.
+     */
+    public function isAwaitingPickup(): bool
+    {
+        return $this->pickup_event_id !== null
+            && $this->handed_out_at === null
+            && in_array($this->status, self::OPEN_STATUSES, true);
+    }
+
+    /**
+     * Open loans that are actually out with the member.
+     *
+     * @param  Builder<Loan>  $query
+     * @return Builder<Loan>
+     */
+    public function scopeHandedOut(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q->whereNull('pickup_event_id')->orWhereNotNull('handed_out_at'));
     }
 
     /**

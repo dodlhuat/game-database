@@ -207,7 +207,10 @@
                 </span>
               </div>
 
-              <div class="loan-card__actions">
+              <div v-if="loan.awaiting_pickup" class="loan-card__actions">
+                <span class="extension-note">{{ $t('dashboard.awaiting_pickup') }}</span>
+              </div>
+              <div v-else class="loan-card__actions">
                 <template v-if="loan.status !== 'RETURNED'">
                   <span v-if="extensionNote(loan)" class="extension-note">
                     {{ extensionNote(loan) }}
@@ -692,6 +695,7 @@ async function cancelReservation(id: number) {
 
 function extensionNote(loan: Loan) {
   if (loan.extension_blocked_reason === 'reserved') return t('dashboard.extension_reserved')
+  if (loan.extension_blocked_reason === 'awaiting_pickup') return t('dashboard.awaiting_pickup')
   if (loan.extension_blocked_reason === 'max_reached') {
     return t('dashboard.extension_max_reached', { n: loan.max_extensions ?? 0 })
   }

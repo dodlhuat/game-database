@@ -281,6 +281,7 @@
     "browse_games": "Spiele entdecken",
     "return_to": "Rückgabe an",
     "pickup_at": "Abholung",
+    "awaiting_pickup": "Wird beim Abholtermin an dich ausgegeben. Verlängern und Zurückgeben geht erst danach.",
     "queue_hint": "Du wirst benachrichtigt, sobald es frei ist.",
     "due": {
       "today": "Heute fällig",
@@ -963,6 +964,19 @@
         "order": "Reihenfolge konnte nicht gespeichert werden.",
         "delete": "Fehler beim Löschen."
       }
+    },
+    "packing": {
+      "breadcrumb": "Packliste",
+      "eyebrow": "Abholtermin · Packliste",
+      "open": "Packliste",
+      "progress_label": "Ausgabe-Fortschritt",
+      "handed_out": "Buchungen ausgegeben",
+      "games_total": "{n} Spiel insgesamt | {n} Spiele insgesamt",
+      "print": "Drucken",
+      "empty": "Für diesen Termin hat noch niemand gebucht.",
+      "package": "Paket: {name}",
+      "hand_out": "Ausgeben",
+      "done": "Ausgegeben"
     },
     "user_picker": {
       "placeholder": "Mitglied nach Name oder E-Mail suchen …",

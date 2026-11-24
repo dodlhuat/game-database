@@ -42,6 +42,9 @@ class LoanResource extends JsonResource
             ),
             'user' => new UserResource($this->whenLoaded('user')),
             'pickup_location' => new PickupLocationResource($this->whenLoaded('pickupLocation')),
+            // Booked for a pickup event and not handed out yet: no extending or returning
+            'awaiting_pickup' => $this->isAwaitingPickup(),
+            'handed_out_at' => $this->handed_out_at,
             // Personal pickup: the booked appointment with its time
             'pickup_event' => $this->whenLoaded('pickupEvent', fn () => $this->pickupEvent ? [
                 'id' => $this->pickupEvent->id,

@@ -13,6 +13,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon $due_date
  * @property Carbon|null $start_date
  * @property Carbon|null $returned_at
+ * @property Carbon|null $handed_out_at
+ * @property int|null $pickup_event_id
  */
 class PackageLoan extends Model
 {
@@ -27,6 +29,7 @@ class PackageLoan extends Model
         'user_id',
         'pickup_location_id',
         'pickup_event_id',
+        'handed_out_at',
         'start_date',
         'due_date',
         'returned_at',
@@ -39,6 +42,7 @@ class PackageLoan extends Model
             'start_date' => 'date',
             'due_date' => 'date',
             'returned_at' => 'datetime',
+            'handed_out_at' => 'datetime',
         ];
     }
 
@@ -46,6 +50,11 @@ class PackageLoan extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(Package::class);
+    }
+
+    public function isAwaitingPickup(): bool
+    {
+        return $this->pickup_event_id !== null && $this->handed_out_at === null && $this->status === 'ACTIVE';
     }
 
     /**

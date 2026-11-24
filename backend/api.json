@@ -6657,6 +6657,330 @@
                 }
             }
         },
+        "/admin/events/{event}/packing-list": {
+            "get": {
+                "operationId": "pickupEvent.show",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "event",
+                        "in": "path",
+                        "required": true,
+                        "description": "The event ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "event": {
+                                            "type": "object",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "title": {
+                                                    "type": "string"
+                                                },
+                                                "date": {
+                                                    "type": "string"
+                                                },
+                                                "time": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "end_time": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "max_loans": {
+                                                    "type": [
+                                                        "integer",
+                                                        "null"
+                                                    ]
+                                                },
+                                                "location": {
+                                                    "anyOf": [
+                                                        {
+                                                            "$ref": "#/components/schemas/PickupLocationResource"
+                                                        },
+                                                        {
+                                                            "type": "null"
+                                                        }
+                                                    ]
+                                                }
+                                            },
+                                            "required": [
+                                                "id",
+                                                "title",
+                                                "date",
+                                                "time",
+                                                "end_time",
+                                                "max_loans",
+                                                "location"
+                                            ]
+                                        },
+                                        "bookings": {
+                                            "type": "array",
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "type": {
+                                                                "type": "string",
+                                                                "const": "loan"
+                                                            },
+                                                            "id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "member": {
+                                                                "type": [
+                                                                    "object",
+                                                                    "null"
+                                                                ],
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer"
+                                                                    },
+                                                                    "name": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "email": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "id",
+                                                                    "name",
+                                                                    "email"
+                                                                ]
+                                                            },
+                                                            "package_name": {
+                                                                "type": "null"
+                                                            },
+                                                            "handed_out_at": {
+                                                                "type": [
+                                                                    "string",
+                                                                    "null"
+                                                                ]
+                                                            },
+                                                            "items": {
+                                                                "type": "array",
+                                                                "prefixItems": [
+                                                                    {
+                                                                        "type": "object",
+                                                                        "properties": {
+                                                                            "loan_id": {
+                                                                                "type": "integer"
+                                                                            },
+                                                                            "game_title": {
+                                                                                "type": "string"
+                                                                            },
+                                                                            "qr_code": {
+                                                                                "type": [
+                                                                                    "string",
+                                                                                    "null"
+                                                                                ]
+                                                                            }
+                                                                        },
+                                                                        "required": [
+                                                                            "loan_id",
+                                                                            "game_title",
+                                                                            "qr_code"
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                "minItems": 1,
+                                                                "maxItems": 1
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "type",
+                                                            "id",
+                                                            "member",
+                                                            "package_name",
+                                                            "handed_out_at",
+                                                            "items"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "string"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "event",
+                                        "bookings"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/loans/{loan}/hand-out": {
+            "patch": {
+                "operationId": "pickupEvent.handOutLoan",
+                "summary": "Ticks a single-game booking off (or back on, after a mis-tap)",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "loan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "handed_out": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "handed_out"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "handed_out_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "handed_out_at"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/package-loans/{packageLoan}/hand-out": {
+            "patch": {
+                "operationId": "pickupEvent.handOutPackage",
+                "summary": "Ticks a package off \u2014 every game in it goes out together",
+                "tags": [
+                    "PickupEvent"
+                ],
+                "parameters": [
+                    {
+                        "name": "packageLoan",
+                        "in": "path",
+                        "required": true,
+                        "description": "The package loan ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "handed_out": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "required": [
+                                    "handed_out"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "handed_out_at": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "handed_out_at"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "$ref": "#/components/responses/ValidationException"
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
         "/pickup-locations": {
             "get": {
                 "operationId": "pickupLocation.index",
@@ -10465,6 +10789,17 @@
                             }
                         ]
                     },
+                    "awaiting_pickup": {
+                        "type": "boolean",
+                        "description": "Booked for a pickup event and not handed out yet: no extending or returning"
+                    },
+                    "handed_out_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "pickup_event": {
                         "type": [
                             "object",
@@ -10583,6 +10918,8 @@
                 "required": [
                     "id",
                     "package_loan_id",
+                    "awaiting_pickup",
+                    "handed_out_at",
                     "start_date",
                     "due_date",
                     "returned_at",
@@ -10872,6 +11209,17 @@
                             }
                         ]
                     },
+                    "awaiting_pickup": {
+                        "type": "boolean",
+                        "description": "Booked for a pickup event and not handed out yet: no extending or returning"
+                    },
+                    "handed_out_at": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "format": "date-time"
+                    },
                     "pickup_event": {
                         "type": [
                             "object",
@@ -10959,6 +11307,8 @@
                 },
                 "required": [
                     "id",
+                    "awaiting_pickup",
+                    "handed_out_at",
                     "start_date",
                     "due_date",
                     "returned_at",

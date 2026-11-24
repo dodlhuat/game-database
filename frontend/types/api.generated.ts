@@ -1127,6 +1127,56 @@ export interface paths {
     patch: operations['packageLoan.updatePickupLocation']
     trace?: never
   }
+  '/admin/events/{event}/packing-list': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get: operations['pickupEvent.show']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/loans/{loan}/hand-out': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Ticks a single-game booking off (or back on, after a mis-tap) */
+    patch: operations['pickupEvent.handOutLoan']
+    trace?: never
+  }
+  '/admin/package-loans/{packageLoan}/hand-out': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Ticks a package off — every game in it goes out together */
+    patch: operations['pickupEvent.handOutPackage']
+    trace?: never
+  }
   '/pickup-locations': {
     parameters: {
       query?: never
@@ -1915,6 +1965,10 @@ export interface components {
       } | null
       user?: components['schemas']['UserResource']
       pickup_location?: components['schemas']['PickupLocationResource'] | null
+      /** @description Booked for a pickup event and not handed out yet: no extending or returning */
+      awaiting_pickup: boolean
+      /** Format: date-time */
+      handed_out_at: string | null
       /** @description Personal pickup: the booked appointment with its time */
       pickup_event?: {
         id: number
@@ -2021,6 +2075,10 @@ export interface components {
       }
       user?: components['schemas']['UserResource']
       pickup_location?: components['schemas']['PickupLocationResource'] | null
+      /** @description Booked for a pickup event and not handed out yet: no extending or returning */
+      awaiting_pickup: boolean
+      /** Format: date-time */
+      handed_out_at: string | null
       /** @description Personal pickup: the booked appointment with its time */
       pickup_event?: {
         id: number
@@ -5373,6 +5431,128 @@ export interface operations {
         content: {
           'application/json': {
             data: components['schemas']['PackageLoanResource'] & Record<string, never>
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickupEvent.show': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The event ID */
+        event: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            event: {
+              id: number
+              title: string
+              date: string
+              time: string | null
+              end_time: string | null
+              max_loans: number | null
+              location: components['schemas']['PickupLocationResource'] | null
+            }
+            bookings: (
+              | {
+                  /** @constant */
+                  type: 'loan'
+                  id: number
+                  member: {
+                    id: number
+                    name: string
+                    email: string
+                  } | null
+                  package_name: null
+                  handed_out_at: string | null
+                  items: [
+                    {
+                      loan_id: number
+                      game_title: string
+                      qr_code: string | null
+                    },
+                  ]
+                }
+              | string
+            )[]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
+  'pickupEvent.handOutLoan': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The loan ID */
+        loan: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          handed_out: boolean
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            handed_out_at: string | null
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+      422: components['responses']['ValidationException']
+    }
+  }
+  'pickupEvent.handOutPackage': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The package loan ID */
+        packageLoan: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': {
+          handed_out: boolean
+        }
+      }
+    }
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            handed_out_at: string | null
           }
         }
       }
