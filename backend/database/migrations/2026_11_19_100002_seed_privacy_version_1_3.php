@@ -6,7 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 /**
  * Privacy policy 1.3: brought in line with what the app actually does.
  * Names the processors (Hetzner hosting, Resend email incl. US transfer,
- * Nominatim address check, Stripe), newsletter on consent, server logs,
+ * Nominatim address check, Mollie), newsletter on consent, server logs,
  * damage photos and favourites, real registration vs. membership data,
  * contact email and website, and the retention rules now enforced by
  * model:prune (email logs) and accounts:prune-inactive. Older versions stay
@@ -56,7 +56,7 @@ Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), Art. 6 Abs. 1 
 
 e) Mitgliedsbeitrag, Zahlungs- und Token-Transaktionen
 Für die Verwaltung von Mitgliedsbeiträgen und Token-Guthaben speichern wir Transaktionsdaten (Betrag, Zeitpunkt, Art der Transaktion, Status der Zahlung). Das Token-Guthaben wird getrennt nach gekauften Token und geschenkten Bonus-Token geführt; für Bonus-Token speichern wir zusätzlich das Ablaufdatum.
-Online-Zahlungen (Mitgliedsbeitrag, Token-Pakete) werden über den Zahlungsdienstleister Stripe (Stripe Payments Europe, Ltd., Irland) abgewickelt. Zahlungsdaten wie Kartennummern werden direkt an Stripe übermittelt und von uns nicht gespeichert; wir erhalten lediglich eine Bestätigung über die erfolgte Zahlung samt Referenz.
+Online-Zahlungen (Mitgliedsbeitrag, Token-Pakete) werden über den Zahlungsdienstleister Mollie (Mollie B.V., Niederlande) abgewickelt. Zum Bezahlen wirst du auf eine Seite von Mollie weitergeleitet; Zahlungsdaten wie Kartennummern gibst du direkt dort ein, sie werden von uns nicht gespeichert. Wir erhalten lediglich eine Bestätigung über die erfolgte Zahlung samt Referenz.
 Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), Art. 6 Abs. 1 lit. c DSGVO (rechtliche Verpflichtung)
 
 f) Kündigung der Mitgliedschaft und Rückerstattung
@@ -83,11 +83,11 @@ Wir geben Ihre personenbezogenen Daten nicht an Dritte weiter, es sei denn, es b
 Für den Betrieb der Plattform setzen wir folgende Dienstleister ein:
 – Hosting: Hetzner Online GmbH, Deutschland. Die Server stehen in einem Rechenzentrum in Finnland (EU).
 – E-Mail-Versand: Resend, Inc., USA. Resend erhält Ihre E-Mail-Adresse, Ihren Namen und den Inhalt der jeweiligen E-Mail.
-– Zahlungsabwicklung: Stripe Payments Europe, Ltd., Irland.
+– Zahlungsabwicklung: Mollie B.V., Niederlande.
 – Adressprüfung: OpenStreetMap Foundation (Nominatim), Vereinigtes Königreich (siehe Punkt 3 b).
 Mit diesen Dienstleistern bestehen, soweit erforderlich, Verträge zur Auftragsverarbeitung gem. Art. 28 DSGVO.
 
-Übermittlung in Drittstaaten: Beim E-Mail-Versand über Resend sowie bei der Zahlungsabwicklung durch Stripe können Daten in den USA verarbeitet werden. Dies erfolgt auf Grundlage des Angemessenheitsbeschlusses der EU-Kommission zum EU-US Data Privacy Framework bzw. auf Grundlage von EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO).
+Übermittlung in Drittstaaten: Beim E-Mail-Versand über Resend können Daten in den USA verarbeitet werden. Dies erfolgt auf Grundlage des Angemessenheitsbeschlusses der EU-Kommission zum EU-US Data Privacy Framework bzw. auf Grundlage von EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO).
 
 5. SPEICHERDAUER
 Personenbezogene Daten werden nur so lange gespeichert, wie es für den jeweiligen Zweck erforderlich ist:

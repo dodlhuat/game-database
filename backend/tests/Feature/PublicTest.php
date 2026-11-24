@@ -155,11 +155,12 @@ class PublicTest extends TestCase
         $this->assertStringContainsString('Vereinsstatuten', $content);
     }
 
-    public function test_latest_privacy_policy_covers_stripe_and_bank_details(): void
+    public function test_latest_privacy_policy_covers_mollie_and_bank_details(): void
     {
         $content = $this->getJson('/api/privacy')->assertOk()->assertJsonPath('version', '1.3')->json('content');
 
-        $this->assertStringContainsString('Stripe', $content);
+        $this->assertStringContainsString('Mollie B.V.', $content);
+        $this->assertStringNotContainsString('Stripe', $content);
         $this->assertStringContainsString('IBAN', $content);
         $this->assertStringContainsString('Bonus-Token', $content);
         $this->assertStringContainsString('Stand: November 2026', $content);
