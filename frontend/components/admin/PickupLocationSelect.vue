@@ -13,6 +13,8 @@
       :value="current.id"
       :disabled="saving"
       :aria-label="$t('admin.loans.change_location')"
+      @focus="loadAllowed"
+      @pointerdown="loadAllowed"
       @change="onChange"
     >
       <option v-for="location in options" :key="location.id" :value="location.id">
@@ -40,6 +42,8 @@ const props = defineProps<{
   editable: boolean
   endpoint: string
   lockedHint?: string
+  /** Borrower: when given, only locations open to this user are offered. */
+  userId?: number | null
 }>()
 
 const emit = defineEmits<{ updated: [location: ApiPickupLocation] }>()
@@ -49,10 +53,23 @@ const { t } = useI18n()
 const saving = ref(false)
 const saved = ref(false)
 const error = ref('')
+const { fetchUserLocations } = usePickupLocations()
+const allowed = ref<ApiPickupLocation[] | null>(null)
+
+// Restricted locations are only for their users — ask once the admin opens
+// the menu, so a long loan list does not fire a request per row.
+async function loadAllowed() {
+  if (!props.userId || allowed.value) return
+  try {
+    allowed.value = await fetchUserLocations(props.userId)
+  } catch {
+    // Fall back to the full list; the backend still refuses a closed location
+  }
+}
 
 // The current location is always offered, even if the list is still loading.
 const options = computed(() => {
-  const list = [...props.locations]
+  const list = [...(allowed.value ?? props.locations)]
   if (props.current && !list.some((l) => l.id === props.current!.id)) list.unshift(props.current)
   return list
 })

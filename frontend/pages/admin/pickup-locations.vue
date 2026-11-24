@@ -107,6 +107,22 @@
                   </td>
                   <td class="location-cell">
                     <span class="location-cell__name">{{ location.name }}</span>
+                    <span
+                      v-if="location.users?.length"
+                      class="access-badge"
+                      :title="location.users.map((u) => u.name).join(', ')"
+                    >
+                      <svg class="icon-svg" aria-hidden="true">
+                        <use href="/svg-icons/icons.svg#lock" />
+                      </svg>
+                      {{
+                        $t(
+                          'admin.pickup_locations.access.badge',
+                          { n: location.users.length },
+                          location.users.length
+                        )
+                      }}
+                    </span>
                     <span v-if="location.address" class="location-cell__address">{{
                       location.address
                     }}</span>
@@ -234,6 +250,32 @@
                   />
                 </div>
 
+                <fieldset class="form-grid__full access">
+                  <legend class="access__legend">
+                    {{ $t('admin.pickup_locations.access.title') }}
+                  </legend>
+                  <UiSwitch
+                    v-model="form.restricted"
+                    :label="$t('admin.pickup_locations.access.restrict')"
+                  />
+                  <p class="form-hint">
+                    {{
+                      form.restricted
+                        ? $t('admin.pickup_locations.access.restricted_hint')
+                        : $t('admin.pickup_locations.access.open_hint')
+                    }}
+                  </p>
+                  <template v-if="form.restricted">
+                    <AdminUserPicker v-model="form.users" />
+                    <p v-if="!form.users.length" class="access__warn" role="status">
+                      <svg class="icon-svg" aria-hidden="true">
+                        <use href="/svg-icons/icons.svg#info" />
+                      </svg>
+                      {{ $t('admin.pickup_locations.access.empty_warning') }}
+                    </p>
+                  </template>
+                </fieldset>
+
                 <div class="form-grid__full">
                   <span class="switch-wrap" :title="formActiveLock ?? undefined">
                     <UiSwitch
@@ -263,7 +305,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import type { ApiPickupLocation } from '~/types/api'
-import type { PickupLocationPayload } from '~/composables/usePickupLocations'
+import type { PickupLocationPayload, PickupLocationUser } from '~/composables/usePickupLocations'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
@@ -294,6 +336,8 @@ const form = reactive({
   map_url: '',
   is_active: true,
   wasActive: true,
+  restricted: false,
+  users: [] as PickupLocationUser[],
 })
 
 // ── Rules (mirrored from the backend, which enforces them) ──────
@@ -338,6 +382,8 @@ function openCreate() {
     map_url: '',
     is_active: true,
     wasActive: true,
+    restricted: false,
+    users: [],
   })
   formError.value = ''
 }
@@ -353,6 +399,8 @@ function openEdit(location: ApiPickupLocation) {
     map_url: location.map_url ?? '',
     is_active: location.is_active,
     wasActive: location.is_active,
+    restricted: !!location.users?.length,
+    users: [...(location.users ?? [])],
   })
   formError.value = ''
 }
@@ -383,6 +431,8 @@ async function save() {
     notes: orNull(form.notes),
     map_url: orNull(form.map_url),
     is_active: form.is_active,
+    // Switching the restriction off, or leaving it without users, opens the place up
+    user_ids: form.restricted ? form.users.map((u) => u.id) : [],
   }
   formError.value = ''
   saving.value = true
@@ -494,6 +544,18 @@ $amber-25: rgba(212, 146, 30, 0.25);
 $amber-glow: rgba(212, 146, 30, 0.16);
 $hero-text: var(--primary-text);
 $hero-muted: var(--secondary-text);
+// Small amber text: deeper burnt orange on light (4.5:1), bright accent on dark.
+// Set on the elements themselves, the form dialog is teleported out of the page.
+$amber-ink: var(--amber-ink);
+
+.access-badge,
+.access {
+  --amber-ink: #b45f0f;
+}
+:root[data-theme='dark'] .access-badge,
+:root[data-theme='dark'] .access {
+  --amber-ink: #{$amber};
+}
 
 .admin-page {
   min-height: 100vh;
@@ -971,6 +1033,65 @@ $hero-muted: var(--secondary-text);
     &:disabled {
       opacity: 0.25;
       cursor: default;
+    }
+  }
+}
+
+// Restricted to a few members: quiet, but impossible to miss in the list
+.access-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  margin-top: 0.25rem;
+  padding: 0.12rem 0.5rem 0.12rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $amber-ink;
+  background: color-mix(in srgb, #{$amber} 12%, transparent);
+  border: 1px solid color-mix(in srgb, #{$amber} 35%, transparent);
+  cursor: help;
+  .icon-svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+}
+
+.access {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0.25rem 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--divider);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary-text) 2%, transparent);
+
+  &__legend {
+    padding: 0 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+  }
+  .form-hint {
+    margin: 0;
+  }
+  &__warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    font-size: 0.8rem;
+    color: $amber-ink;
+    .icon-svg {
+      flex: none;
+      width: 1rem;
+      height: 1rem;
+      margin-top: 0.05rem;
     }
   }
 }

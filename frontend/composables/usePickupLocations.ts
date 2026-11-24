@@ -7,7 +7,21 @@ export type PickupLocationPayload = {
   notes: string | null
   map_url: string | null
   is_active: boolean
+  /** Restrict the location to these users; empty means open for everyone. */
+  user_ids: number[]
 }
+
+/** Who a location is restricted to (admin list only). */
+export type PickupLocationUser = {
+  id: number
+  name: string
+  email: string
+  /** False for users who no longer have an active membership. */
+  can_borrow: boolean
+}
+
+/** Cache keys: cleared on login/logout so a new user never sees the last one's places. */
+export const PICKUP_LOCATION_STATE_KEYS = ['active-pickup-locations', 'user-pickup-locations']
 
 export function usePickupLocations() {
   const api = useApi()
@@ -26,9 +40,27 @@ export function usePickupLocations() {
     return res.data
   }
 
-  // Admin changes alter what the borrow dialog should offer.
+  // Admin move menu: the active locations open to one borrower, cached per user.
+  const userLocations = useState<Record<number, ApiPickupLocation[]>>(
+    'user-pickup-locations',
+    () => ({})
+  )
+
+  const fetchUserLocations = async (userId: number): Promise<ApiPickupLocation[]> => {
+    // clearNuxtState may leave the state undefined until it is set again
+    const cached = userLocations.value?.[userId]
+    if (cached) return cached
+    const res = await api.get<{ data: ApiPickupLocation[] }>(
+      `/admin/users/${userId}/pickup-locations`
+    )
+    userLocations.value = { ...(userLocations.value ?? {}), [userId]: res.data }
+    return res.data
+  }
+
+  // Admin changes alter what the borrow dialog and the move menu should offer.
   const invalidate = () => {
     activeLocations.value = null
+    userLocations.value = {}
   }
 
   const fetchAdminLocations = async (): Promise<ApiPickupLocation[]> => {
@@ -71,6 +103,7 @@ export function usePickupLocations() {
     activeLocations,
     fetchActiveLocations,
     fetchAdminLocations,
+    fetchUserLocations,
     createLocation,
     updateLocation,
     toggleLocation,

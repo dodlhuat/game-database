@@ -44,7 +44,9 @@ class PackageLoanController extends Controller
             'pickup_location_id' => ['nullable', 'integer'],
         ]);
 
-        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'));
+        /** @var User $user */
+        $user = $request->user();
+        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'), $user);
         if (! $location) {
             return response()->json([
                 'message' => 'Bitte wähle einen gültigen Abholort.',

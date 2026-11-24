@@ -71,6 +71,7 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     setAuth(user: User, token: string) {
+      clearNuxtState(PICKUP_LOCATION_STATE_KEYS)
       this.user = user
       this.token = token
       localStorage.setItem('auth_token', token)
@@ -94,6 +95,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     logout() {
+      clearNuxtState(PICKUP_LOCATION_STATE_KEYS)
       this.user = null
       this.token = null
       localStorage.removeItem('auth_token')

@@ -6603,7 +6603,7 @@
         "/pickup-locations": {
             "get": {
                 "operationId": "pickupLocation.index",
-                "summary": "Active pickup locations, in the order members get to choose from",
+                "summary": "Active pickup locations open to this user, in the order members get to choose from",
                 "tags": [
                     "PickupLocation"
                 ],
@@ -6628,6 +6628,55 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/AuthenticationException"
+                    }
+                }
+            }
+        },
+        "/admin/users/{user}/pickup-locations": {
+            "get": {
+                "operationId": "pickupLocation.forUser",
+                "summary": "Active locations this user may use \u2014 what the move-loan menu offers for their loans",
+                "tags": [
+                    "PickupLocation"
+                ],
+                "parameters": [
+                    {
+                        "name": "user",
+                        "in": "path",
+                        "required": true,
+                        "description": "The user ID",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of `PickupLocationResource`",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/PickupLocationResource"
+                                            }
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "$ref": "#/components/responses/ModelNotFoundException"
                     },
                     "401": {
                         "$ref": "#/components/responses/AuthenticationException"
@@ -6778,7 +6827,7 @@
                     }
                 },
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "`PickupLocationResource`",
                         "content": {
                             "application/json": {
@@ -10737,6 +10786,14 @@
                     },
                     "is_active": {
                         "type": "boolean"
+                    },
+                    "user_ids": {
+                        "type": "array",
+                        "description": "Restrict the location to these users; an empty list opens it for everyone",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "uniqueItems": true
                     }
                 },
                 "required": [
@@ -10786,6 +10843,34 @@
                     "open_loans_count": {
                         "type": "integer",
                         "description": "Admin list only: borrowed games that still have to come back here."
+                    },
+                    "users": {
+                        "type": "array",
+                        "description": "Admin list only: who the location is restricted to \u2014 empty means everyone.",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "integer"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "email": {
+                                    "type": "string"
+                                },
+                                "can_borrow": {
+                                    "type": "boolean",
+                                    "description": "Flags assignments that no longer matter, so admins can tidy up"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "name",
+                                "email",
+                                "can_borrow"
+                            ]
+                        }
                     }
                 },
                 "required": [

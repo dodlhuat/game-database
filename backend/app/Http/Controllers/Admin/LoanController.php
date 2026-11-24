@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LoanResource;
 use App\Models\Loan;
+use App\Models\PickupLocation;
 use App\Models\User;
 use App\Notifications\LoanOverdueReminder;
 use App\Services\LoanReturnService;
@@ -95,7 +96,15 @@ class LoanController extends Controller
             return response()->json(['message' => 'Ausleihe ist bereits zurückgegeben.'], 422);
         }
 
-        $loan->update(['pickup_location_id' => $request->integer('pickup_location_id')]);
+        /** @var PickupLocation $location */
+        $location = PickupLocation::findOrFail($request->integer('pickup_location_id'));
+        /** @var User $borrower */
+        $borrower = $loan->user;
+        if (! $location->isAccessibleTo($borrower)) {
+            return response()->json(['message' => "Dieser Ort ist für {$borrower->name} nicht freigegeben."], 422);
+        }
+
+        $loan->update(['pickup_location_id' => $location->id]);
 
         return new LoanResource($loan->load(['copy.game', 'user', 'extensions', 'pickupLocation']));
     }

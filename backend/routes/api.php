@@ -223,6 +223,7 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::patch('/package-loans/{packageLoan}/pickup-location', [App\Http\Controllers\Admin\PackageLoanController::class, 'updatePickupLocation']);
 
     // Token-Transaktionen (Admin: pro User)
+    Route::get('/users/{user}/pickup-locations', [App\Http\Controllers\Admin\PickupLocationController::class, 'forUser']);
     Route::get('/users/{user}/token-transactions', [App\Http\Controllers\Admin\TokenTransactionController::class, 'index']);
 
     // Events

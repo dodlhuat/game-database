@@ -65,6 +65,7 @@
                     <AdminPickupLocationSelect
                       :current="loan.pickup_location"
                       :locations="locations"
+                      :user-id="loan.user?.id"
                       :editable="loan.status === 'ACTIVE' || loan.status === 'OVERDUE'"
                       :endpoint="`/admin/package-loans/${loan.id}/pickup-location`"
                       @updated="loan.pickup_location = $event"

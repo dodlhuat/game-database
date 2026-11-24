@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PackageLoanResource;
 use App\Models\PackageLoan;
+use App\Models\PickupLocation;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -37,6 +39,14 @@ class PackageLoanController extends Controller
         }
 
         $locationId = $request->integer('pickup_location_id');
+        /** @var PickupLocation $location */
+        $location = PickupLocation::findOrFail($locationId);
+        /** @var User $borrower */
+        $borrower = $packageLoan->user;
+        if (! $location->isAccessibleTo($borrower)) {
+            return response()->json(['message' => "Dieser Ort ist für {$borrower->name} nicht freigegeben."], 422);
+        }
+
         DB::transaction(function () use ($packageLoan, $locationId) {
             $packageLoan->update(['pickup_location_id' => $locationId]);
             $packageLoan->loans()->update(['pickup_location_id' => $locationId]);

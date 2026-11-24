@@ -71,6 +71,7 @@
                     <AdminPickupLocationSelect
                       :current="loan.pickup_location"
                       :locations="locations"
+                      :user-id="loan.user?.id"
                       :editable="isOpen(loan.status) && !loan.package_loan_id"
                       :locked-hint="
                         isOpen(loan.status) && loan.package_loan_id
@@ -160,7 +161,7 @@ const statusFilter = ref('')
 const loans = ref<
   {
     id: number
-    user: { name: string } | null
+    user: { id: number; name: string } | null
     game: { title: string } | null
     start_date: string
     due_date: string

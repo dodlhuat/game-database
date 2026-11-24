@@ -1130,8 +1130,25 @@ export interface paths {
       path?: never
       cookie?: never
     }
-    /** Active pickup locations, in the order members get to choose from */
+    /** Active pickup locations open to this user, in the order members get to choose from */
     get: operations['pickupLocation.index']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/admin/users/{user}/pickup-locations': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Active locations this user may use — what the move-loan menu offers for their loans */
+    get: operations['pickupLocation.forUser']
     put?: never
     post?: never
     delete?: never
@@ -1987,6 +2004,8 @@ export interface components {
       /** Format: uri */
       map_url?: string | null
       is_active?: boolean
+      /** @description Restrict the location to these users; an empty list opens it for everyone */
+      user_ids?: number[]
     }
     /** PickupLocationResource */
     PickupLocationResource: {
@@ -2000,6 +2019,14 @@ export interface components {
       sort_order: number
       /** @description Admin list only: borrowed games that still have to come back here. */
       open_loans_count?: number
+      /** @description Admin list only: who the location is restricted to — empty means everyone. */
+      users?: {
+        id: number
+        name: string
+        email: string
+        /** @description Flags assignments that no longer matter, so admins can tidy up */
+        can_borrow: boolean
+      }[]
     }
     /** PrivacyVersion */
     PrivacyVersion: {
@@ -5296,6 +5323,33 @@ export interface operations {
       401: components['responses']['AuthenticationException']
     }
   }
+  'pickupLocation.forUser': {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        /** @description The user ID */
+        user: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Array of `PickupLocationResource` */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': {
+            data: components['schemas']['PickupLocationResource'][]
+          }
+        }
+      }
+      401: components['responses']['AuthenticationException']
+      404: components['responses']['ModelNotFoundException']
+    }
+  }
   'pickupLocation.reorder': {
     parameters: {
       query?: never
@@ -5388,7 +5442,7 @@ export interface operations {
     }
     responses: {
       /** @description `PickupLocationResource` */
-      200: {
+      201: {
         headers: {
           [name: string]: unknown
         }

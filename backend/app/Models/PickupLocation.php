@@ -6,6 +6,7 @@ use Database\Factories\PickupLocationFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -53,18 +54,53 @@ class PickupLocation extends Model
     }
 
     /**
-     * The location a new loan uses: the chosen one if it is active, or — when
-     * no choice was sent — the only active location, if there is just one.
+     * Locations the user may pick: every location without assigned users,
+     * plus the ones the user is assigned to. Admins may use all of them.
+     *
+     * @param  Builder<PickupLocation>  $query
+     * @return Builder<PickupLocation>
      */
-    public static function forNewLoan(mixed $id): ?self
+    public function scopeAccessibleTo(Builder $query, User $user): Builder
     {
-        if ($id === null || $id === '') {
-            $active = self::active()->limit(2)->get();
-
-            return $active->count() === 1 ? $active->first() : null;
+        if ($user->isAdmin()) {
+            return $query;
         }
 
-        return is_numeric($id) ? self::active()->find((int) $id) : null;
+        return $query->where(fn (Builder $q) => $q
+            ->whereDoesntHave('users')
+            ->orWhereHas('users', fn (Builder $u) => $u->whereKey($user->id)));
+    }
+
+    public function isAccessibleTo(User $user): bool
+    {
+        return self::accessibleTo($user)->whereKey($this->id)->exists();
+    }
+
+    /**
+     * The location a new loan uses: the chosen one if it is active and open
+     * to the user, or — when no choice was sent — the only such location.
+     */
+    public static function forNewLoan(mixed $id, User $user): ?self
+    {
+        $candidates = self::active()->accessibleTo($user);
+
+        if ($id === null || $id === '') {
+            $usable = $candidates->limit(2)->get();
+
+            return $usable->count() === 1 ? $usable->first() : null;
+        }
+
+        return is_numeric($id) ? $candidates->find((int) $id) : null;
+    }
+
+    /**
+     * Users this location is restricted to — none means open for everyone.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 
     /** @return HasMany<Loan, $this> */

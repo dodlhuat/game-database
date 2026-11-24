@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\PickupLocationRequest;
 use App\Http\Resources\PickupLocationResource;
 use App\Models\Loan;
 use App\Models\PickupLocation;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,17 +24,29 @@ class PickupLocationController extends Controller
         );
     }
 
-    public function store(PickupLocationRequest $request): PickupLocationResource
+    /** Active locations this user may use — what the move-loan menu offers for their loans. */
+    public function forUser(User $user): AnonymousResourceCollection
+    {
+        return PickupLocationResource::collection(
+            PickupLocation::active()->accessibleTo($user)->ordered()->get()
+        );
+    }
+
+    public function store(PickupLocationRequest $request): JsonResponse
     {
         $data = $this->payload($request);
         $data['is_active'] = $request->boolean('is_active', true);
         $maxOrder = PickupLocation::withTrashed()->max('sort_order');
         $data['sort_order'] = (is_numeric($maxOrder) ? (int) $maxOrder : 0) + 1;
 
-        $location = PickupLocation::create($data);
-        $location->setAttribute('open_loans_count', 0);
+        $location = DB::transaction(function () use ($data, $request) {
+            $location = PickupLocation::create($data);
+            $this->syncUsers($request, $location);
 
-        return new PickupLocationResource($location);
+            return $location;
+        });
+
+        return $this->resource($location)->response()->setStatusCode(201);
     }
 
     public function update(PickupLocationRequest $request, PickupLocation $pickupLocation): JsonResponse|PickupLocationResource
@@ -45,7 +58,10 @@ class PickupLocationController extends Controller
             return $blocked;
         }
 
-        $pickupLocation->update($data);
+        DB::transaction(function () use ($pickupLocation, $data, $request) {
+            $pickupLocation->update($data);
+            $this->syncUsers($request, $pickupLocation);
+        });
 
         return $this->resource($pickupLocation);
     }
@@ -138,6 +154,16 @@ class PickupLocationController extends Controller
         return $data;
     }
 
+    /** Only touches the assignment when the form sent it, so other callers keep it. */
+    private function syncUsers(PickupLocationRequest $request, PickupLocation $location): void
+    {
+        if ($request->has('user_ids')) {
+            /** @var list<int> $ids */
+            $ids = $request->validated('user_ids', []);
+            $location->users()->sync($ids);
+        }
+    }
+
     private function resource(PickupLocation $location): PickupLocationResource
     {
         /** @var PickupLocation $fresh */
@@ -152,6 +178,8 @@ class PickupLocationController extends Controller
      */
     private function withOpenLoans(Builder $query): Builder
     {
-        return $query->withCount(['loans as open_loans_count' => fn ($q) => $q->whereIn('status', Loan::OPEN_STATUSES)]);
+        return $query
+            ->with(['users' => fn ($q) => $q->orderBy('name')])
+            ->withCount(['loans as open_loans_count' => fn ($q) => $q->whereIn('status', Loan::OPEN_STATUSES)]);
     }
 }

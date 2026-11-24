@@ -116,6 +116,9 @@
                 :locations="pickupLocations"
                 :show-error="pickupMissing"
               />
+              <p v-else-if="noPickupLocation" class="alert alert-info detail__no-location">
+                {{ $t('pickup.none_available') }}
+              </p>
               <div v-if="loanError" class="alert alert-error" style="margin-bottom: 0.75rem">
                 {{ loanError }}
               </div>
@@ -181,6 +184,8 @@ const { fetchActiveLocations } = usePickupLocations()
 const pickupLocations = ref<ApiPickupLocation[]>([])
 const pickupLocationId = ref<number | null>(null)
 const pickupMissing = ref(false)
+// Loaded fine, but every active location is reserved for other members
+const noPickupLocation = ref(false)
 watch(pickupLocationId, () => (pickupMissing.value = false))
 
 onMounted(async () => {
@@ -193,6 +198,7 @@ onMounted(async () => {
     try {
       pickupLocations.value = await fetchActiveLocations()
       pickupLocationId.value = initialPickupLocationId(pickupLocations.value)
+      noPickupLocation.value = pickupLocations.value.length === 0
     } catch {
       // the backend still rejects a loan without a valid location
     }
@@ -203,7 +209,7 @@ async function borrowPackage() {
   if (!pkg.value) return
   if (!pickupLocationId.value) {
     if (pickupLocations.value.length) pickupMissing.value = true
-    else loanError.value = t('pickup.load_error')
+    else if (!noPickupLocation.value) loanError.value = t('pickup.load_error')
     return
   }
   loaning.value = true

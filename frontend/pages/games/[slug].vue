@@ -435,6 +435,8 @@ function openLightbox(i: number) {
 
 const loanDates = { start_date: '', due_date: '' }
 let pickupLocations: ApiPickupLocation[] = []
+// Loaded fine but empty: every active location is reserved for other members
+let noPickupLocation = false
 
 useHead({
   link: [
@@ -468,14 +470,18 @@ async function openLoanModal() {
     dueLabel = loanDates.due_date
   }
 
+  noPickupLocation = false
   try {
     pickupLocations = await fetchActiveLocations()
+    noPickupLocation = pickupLocations.length === 0
   } catch {
     pickupLocations = []
   }
   const pickerHtml = pickupLocations.length
     ? renderPickupPickerHtml(pickupLocations, initialPickupLocationId(pickupLocations), t)
-    : ''
+    : noPickupLocation
+      ? `<p class="alert alert-info" style="margin:0">${t('pickup.none_available')}</p>`
+      : ''
 
   const deposit = game.value.deposit_tokens ?? 0
   const depositHtml =
@@ -558,7 +564,7 @@ async function submitLoan(modal: InstanceType<typeof Modal>) {
       pickupError.hidden = false
     } else if (msgEl) {
       msgEl.style.color = 'var(--error)'
-      msgEl.textContent = t('pickup.load_error')
+      msgEl.textContent = noPickupLocation ? t('pickup.none_available') : t('pickup.load_error')
       msgEl.style.display = 'block'
     }
     return

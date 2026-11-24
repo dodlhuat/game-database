@@ -6,6 +6,7 @@ use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -159,6 +160,16 @@ class User extends Authenticatable implements MustVerifyEmail
             ->whereNull('expired_at')
             ->orderBy('expires_at')
             ->orderBy('id');
+    }
+
+    /**
+     * Restricted pickup locations this user was given access to.
+     *
+     * @return BelongsToMany<PickupLocation, $this>
+     */
+    public function pickupLocations(): BelongsToMany
+    {
+        return $this->belongsToMany(PickupLocation::class)->withTimestamps();
     }
 
     /** @return HasMany<EmailLog, $this> */

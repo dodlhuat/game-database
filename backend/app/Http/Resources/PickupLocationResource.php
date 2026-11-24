@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\PickupLocation;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,6 +24,14 @@ class PickupLocationResource extends JsonResource
             'sort_order' => $this->sort_order,
             // Admin list only: borrowed games that still have to come back here.
             'open_loans_count' => $this->whenCounted('open_loans'),
+            // Admin list only: who the location is restricted to — empty means everyone.
+            'users' => $this->whenLoaded('users', fn () => $this->users->map(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                // Flags assignments that no longer matter, so admins can tidy up
+                'can_borrow' => $u->isAdmin() || $u->isMember(),
+            ])->values()),
         ];
     }
 }

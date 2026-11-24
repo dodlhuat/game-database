@@ -52,7 +52,7 @@ class LoanController extends Controller
             ], 403);
         }
 
-        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'));
+        $location = PickupLocation::forNewLoan($request->input('pickup_location_id'), $user);
         if (! $location) {
             return $this->invalidLocationResponse();
         }

@@ -5,6 +5,7 @@
     "hint": "Dort holst du es ab – und bringst es auch wieder dorthin zurück.",
     "required": "Bitte wähle einen Abholort.",
     "load_error": "Die Abholorte konnten nicht geladen werden. Bitte lade die Seite neu.",
+    "none_available": "Für dich ist aktuell kein Abholort freigegeben. Bitte wende dich an uns.",
     "map_link": "Auf der Karte ansehen"
   },
   "footer": {
@@ -945,6 +946,13 @@
         "delete": "Fehler beim Löschen."
       }
     },
+    "user_picker": {
+      "placeholder": "Mitglied nach Name oder E-Mail suchen …",
+      "no_results": "Niemand gefunden.",
+      "remove": "{name} entfernen",
+      "no_membership": "Keine aktive Mitgliedschaft – kann hier derzeit nicht ausleihen.",
+      "no_membership_short": "inaktiv"
+    },
     "pickup_locations": {
       "title": "Abholorte",
       "breadcrumb": "Abholorte",
@@ -976,6 +984,14 @@
         "notes_placeholder": "z. B. Bei „Müller“ klingeln, 2. Stock",
         "map_url": "Karten-Link (optional)",
         "active": "Beim Ausleihen zur Auswahl anbieten"
+      },
+      "access": {
+        "title": "Zugang",
+        "restrict": "Nur für ausgewählte Mitglieder",
+        "open_hint": "Alle Mitglieder können diesen Ort beim Ausleihen wählen.",
+        "restricted_hint": "Nur die ausgewählten Mitglieder sehen diesen Ort. Laufende Ausleihen anderer Mitglieder bleiben davon unberührt.",
+        "empty_warning": "Noch niemand ausgewählt – ohne Auswahl bleibt der Ort für alle offen.",
+        "badge": "Nur für {n} Mitglied | Nur für {n} Mitglieder"
       },
       "errors": {
         "name": "Bitte einen Namen angeben.",
