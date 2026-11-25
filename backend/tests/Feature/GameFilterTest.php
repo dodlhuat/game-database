@@ -63,12 +63,24 @@ class GameFilterTest extends TestCase
         $this->assertSame(['Big'], $this->titles('players=6'));
     }
 
+    public function test_players_or_more_matches_every_game_playable_with_at_least_that_many(): void
+    {
+        Game::factory()->create(['title' => 'Duo', 'min_players' => 2, 'max_players' => 4]);
+        Game::factory()->create(['title' => 'Party', 'min_players' => 7, 'max_players' => 12]);
+        Game::factory()->create(['title' => 'Six', 'min_players' => 3, 'max_players' => 6]);
+        Game::factory()->create(['title' => 'Open', 'min_players' => 4, 'max_players' => null]);
+
+        $this->assertEqualsCanonicalizing(['Party', 'Six', 'Open'], $this->titles('players='.urlencode('6+')));
+        // exactly 6 still leaves out a game that needs at least 7
+        $this->assertEqualsCanonicalizing(['Six', 'Open'], $this->titles('players=6'));
+    }
+
     public function test_players_filter_is_ignored_for_empty_zero_or_non_numeric_values(): void
     {
         Game::factory()->create(['title' => 'Small', 'min_players' => 2, 'max_players' => 4]);
         Game::factory()->create(['title' => 'Big', 'min_players' => 5, 'max_players' => 8]);
 
-        foreach (['players=', 'players=0', 'players=abc'] as $query) {
+        foreach (['players=', 'players=0', 'players=abc', 'players=%2B', 'players=0%2B'] as $query) {
             $this->assertEqualsCanonicalizing(['Small', 'Big'], $this->titles($query), $query);
         }
     }

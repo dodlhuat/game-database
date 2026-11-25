@@ -95,6 +95,20 @@ describe('games list — mechanic filter', () => {
   })
 })
 
+describe('games list — player count', () => {
+  it('sends 6+ as "6 or more"', async () => {
+    const wrapper = await mountPage()
+    const sixPlus = wrapper
+      .findAll('.player-chip')
+      .find((c: DOMWrapper<Element>) => c.text() === '6+')!
+
+    await sixPlus.trigger('click')
+    await flushPromises()
+
+    expect(lastFilters().players).toBe('6+')
+  })
+})
+
 describe('games list — search with filters', () => {
   it('passes the chosen filters along with the search text', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true })

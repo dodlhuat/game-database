@@ -404,7 +404,8 @@ const playerOptions = computed(() => [
   { label: '3', value: '3' },
   { label: '4', value: '4' },
   { label: '5', value: '5' },
-  { label: '6+', value: '6' },
+  // "ab 6 Spielern": the API reads the trailing + as "or more"
+  { label: '6+', value: '6+' },
 ])
 
 const durationOptions = computed(() => [

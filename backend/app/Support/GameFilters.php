@@ -27,12 +27,13 @@ class GameFilters
             ->when($request->string('tag')->toString(), fn ($q, string $slug) => $q->whereHas('tags', fn ($q) => $q->where('slug', $slug))
             )
             ->when($request->string('difficulty')->toString(), fn ($q, string $diff) => $q->where('difficulty', $diff))
-            ->when($request->integer('players'), function ($q, int $n) {
-                $q->where(function ($q) use ($n) {
-                    $q->whereNull('min_players')->orWhere('min_players', '<=', $n);
-                })->where(function ($q) use ($n) {
-                    $q->whereNull('max_players')->orWhere('max_players', '>=', $n);
-                });
+            // "4" = playable with exactly 4; "6+" = playable with 6 or more
+            ->when(self::players($request), function ($q, array $players) {
+                [$n, $orMore] = $players;
+                if (! $orMore) {
+                    $q->where(fn ($q) => $q->whereNull('min_players')->orWhere('min_players', '<=', $n));
+                }
+                $q->where(fn ($q) => $q->whereNull('max_players')->orWhere('max_players', '>=', $n));
             })
             ->when($request->string('duration')->toString(), function ($q, string $dur) {
                 if ($dur === 'short') {
@@ -64,5 +65,21 @@ class GameFilters
             ->when($request->boolean('available'), fn ($q) => $q->whereHas('copies', fn ($q) => $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])->whereDoesntHave('activeLoans')
             )
             );
+    }
+
+    /**
+     * The player count asked for, and whether more is fine too ("6+").
+     * Empty, zero or anything that is not a count means no filter.
+     *
+     * @return array{int, bool}|null
+     */
+    private static function players(Request $request): ?array
+    {
+        if (preg_match('/^\s*(\d+)(\+?)\s*$/', $request->string('players')->toString(), $m) !== 1) {
+            return null;
+        }
+        $n = (int) $m[1];
+
+        return $n > 0 ? [$n, $m[2] === '+'] : null;
     }
 }
