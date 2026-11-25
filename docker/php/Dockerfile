@@ -23,6 +23,15 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     pcntl \
     bcmath
 
+# PCOV for test coverage (make coverage). Installed but switched off, so
+# normal test runs and the pre-commit hook stay as fast as before; the
+# production image (Dockerfile.prod) does not get it at all.
+RUN apk add --no-cache --virtual .pcov-build $PHPIZE_DEPS \
+ && pecl install pcov \
+ && docker-php-ext-enable pcov \
+ && echo "pcov.enabled=0" > /usr/local/etc/php/conf.d/zz-pcov.ini \
+ && apk del .pcov-build
+
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

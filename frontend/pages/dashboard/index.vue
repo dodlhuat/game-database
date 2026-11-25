@@ -752,8 +752,12 @@ async function submitDamage() {
 }
 
 async function cancelReservation(id: number) {
-  await removeReservation(id)
-  data.value = await fetchDashboard()
+  try {
+    await removeReservation(id)
+    data.value = await fetchDashboard()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 
 function extensionNote(loan: Loan) {

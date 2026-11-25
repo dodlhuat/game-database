@@ -106,7 +106,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchNewsletters, sendNewsletter } = useAdmin()
 const { t } = useI18n()
-const { notify } = useDialogs()
+const { confirmDialog, notify } = useDialogs()
 
 interface Newsletter {
   id: number
@@ -139,6 +139,13 @@ async function load() {
 
 async function send() {
   if (!form.value.subject || !form.value.body) return
+  // Goes out to every subscriber at once and cannot be called back
+  const ok = await confirmDialog({
+    title: t('admin.newsletters.confirm_title'),
+    message: t('admin.newsletters.confirm_send', { subject: form.value.subject }),
+    confirmLabel: t('admin.newsletters.confirm_action'),
+  })
+  if (!ok) return
   sending.value = true
   successMsg.value = ''
   try {

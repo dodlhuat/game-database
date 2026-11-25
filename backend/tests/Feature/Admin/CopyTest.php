@@ -248,4 +248,24 @@ class CopyTest extends TestCase
         $this->assertSame(2, $perPage('per_page=2'));
         $this->assertSame(200, $perPage('per_page=9999'));
     }
+
+    public function test_approve_refuses_worn_which_the_database_no_longer_allows(): void
+    {
+        // WORN was folded into GOOD; MySQL/PostgreSQL would reject it with a
+        // server error, the SQLite test database would silently store it
+        $copy = Copy::factory()->create(['condition' => 'REVIEW']);
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->postJson("/api/admin/copies/{$copy->id}/approve", ['condition' => 'WORN'])
+            ->assertJsonValidationErrors('condition');
+
+        $this->assertSame('REVIEW', $copy->fresh()?->condition);
+    }
+
+    public function test_copy_conditions_match_the_database_column(): void
+    {
+        // the values of the last migration that set the column (MySQL ENUM / PostgreSQL CHECK)
+        $this->assertSame(['NEW', 'VERY_GOOD', 'GOOD', 'REVIEW', 'DAMAGED', 'LOCKED'], Copy::CONDITIONS);
+        $this->assertSame([], array_diff(Copy::APPROVED_CONDITIONS, Copy::CONDITIONS));
+    }
 }

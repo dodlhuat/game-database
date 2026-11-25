@@ -2,7 +2,7 @@
 # Brettspiel-Ausleihplattform — Lokale Entwicklung
 # ============================================================
 
-.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data seed-taxonomy \
+.PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test test-mariadb coverage reset-data seed-taxonomy \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
         deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy deploy-env-set deploy-env-unset \
         server-update server-update-install server-update-install-all \
@@ -82,6 +82,21 @@ api-generate:
 test:
 	docker compose exec backend php artisan config:clear --ansi
 	docker compose exec backend php artisan test
+
+## Backend-Tests zusätzlich gegen MariaDB statt SQLite (eigene Datenbank
+## game_database_testing, die Entwicklungsdaten bleiben unberührt). Findet, was
+## SQLite durchgehen lässt: Werte außerhalb einer ENUM-Spalte, zu lange Texte, Fremdschlüssel.
+test-mariadb:
+	docker compose exec mariadb mariadb -uroot -prootsecret -e "CREATE DATABASE IF NOT EXISTS game_database_testing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON game_database_testing.* TO 'game_user'@'%';"
+	docker compose exec backend php artisan config:clear --ansi
+	docker compose exec backend php vendor/bin/phpunit -c phpunit.mariadb.xml
+
+## Testabdeckung messen: Backend (PCOV im Dev-Container) und Frontend (Vitest).
+## Bericht Frontend: frontend/coverage/index.html
+coverage:
+	docker compose exec backend php artisan config:clear --ansi
+	docker compose exec backend php -d pcov.enabled=1 -d pcov.directory=app artisan test --coverage
+	cd frontend && npm run test:coverage
 
 ## Linter für Frontend (ESLint) und Backend (Pint) ausführen
 lint:

@@ -145,6 +145,8 @@ describe('admin/events.vue — regular events', () => {
       is_all_day: '0',
       time: '18:00',
       end_time: '22:00',
+      // always sent, so clearing the text clears it
+      description: '',
       pickup_location_id: '',
       max_loans: '',
     })

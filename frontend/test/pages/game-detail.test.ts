@@ -4,6 +4,7 @@ import { flushPromises } from '@vue/test-utils'
 import { useAuthStore } from '~/stores/auth'
 import type { Game } from '~/composables/useGames'
 import GameDetailPage from '~/pages/games/[slug].vue'
+import { Modal } from '@dodlhuat/basix/js/modal'
 
 // openLoanModal/submitLoan drive real vanilla-JS basix widgets (Modal) via
 // direct DOM manipulation — out of scope here (see Phase B precedent for
@@ -44,6 +45,9 @@ mockNuxtImport('useLoans', () => {
     fetchTokenTransactions: vi.fn(),
   })
 })
+
+const pickup = vi.hoisted(() => ({ fetchActiveLocations: vi.fn(), fetchPickupEvents: vi.fn() }))
+mockNuxtImport('usePickupLocations', () => () => pickup)
 
 const fetchSettingsMock = vi.fn()
 mockNuxtImport('useLoanSettings', () => {
@@ -245,5 +249,110 @@ describe('games/[slug].vue — borrow/reserve CTA', () => {
     await flushPromises()
 
     expect(wrapper.find('.gd-reserve-status--error').text()).toBe('Schon reserviert.')
+  })
+})
+
+describe('games/[slug].vue — borrowing', () => {
+  const linz = {
+    id: 1,
+    name: 'Linz',
+    address: null,
+    opening_hours: null,
+    notes: null,
+    map_url: null,
+  }
+  const wels = {
+    id: 2,
+    name: 'Wels',
+    address: null,
+    opening_hours: null,
+    notes: null,
+    map_url: null,
+  }
+
+  beforeEach(() => {
+    vi.mocked(Modal).mockClear()
+    createLoanMock.mockReset()
+    fetchSettingsMock.mockReset().mockRejectedValue(new Error('no settings in this test'))
+    pickup.fetchActiveLocations.mockReset().mockResolvedValue([linz, wels])
+    pickup.fetchPickupEvents.mockReset().mockResolvedValue([])
+    localStorage.clear()
+    document.body.innerHTML = ''
+  })
+
+  /** Opens the dialog and puts its markup into the page, as basix would. */
+  async function openDialog(game: Partial<Game> = {}) {
+    setUser({ tokens: 20 })
+    const wrapper = await mountGamePage(game)
+    await wrapper.find('.gd-actions .gd-btn--primary').trigger('click')
+    await flushPromises()
+    const opts = vi.mocked(Modal).mock.calls.at(-1)![0] as { content: string; footer: string }
+    document.body.insertAdjacentHTML('beforeend', opts.content + opts.footer)
+    // the page wires the buttons up two animation frames later
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
+    return { wrapper, content: opts.content }
+  }
+
+  const click = (id: string) => document.getElementById(id)!.click()
+
+  it('shows the title escaped, so a title cannot break the dialog', async () => {
+    const { content } = await openDialog({ title: 'Kniffel <Deluxe> & Co' })
+
+    expect(content).toContain('Kniffel &lt;Deluxe&gt; &amp; Co')
+  })
+
+  it('asks for a pickup place before borrowing', async () => {
+    await openDialog()
+
+    click('loan-submit')
+    await flushPromises()
+
+    expect(createLoanMock).not.toHaveBeenCalled()
+    expect(document.getElementById('pickup-error')!.hidden).toBe(false)
+  })
+
+  it('borrows an available copy at the chosen place and charges the tokens', async () => {
+    createLoanMock.mockResolvedValue({ data: {} })
+    const { wrapper } = await openDialog({ deposit_tokens: 3 })
+    const auth = useAuthStore()
+
+    document.querySelector<HTMLInputElement>('input[value="l:2"]')!.checked = true
+    click('loan-submit')
+    await flushPromises()
+
+    expect(createLoanMock).toHaveBeenCalledWith(
+      expect.objectContaining({ copy_id: 1, pickup_location_id: 2 })
+    )
+    expect(document.getElementById('loan-msg')!.textContent).toContain('Ausleihe erfolgreich')
+    expect(auth.user!.tokens).toBe(14) // 20 minus the medium price of 6
+    expect(auth.user!.tokens_blocked).toBe(3) // the deposit
+    expect(localStorage.getItem('last_pickup_location')).toBe('2')
+    // the page now shows that the member has this game
+    expect(wrapper.find('.gd-actions').text()).toContain(
+      wrapper.vm.$t('pages.game.already_borrowed')
+    )
+  })
+
+  it('shows why borrowing failed and lets the member try again', async () => {
+    createLoanMock.mockRejectedValue({ message: 'Zu wenig Token.' })
+    await openDialog()
+
+    document.querySelector<HTMLInputElement>('input[value="l:1"]')!.checked = true
+    click('loan-submit')
+    await flushPromises()
+
+    expect(document.getElementById('loan-msg')!.textContent).toBe('Zu wenig Token.')
+    expect((document.getElementById('loan-submit') as HTMLButtonElement).disabled).toBe(false)
+    expect(useAuthStore().user!.tokens).toBe(20)
+  })
+
+  it('tells when no place is open for the member', async () => {
+    pickup.fetchActiveLocations.mockResolvedValue([])
+    const { content } = await openDialog()
+
+    expect(content).toContain('alert')
+    click('loan-submit')
+    await flushPromises()
+    expect(createLoanMock).not.toHaveBeenCalled()
   })
 })

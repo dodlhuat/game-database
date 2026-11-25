@@ -27,6 +27,8 @@ class EventRequest extends FormRequest
             'max_loans' => ['nullable', 'integer', 'min:1', 'max:999'],
             'description' => ['nullable', 'string'],
             'image' => ['nullable', 'image', 'max:5120'],
+            // "Remove image" in the admin form (ignored when a new image comes along)
+            'remove_image' => ['sometimes', 'boolean'],
         ];
     }
 

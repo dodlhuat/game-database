@@ -366,6 +366,7 @@
 </template>
 
 <script setup lang="ts">
+import { escapeHtml } from '@dodlhuat/basix/js/utils'
 // Cinzel for the title, served from our own bundle — loading it from Google
 // Fonts would send every visitor's IP address to Google.
 import '@fontsource/cinzel/700.css'
@@ -492,7 +493,7 @@ async function openLoanModal() {
 
   const content = `
     <div style="padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem">
-      <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${game.value.title}</p>
+      <p style="color:var(--accent-color);font-weight:600;margin:0;font-size:.95rem">${escapeHtml(game.value.title)}</p>
       <div style="display:flex;flex-direction:column;gap:.35rem">
         <label style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--secondary-text)">${t('pages.game.confirm_borrow.start_label')}</label>
         <p id="loan-start" style="margin:0;font-size:.95rem;font-weight:600;color:var(--primary-text)">${startLabel}</p>

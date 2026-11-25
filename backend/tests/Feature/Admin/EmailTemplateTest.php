@@ -53,4 +53,34 @@ class EmailTemplateTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.subject', 'Bestätigung deiner Kündigung');
     }
+
+    public function test_admin_saves_an_edited_template(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)->putJson('/api/admin/email-templates/user_approved', [
+            'subject' => 'Willkommen an Bord',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>Dein Konto ist frei.</p>',
+            'action_text' => null,
+        ])->assertOk()->assertJsonPath('data.subject', 'Willkommen an Bord');
+
+        $template = EmailTemplate::where('key', 'user_approved')->firstOrFail();
+        $this->assertSame('<p>Dein Konto ist frei.</p>', $template->body);
+        $this->assertNull($template->action_text);
+    }
+
+    public function test_a_template_needs_subject_greeting_and_body(): void
+    {
+        $this->actingAs(User::factory()->admin()->create())
+            ->putJson('/api/admin/email-templates/user_approved', ['subject' => '', 'greeting' => '', 'body' => ''])
+            ->assertJsonValidationErrors(['subject', 'greeting', 'body']);
+    }
+
+    public function test_members_cannot_edit_templates(): void
+    {
+        $this->actingAs(User::factory()->member()->create())
+            ->putJson('/api/admin/email-templates/user_approved', ['subject' => 'x', 'greeting' => 'x', 'body' => 'x'])
+            ->assertForbidden();
+    }
 }

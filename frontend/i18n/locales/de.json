@@ -849,6 +849,9 @@
       "location_error": "Abholort konnte nicht geändert werden."
     },
     "newsletters": {
+      "confirm_title": "Newsletter jetzt senden?",
+      "confirm_send": "„{subject}“ geht sofort an alle Mitglieder mit Newsletter-Abo. Das lässt sich nicht rückgängig machen.",
+      "confirm_action": "Jetzt senden",
       "send_failed": "Der Newsletter konnte nicht versendet werden.",
       "title": "Newsletter",
       "compose_title": "Neuen Newsletter verfassen",

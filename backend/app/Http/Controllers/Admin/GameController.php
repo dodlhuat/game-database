@@ -32,8 +32,15 @@ class GameController extends Controller
 
     public function store(GameRequest $request): GameResource
     {
-        $data = $request->except(['cover_image', 'tag_ids', 'mechanic_ids', 'language_ids']);
-        $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
+        // Only checked fields — the raw request could set cover_image_url directly
+        $data = collect($request->validated())
+            ->except(['cover_image', 'tag_ids', 'mechanic_ids', 'language_ids'])
+            ->all();
+        // An emptied deposit field means no deposit (the column is not nullable)
+        if (array_key_exists('deposit_tokens', $data)) {
+            $data['deposit_tokens'] = is_numeric($data['deposit_tokens']) ? (int) $data['deposit_tokens'] : 0;
+        }
+        $data['slug'] = $data['slug'] ?? Str::slug($request->string('title')->toString());
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image_url'] = $this->imageUpload->uploadGameCover($request->file('cover_image'));
@@ -65,7 +72,14 @@ class GameController extends Controller
 
     public function update(GameRequest $request, Game $game): GameResource
     {
-        $data = $request->except(['cover_image', 'tag_ids', 'mechanic_ids', 'language_ids']);
+        // Only checked fields — the raw request could set cover_image_url directly
+        $data = collect($request->validated())
+            ->except(['cover_image', 'tag_ids', 'mechanic_ids', 'language_ids'])
+            ->all();
+        // An emptied deposit field means no deposit (the column is not nullable)
+        if (array_key_exists('deposit_tokens', $data)) {
+            $data['deposit_tokens'] = is_numeric($data['deposit_tokens']) ? (int) $data['deposit_tokens'] : 0;
+        }
 
         if ($request->hasFile('cover_image')) {
             $data['cover_image_url'] = $this->imageUpload->uploadGameCover(

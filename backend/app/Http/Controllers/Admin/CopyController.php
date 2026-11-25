@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class CopyController extends Controller
 {
@@ -103,7 +104,7 @@ class CopyController extends Controller
     public function approve(Request $request, Copy $copy): JsonResponse
     {
         $request->validate([
-            'condition' => ['nullable', 'in:NEW,VERY_GOOD,GOOD,WORN'],
+            'condition' => ['nullable', Rule::in(Copy::APPROVED_CONDITIONS)],
         ]);
 
         if ($copy->condition !== 'REVIEW') {

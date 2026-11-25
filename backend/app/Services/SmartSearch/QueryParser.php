@@ -19,12 +19,14 @@ class QueryParser
 
         $normalized = $this->normalize($query);
 
-        $mechanicSlug = $this->bestMechanicMatch($normalized);
-        if ($mechanicSlug !== null) {
+        // The closer match wins, so an exact tag beats a mechanic that only
+        // sounds alike; on a tie the mechanic does
+        [$mechanicSlug, $mechanicScore] = $this->bestMechanicMatch($normalized);
+        [$tagSlug, $tagScore] = $this->bestTagMatch($normalized);
+
+        if ($mechanicSlug !== null && $mechanicScore >= $tagScore) {
             return ['intent' => 'MECHANIC', 'slug' => $mechanicSlug];
         }
-
-        $tagSlug = $this->bestTagMatch($normalized);
         if ($tagSlug !== null) {
             return ['intent' => 'TAG', 'slug' => $tagSlug];
         }
@@ -51,7 +53,8 @@ class QueryParser
         return $best;
     }
 
-    private function bestMechanicMatch(string $normalized): ?string
+    /** @return array{0: string|null, 1: float} best slug and its score */
+    private function bestMechanicMatch(string $normalized): array
     {
         $best = null;
         $bestScore = 0.0;
@@ -66,10 +69,11 @@ class QueryParser
             }
         );
 
-        return $best;
+        return [$best, $bestScore];
     }
 
-    private function bestTagMatch(string $normalized): ?string
+    /** @return array{0: string|null, 1: float} best slug and its score */
+    private function bestTagMatch(string $normalized): array
     {
         // Also try without trailing German adjective ending ("lustige" → "lustig")
         $stem = rtrim($normalized, 'e');
@@ -90,7 +94,7 @@ class QueryParser
             }
         );
 
-        return $best;
+        return [$best, $bestScore];
     }
 
     public function normalize(string $s): string

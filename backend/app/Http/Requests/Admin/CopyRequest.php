@@ -21,7 +21,7 @@ class CopyRequest extends FormRequest
 
         return [
             'game_id' => ['required', 'integer', 'exists:games,id'],
-            'condition' => ['required', 'in:NEW,VERY_GOOD,GOOD,REVIEW,DAMAGED,LOCKED'],
+            'condition' => ['required', Rule::in(Copy::CONDITIONS)],
             'qr_code' => ['nullable', 'string', Rule::unique('copies', 'qr_code')->ignore($copyId)],
             'owner' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],

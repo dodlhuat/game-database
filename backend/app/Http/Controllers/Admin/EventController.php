@@ -31,7 +31,8 @@ class EventController extends Controller
 
     public function store(EventRequest $request): EventResource
     {
-        $data = $request->except('image');
+        // Only checked fields — the raw request could set image_url directly
+        $data = collect($request->validated())->except(['image', 'remove_image'])->all();
         $data['is_all_day'] = $request->boolean('is_all_day');
         if ($data['is_all_day']) {
             $data['time'] = null;
@@ -47,7 +48,8 @@ class EventController extends Controller
 
     public function update(EventRequest $request, Event $event): EventResource|JsonResponse
     {
-        $data = $request->except('image');
+        // Only checked fields — the raw request could set image_url directly
+        $data = collect($request->validated())->except(['image', 'remove_image'])->all();
         $data['is_all_day'] = $request->boolean('is_all_day');
         if ($data['is_all_day']) {
             $data['time'] = null;
@@ -64,6 +66,9 @@ class EventController extends Controller
                 $request->file('image'),
                 $event->image_url,
             );
+        } elseif ($request->boolean('remove_image') && $event->image_url) {
+            $this->imageUpload->delete($event->image_url);
+            $data['image_url'] = null;
         }
 
         $event->update($data);

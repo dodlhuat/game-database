@@ -6,6 +6,7 @@ use App\Mail\DonationMail;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Mail\Attachment;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -130,5 +131,19 @@ class DonationTest extends TestCase
             ->assertCreated();
 
         $this->assertDatabaseCount('jobs', 1);
+    }
+
+    public function test_the_mail_lists_the_games_and_attaches_the_photos(): void
+    {
+        $mail = new DonationMail(
+            donorName: 'Mia Muster',
+            donorEmail: 'mia@example.at',
+            games: ['Catan', 'Azul'],
+            images: [['filename' => 'box.jpg', 'mime' => 'image/jpeg', 'contents' => base64_encode('jpeg-bytes')]],
+        );
+
+        $mail->assertSeeInHtml('Catan');
+        $mail->assertSeeInHtml('Mia Muster');
+        $mail->assertHasAttachment(Attachment::fromData(fn () => 'jpeg-bytes', 'box.jpg')->withMime('image/jpeg'));
     }
 }

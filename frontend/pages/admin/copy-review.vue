@@ -472,7 +472,6 @@ const targetConditionOptions = computed(() => [
   { label: t('admin.form.condition_new'), value: 'NEW' },
   { label: t('admin.form.condition_very_good'), value: 'VERY_GOOD' },
   { label: t('admin.form.condition_good'), value: 'GOOD' },
-  { label: t('admin.form.condition_worn'), value: 'WORN' },
 ])
 
 const notInReviewHint = computed(() => {

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Loan;
 use App\Models\TokenPurchase;
 use App\Models\TokenTransaction;
 use App\Models\User;
@@ -187,5 +188,22 @@ class TokenControllerTest extends TestCase
             ->assertJsonPath('meta.total', 3)
             ->assertJsonPath('meta.last_page', 1)
             ->assertJsonCount(3, 'data');
+    }
+
+    public function test_token_history_names_the_borrowed_game(): void
+    {
+        $user = User::factory()->member()->create();
+        $loan = Loan::factory()->create(['user_id' => $user->id]);
+        TokenTransaction::factory()->create([
+            'user_id' => $user->id,
+            'loan_id' => $loan->id,
+            'type' => 'BORROW',
+            'amount' => -3,
+        ]);
+
+        $this->actingAs($user)->getJson('/api/token-transactions')
+            ->assertOk()
+            ->assertJsonPath('data.0.loan.copy.game.title', $loan->copy?->game?->title)
+            ->assertJsonPath('data.0.loan.copy.game.slug', $loan->copy?->game?->slug);
     }
 }

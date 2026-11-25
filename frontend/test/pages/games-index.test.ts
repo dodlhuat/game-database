@@ -5,6 +5,10 @@ import GamesIndexPage from '~/pages/games/index.vue'
 
 // fetchGames gets the page's reactive filter object; keep a snapshot per call
 const fetchGamesCalls: Record<string, unknown>[] = []
+const langs = vi.hoisted(() => ({ list: [] as { id: number; name: string }[] }))
+const notifyMock = vi.hoisted(() => vi.fn())
+mockNuxtImport('useDialogs', () => () => ({ confirmDialog: vi.fn(), notify: notifyMock }))
+
 const fetchGamesMock = vi.fn()
 const smartSearchMock = vi.fn()
 mockNuxtImport('useGames', () => {
@@ -17,7 +21,7 @@ mockNuxtImport('useGames', () => {
           { id: 7, name: 'Arbeiter einsetzen', slug: 'arbeiter-einsetzen' },
         ],
       }),
-    fetchLanguages: () => Promise.resolve([]),
+    fetchLanguages: () => Promise.resolve(langs.list),
     smartSearch: smartSearchMock,
   })
 })
@@ -35,6 +39,8 @@ function lastFilters() {
 }
 
 beforeEach(() => {
+  langs.list = []
+  notifyMock.mockReset()
   fetchGamesCalls.length = 0
   fetchGamesMock.mockReset()
   smartSearchMock.mockReset()
@@ -123,5 +129,101 @@ describe('games list — search with filters', () => {
     expect(q).toBe('Abenteuer')
     expect(filters.mechanic).toBe('deckbau')
     vi.useRealTimers()
+  })
+})
+
+describe('games list — sorting, paging and clearing', () => {
+  /** Opens the filter panel and picks a difficulty chip. */
+  async function chooseDifficulty(wrapper: Awaited<ReturnType<typeof mountPage>>) {
+    await wrapper.find('.filter-toggle').trigger('click')
+    await wrapper
+      .findAll('.option-chip')
+      .find((c: DOMWrapper<Element>) => c.text() === 'Leicht')!
+      .trigger('click')
+    await flushPromises()
+  }
+
+  it('sorts by newest and back to A–Z, starting on the first page', async () => {
+    const wrapper = await mountPage()
+
+    await wrapper.findAll('.sort-btn')[1]!.trigger('click')
+    await flushPromises()
+    expect(lastFilters()).toMatchObject({ sort: 'created_at', page: 1 })
+
+    await wrapper.findAll('.sort-btn')[0]!.trigger('click')
+    await flushPromises()
+    expect(lastFilters().sort).toBe('title')
+  })
+
+  it('pages forward keeping the filters', async () => {
+    fetchGamesMock.mockImplementation((filters: Record<string, unknown>) => {
+      fetchGamesCalls.push({ ...filters })
+      return Promise.resolve({
+        data: [
+          {
+            id: 1,
+            title: 'Azul',
+            slug: 'azul',
+            tags: [],
+            mechanics: [],
+            languages: [],
+            available_copies_count: 1,
+          },
+        ],
+        meta: { current_page: filters.page, last_page: 3, per_page: 24, total: 60 },
+      })
+    })
+    window.scrollTo = vi.fn() as unknown as typeof window.scrollTo
+    const wrapper = await mountPage()
+    await chooseDifficulty(wrapper)
+    await wrapper.find('.filter-toggle').trigger('click') // close the panel
+
+    await wrapper.findAll('.pagination__btn').at(-1)!.trigger('click')
+    await flushPromises()
+
+    expect(lastFilters()).toMatchObject({ page: 2, difficulty: 'EASY' })
+  })
+
+  it('removes one filter with its pill and all of them with the clear button', async () => {
+    langs.list = [{ id: 4, name: 'Deutsch' }]
+    const wrapper = await mountPage()
+    await chooseDifficulty(wrapper)
+    await wrapper
+      .findAll('.option-chip')
+      .find((c: DOMWrapper<Element>) => c.text() === 'Deutsch')!
+      .trigger('click')
+    await flushPromises()
+    expect(lastFilters()).toMatchObject({ difficulty: 'EASY', language: 4 })
+
+    await wrapper.find('.filter-toggle').trigger('click') // pills show with the panel closed
+    await wrapper.find('.active-pill').trigger('click')
+    await flushPromises()
+    expect(lastFilters()).toMatchObject({ difficulty: '', language: 4 })
+
+    await wrapper.find('.clear-all-btn').trigger('click')
+    await flushPromises()
+    expect(lastFilters()).toMatchObject({ difficulty: '', language: '', available: false, page: 1 })
+  })
+
+  it('picking the same language twice removes it again', async () => {
+    langs.list = [{ id: 4, name: 'Deutsch' }]
+    const wrapper = await mountPage()
+    await wrapper.find('.filter-toggle').trigger('click')
+    const chip = () =>
+      wrapper.findAll('.option-chip').find((c: DOMWrapper<Element>) => c.text() === 'Deutsch')!
+
+    await chip().trigger('click')
+    await flushPromises()
+    expect(lastFilters().language).toBe(4)
+    await chip().trigger('click')
+    await flushPromises()
+    expect(lastFilters().language).toBe('')
+  })
+
+  it('says so when the games cannot be loaded', async () => {
+    fetchGamesMock.mockRejectedValue({ message: 'Server nicht erreichbar.' })
+    await mountPage()
+
+    expect(notifyMock).toHaveBeenCalledWith('Server nicht erreichbar.', 'error')
   })
 })

@@ -10,10 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
- * @property 'NEW'|'VERY_GOOD'|'GOOD'|'WORN'|'DAMAGED'|'LOCKED'|'REVIEW' $condition
+ * @property 'NEW'|'VERY_GOOD'|'GOOD'|'DAMAGED'|'LOCKED'|'REVIEW' $condition
  */
 class Copy extends Model
 {
+    /**
+     * What the condition column allows. "WORN" was folded into GOOD in
+     * 2026-04 and is no longer a copy condition (only a return condition);
+     * MySQL/PostgreSQL reject it, while the SQLite test database would not.
+     */
+    public const CONDITIONS = ['NEW', 'VERY_GOOD', 'GOOD', 'REVIEW', 'DAMAGED', 'LOCKED'];
+
+    /** What a copy may be set to when it passes the review. */
+    public const APPROVED_CONDITIONS = ['NEW', 'VERY_GOOD', 'GOOD'];
+
     /** @use HasFactory<CopyFactory> */
     use HasFactory;
 
@@ -61,7 +71,7 @@ class Copy extends Model
 
         return match ($this->condition) {
             'VERY_GOOD' => (int) round($game->deposit_tokens * $setting->deposit_pct_very_good / 100),
-            'GOOD', 'WORN' => (int) round($game->deposit_tokens * $setting->deposit_pct_good / 100),
+            'GOOD' => (int) round($game->deposit_tokens * $setting->deposit_pct_good / 100),
             default => $game->deposit_tokens, // NEW = 100%
         };
     }

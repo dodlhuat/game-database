@@ -989,13 +989,16 @@ async function save() {
       'deposit_tokens',
       'size_category',
     ] as const
-    fields.forEach((f) => {
-      if (form[f] !== '' && form[f] !== null) fd.append(f, String(form[f]))
-    })
+    // Always send every field: an emptied one arrives as null and clears the
+    // value, instead of silently keeping the old one
+    fields.forEach((f) => fd.append(f, form[f] === null ? '' : String(form[f])))
     fd.append('is_active', form.is_active ? '1' : '0')
-    form.tag_ids.forEach((id) => fd.append('tag_ids[]', String(id)))
-    form.mechanic_ids.forEach((id) => fd.append('mechanic_ids[]', String(id)))
-    form.language_ids.forEach((id) => fd.append('language_ids[]', String(id)))
+    // An empty list is sent as an empty value, so removing the last tag works
+    const appendList = (key: string, ids: number[]) =>
+      ids.length ? ids.forEach((id) => fd.append(`${key}[]`, String(id))) : fd.append(key, '')
+    appendList('tag_ids', form.tag_ids)
+    appendList('mechanic_ids', form.mechanic_ids)
+    appendList('language_ids', form.language_ids)
     if (form.coverFile) fd.append('cover_image', form.coverFile)
     form.id ? await updateGame(form.id, fd) : await createGame(fd)
     await load()

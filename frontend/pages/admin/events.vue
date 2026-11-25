@@ -436,7 +436,8 @@ function buildFormData() {
   fd.append('is_all_day', form.is_all_day ? '1' : '0')
   if (!form.is_all_day && form.time) fd.append('time', form.time)
   if (!form.is_all_day && form.end_time) fd.append('end_time', form.end_time)
-  if (form.description) fd.append('description', form.description)
+  // Always sent, so clearing the text clears it (an empty value arrives as null)
+  fd.append('description', form.description)
   if (form.imageFile) fd.append('image', form.imageFile)
   if (form.removeImage) fd.append('remove_image', '1')
   // Empty strings arrive as null, which turns a pickup event back into a regular one
