@@ -165,7 +165,13 @@ const { notify } = useDialogs()
 const year = new Date().getFullYear()
 const loading = ref(true)
 const remindingId = ref<number | null>(null)
-const statusFilter = ref('')
+// The admin start links here with ?status=OVERDUE
+const route = useRoute()
+const statusFilter = ref(
+  ['ACTIVE', 'EXTENDED', 'OVERDUE', 'RETURNED'].includes(String(route.query.status))
+    ? String(route.query.status)
+    : ''
+)
 const loans = ref<
   {
     id: number

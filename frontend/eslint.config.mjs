@@ -16,5 +16,21 @@ export default withNuxt(
       ],
     },
   },
+  {
+    files: ['test/**/*.ts'],
+    rules: {
+      // A hook that returns a function gets it called as teardown — and
+      // `() => mock.mockReset()` returns the mock itself, which then runs once
+      // more after every test. Always give hooks a block body.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'CallExpression[callee.name=/^(before|after)(Each|All)$/] > ArrowFunctionExpression[expression=true]',
+          message: 'Give test hooks a block body: () => { … }',
+        },
+      ],
+    },
+  },
   prettier
 )

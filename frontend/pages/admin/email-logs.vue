@@ -20,21 +20,21 @@
             class="form-input filter-row__select"
             :options="[
               { label: $t('admin.email_logs.all_templates'), value: '' },
-              ...templateKeys.map((k) => ({ label: k, value: k })),
+              ...templateOptions,
             ]"
-            @change="load"
+            @change="applyFilter"
           />
           <input
             v-model="filterDateFrom"
             type="date"
             class="form-input filter-row__date"
-            @change="load"
+            @change="applyFilter"
           />
           <input
             v-model="filterDateTo"
             type="date"
             class="form-input filter-row__date"
-            @change="load"
+            @change="applyFilter"
           />
         </div>
 
@@ -69,7 +69,9 @@
                   <td class="dash-table__primary">{{ log.recipient_email }}</td>
                   <td class="text-muted">{{ log.user?.name ?? '—' }}</td>
                   <td>
-                    <span class="template-tag">{{ log.template_key }}</span>
+                    <span class="template-tag" :title="log.template_key">{{
+                      templateLabel(log.template_key)
+                    }}</span>
                   </td>
                   <td class="text-muted">{{ log.subject }}</td>
                   <td class="text-muted">{{ formatDate(log.sent_at) }}</td>
@@ -110,6 +112,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { EMAIL_TEMPLATE_META } from '~/utils/emailTemplates'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
@@ -141,16 +144,20 @@ const filterTemplate = ref('')
 const filterDateFrom = ref('')
 const filterDateTo = ref('')
 
-const templateKeys = [
-  'email_verification',
-  'welcome_member',
-  'membership_renewal_reminder',
-  'user_approved',
-  'user_rejected',
-  'new_user_registered',
-  'loan_due_soon',
-  'reservation_available',
-]
+// Every mail the app sends, by its readable name
+const templateOptions = Object.entries(EMAIL_TEMPLATE_META)
+  .map(([value, m]) => ({ label: m.label, value }))
+  .sort((x, y) => x.label.localeCompare(y.label, 'de'))
+
+function templateLabel(key: string) {
+  return EMAIL_TEMPLATE_META[key]?.label ?? key
+}
+
+// A new filter starts on its first page
+function applyFilter() {
+  page.value = 1
+  load()
+}
 
 async function load() {
   loading.value = true

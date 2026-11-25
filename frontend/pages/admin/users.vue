@@ -23,8 +23,18 @@
 
         <section v-else class="dash-section">
           <header class="dash-section__header">
-            <h2 class="dash-section__title">{{ $t('admin.users.all') }}</h2>
+            <h2 class="dash-section__title">
+              {{ statusFilter ? $t('admin.users.pending_only') : $t('admin.users.all') }}
+            </h2>
             <span class="dash-section__count">{{ total }}</span>
+            <button
+              v-if="statusFilter"
+              type="button"
+              class="action-btn filter-clear"
+              @click="clearStatusFilter"
+            >
+              {{ $t('admin.users.show_all') }}
+            </button>
           </header>
 
           <div v-if="!users.length" class="dash-empty">
@@ -507,11 +517,21 @@ const page = ref(1)
 const lastPage = ref(1)
 const total = ref(0)
 
+// The admin start links here with ?status=PENDING to show who waits for approval
+const route = useRoute()
+const statusFilter = ref(String(route.query.status ?? '') === 'PENDING' ? 'PENDING' : '')
+
+function clearStatusFilter() {
+  statusFilter.value = ''
+  navigateTo({ query: {} }, { replace: true })
+  loadUsers(1)
+}
+
 async function loadUsers(target = page.value) {
   pending.value = true
   try {
     const data = await api.get<{ data: User[]; meta?: PageMeta }>('/admin/users', {
-      params: { page: target },
+      params: { page: target, ...(statusFilter.value ? { status: statusFilter.value } : {}) },
     })
     users.value = data.data
     page.value = data.meta?.current_page ?? 1
@@ -753,6 +773,10 @@ $hero-divider: var(--divider);
   gap: 0.75rem;
   padding: 1.1rem 1.5rem;
   border-bottom: 1px solid var(--divider);
+}
+// "Show all" sits at the far end of the header
+.filter-clear {
+  margin-left: auto;
 }
 .dash-section__title {
   font-size: 0.95rem;

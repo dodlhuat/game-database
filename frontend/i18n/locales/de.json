@@ -793,6 +793,8 @@
     "users": {
       "title": "Mitgliederverwaltung",
       "all": "Alle Mitglieder",
+      "pending_only": "Warten auf Freischaltung",
+      "show_all": "Alle zeigen",
       "create_title": "Benutzer anlegen",
       "edit_title": "Benutzer bearbeiten",
       "role_user": "Registriert (USER)",

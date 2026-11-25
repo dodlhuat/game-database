@@ -64,7 +64,7 @@ class EmailTemplateConsistencyTest extends TestCase
 
     public function test_every_mail_is_listed_on_the_admin_page(): void
     {
-        $file = base_path('../frontend/pages/admin/emails.vue');
+        $file = base_path('../frontend/utils/emailTemplates.ts');
         if (! is_file($file)) {
             // the backend container only mounts backend/
             $this->markTestSkipped('frontend/ is not available here');
@@ -75,6 +75,6 @@ class EmailTemplateConsistencyTest extends TestCase
             fn (string $key) => ! preg_match("/^\\s+{$key}: \\{/m", $page),
         ));
 
-        $this->assertSame([], $missing, 'templates missing in frontend/pages/admin/emails.vue');
+        $this->assertSame([], $missing, 'templates missing in frontend/utils/emailTemplates.ts');
     }
 }
