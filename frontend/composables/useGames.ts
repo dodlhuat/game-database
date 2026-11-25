@@ -86,12 +86,15 @@ export interface PaginatedGames {
 export function useGames() {
   const api = useApi()
 
-  function fetchGames(filters: GameFilters = {}) {
-    const params = Object.fromEntries(
+  // Drops unset filters, so the API only sees what the member actually chose
+  function filterParams(filters: GameFilters) {
+    return Object.fromEntries(
       Object.entries(filters).filter(([, v]) => v !== undefined && v !== '' && v !== false)
     ) as Record<string, string | number | boolean>
+  }
 
-    return api.get<PaginatedGames>('/games', { params })
+  function fetchGames(filters: GameFilters = {}) {
+    return api.get<PaginatedGames>('/games', { params: filterParams(filters) })
   }
 
   function fetchGame(slug: string) {
@@ -116,8 +119,12 @@ export function useGames() {
     return api.get<{ id: number; name: string }[]>('/languages')
   }
 
-  function smartSearch(q: string) {
-    return api.get<SmartSearchResult>('/games/smart-search', { params: { q } })
+  /** Search text plus the list filters (search, sort and page do not apply here). */
+  function smartSearch(q: string, filters: GameFilters = {}) {
+    const { search: _search, sort: _sort, page: _page, ...rest } = filters
+    return api.get<SmartSearchResult>('/games/smart-search', {
+      params: { q, ...filterParams(rest) },
+    })
   }
 
   return {

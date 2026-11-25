@@ -7,6 +7,7 @@ use App\Models\Favorite;
 use App\Models\Game;
 use App\Services\SmartSearch\QueryParser;
 use App\Services\SmartSearch\SimilarityScorer;
+use App\Support\GameFilters;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -36,7 +37,9 @@ class GameSearchController extends Controller
                 $q->whereNotIn('condition', ['LOCKED', 'REVIEW', 'DAMAGED'])
                     ->whereDoesntHave('activeLoans');
             }])
-            ->withCount('reviews');
+            ->withCount('reviews')
+            // The list filters apply to the search too, so they never silently drop out
+            ->tap(fn ($q) => GameFilters::apply($q, $request));
 
         $meta = [];
 

@@ -203,8 +203,8 @@
                 v-for="m in allMechanics"
                 :key="m.id"
                 class="option-chip"
-                :class="{ 'option-chip--active': selectedMechanicIds.includes(m.id) }"
-                @click="toggleMechanic(m.id)"
+                :class="{ 'option-chip--active': selectedMechanicSlugs.includes(m.slug) }"
+                @click="toggleMechanic(m.slug)"
               >
                 {{ m.name }}
               </button>
@@ -418,16 +418,12 @@ const AGE_MAX = 18
 const ageRange = ref<[number, number]>([AGE_MIN, AGE_MAX])
 
 // ── Mechanik-Filter (Mehrfachauswahl) ────────────────────────────────
-const selectedMechanicIds = computed(() =>
-  filters.mechanic
-    .split(',')
-    .filter(Boolean)
-    .map((v) => Number(v))
-)
+// The API filters by slug (?mechanic=deck-building,worker-placement), like tags.
+const selectedMechanicSlugs = computed(() => filters.mechanic.split(',').filter(Boolean))
 
-function toggleMechanic(id: number) {
-  const ids = selectedMechanicIds.value
-  const next = ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]
+function toggleMechanic(slug: string) {
+  const slugs = selectedMechanicSlugs.value
+  const next = slugs.includes(slug) ? slugs.filter((s) => s !== slug) : [...slugs, slug]
   filters.mechanic = next.join(',')
   resetPage()
 }
@@ -453,10 +449,12 @@ const filters = reactive({
 
 // ── Active filter labels ───────────────────────────────────────────
 const mechanicLabel = computed(() => {
-  const ids = selectedMechanicIds.value
-  if (ids.length === 0) return t('pages.games.filter_mechanic')
-  if (ids.length > 1) return `${ids.length} ${t('pages.games.filter_mechanic')}`
-  return allMechanics.value.find((m) => m.id === ids[0])?.name ?? t('pages.games.filter_mechanic')
+  const slugs = selectedMechanicSlugs.value
+  if (slugs.length === 0) return t('pages.games.filter_mechanic')
+  if (slugs.length > 1) return `${slugs.length} ${t('pages.games.filter_mechanic')}`
+  return (
+    allMechanics.value.find((m) => m.slug === slugs[0])?.name ?? t('pages.games.filter_mechanic')
+  )
 })
 
 const difficultyLabel = computed(() => {
@@ -568,7 +566,7 @@ async function load() {
   loading.value = true
   try {
     if (filters.search) {
-      const data = await smartSearch(filters.search)
+      const data = await smartSearch(filters.search, filters)
       games.value = data.data
       smartMeta.value = data.meta
       meta.value = {
