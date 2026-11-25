@@ -9,7 +9,7 @@ Eine Plattform zur Verwaltung und Ausleihe von Brettspielen. Mitglieder können 
 | Backend | Laravel 12 (PHP 8.2+) |
 | Auth | Laravel Sanctum (Token-basiert) |
 | Datenbank | PostgreSQL 16 |
-| Bilder | Cloudinary + Intervention Image |
+| Bilder | Lokaler Speicher (public disk) + Intervention Image |
 | Frontend | Nuxt 4 (Vue 3.5 + TypeScript) |
 | Styling | Basix SCSS Komponenten-Library |
 | State | Pinia 3 |

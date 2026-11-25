@@ -4,7 +4,7 @@
 
 .PHONY: up down setup artisan migrate logs ps api-generate demo lint lint-fix test reset-data seed-taxonomy \
         prod-up prod-down prod-logs prod-deploy prod-shell prod-artisan \
-        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy deploy-env-set \
+        deploy deploy-pull deploy-backend deploy-frontend deploy-fix-pull deploy-verify deploy-backup deploy-reset-data deploy-seed-taxonomy deploy-env-set deploy-env-unset \
         server-update server-update-install server-update-install-all \
         maintenance-on maintenance-off
 
@@ -206,6 +206,14 @@ deploy-env-set:
 	@printf 'Wert für %s: ' "$(KEY)"; stty -echo; read -r value; stty echo; echo; \
 	[ -n "$$value" ] || { echo "Leerer Wert — abgebrochen."; exit 1; }; \
 	printf '%s' "$$value" | ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && v=$$(cat) && { grep -v "^$(KEY)=" .env; printf "%s=%s\n" "$(KEY)" "$$v"; } > .env.new && cat .env.new > .env && rm .env.new && php artisan config:cache >/dev/null && echo "✓ $(KEY) gesetzt, Config-Cache neu gebaut"'
+
+## Variablen aus backend/.env auf dem Server entfernen, z. B.:
+##   make deploy-env-unset KEYS="STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET"
+## Nennt nur die Namen, die tatsächlich entfernt wurden; Werte werden nie ausgegeben.
+deploy-env-unset:
+	@[ -n "$(KEYS)" ] || { echo 'Aufruf: make deploy-env-unset KEYS="NAME1 NAME2"'; exit 1; }
+	@for k in $(KEYS); do printf '%s' "$$k" | grep -Eq '^[A-Z][A-Z0-9_]*$$' || { echo "Ungültiger Name: $$k"; exit 1; }; done
+	@ssh $(DEPLOY_SERVER) 'cd $(DEPLOY_DIR)/backend && pattern="^($(shell echo $(KEYS) | tr ' ' '|'))=" && found=$$(grep -oE "$$pattern" .env | tr -d = | tr "\n" " ") && if [ -z "$$found" ]; then echo "Nichts zu entfernen."; else grep -vE "$$pattern" .env > .env.new && cat .env.new > .env && rm .env.new && php artisan config:cache >/dev/null && echo "✓ Entfernt: $$found— Config-Cache neu gebaut"; fi'
 
 # ============================================================
 # Server-Updates (Ubuntu-Pakete, z.B. PHP, nginx, OpenSSL)
