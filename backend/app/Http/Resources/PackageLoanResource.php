@@ -42,7 +42,8 @@ class PackageLoanResource extends JsonResource
             'due_date' => $this->due_date,
             'returned_at' => $this->returned_at,
             'status' => $this->status,
-            'is_overdue' => $this->due_date < now() && $this->status === 'ACTIVE',
+            // overdue from the day after the due date, like loans:mark-overdue
+            'is_overdue' => $this->due_date->lt(today()) && $this->status === 'ACTIVE',
             'loans' => LoanResource::collection($this->whenLoaded('loans')),
             'created_at' => $this->created_at,
         ];

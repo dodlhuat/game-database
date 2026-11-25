@@ -119,7 +119,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchEmailTemplates, updateEmailTemplate, resetEmailTemplate } = useAdmin()
 const { t } = useI18n()
-const { notify } = useDialogs()
+const { confirmDialog, notify } = useDialogs()
 
 interface EmailTemplate {
   id: number
@@ -365,6 +365,14 @@ async function save() {
 }
 
 async function reset() {
+  // Replaces whatever was written here with the standard text
+  const ok = await confirmDialog({
+    title: t('admin.emails.reset_title'),
+    message: t('admin.emails.reset_confirm'),
+    confirmLabel: t('admin.emails.reset_action'),
+    danger: true,
+  })
+  if (!ok) return
   saving.value = true
   formError.value = ''
   try {

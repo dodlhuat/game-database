@@ -903,6 +903,9 @@
       "deposit_pct_good_hint": "Prozentsatz der Spielkaution für Kopien im Zustand 'Gut'."
     },
     "emails": {
+      "reset_title": "Auf Standard zurücksetzen?",
+      "reset_confirm": "Betreff, Anrede, Text und Button bekommen wieder den Standardtext. Deine Änderungen an dieser Vorlage gehen verloren.",
+      "reset_action": "Zurücksetzen",
       "title": "E-Mail-Vorlagen",
       "edit_eyebrow": "E-Mail-Vorlage bearbeiten",
       "available_vars": "Verfügbare Variablen:",

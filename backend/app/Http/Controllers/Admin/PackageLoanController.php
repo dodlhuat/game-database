@@ -17,9 +17,15 @@ class PackageLoanController extends Controller
 {
     public function index(Request $request): AnonymousResourceCollection
     {
+        $status = $request->string('status')->toString();
+
         $loans = PackageLoan::query()
             ->with(['package', 'user', 'loans.copy.game'])
-            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
+            // Package loans never get the status OVERDUE (only their single
+            // loans do); overdue means running past the due date, the same
+            // rule PackageLoanResource uses for is_overdue
+            ->when($status === 'OVERDUE', fn ($q) => $q->where('status', 'ACTIVE')->whereDate('due_date', '<', today()))
+            ->when($status !== '' && $status !== 'OVERDUE', fn ($q) => $q->where('status', $status))
             ->when($request->pickup_location_id, fn ($q, $id) => $q->where('pickup_location_id', $id))
             ->orderByDesc('created_at')
             ->paginate(20);

@@ -451,8 +451,11 @@ async function save() {
       sponsors.value.push(await createSponsor(buildFormData()))
     }
     closeForm()
-  } catch {
-    formError.value = t('admin.sponsors.errors.save')
+  } catch (err: unknown) {
+    // e.g. a logo that is too large — say why, not just that it failed
+    const message = (err as { message?: unknown })?.message
+    formError.value =
+      typeof message === 'string' && message ? message : t('admin.sponsors.errors.save')
   } finally {
     saving.value = false
   }

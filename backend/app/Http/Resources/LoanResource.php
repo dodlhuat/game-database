@@ -59,7 +59,8 @@ class LoanResource extends JsonResource
             'return_condition' => $this->return_condition,
             'deposit_tokens' => $this->deposit_tokens,
             'status' => $this->status,
-            'is_overdue' => $this->due_date < now() && in_array($this->status, ['ACTIVE', 'EXTENDED']),
+            // overdue from the day after the due date, like loans:mark-overdue
+            'is_overdue' => $this->due_date->lt(today()) && in_array($this->status, ['ACTIVE', 'EXTENDED']),
             'overdue_reminder_sent_at' => $this->overdue_reminder_sent_at,
             'extensions' => ExtensionResource::collection($this->whenLoaded('extensions')),
             'can_extend' => $this->when($hasExtensions, fn () => $this->extensionBlockReason($request) === null),
