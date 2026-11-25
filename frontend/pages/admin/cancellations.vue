@@ -18,7 +18,7 @@
         <section v-else class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.cancellations.title') }}</h2>
-            <span class="dash-section__count">{{ cancellations.length }}</span>
+            <span class="dash-section__count">{{ total }}</span>
           </header>
 
           <div v-if="!cancellations.length" class="dash-empty">
@@ -79,6 +79,13 @@
               </tbody>
             </table>
           </div>
+          <AdminPagination
+            :page="page"
+            :last-page="lastPage"
+            :total="total"
+            :loading="loading"
+            @change="load"
+          />
         </section>
       </div>
     </div>
@@ -97,11 +104,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { PageMeta } from '~/composables/useAdmin'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const api = useApi()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface Cancellation {
   id: number
@@ -123,13 +132,25 @@ const loading = ref(true)
 const processing = ref(false)
 const cancellations = ref<Cancellation[]>([])
 
-onMounted(load)
+// The API pages the list (25 per page)
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
 
-async function load() {
+onMounted(() => load())
+
+async function load(target = page.value) {
   loading.value = true
   try {
-    const data = await api.get<{ data: Cancellation[] }>('/admin/cancellations')
+    const data = await api.get<{ data: Cancellation[]; meta: PageMeta }>('/admin/cancellations', {
+      params: { page: target },
+    })
     cancellations.value = data.data
+    page.value = data.meta.current_page
+    lastPage.value = data.meta.last_page
+    total.value = data.meta.total
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
@@ -139,7 +160,10 @@ async function markRefunded(id: number) {
   processing.value = true
   try {
     await api.patch(`/admin/cancellations/${id}/refunded`)
+    notify(t('admin.cancellations.marked_refunded'))
     await load()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
   } finally {
     processing.value = false
   }

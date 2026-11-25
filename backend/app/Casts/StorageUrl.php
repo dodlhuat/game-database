@@ -43,13 +43,15 @@ class StorageUrl implements CastsAttributes
      */
     public static function toPath(string $value): ?string
     {
-        if (! self::isAbsolute($value)) {
-            return ltrim($value, '/');
-        }
-
+        // The disk URL may itself be relative ("/storage/…" when no app URL
+        // is configured), so strip it before treating the value as a path.
         $base = rtrim(Storage::disk('public')->url(''), '/').'/';
         if (str_starts_with($value, $base)) {
             return substr($value, strlen($base));
+        }
+
+        if (! self::isAbsolute($value)) {
+            return ltrim($value, '/');
         }
 
         return null;

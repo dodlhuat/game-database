@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Package;
+use App\Support\UniqueSlug;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class PackageController extends Controller
 {
@@ -32,7 +32,7 @@ class PackageController extends Controller
             'is_active' => 'boolean',
         ]);
 
-        $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
+        $data['slug'] = $data['slug'] ?? UniqueSlug::for(Package::class, $data['name'], fallback: 'paket');
 
         $package = Package::create($data);
         $package->games()->sync($data['game_ids'] ?? []);
@@ -76,6 +76,15 @@ class PackageController extends Controller
 
     public function destroy(Package $package): JsonResponse
     {
+        // Deleting would cascade to its package loans — running ones included —
+        // and turn their games into loose single loans. Keep the history.
+        if ($package->packageLoans()->exists()) {
+            return response()->json([
+                'message' => 'Dieses Paket wurde schon ausgeliehen und kann deshalb nicht gelöscht werden. Deaktiviere es stattdessen.',
+                'reason' => 'has_loans',
+            ], 422);
+        }
+
         $package->delete();
 
         return response()->json(['message' => 'Paket gelöscht.']);

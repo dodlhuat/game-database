@@ -7,6 +7,13 @@ export interface AdminStats {
   }
 }
 
+/** Laravel paginator meta, as the admin list endpoints return it. */
+export interface PageMeta {
+  current_page: number
+  last_page: number
+  total: number
+}
+
 export interface AdminCopy {
   id: number
   game_id: number
@@ -33,7 +40,7 @@ export function useAdmin() {
 
   // Games
   const fetchAdminGames = (params?: Record<string, string | number | boolean>) =>
-    api.get<{ data: unknown[]; meta: unknown }>('/admin/games', { params })
+    api.get<{ data: unknown[]; meta: PageMeta }>('/admin/games', { params })
 
   const importGames = (file: File) => {
     const fd = new FormData()
@@ -88,7 +95,7 @@ export function useAdmin() {
 
   // Copies
   const fetchCopies = (params?: Record<string, string | number>) =>
-    api.get<{ data: unknown[]; meta: unknown }>('/admin/copies', { params })
+    api.get<{ data: unknown[]; meta: PageMeta }>('/admin/copies', { params })
 
   const createCopy = (data: unknown) => api.post('/admin/copies', data)
 
@@ -107,7 +114,7 @@ export function useAdmin() {
 
   // Loans
   const fetchAdminLoans = (params?: Record<string, string | number>) =>
-    api.get<{ data: unknown[]; meta: unknown }>('/admin/loans', { params })
+    api.get<{ data: unknown[]; meta: PageMeta }>('/admin/loans', { params })
 
   const markOverdue = (id: number) => api.patch(`/admin/loans/${id}/overdue`)
 
@@ -121,7 +128,7 @@ export function useAdmin() {
 
   // Damage Reports
   const fetchDamageReports = (params?: Record<string, string | number>) =>
-    api.get<{ data: unknown[] }>('/admin/damage-reports', { params })
+    api.get<{ data: unknown[]; meta: PageMeta }>('/admin/damage-reports', { params })
 
   // Email Templates
   const fetchEmailTemplates = () => api.get<{ data: unknown[] }>('/admin/email-templates')

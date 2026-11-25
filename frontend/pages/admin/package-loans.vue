@@ -121,6 +121,7 @@ const locations = ref<ApiPickupLocation[]>([])
 
 const api = useApi()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface PackageLoan {
   id: number
@@ -168,6 +169,8 @@ async function load() {
     })
     loans.value = data.data
     meta.value = data.meta
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

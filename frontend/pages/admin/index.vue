@@ -317,6 +317,8 @@ import type { AdminStats } from '~/composables/useAdmin'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchStats } = useAdmin()
+const { t } = useI18n()
+const { notify } = useDialogs()
 const stats = ref<AdminStats | null>(null)
 const loading = ref(true)
 const reviewLocations = computed(() => stats.value?.copies.to_review_by_location ?? [])
@@ -340,6 +342,8 @@ const alertCount = computed(() => {
 onMounted(async () => {
   try {
     stats.value = await fetchStats()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

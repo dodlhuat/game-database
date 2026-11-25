@@ -372,6 +372,7 @@ import type { Game, SmartSearchMeta } from '~/composables/useGames'
 
 const { fetchGames, fetchMechanics, fetchLanguages, smartSearch } = useGames()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 type MechanicItem = {
   id: number
@@ -582,6 +583,8 @@ async function load() {
       games.value = data.data
       meta.value = data.meta
     }
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.load'), 'error')
   } finally {
     loading.value = false
   }

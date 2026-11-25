@@ -106,6 +106,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchNewsletters, sendNewsletter } = useAdmin()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface Newsletter {
   id: number
@@ -129,6 +130,8 @@ async function load() {
   try {
     const data = await fetchNewsletters()
     newsletters.value = data.data as Newsletter[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
@@ -143,6 +146,9 @@ async function send() {
     form.value = { subject: '', body: '' }
     successMsg.value = t('admin.newsletters.success')
     await load()
+  } catch (err: unknown) {
+    // the text stays in the form, so it can simply be sent again
+    notify((err as { message?: string }).message ?? t('admin.newsletters.send_failed'), 'error')
   } finally {
     sending.value = false
   }

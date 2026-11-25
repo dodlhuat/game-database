@@ -120,6 +120,7 @@ import { ref, reactive, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const { fetchAdminMechanics, createMechanic, updateMechanic, deleteMechanic } = useAdmin()
 
 interface MechanicItem {
@@ -144,6 +145,8 @@ async function load() {
   try {
     const data = await fetchAdminMechanics()
     mechanics.value = data.data as MechanicItem[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
@@ -179,8 +182,24 @@ async function save() {
 }
 
 async function remove(mechanic: MechanicItem) {
-  await deleteMechanic(mechanic.id)
-  await load()
+  const ok = await confirmDialog({
+    title: t('admin.mechanics.delete_title'),
+    message: t(
+      'admin.mechanics.confirm_delete',
+      { name: mechanic.name, n: mechanic.games_count ?? 0 },
+      mechanic.games_count ?? 0
+    ),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  try {
+    await deleteMechanic(mechanic.id)
+    notify(t('admin.mechanics.deleted', { name: mechanic.name }))
+    await load()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 </script>
 

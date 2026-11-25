@@ -34,7 +34,7 @@
         <section v-else class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.loans.title') }}</h2>
-            <span class="dash-section__count">{{ loans.length }}</span>
+            <span class="dash-section__count">{{ total }}</span>
           </header>
 
           <div v-if="!loans.length" class="dash-empty">
@@ -125,6 +125,13 @@
               </tbody>
             </table>
           </div>
+          <AdminPagination
+            :page="page"
+            :last-page="lastPage"
+            :total="total"
+            :loading="loading"
+            @change="load"
+          />
         </section>
       </div>
     </div>
@@ -153,6 +160,7 @@ const isOpen = (status: string) => ['ACTIVE', 'EXTENDED', 'OVERDUE'].includes(st
 
 const { fetchAdminLoans, markOverdue, sendOverdueReminder } = useAdmin()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 const year = new Date().getFullYear()
 const loading = ref(true)
@@ -189,31 +197,49 @@ onMounted(() => {
 
 function setStatusFilter(value: string) {
   statusFilter.value = value
-  load()
+  load(1) // a new filter starts on its first page
 }
 
-async function load() {
+// The API pages the list (25 per page)
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
+
+async function load(target = page.value) {
   loading.value = true
   try {
-    const data = await fetchAdminLoans(
-      statusFilter.value ? { status: statusFilter.value } : undefined
-    )
+    const data = await fetchAdminLoans({
+      page: target,
+      ...(statusFilter.value ? { status: statusFilter.value } : {}),
+    })
     loans.value = data.data as typeof loans.value
+    page.value = data.meta.current_page
+    lastPage.value = data.meta.last_page
+    total.value = data.meta.total
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
 }
 
 async function setOverdue(id: number) {
-  await markOverdue(id)
-  await load()
+  try {
+    await markOverdue(id)
+    await load()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 
 async function remind(id: number) {
   remindingId.value = id
   try {
     await sendOverdueReminder(id)
+    notify(t('admin.loans.reminder_sent'))
     await load()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.loans.reminder_failed'), 'error')
   } finally {
     remindingId.value = null
   }

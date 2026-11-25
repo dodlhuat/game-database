@@ -17,6 +17,14 @@ class DamageReportController extends Controller
             ->orderByDesc('created_at')
             ->paginate(25);
 
-        return response()->json($reports);
+        // Same shape as the other admin lists: rows in data, paging in meta
+        return response()->json([
+            'data' => $reports->items(),
+            'meta' => [
+                'current_page' => $reports->currentPage(),
+                'last_page' => $reports->lastPage(),
+                'total' => $reports->total(),
+            ],
+        ]);
     }
 }

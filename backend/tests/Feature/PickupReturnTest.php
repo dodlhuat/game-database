@@ -216,4 +216,20 @@ class PickupReturnTest extends TestCase
         $this->assertStringContainsString('späteren Abholtermin am selben Ort', $content);
         $this->assertStringContainsString('nicht abgeholt', $content);
     }
+
+    public function test_package_return_options_are_for_the_borrower_and_admins_only(): void
+    {
+        $packageLoan = PackageLoan::factory()->create([
+            'user_id' => $this->member->id,
+            'pickup_location_id' => $this->main->id,
+        ]);
+        $url = "/api/package-loans/{$packageLoan->id}/return-options";
+
+        $this->actingAs($this->member)->getJson($url)
+            ->assertOk()
+            ->assertJsonPath('locations.0.name', 'Hauptstandort')
+            ->assertJsonPath('events', []);
+        $this->actingAs($this->admin)->getJson($url)->assertOk();
+        $this->actingAs(User::factory()->member()->create())->getJson($url)->assertForbidden();
+    }
 }

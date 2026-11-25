@@ -77,7 +77,7 @@
                       <button class="action-btn" @click="openEdit(pkg)">
                         {{ $t('admin.actions.edit') }}
                       </button>
-                      <button class="action-btn action-btn--danger" @click="remove(pkg.id)">
+                      <button class="action-btn action-btn--danger" @click="remove(pkg)">
                         {{ $t('admin.actions.delete') }}
                       </button>
                     </div>
@@ -206,6 +206,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const { fetchAdminPackages, createPackage, updatePackage, deletePackage, fetchAdminGames } =
   useAdmin()
 
@@ -261,6 +262,8 @@ async function load() {
   try {
     const data = await fetchAdminPackages()
     packages.value = data.data as PackageItem[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
@@ -323,9 +326,22 @@ async function save() {
   }
 }
 
-async function remove(id: number) {
-  await deletePackage(id)
-  await load()
+async function remove(pkg: { id: number; name: string }) {
+  const ok = await confirmDialog({
+    title: t('admin.packages_admin.delete_title'),
+    message: t('admin.packages_admin.confirm_delete', { name: pkg.name }),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  try {
+    await deletePackage(pkg.id)
+    notify(t('admin.packages_admin.deleted', { name: pkg.name }))
+    await load()
+  } catch (err: unknown) {
+    // e.g. a package that was already borrowed — it can only be deactivated
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 </script>
 

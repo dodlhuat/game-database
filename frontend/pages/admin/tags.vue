@@ -120,6 +120,7 @@ import { ref, reactive, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { confirmDialog, notify } = useDialogs()
 const { fetchAdminTags, createTag, updateTag, deleteTag } = useAdmin()
 
 interface Tag {
@@ -144,6 +145,8 @@ async function load() {
   try {
     const data = await fetchAdminTags()
     tags.value = data.data as Tag[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
@@ -179,8 +182,24 @@ async function save() {
 }
 
 async function remove(tag: Tag) {
-  await deleteTag(tag.id)
-  await load()
+  const ok = await confirmDialog({
+    title: t('admin.tags.delete_title'),
+    message: t(
+      'admin.tags.confirm_delete',
+      { name: tag.name, n: tag.games_count ?? 0 },
+      tag.games_count ?? 0
+    ),
+    confirmLabel: t('admin.actions.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  try {
+    await deleteTag(tag.id)
+    notify(t('admin.tags.deleted', { name: tag.name }))
+    await load()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  }
 }
 </script>
 

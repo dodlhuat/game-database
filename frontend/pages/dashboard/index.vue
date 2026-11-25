@@ -537,6 +537,7 @@ definePageMeta({ middleware: ['auth'] })
 
 const auth = useAuthStore()
 const { t } = useI18n()
+const { notify } = useDialogs()
 const {
   fetchDashboard,
   returnLoan: doReturn,
@@ -611,6 +612,8 @@ useAsyncData(
   async () => {
     try {
       data.value = await fetchDashboard()
+    } catch (err: unknown) {
+      notify((err as { message?: string }).message ?? t('common.error.load'), 'error')
     } finally {
       loading.value = false
     }
@@ -739,6 +742,10 @@ async function submitDamage() {
   try {
     await reportDamage(damageLoan.value.id, damageDescription.value, damagePhotoFile.value)
     damageLoan.value = null
+    notify(t('dashboard.damage_sent'))
+  } catch (err: unknown) {
+    // keep the dialog open so nothing typed is lost
+    notify((err as { message?: string }).message ?? t('dashboard.damage_failed'), 'error')
   } finally {
     reporting.value = false
   }

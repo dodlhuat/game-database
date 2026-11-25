@@ -134,6 +134,7 @@
     "error": {
       "not_found": "Seite nicht gefunden",
       "not_found_desc": "Die aufgerufene Seite existiert nicht.",
+      "load": "Die Daten konnten nicht geladen werden. Bitte lade die Seite neu.",
       "generic": "Ein Fehler ist aufgetreten",
       "try_later": "Bitte versuche es später erneut.",
       "session_expired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
@@ -293,6 +294,8 @@
     "damage_description": "Beschreibung",
     "damage_photo": "Foto (optional)",
     "damage_report": "Melden",
+    "damage_sent": "Danke! Deine Schadensmeldung ist bei uns eingegangen.",
+    "damage_failed": "Die Schadensmeldung konnte nicht gesendet werden. Bitte versuch es noch einmal.",
     "extension_title": "Ausleihe verlängern",
     "extension_new_due_date": "Neues Rückgabedatum",
     "extension_apply": "Jetzt verlängern",
@@ -566,17 +569,7 @@
     "dashboard": "Admin-Dashboard",
     "heading": "Administration",
     "management": "Verwaltung",
-    "users": "Mitglieder",
-    "games": "Spiele",
-    "tags": "Tags",
-    "loans": "Ausleihen",
-    "newsletters": "Newsletter",
     "packages": "Pakete",
-    "damage_reports": "Schadensmeldungen",
-    "emails": "E-Mail-Vorlagen",
-    "loan_settings": "Ausleih-Einstellungen",
-    "email_logs": "E-Mail-Protokoll",
-    "package_loans": "Paket-Ausleihen",
     "stats": {
       "users_total": "Mitglieder gesamt",
       "users_pending": "ausstehend",
@@ -750,12 +743,18 @@
       "success_damaged": "Exemplar {code} als beschädigt markiert."
     },
     "mechanics": {
+      "delete_title": "Mechanik löschen",
+      "confirm_delete": "„{name}“ wirklich löschen? | „{name}“ wirklich löschen? Es wird von einem Spiel entfernt. | „{name}“ wirklich löschen? Es wird von {n} Spielen entfernt.",
+      "deleted": "„{name}“ wurde gelöscht.",
       "title": "Mechaniken verwalten",
       "all": "Alle Mechaniken",
       "add": "Mechanik hinzufügen",
       "rename": "Mechanik umbenennen"
     },
     "packages_admin": {
+      "delete_title": "Paket löschen",
+      "confirm_delete": "„{name}“ wirklich löschen? Ein Paket, das schon ausgeliehen wurde, kann nur deaktiviert werden.",
+      "deleted": "„{name}“ wurde gelöscht.",
       "title": "Pakete verwalten",
       "all": "Alle Pakete",
       "add": "Paket hinzufügen",
@@ -768,6 +767,9 @@
       "games_none": "Keine Spiele gefunden."
     },
     "tags": {
+      "delete_title": "Tag löschen",
+      "confirm_delete": "„{name}“ wirklich löschen? | „{name}“ wirklich löschen? Es wird von einem Spiel entfernt. | „{name}“ wirklich löschen? Es wird von {n} Spielen entfernt.",
+      "deleted": "„{name}“ wurde gelöscht.",
       "title": "Tags verwalten",
       "all": "Alle Tags",
       "add": "Tag hinzufügen",
@@ -815,6 +817,8 @@
       "filter_overdue": "Überfällig",
       "filter_returned": "Zurückgegeben",
       "status_cancelled": "Storniert",
+      "reminder_sent": "Erinnerung verschickt.",
+      "reminder_failed": "Die Erinnerung konnte nicht verschickt werden.",
       "member_col": "Mitglied",
       "loaned_at": "Ausgeliehen am",
       "due_at": "Fällig am",
@@ -828,6 +832,7 @@
       "location_error": "Abholort konnte nicht geändert werden."
     },
     "newsletters": {
+      "send_failed": "Der Newsletter konnte nicht versendet werden.",
       "title": "Newsletter",
       "compose_title": "Neuen Newsletter verfassen",
       "history_title": "Versandhistorie",
@@ -910,6 +915,7 @@
       "view_photo": "Ansehen"
     },
     "cancellations": {
+      "marked_refunded": "Als erstattet markiert.",
       "title": "Kündigungen",
       "open": "Offene Rücküberweisungen",
       "member": "Mitglied",
@@ -1010,6 +1016,16 @@
         "order": "Reihenfolge konnte nicht gespeichert werden.",
         "delete": "Fehler beim Löschen."
       }
+    },
+    "errors": {
+      "load": "Die Liste konnte nicht geladen werden. Bitte lade die Seite neu."
+    },
+    "pagination": {
+      "label": "Seiten",
+      "prev": "Vorherige Seite",
+      "next": "Nächste Seite",
+      "page": "Seite {page} von {last}",
+      "total": "{n} Eintrag | {n} Einträge"
     },
     "packing": {
       "breadcrumb": "Packliste",

@@ -35,6 +35,10 @@ class DamageReportController extends Controller
             return response()->json(['message' => 'Schadensmeldung nur für aktive Ausleihen möglich.'], 422);
         }
 
+        if ($loan->isAwaitingPickup()) {
+            return response()->json(['message' => 'Das Spiel wurde noch nicht an dich ausgegeben.', 'reason' => 'awaiting_pickup'], 422);
+        }
+
         $photoUrl = null;
         if ($request->hasFile('photo')) {
             $photoUrl = $this->imageUpload->uploadDamagePhoto($request->file('photo'));

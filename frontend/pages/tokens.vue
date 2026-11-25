@@ -299,6 +299,7 @@ const api = useApi()
 const { fetchTokenTransactions } = useLoans()
 const { fetchSettings } = useLoanSettings()
 const { t } = useI18n()
+const { notify } = useDialogs()
 const success = ref('')
 const error = ref('')
 const costs = ref<LoanSettings | null>(null)
@@ -451,6 +452,8 @@ async function loadTx(page: number) {
     const data = await fetchTokenTransactions(page)
     transactions.value = data.data
     txMeta.value = { last_page: data.meta.last_page, total: data.meta.total }
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.load'), 'error')
   } finally {
     txLoading.value = false
   }

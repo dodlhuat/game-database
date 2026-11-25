@@ -119,6 +119,7 @@ definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchEmailTemplates, updateEmailTemplate, resetEmailTemplate } = useAdmin()
 const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface EmailTemplate {
   id: number
@@ -306,6 +307,8 @@ onMounted(async () => {
   try {
     const data = await fetchEmailTemplates()
     templates.value = data.data as EmailTemplate[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MechanicResource;
 use App\Models\Mechanic;
+use App\Support\UniqueSlug;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Str;
 
 class MechanicController extends Controller
 {
@@ -23,7 +23,7 @@ class MechanicController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:mechanics,name'],
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = UniqueSlug::for(Mechanic::class, $data['name']);
 
         return new MechanicResource(Mechanic::create($data));
     }
@@ -34,7 +34,7 @@ class MechanicController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:mechanics,name,'.$mechanic->id],
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = UniqueSlug::for(Mechanic::class, $data['name'], $mechanic->id);
         $mechanic->update($data);
 
         return new MechanicResource($mechanic->loadCount('games'));

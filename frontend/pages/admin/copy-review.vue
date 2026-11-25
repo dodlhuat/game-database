@@ -280,6 +280,7 @@ import type { AdminCopy } from '~/composables/useAdmin'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { t } = useI18n()
+const { notify } = useDialogs()
 const { fetchCopies, lookupCopy, approveCopy, markCopyDamaged } = useAdmin()
 
 const year = new Date().getFullYear()
@@ -292,14 +293,26 @@ const scanBusy = ref(false)
 const scanError = ref('')
 const scanShake = ref(false)
 
+// The queue is grouped by location on this page, so it needs every copy:
+// fetch page after page instead of showing only the first one.
 async function fetchQueue() {
-  const data = await fetchCopies({ condition: 'REVIEW', per_page: 100 })
-  copies.value = data.data as AdminCopy[]
+  const all: AdminCopy[] = []
+  let page = 1
+  let lastPage = 1
+  do {
+    const data = await fetchCopies({ condition: 'REVIEW', per_page: 200, page })
+    all.push(...(data.data as AdminCopy[]))
+    lastPage = data.meta.last_page
+    page++
+  } while (page <= lastPage)
+  copies.value = all
 }
 
 onMounted(async () => {
   try {
     await fetchQueue()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

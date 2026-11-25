@@ -49,7 +49,7 @@
         <section v-else class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.games.all') }}</h2>
-            <span class="dash-section__count">{{ games.length }}</span>
+            <span class="dash-section__count">{{ total }}</span>
           </header>
 
           <div v-if="!games.length" class="dash-empty">
@@ -101,6 +101,13 @@
               </tbody>
             </table>
           </div>
+          <AdminPagination
+            :page="page"
+            :last-page="lastPage"
+            :total="total"
+            :loading="loading"
+            @change="load"
+          />
         </section>
       </div>
     </div>
@@ -834,11 +841,23 @@ onMounted(async () => {
   allLanguages.value = langData as { id: number; name: string }[]
 })
 
-async function load() {
+// The API pages the list (25 per page); keep the page across reloads
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
+
+async function load(target = page.value) {
   loading.value = true
   try {
-    const data = await fetchAdminGames()
+    const data = await fetchAdminGames({ page: target })
     games.value = data.data as Game[]
+    page.value = data.meta.current_page
+    lastPage.value = data.meta.last_page
+    total.value = data.meta.total
+    // a delete can empty the last page — step back to the one before
+    if (!games.value.length && page.value > 1) await load(page.value - 1)
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

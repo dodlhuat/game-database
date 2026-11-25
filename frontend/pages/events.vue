@@ -105,6 +105,7 @@ import type { Calendar } from '@dodlhuat/basix/js/calendar'
 definePageMeta({ middleware: 'auth' })
 
 const { t } = useI18n()
+const { notify } = useDialogs()
 const { fetchEvents } = useEvents()
 const calendarEl = ref<HTMLElement | null>(null)
 const loading = ref(true)
@@ -164,6 +165,8 @@ function formatTimeSpan(time: string | null, endTime: string | null) {
 onMounted(async () => {
   try {
     events = await fetchEvents()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.load'), 'error')
   } finally {
     loading.value = false
   }

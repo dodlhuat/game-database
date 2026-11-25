@@ -68,7 +68,11 @@ function row(wrapper: Awaited<ReturnType<typeof mountUsersPage>>, i: number) {
 async function openMenu(wrapper: Awaited<ReturnType<typeof mountUsersPage>>, i: number) {
   await row(wrapper, i).find('.row-menu-btn').trigger('click')
   await flushPromises()
-  await new Promise((r) => setTimeout(r, 0))
+  // The first open imports the menu module — wait for its items rather than
+  // a fixed tick, which lost the race now and then and made this test flaky
+  await vi.waitFor(() => {
+    if (!modal().findAll('.context-menu-item').length) throw new Error('menu not open yet')
+  })
   return modal()
     .findAll('.context-menu-item')
     .map((li) => li)
@@ -103,7 +107,7 @@ describe('admin/users.vue — status actions', () => {
   it('loads and renders the user list', async () => {
     const wrapper = await mountUsersPage()
 
-    expect(getMock).toHaveBeenCalledWith('/admin/users')
+    expect(getMock).toHaveBeenCalledWith('/admin/users', { params: { page: 1 } })
     expect(wrapper.findAll('tbody tr')).toHaveLength(2)
   })
 

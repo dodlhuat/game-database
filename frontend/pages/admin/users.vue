@@ -24,7 +24,7 @@
         <section v-else class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.users.all') }}</h2>
-            <span class="dash-section__count">{{ users.length }}</span>
+            <span class="dash-section__count">{{ total }}</span>
           </header>
 
           <div v-if="!users.length" class="dash-empty">
@@ -111,6 +111,13 @@
               </tbody>
             </table>
           </div>
+          <AdminPagination
+            :page="page"
+            :last-page="lastPage"
+            :total="total"
+            :loading="pending"
+            @change="loadUsers"
+          />
         </section>
       </div>
     </div>
@@ -325,6 +332,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import type { PageMeta } from '~/composables/useAdmin'
 import { useRowMenu, type RowMenuItem } from '~/composables/useRowMenu'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
@@ -351,6 +359,7 @@ interface TxItem {
 
 const api = useApi()
 const { t } = useI18n()
+const { notify } = useDialogs()
 const year = new Date().getFullYear()
 const users = ref<User[]>([])
 const pending = ref(true)
@@ -373,6 +382,7 @@ async function submitCreate() {
   try {
     const res = await api.post<{ data: User }>('/admin/users', createForm.value)
     users.value.unshift(res.data)
+    total.value++
     showCreate.value = false
   } catch (e: unknown) {
     const err = e as { data?: { message?: string } }
@@ -463,6 +473,8 @@ async function loadTxPanel(userId: number, page: number) {
     )
     txPanel.value.transactions = data.data
     txPanel.value.lastPage = data.meta.last_page
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     txPanel.value.loading = false
   }
@@ -488,13 +500,30 @@ function updateScrollHint() {
 let resizeObserver: ResizeObserver | null = null
 
 // ── Status actions ──────────────────────────────────────────────
-onMounted(async () => {
+// The API pages the list (20 per page)
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
+
+async function loadUsers(target = page.value) {
+  pending.value = true
   try {
-    const data = await api.get<{ data: User[] }>('/admin/users')
+    const data = await api.get<{ data: User[]; meta?: PageMeta }>('/admin/users', {
+      params: { page: target },
+    })
     users.value = data.data
+    page.value = data.meta?.current_page ?? 1
+    lastPage.value = data.meta?.last_page ?? 1
+    total.value = data.meta?.total ?? data.data.length
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     pending.value = false
   }
+}
+
+onMounted(async () => {
+  await loadUsers()
   await nextTick()
   updateScrollHint()
   if (tableWrap.value && typeof ResizeObserver !== 'undefined') {

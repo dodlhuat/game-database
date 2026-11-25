@@ -114,6 +114,8 @@ import { ref, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const api = useApi()
+const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface EmailLog {
   id: number
@@ -163,6 +165,8 @@ async function load() {
     })
     logs.value = data.data
     meta.value = data.meta
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

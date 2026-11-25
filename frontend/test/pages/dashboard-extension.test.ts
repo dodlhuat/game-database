@@ -7,13 +7,19 @@ import type { DashboardData, Loan } from '~/composables/useLoans'
 
 const fetchDashboardMock = vi.fn()
 const requestExtensionMock = vi.fn()
+const reportDamageMock = vi.hoisted(() => vi.fn())
+const notifyMock = vi.hoisted(() => vi.fn())
+mockNuxtImport('useDialogs', () => {
+  return () => ({ confirmDialog: vi.fn(), notify: notifyMock })
+})
+
 mockNuxtImport('useLoans', () => {
   return () => ({
     fetchDashboard: fetchDashboardMock,
     returnLoan: vi.fn(),
     requestExtension: requestExtensionMock,
     removeReservation: vi.fn(),
-    reportDamage: vi.fn(),
+    reportDamage: reportDamageMock,
   })
 })
 
@@ -186,5 +192,55 @@ describe('dashboard — extending a loan', () => {
     const vm = wrapper.vm as unknown as { minExtensionDate: Date; maxExtensionDate: Date }
     expect(vm.minExtensionDate.toDateString()).toBe(new Date('2026-11-30T00:00:00').toDateString())
     expect(vm.maxExtensionDate.toDateString()).toBe(new Date('2026-12-13T00:00:00').toDateString())
+  })
+})
+
+describe('dashboard — reporting damage', () => {
+  beforeEach(() => {
+    fetchDashboardMock.mockReset()
+    reportDamageMock.mockReset()
+    notifyMock.mockReset()
+  })
+
+  afterEach(() => {
+    mounted?.unmount()
+    mounted = null
+  })
+
+  async function openAndSubmit(wrapper: Awaited<ReturnType<typeof mountDashboard>>) {
+    await wrapper
+      .findAll('.action-btn')
+      .find((b) => b.text().includes(wrapper.vm.$t('btn.damage')))!
+      .trigger('click')
+    await wrapper.find('.modal-overlay input').setValue('Karte geknickt')
+    await wrapper
+      .findAll('.modal-overlay button')
+      .find((b) => b.text() === wrapper.vm.$t('dashboard.damage_report'))!
+      .trigger('click')
+    await flushPromises()
+  }
+
+  it('confirms a sent report and closes the dialog', async () => {
+    reportDamageMock.mockResolvedValue({})
+    const wrapper = await mountDashboard([loan()])
+
+    await openAndSubmit(wrapper)
+
+    expect(reportDamageMock).toHaveBeenCalledWith(1, 'Karte geknickt', null)
+    expect(notifyMock).toHaveBeenCalledWith(wrapper.vm.$t('dashboard.damage_sent'))
+    expect(wrapper.find('.modal-overlay').exists()).toBe(false)
+  })
+
+  it('says so when the report fails and keeps what was typed', async () => {
+    reportDamageMock.mockRejectedValue({ message: 'Server nicht erreichbar.' })
+    const wrapper = await mountDashboard([loan()])
+
+    await openAndSubmit(wrapper)
+
+    expect(notifyMock).toHaveBeenCalledWith('Server nicht erreichbar.', 'error')
+    expect(wrapper.find('.modal-overlay').exists()).toBe(true)
+    expect((wrapper.find('.modal-overlay input').element as HTMLInputElement).value).toBe(
+      'Karte geknickt'
+    )
   })
 })

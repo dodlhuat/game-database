@@ -18,7 +18,7 @@
         <section v-else class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.damage_reports.all') }}</h2>
-            <span class="dash-section__count">{{ reports.length }}</span>
+            <span class="dash-section__count">{{ total }}</span>
           </header>
 
           <div v-if="!reports.length" class="dash-empty">
@@ -64,6 +64,13 @@
               </tbody>
             </table>
           </div>
+          <AdminPagination
+            :page="page"
+            :last-page="lastPage"
+            :total="total"
+            :loading="loading"
+            @change="load"
+          />
         </section>
       </div>
     </div>
@@ -86,6 +93,8 @@ import { ref, onMounted } from 'vue'
 definePageMeta({ middleware: ['auth', 'admin'] })
 
 const { fetchDamageReports } = useAdmin()
+const { t } = useI18n()
+const { notify } = useDialogs()
 
 interface DamageReport {
   id: number
@@ -100,14 +109,27 @@ const year = new Date().getFullYear()
 const loading = ref(true)
 const reports = ref<DamageReport[]>([])
 
-onMounted(async () => {
+// The API pages the list (25 per page)
+const page = ref(1)
+const lastPage = ref(1)
+const total = ref(0)
+
+async function load(target = page.value) {
+  loading.value = true
   try {
-    const data = await fetchDamageReports()
+    const data = await fetchDamageReports({ page: target })
     reports.value = data.data as DamageReport[]
+    page.value = data.meta.current_page
+    lastPage.value = data.meta.last_page
+    total.value = data.meta.total
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(() => load())
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('de-DE', { dateStyle: 'medium' })

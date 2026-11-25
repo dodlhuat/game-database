@@ -52,7 +52,10 @@ mockNuxtImport('useGames', () => {
 let activeWrapper: Awaited<ReturnType<typeof mountSuspended>> | null = null
 
 async function mountGamesPage() {
-  fetchAdminGamesMock.mockResolvedValue({ data: [] })
+  fetchAdminGamesMock.mockResolvedValue({
+    data: [],
+    meta: { current_page: 1, last_page: 1, total: 0 },
+  })
   activeWrapper = await mountSuspended(AdminGamesPage, {
     global: { stubs: { UiVirtualDropdown: true, UiDatePicker: true, UiRichEditor: true } },
   })
@@ -115,7 +118,10 @@ describe('admin/games.vue — import', () => {
 
   it('imports a selected file and reloads the game list', async () => {
     importGamesMock.mockResolvedValue({ new: 2, updated: 1, total: 3 })
-    fetchAdminGamesMock.mockResolvedValue({ data: [] })
+    fetchAdminGamesMock.mockResolvedValue({
+      data: [],
+      meta: { current_page: 1, last_page: 1, total: 0 },
+    })
     const wrapper = await mountGamesPage()
     fetchAdminGamesMock.mockClear()
 
@@ -153,5 +159,40 @@ describe('admin/games.vue — import', () => {
 
     expect(modal().text()).toContain('Ungültige Datei.')
     expect(modal().find('.import-result__value--new').text()).toBe('0')
+  })
+})
+
+describe('admin/games.vue — paging', () => {
+  beforeEach(() => {
+    fetchAdminGamesMock.mockReset()
+    notifyMock.mockReset()
+  })
+
+  it('shows the total and loads the next page instead of stopping at the first 25', async () => {
+    fetchAdminGamesMock.mockImplementation(({ page }: { page: number }) =>
+      Promise.resolve({
+        data: [{ id: page, title: `Spiel auf Seite ${page}`, slug: `s${page}`, is_active: true }],
+        meta: { current_page: page, last_page: 2, total: 26 },
+      })
+    )
+    activeWrapper = await mountSuspended(AdminGamesPage)
+    await flushPromises()
+
+    expect(activeWrapper.find('.dash-section__count').text()).toBe('26')
+    await activeWrapper
+      .find('.admin-pagination button[aria-label="Nächste Seite"]')
+      .trigger('click')
+    await flushPromises()
+
+    expect(fetchAdminGamesMock).toHaveBeenLastCalledWith({ page: 2 })
+    expect(activeWrapper.text()).toContain('Spiel auf Seite 2')
+  })
+
+  it('says so when the list cannot be loaded', async () => {
+    fetchAdminGamesMock.mockRejectedValue({ message: 'Server nicht erreichbar.' })
+    activeWrapper = await mountSuspended(AdminGamesPage)
+    await flushPromises()
+
+    expect(notifyMock).toHaveBeenCalledWith('Server nicht erreichbar.', 'error')
   })
 })

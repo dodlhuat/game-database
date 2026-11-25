@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
+use App\Support\UniqueSlug;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Str;
 
 class TagController extends Controller
 {
@@ -23,7 +23,7 @@ class TagController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:tags,name'],
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = UniqueSlug::for(Tag::class, $data['name']);
 
         return new TagResource(Tag::create($data));
     }
@@ -34,7 +34,7 @@ class TagController extends Controller
             'name' => ['required', 'string', 'max:100', 'unique:tags,name,'.$tag->id],
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = UniqueSlug::for(Tag::class, $data['name'], $tag->id);
         $tag->update($data);
 
         return new TagResource($tag->loadCount('games'));
