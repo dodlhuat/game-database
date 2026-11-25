@@ -59,6 +59,7 @@
     "terms": "Nutzungsbedingungen",
     "privacy": "Datenschutzerklärung",
     "cookies": "Cookie-Richtlinien",
+    "imprint": "Impressum",
     "collection": "Spielesammlung",
     "donations": "Sachspenden",
     "menu_open": "Menü öffnen",
@@ -1174,6 +1175,32 @@
     "cookies": {
       "title": "Cookie-Richtlinien",
       "unavailable": "Die Cookie-Richtlinien werden in Kürze verfügbar sein."
+    }
+  },
+  "imprint": {
+    "tag": "Impressum",
+    "title": "Impressum",
+    "lead": "Angaben gemäß § 5 E-Commerce-Gesetz und Offenlegung gemäß § 25 Mediengesetz.",
+    "facts": {
+      "owner_label": "Medieninhaber und Herausgeber",
+      "owner": "AUA-Alle.Unsere.Abenteuer – Verein zur Förderung des gemeinsamen Spielens",
+      "address_label": "Sitz",
+      "address": "Michael Gleiß Gasse 3, 3107 Viehofen",
+      "zvr_label": "ZVR-Zahl",
+      "zvr": "1545800206",
+      "board_label": "Vertretungsbefugt",
+      "board": "Alexander Hamberger-Windegger, Obmann",
+      "email_label": "Kontakt",
+      "purpose_label": "Vereinszweck",
+      "purpose": "Förderung des gemeinsamen Spielens; nicht auf Gewinn gerichtet, politisch unabhängig und konfessionell ungebunden"
+    },
+    "direction": {
+      "title": "Grundlegende Richtung",
+      "text": "Diese Website informiert über die Tätigkeit des Vereins – Spieleabende, Veranstaltungen und die Spielothek – und dient Mitgliedern zum Ausleihen von Spielen."
+    },
+    "liability": {
+      "title": "Haftung für Links",
+      "text": "Für die Inhalte verlinkter externer Seiten sind ausschließlich deren Betreiber verantwortlich. Zum Zeitpunkt der Verlinkung waren keine rechtswidrigen Inhalte erkennbar; werden uns solche bekannt, entfernen wir den Link umgehend."
     }
   },
   "about": {

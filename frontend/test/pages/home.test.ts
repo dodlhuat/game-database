@@ -66,6 +66,6 @@ describe('/ (home)', () => {
     wrapper = await mountSuspended(HomePage)
 
     expect(wrapper.find('.landing').exists()).toBe(false)
-    expect(links()).toEqual(['/login'])
+    expect(links()).toEqual(['/impressum', '/login'])
   })
 })

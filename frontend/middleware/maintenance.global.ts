@@ -4,7 +4,7 @@ import { useAuthStore } from '~/stores/auth'
  * Seiten, die im Wartungsmodus erreichbar bleiben: Startseite (zeigt die
  * Wartungsansicht), Login sowie Passwort vergessen/zurücksetzen, damit sich
  * ein Admin auch ohne bekanntes Passwort wieder Zugang verschaffen kann.
- * Die Newsletter-Abmeldung muss immer funktionieren.
+ * Die Newsletter-Abmeldung und das Impressum müssen immer erreichbar sein.
  */
 const ALLOWED_PATHS = new Set([
   '/',
@@ -12,6 +12,7 @@ const ALLOWED_PATHS = new Set([
   '/forgot-password',
   '/reset-password',
   '/newsletter/abmelden',
+  '/impressum',
 ])
 
 /**

@@ -105,6 +105,15 @@ describe('maintenance middleware', () => {
     }
   )
 
+  it.each(['/impressum', '/newsletter/abmelden'])(
+    'keeps %s reachable when on — the imprint and unsubscribing must always work',
+    (path) => {
+      useRuntimeConfig().public.maintenanceMode = true
+      go(path)
+      expect(navigateToMock).not.toHaveBeenCalled()
+    }
+  )
+
   it('lets a logged-in admin reach every route when on', () => {
     useRuntimeConfig().public.maintenanceMode = true
     useAuthStore().user = { role: 'ADMIN' } as never

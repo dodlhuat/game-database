@@ -23,4 +23,22 @@ describe('de.json', () => {
     }
     expect(duplicates).toEqual([])
   })
+
+  it('has no bare "@", which vue-i18n reads as a linked message', () => {
+    const messages = JSON.parse(
+      readFileSync(resolve(__dirname, '../i18n/locales/de.json'), 'utf-8')
+    ) as Record<string, unknown>
+    const offenders: string[] = []
+    const walk = (node: unknown, path: string) => {
+      if (typeof node === 'string') {
+        // "@" starts a linked message and breaks loading the whole file;
+        // write it as {'@'} or keep such values (e.g. e-mail addresses) out of here
+        if (node.replace(/\{'@'\}/g, '').includes('@')) offenders.push(path)
+      } else if (node && typeof node === 'object') {
+        for (const [k, v] of Object.entries(node)) walk(v, path ? `${path}.${k}` : k)
+      }
+    }
+    walk(messages, '')
+    expect(offenders).toEqual([])
+  })
 })

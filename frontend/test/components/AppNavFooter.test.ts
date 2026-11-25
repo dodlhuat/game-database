@@ -82,7 +82,9 @@ describe('AppFooter', () => {
   it('always links the legal documents', async () => {
     const footer = await mountSuspended(AppFooter)
 
-    expect(hrefs(footer)).toEqual(expect.arrayContaining(['/terms', '/privacy', '/cookies']))
+    expect(hrefs(footer)).toEqual(
+      expect.arrayContaining(['/terms', '/privacy', '/cookies', '/impressum'])
+    )
   })
 
   it('shows the sponsors link only once there is someone to thank', async () => {

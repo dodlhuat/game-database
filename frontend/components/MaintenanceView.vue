@@ -33,9 +33,13 @@
         {{ $t('pages.maintenance.signoff') }}
       </p>
 
-      <NuxtLink to="/login" class="maintenance__login">{{
-        $t('pages.maintenance.admin_login')
-      }}</NuxtLink>
+      <!-- The imprint has to stay reachable while the site is closed -->
+      <nav class="maintenance__links">
+        <NuxtLink to="/impressum" class="maintenance__login">{{ $t('nav.imprint') }}</NuxtLink>
+        <NuxtLink to="/login" class="maintenance__login">{{
+          $t('pages.maintenance.admin_login')
+        }}</NuxtLink>
+      </nav>
     </div>
   </main>
 </template>
@@ -150,9 +154,15 @@ $indigo-glow: rgba(44, 40, 32, 0.6);
     animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
   }
 
+  &__links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
   &__login {
     display: inline-block;
-    margin-top: 2.5rem;
     font-size: 0.75rem;
     letter-spacing: 0.08em;
     opacity: 0.4;

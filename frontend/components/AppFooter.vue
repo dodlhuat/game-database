@@ -37,6 +37,7 @@ onMounted(() => {
           <NuxtLink to="/terms" class="app-footer__link">{{ $t('nav.terms') }}</NuxtLink>
           <NuxtLink to="/privacy" class="app-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
           <NuxtLink to="/cookies" class="app-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
+          <NuxtLink to="/impressum" class="app-footer__link">{{ $t('nav.imprint') }}</NuxtLink>
         </nav>
         <span class="app-footer__copy">{{ $t('common.copyright_short', { year }) }}</span>
       </div>
