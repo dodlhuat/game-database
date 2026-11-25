@@ -94,9 +94,13 @@ async function submit() {
     })
     done.value = true
   } catch (err: unknown) {
-    const e = err as { errors?: Record<string, string[]>; message?: string }
+    const e = err as { status?: number; errors?: Record<string, string[]>; message?: string }
     if (e.errors?.password) {
       errors.password = e.errors.password[0] ?? ''
+    } else if (e.status === 422 && !e.errors) {
+      // Token used, expired or not for this address: this link will never
+      // work again, so offer a new one instead of the form
+      invalidLink.value = true
     } else {
       generalError.value = e.message ?? 'Fehler beim Zurücksetzen.'
     }
