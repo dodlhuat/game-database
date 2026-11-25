@@ -192,6 +192,18 @@ const meta: Record<string, TemplateMeta> = {
     icon: 'checklist',
     vars: ['count', 'date', 'pickup_list'],
   },
+  membership_payment_duplicate: {
+    label: 'Doppelte Zahlung – wird erstattet',
+    recipient: 'Mitglied',
+    icon: 'undo',
+    vars: ['name', 'amount', 'date'],
+  },
+  membership_payment_duplicate_admin: {
+    label: 'Doppelte Zahlung – bitte erstatten',
+    recipient: 'Admin',
+    icon: 'undo',
+    vars: ['name', 'email', 'amount', 'date', 'payment_id'],
+  },
   pickup_event_reminder: {
     label: 'Abholtermin morgen',
     recipient: 'Mitglied',

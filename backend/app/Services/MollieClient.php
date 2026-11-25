@@ -59,6 +59,16 @@ class MollieClient
     }
 
     /**
+     * Cancels an open payment. Only allowed where Mollie says isCancelable.
+     *
+     * @return array<string, mixed>
+     */
+    public function cancelPayment(string $paymentId): array
+    {
+        return $this->request('delete', '/payments/'.rawurlencode($paymentId));
+    }
+
+    /**
      * Where to send the member to pay.
      *
      * @param  array<string, mixed>  $payment

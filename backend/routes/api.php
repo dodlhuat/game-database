@@ -3,6 +3,7 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AddressValidationController;
 use App\Http\Controllers\Admin\CopyController;
+use App\Http\Controllers\Admin\DuplicatePaymentController;
 use App\Http\Controllers\Admin\EmailLogController;
 use App\Http\Controllers\Admin\EmailTemplateController;
 use App\Http\Controllers\Admin\GameImageController;
@@ -180,6 +181,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Kündigungen
     Route::get('/cancellations', [App\Http\Controllers\Admin\MembershipCancellationController::class, 'index']);
     Route::patch('/cancellations/{cancellation}/refunded', [App\Http\Controllers\Admin\MembershipCancellationController::class, 'markRefunded']);
+    Route::get('/duplicate-payments', [DuplicatePaymentController::class, 'index']);
+    Route::patch('/duplicate-payments/{payment}/refunded', [DuplicatePaymentController::class, 'markRefunded']);
 
     // Spieleverwaltung
     Route::post('/games/import', [GameImportExportController::class, 'import']);

@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\Models\MembershipPayment;
 use App\Models\User;
+use App\Notifications\MembershipPaymentDuplicate;
+use App\Notifications\MembershipPaymentDuplicateAdmin;
 use App\Notifications\WelcomeMemberNotification;
 use App\Notifications\WelcomeSupporterNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Activates a membership for a completed payment. Idempotent: the
@@ -21,26 +24,40 @@ class MembershipPaymentCompleter
     public function complete(MembershipPayment $payment, string $chargeId, array $rawPayload): MembershipPayment
     {
         $applied = false;
+        $duplicate = false;
 
-        $result = DB::transaction(function () use ($payment, $chargeId, $rawPayload, &$applied) {
+        $result = DB::transaction(function () use ($payment, $chargeId, $rawPayload, &$applied, &$duplicate) {
             $locked = MembershipPayment::whereKey($payment->id)->lockForUpdate()->first();
 
-            if (! $locked || $locked->status === 'COMPLETED') {
+            if (! $locked || ! in_array($locked->status, ['CREATED', 'FAILED'], true)) {
                 return $locked ?? $payment;
             }
 
+            $user = User::whereKey($locked->user_id)->lockForUpdate()->firstOrFail();
+            $fits = $this->stillFits($locked, $user);
+
             $locked->update([
                 'provider_charge_id' => $chargeId,
-                'status' => 'COMPLETED',
+                'status' => $fits ? 'COMPLETED' : MembershipPayment::STATUS_DUPLICATE,
                 'payload' => $rawPayload,
                 'captured_at' => now(),
             ]);
 
-            $this->apply($locked, User::findOrFail($locked->user_id));
-            $applied = true;
+            if ($fits) {
+                $this->apply($locked, $user);
+                $applied = true;
+            } else {
+                $duplicate = true;
+            }
 
             return $locked;
         });
+
+        if ($duplicate) {
+            $member = User::findOrFail($result->user_id);
+            $member->notify(new MembershipPaymentDuplicate($result));
+            Notification::send(User::where('role', 'ADMIN')->get(), new MembershipPaymentDuplicateAdmin($result, $member));
+        }
 
         if ($applied && $result->type !== MembershipPayment::TYPE_RENEWAL) {
             $user = User::findOrFail($result->user_id);
@@ -50,6 +67,25 @@ class MembershipPaymentCompleter
         }
 
         return $result;
+    }
+
+    /**
+     * Whether the membership this payment was for is still due. A second
+     * payment for the same thing — two tabs, a double click, a renewal paid
+     * twice — no longer fits once the first one went through; it is then
+     * refunded instead of applied (see PaymentService::sync). Mirrors the
+     * checks in MembershipController::checkout.
+     */
+    private function stillFits(MembershipPayment $payment, User $user): bool
+    {
+        if ($payment->type !== MembershipPayment::TYPE_RENEWAL) {
+            return $user->role === 'USER';
+        }
+
+        return in_array($user->role, ['MEMBER', 'SUPPORTER'], true)
+            && $user->membership_expires_at !== null
+            // a day of slack for a payment started right at the window's edge
+            && $user->membership_expires_at->lte(now()->addMonths(3)->addDay());
     }
 
     private function apply(MembershipPayment $payment, User $user): void

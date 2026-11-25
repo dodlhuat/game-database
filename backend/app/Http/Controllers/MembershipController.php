@@ -53,6 +53,13 @@ class MembershipController extends Controller
         ]);
         $type = $request->string('type')->toString();
 
+        $open = $this->openPayment($user, $type);
+        if ($open instanceof JsonResponse) {
+            return $open;
+        }
+        // A payment started earlier may have gone through in the meantime
+        $user->refresh();
+
         $address = [];
         if ($type === MembershipPayment::TYPE_RENEWAL) {
             if (! in_array($user->role, ['MEMBER', 'SUPPORTER'], true)) {
@@ -103,6 +110,53 @@ class MembershipController extends Controller
         }
 
         return response()->json(['checkoutUrl' => $checkoutUrl, 'id' => $payment->id]);
+    }
+
+    /**
+     * A membership payment of this member that Mollie still has open. Paid
+     * ones get booked on the way (sync), so the checks below see the result.
+     * Same type → continue that checkout instead of paying twice; another
+     * type → cancel it if Mollie allows, otherwise ask to finish it first.
+     * Mollie being unreachable never blocks: the completer still refunds a
+     * payment that arrives for a membership that already exists.
+     */
+    private function openPayment(User $user, string $type): ?JsonResponse
+    {
+        $candidates = MembershipPayment::where('user_id', $user->id)
+            ->where('status', 'CREATED')
+            ->whereNotNull('provider_payment_id')
+            ->latest('id')
+            ->get();
+
+        foreach ($candidates as $payment) {
+            try {
+                if ($this->payments->sync($payment) !== PaymentService::PENDING) {
+                    continue;
+                }
+                $checkout = $this->payments->openCheckout($payment);
+
+                if ($payment->type === $type && $checkout['url'] !== null) {
+                    return response()->json(['checkoutUrl' => $checkout['url'], 'id' => $payment->id, 'resumed' => true]);
+                }
+                if ($payment->type !== $type && $checkout['cancelable']) {
+                    $this->payments->cancel($payment);
+
+                    continue;
+                }
+
+                return response()->json([
+                    'message' => $checkout['url'] !== null
+                        ? 'Du hast schon eine Zahlung für deine Mitgliedschaft begonnen. Schließe sie ab oder warte rund 15 Minuten, bis sie verfällt.'
+                        : 'Deine Zahlung für die Mitgliedschaft wird gerade bearbeitet. Bitte schau in ein paar Minuten wieder vorbei.',
+                    'reason' => 'payment_open',
+                    'checkoutUrl' => $checkout['url'],
+                ], 409);
+            } catch (Throwable $e) {
+                report($e);
+            }
+        }
+
+        return null;
     }
 
     /** Supporter who already paid the fee upgrades to a full membership. */

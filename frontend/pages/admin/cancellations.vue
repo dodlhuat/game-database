@@ -15,78 +15,129 @@
       <div class="admin-content__inner">
         <div v-if="loading" class="admin-state"><div class="spinner" /></div>
 
-        <section v-else class="dash-section">
-          <header class="dash-section__header">
-            <h2 class="dash-section__title">{{ $t('admin.cancellations.title') }}</h2>
-            <span class="dash-section__count">{{ total }}</span>
-          </header>
+        <template v-else>
+          <!-- Only there while something is waiting to be paid back -->
+          <section v-if="duplicates.length" class="dash-section dash-section--alert">
+            <header class="dash-section__header">
+              <h2 class="dash-section__title">{{ $t('admin.duplicate_payments.title') }}</h2>
+              <span class="dash-section__count">{{ duplicates.length }}</span>
+            </header>
+            <p class="section-hint">{{ $t('admin.duplicate_payments.hint') }}</p>
+            <div class="table-wrap">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>{{ $t('admin.cancellations.member') }}</th>
+                    <th>{{ $t('admin.duplicate_payments.amount') }}</th>
+                    <th>{{ $t('admin.duplicate_payments.mollie_id') }}</th>
+                    <th>{{ $t('admin.duplicate_payments.paid_at') }}</th>
+                    <th>{{ $t('admin.table.actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="d in duplicates" :key="d.id">
+                    <td class="dash-table__primary">
+                      {{ d.user?.name ?? '—' }}
+                      <span class="text-muted cell-sub">{{ d.user?.email }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ euro(d.price_cents) }}</strong>
+                      <span class="text-muted cell-sub">{{
+                        $t(`admin.duplicate_payments.type_${d.type.toLowerCase()}`)
+                      }}</span>
+                    </td>
+                    <td class="iban">{{ d.provider_payment_id ?? '—' }}</td>
+                    <td class="text-muted">{{ formatDate(d.paid_at ?? undefined) }}</td>
+                    <td>
+                      <button
+                        class="action-btn action-btn--success"
+                        :disabled="processing"
+                        @click="markDuplicateRefunded(d.id)"
+                      >
+                        {{ $t('admin.duplicate_payments.mark_refunded') }}
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-          <div v-if="!cancellations.length" class="dash-empty">
-            <p class="dash-empty__text">{{ $t('admin.cancellations.empty') }}</p>
-          </div>
+          <section class="dash-section">
+            <header class="dash-section__header">
+              <h2 class="dash-section__title">{{ $t('admin.cancellations.title') }}</h2>
+              <span class="dash-section__count">{{ total }}</span>
+            </header>
 
-          <div v-else class="table-wrap">
-            <table class="dash-table">
-              <thead>
-                <tr>
-                  <th>{{ $t('admin.cancellations.member') }}</th>
-                  <th>{{ $t('admin.cancellations.refund') }}</th>
-                  <th>{{ $t('admin.cancellations.bank') }}</th>
-                  <th>{{ $t('admin.cancellations.reason') }}</th>
-                  <th>{{ $t('admin.cancellations.date') }}</th>
-                  <th>{{ $t('admin.table.actions') }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="c in cancellations" :key="c.id">
-                  <td class="dash-table__primary">
-                    {{ c.user?.name ?? '—' }}
-                    <span class="text-muted cell-sub">{{ c.user?.email }}</span>
-                  </td>
-                  <td>
-                    <strong>{{ euro(c.refund_cents) }}</strong>
-                    <span class="text-muted cell-sub">{{
-                      $t('admin.cancellations.tokens_info', {
-                        tokens: c.refund_tokens,
-                        fee: euro(c.fee_cents),
-                      })
-                    }}</span>
-                    <span v-if="c.bonus_tokens_forfeited" class="text-muted cell-sub">{{
-                      $t('admin.cancellations.bonus_forfeited', { bonus: c.bonus_tokens_forfeited })
-                    }}</span>
-                  </td>
-                  <td>
-                    <template v-if="c.iban">
-                      {{ c.account_holder }}
-                      <span class="text-muted cell-sub iban">{{ c.iban }}</span>
-                    </template>
-                    <template v-else>—</template>
-                  </td>
-                  <td class="text-muted">{{ c.reason || '—' }}</td>
-                  <td class="text-muted">{{ formatDate(c.created_at) }}</td>
-                  <td>
-                    <button
-                      v-if="c.status === 'REQUESTED'"
-                      class="action-btn action-btn--success"
-                      :disabled="processing"
-                      @click="markRefunded(c.id)"
-                    >
-                      {{ $t('admin.cancellations.mark_refunded') }}
-                    </button>
-                    <span v-else class="text-muted">{{ statusLabel(c.status) }}</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <AdminPagination
-            :page="page"
-            :last-page="lastPage"
-            :total="total"
-            :loading="loading"
-            @change="load"
-          />
-        </section>
+            <div v-if="!cancellations.length" class="dash-empty">
+              <p class="dash-empty__text">{{ $t('admin.cancellations.empty') }}</p>
+            </div>
+
+            <div v-else class="table-wrap">
+              <table class="dash-table">
+                <thead>
+                  <tr>
+                    <th>{{ $t('admin.cancellations.member') }}</th>
+                    <th>{{ $t('admin.cancellations.refund') }}</th>
+                    <th>{{ $t('admin.cancellations.bank') }}</th>
+                    <th>{{ $t('admin.cancellations.reason') }}</th>
+                    <th>{{ $t('admin.cancellations.date') }}</th>
+                    <th>{{ $t('admin.table.actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="c in cancellations" :key="c.id">
+                    <td class="dash-table__primary">
+                      {{ c.user?.name ?? '—' }}
+                      <span class="text-muted cell-sub">{{ c.user?.email }}</span>
+                    </td>
+                    <td>
+                      <strong>{{ euro(c.refund_cents) }}</strong>
+                      <span class="text-muted cell-sub">{{
+                        $t('admin.cancellations.tokens_info', {
+                          tokens: c.refund_tokens,
+                          fee: euro(c.fee_cents),
+                        })
+                      }}</span>
+                      <span v-if="c.bonus_tokens_forfeited" class="text-muted cell-sub">{{
+                        $t('admin.cancellations.bonus_forfeited', {
+                          bonus: c.bonus_tokens_forfeited,
+                        })
+                      }}</span>
+                    </td>
+                    <td>
+                      <template v-if="c.iban">
+                        {{ c.account_holder }}
+                        <span class="text-muted cell-sub iban">{{ c.iban }}</span>
+                      </template>
+                      <template v-else>—</template>
+                    </td>
+                    <td class="text-muted">{{ c.reason || '—' }}</td>
+                    <td class="text-muted">{{ formatDate(c.created_at) }}</td>
+                    <td>
+                      <button
+                        v-if="c.status === 'REQUESTED'"
+                        class="action-btn action-btn--success"
+                        :disabled="processing"
+                        @click="markRefunded(c.id)"
+                      >
+                        {{ $t('admin.cancellations.mark_refunded') }}
+                      </button>
+                      <span v-else class="text-muted">{{ statusLabel(c.status) }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <AdminPagination
+              :page="page"
+              :last-page="lastPage"
+              :total="total"
+              :loading="loading"
+              @change="load"
+            />
+          </section>
+        </template>
       </div>
     </div>
 
@@ -132,12 +183,46 @@ const loading = ref(true)
 const processing = ref(false)
 const cancellations = ref<Cancellation[]>([])
 
+/** Membership paid twice — the second payment waits to be refunded in Mollie. */
+interface DuplicatePayment {
+  id: number
+  user: { id: number; name: string; email: string } | null
+  type: 'MEMBER' | 'SUPPORTER' | 'RENEWAL'
+  price_cents: number
+  provider_payment_id: string | null
+  paid_at: string | null
+}
+const duplicates = ref<DuplicatePayment[]>([])
+
 // The API pages the list (25 per page)
 const page = ref(1)
 const lastPage = ref(1)
 const total = ref(0)
 
-onMounted(() => load())
+onMounted(() => Promise.all([load(), loadDuplicates()]))
+
+async function loadDuplicates() {
+  try {
+    duplicates.value = (
+      await api.get<{ data: DuplicatePayment[] }>('/admin/duplicate-payments')
+    ).data
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
+  }
+}
+
+async function markDuplicateRefunded(id: number) {
+  processing.value = true
+  try {
+    await api.patch(`/admin/duplicate-payments/${id}/refunded`)
+    notify(t('admin.cancellations.marked_refunded'))
+    await loadDuplicates()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('common.error.generic'), 'error')
+  } finally {
+    processing.value = false
+  }
+}
 
 async function load(target = page.value) {
   loading.value = true
@@ -519,7 +604,26 @@ $hero-divider: var(--divider);
     padding-bottom: 0;
   }
 }
-</style>
+.cell-sub {
+  display: block;
+  font-size: 0.78rem;
+}
 
-.cell-sub { display: block; font-size: 0.78rem; } .iban { font-family: ui-monospace, monospace;
-letter-spacing: 0.02em; }
+.iban {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+// Money waiting to go back: set apart from the regular list
+.dash-section--alert {
+  margin-bottom: 1.5rem;
+  border-left: 3px solid var(--accent-color);
+}
+
+.section-hint {
+  margin: 0 1.25rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--secondary-text);
+}
+</style>

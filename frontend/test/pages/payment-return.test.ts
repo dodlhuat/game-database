@@ -84,6 +84,23 @@ describe('/zahlung — return from Mollie', () => {
     expect(wrapper.find('.stage__cta').text()).toBe('Erneut versuchen')
   })
 
+  it('explains a double payment instead of offering to pay again', async () => {
+    getMock.mockResolvedValue({
+      status: 'duplicate',
+      message:
+        'Deine Mitgliedschaft war zu diesem Zeitpunkt schon bezahlt – du hast doppelt gezahlt.',
+      user: null,
+    })
+
+    const wrapper = await visit('?art=membership&id=9')
+
+    expect(wrapper.find('.stage--duplicate').exists()).toBe(true)
+    expect(wrapper.find('.stage__title').text()).toBe('Doppelt bezahlt')
+    expect(wrapper.find('.stage__text').text()).toContain('doppelt gezahlt')
+    expect(wrapper.find('.stage__cta').text()).toBe('Zum Dashboard')
+    expect(getMock).toHaveBeenCalledTimes(1)
+  })
+
   it('does not call the API for a broken link', async () => {
     const wrapper = await visit('?art=stripe&id=abc')
 

@@ -27,7 +27,17 @@
 
           <p v-if="formError" class="form-error" role="alert">{{ formError }}</p>
 
+          <!-- A membership payment of another kind is still open at Mollie -->
           <button
+            v-if="openCheckoutUrl"
+            type="button"
+            class="button button-primary dialog__pay"
+            @click="resumeOpen"
+          >
+            {{ $t('payment.resume_open') }}
+          </button>
+          <button
+            v-else
             type="button"
             class="button button-primary dialog__pay"
             :disabled="redirecting"
@@ -78,6 +88,7 @@ const { t } = useI18n()
 
 const redirecting = ref(false)
 const formError = ref('')
+const openCheckoutUrl = ref<string | null>(null)
 
 const item = computed(() => {
   if (props.pkg) {
@@ -104,6 +115,7 @@ const item = computed(() => {
 watch(item, () => {
   redirecting.value = false
   formError.value = ''
+  openCheckoutUrl.value = null
 })
 
 const formattedPrice = computed(() =>
@@ -128,10 +140,17 @@ async function pay() {
     rememberPaymentReturn(route.fullPath)
     window.location.assign(res.checkoutUrl)
   } catch (err: unknown) {
-    const message = (err as { message?: unknown })?.message
+    const { message, checkoutUrl } = (err ?? {}) as { message?: unknown; checkoutUrl?: unknown }
     formError.value = typeof message === 'string' && message ? message : t('payment.prepare_failed')
+    openCheckoutUrl.value = typeof checkoutUrl === 'string' && checkoutUrl ? checkoutUrl : null
     redirecting.value = false
   }
+}
+
+function resumeOpen() {
+  if (!openCheckoutUrl.value) return
+  rememberPaymentReturn(route.fullPath)
+  window.location.assign(openCheckoutUrl.value)
 }
 </script>
 

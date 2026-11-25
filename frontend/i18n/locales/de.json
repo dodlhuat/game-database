@@ -9,6 +9,7 @@
     "pay": "Weiter zur Bezahlung · {price}",
     "redirecting": "Weiterleitung zu Mollie …",
     "prepare_failed": "Die Zahlung konnte nicht vorbereitet werden. Bitte versuch es noch einmal.",
+    "resume_open": "Begonnene Zahlung fortsetzen",
     "return_eyebrow": "Zahlung",
     "state_checking_title": "Zahlung wird geprüft …",
     "state_checking_text": "Einen Moment, wir holen uns die Bestätigung von Mollie.",
@@ -20,6 +21,8 @@
     "state_failed_text": "Die Zahlung wurde abgebrochen oder ist fehlgeschlagen. Es wurde nichts abgebucht.",
     "state_refunded_title": "Zahlung erstattet",
     "state_refunded_text": "Diese Zahlung wurde erstattet.",
+    "state_duplicate_title": "Doppelt bezahlt",
+    "state_duplicate_text": "Deine Mitgliedschaft war schon bezahlt. Wir erstatten dir diesen Betrag in den nächsten Tagen.",
     "state_error_title": "Zahlung nicht gefunden",
     "state_error_text": "Wir konnten diese Zahlung nicht zuordnen. Bitte versuch es noch einmal.",
     "continue": "Weiter",
@@ -941,6 +944,17 @@
       "empty": "Keine Kündigungen vorhanden.",
       "bonus_forfeited": "{bonus} Bonus verfallen",
       "tokens_info": "{tokens} Token, Abzug {fee}"
+    },
+    "duplicate_payments": {
+      "title": "Doppelte Zahlungen – zu erstatten",
+      "hint": "Diese Mitgliedschaften wurden doppelt bezahlt; die zweite Zahlung wurde nicht verbucht. Erstatte sie im Mollie-Dashboard – sobald Mollie die Erstattung meldet, verschwindet sie von hier.",
+      "amount": "Betrag",
+      "mollie_id": "Mollie-Zahlung",
+      "paid_at": "Bezahlt am",
+      "mark_refunded": "Als erstattet markieren",
+      "type_member": "Vollmitgliedschaft",
+      "type_supporter": "Außerordentliche Mitgliedschaft",
+      "type_renewal": "Verlängerung"
     },
     "package_loans": {
       "title": "Paket-Ausleihen",

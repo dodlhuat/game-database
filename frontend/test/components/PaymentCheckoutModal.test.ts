@@ -103,4 +103,25 @@ describe('PaymentCheckoutModal', () => {
     expect(assignMock).not.toHaveBeenCalled()
     expect(modal().find('.dialog__pay').attributes('disabled')).toBeUndefined()
   })
+
+  it('offers to continue a membership payment that is still open', async () => {
+    postMock.mockRejectedValue({
+      status: 409,
+      reason: 'payment_open',
+      message: 'Du hast schon eine Zahlung für deine Mitgliedschaft begonnen.',
+      checkoutUrl: 'https://www.mollie.com/checkout/tr_1',
+    })
+    await mountModal({
+      membership: { type: 'MEMBER', price_cents: 2400, currency: 'EUR', address: {} },
+    })
+
+    await modal().find('.dialog__pay').trigger('click')
+    await flushPromises()
+
+    expect(modal().find('.form-error').text()).toContain('schon eine Zahlung')
+    expect(modal().find('.dialog__pay').text()).toBe('Begonnene Zahlung fortsetzen')
+    await modal().find('.dialog__pay').trigger('click')
+    expect(assignMock).toHaveBeenCalledWith('https://www.mollie.com/checkout/tr_1')
+    expect(postMock).toHaveBeenCalledTimes(1)
+  })
 })

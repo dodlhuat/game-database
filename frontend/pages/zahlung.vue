@@ -30,7 +30,7 @@
           {{ $t('payment.try_again') }}
         </NuxtLink>
         <NuxtLink
-          v-else-if="state === 'slow' || state === 'refunded'"
+          v-else-if="state === 'slow' || state === 'refunded' || state === 'duplicate'"
           to="/dashboard"
           class="button stage__cta"
         >
@@ -48,7 +48,7 @@ import { takePaymentReturn } from '~/utils/paymentReturn'
 
 definePageMeta({ middleware: ['auth'] })
 
-type State = 'checking' | 'paid' | 'slow' | 'failed' | 'refunded' | 'error'
+type State = 'checking' | 'paid' | 'slow' | 'failed' | 'refunded' | 'duplicate' | 'error'
 
 const route = useRoute()
 const api = useApi()
@@ -79,6 +79,7 @@ const icon = computed(() => {
     case 'slow':
       return 'hourglass_bottom'
     case 'refunded':
+    case 'duplicate':
       return 'undo'
     default:
       return null
@@ -100,7 +101,7 @@ async function check() {
       state.value = 'paid'
       message.value = res.message
       timer = setTimeout(() => navigateTo(returnTo.value), 4000)
-    } else if (res.status === 'failed' || res.status === 'refunded') {
+    } else if (res.status === 'failed' || res.status === 'refunded' || res.status === 'duplicate') {
       state.value = res.status
       message.value = res.message
     } else if (tries >= MAX_TRIES) {
@@ -251,6 +252,7 @@ $ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 .stage--failed,
 .stage--error,
 .stage--refunded,
+.stage--duplicate,
 .stage--slow {
   .seal__arc {
     stroke-dashoffset: 0;

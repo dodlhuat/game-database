@@ -20,6 +20,21 @@ class MembershipPayment extends Model
 
     public const TYPE_RENEWAL = 'RENEWAL';
 
+    /**
+     * Paid, but the membership it was for already existed by then (two
+     * tabs, two clicks at once): not applied, and waiting for an admin to
+     * refund it — money always goes back by hand. DUP_REFUNDED once that
+     * happened (marked in the admin, or seen as refunded at Mollie).
+     */
+    public const STATUS_DUPLICATE = 'DUPLICATE';
+
+    public const STATUS_DUP_REFUNDED = 'DUP_REFUNDED';
+
+    public function isDuplicate(): bool
+    {
+        return in_array($this->status, [self::STATUS_DUPLICATE, self::STATUS_DUP_REFUNDED], true);
+    }
+
     protected $fillable = [
         'user_id',
         'type',

@@ -52,6 +52,10 @@ class PaymentController extends Controller
 
     private function message(TokenPurchase|MembershipPayment $record, string $outcome): string
     {
+        if ($record instanceof MembershipPayment && $record->status === MembershipPayment::STATUS_DUPLICATE) {
+            return 'Deine Mitgliedschaft war zu diesem Zeitpunkt schon bezahlt – du hast doppelt gezahlt. Wir erstatten dir diesen Betrag in den nächsten Tagen, an deiner Mitgliedschaft ändert sich nichts.';
+        }
+
         return match ($outcome) {
             PaymentService::PAID => $record instanceof TokenPurchase
                 ? "{$record->token_amount} Token wurden deinem Konto gutgeschrieben."

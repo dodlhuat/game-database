@@ -29,6 +29,9 @@ class PaymentService
 
     public const REFUNDED = 'refunded';
 
+    /** Paid twice for the same membership; the second payment awaits a refund. */
+    public const DUPLICATE = 'duplicate';
+
     public function __construct(
         private MollieClient $mollie,
         private TokenPurchaseCompleter $tokens,
@@ -78,7 +81,7 @@ class PaymentService
         $payment = $this->mollie->getPayment($record->provider_payment_id);
         $status = $payment['status'] ?? null;
 
-        if ($status === 'paid' && $record->status !== 'COMPLETED' && $record->status !== 'REFUNDED') {
+        if ($status === 'paid' && in_array($record->status, ['CREATED', 'FAILED'], true)) {
             $record instanceof TokenPurchase
                 ? $this->tokens->complete($record, $record->provider_payment_id, $payment)
                 : $this->memberships->complete($record, $record->provider_payment_id, $payment);
@@ -87,12 +90,49 @@ class PaymentService
             $record->update(['status' => 'FAILED', 'payload' => $payment]);
         }
 
+        // A duplicate is refunded by hand in the Mollie dashboard; once Mollie
+        // reports it, the admin list no longer shows it as open.
+        if ($record instanceof MembershipPayment && $record->status === MembershipPayment::STATUS_DUPLICATE
+            && $this->cents($payment, 'amountRefunded') >= $record->price_cents) {
+            $record->update(['status' => MembershipPayment::STATUS_DUP_REFUNDED]);
+        }
+
         if ($record->status === 'COMPLETED' && ($this->cents($payment, 'amountRefunded') > 0 || $this->cents($payment, 'amountChargedBack') > 0)) {
             $record->update(['status' => 'REFUNDED']);
             Log::info('Mollie payment refunded or charged back.', ['payment' => $record->provider_payment_id]);
         }
 
         return $this->outcome($record);
+    }
+
+    /**
+     * Where an open payment can still be paid, so a member who clicks "pay"
+     * twice continues what they started instead of paying twice. url is
+     * null once it can no longer be paid or is being processed.
+     *
+     * @return array{url: string|null, cancelable: bool}
+     */
+    public function openCheckout(TokenPurchase|MembershipPayment $record): array
+    {
+        if ($record->provider !== 'mollie' || ! $record->provider_payment_id) {
+            return ['url' => null, 'cancelable' => false];
+        }
+        $payment = $this->mollie->getPayment($record->provider_payment_id);
+        $open = ($payment['status'] ?? null) === 'open';
+
+        return [
+            'url' => $open ? MollieClient::checkoutUrl($payment) : null,
+            'cancelable' => ($payment['isCancelable'] ?? false) === true,
+        ];
+    }
+
+    /** Cancels an open payment at Mollie and marks it failed here. */
+    public function cancel(TokenPurchase|MembershipPayment $record): void
+    {
+        if ($record->provider_payment_id) {
+            $this->mollie->cancelPayment($record->provider_payment_id);
+        }
+        $record->update(['status' => 'FAILED']);
     }
 
     public function kind(TokenPurchase|MembershipPayment $record): string
@@ -105,7 +145,8 @@ class PaymentService
         return match ($record->status) {
             'COMPLETED' => self::PAID,
             'FAILED' => self::FAILED,
-            'REFUNDED' => self::REFUNDED,
+            'REFUNDED', MembershipPayment::STATUS_DUP_REFUNDED => self::REFUNDED,
+            MembershipPayment::STATUS_DUPLICATE => self::DUPLICATE,
             default => self::PENDING,
         };
     }
