@@ -20,7 +20,7 @@ class GameController extends Controller
     {
         $games = Game::with(['tags', 'mechanics', 'languages'])
             ->withCount('copies')
-            ->when($request->string('search')->toString(), fn ($q, string $s) => $q->where('title', 'like', "%{$s}%")
+            ->when($request->string('search')->toString(), fn ($q, string $s) => $q->whereLike('title', "%{$s}%")
             )
             ->when($request->has('is_active'), fn ($q) => $q->where('is_active', $request->boolean('is_active'))
             )

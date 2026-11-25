@@ -222,7 +222,7 @@ describe('admin/users.vue — create', () => {
   })
 
   it('shows an error and keeps the modal open when creation fails', async () => {
-    postMock.mockRejectedValue({ data: { message: 'E-Mail bereits vergeben.' } })
+    postMock.mockRejectedValue({ status: 422, message: 'E-Mail bereits vergeben.' })
     const wrapper = await mountUsersPage()
 
     await wrapper.find('.hero-btn').trigger('click')

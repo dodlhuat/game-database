@@ -555,6 +555,8 @@ async function remove(location: ApiPickupLocation) {
 onMounted(async () => {
   try {
     locations.value = await fetchAdminLocations()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

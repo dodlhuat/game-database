@@ -29,8 +29,8 @@ class GameController extends Controller
             }])
             ->withCount('reviews')
             ->when($request->string('search')->toString(), fn ($q, string $search) => $q->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                $q->whereLike('title', "%{$search}%")
+                    ->orWhereLike('description', "%{$search}%");
             })
             )
             ->tap(fn ($q) => GameFilters::apply($q, $request))

@@ -541,6 +541,8 @@ async function remove(sponsor: ApiSponsor) {
 onMounted(async () => {
   try {
     sponsors.value = await fetchAdminSponsors()
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

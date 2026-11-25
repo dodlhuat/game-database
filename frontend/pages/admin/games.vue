@@ -1033,6 +1033,8 @@ async function openCopies(game: Game) {
   try {
     const data = await fetchCopies({ game_id: game.id })
     copiesPanel.copies = data.data as Copy[]
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     copiesPanel.loading = false
   }

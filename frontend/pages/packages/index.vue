@@ -20,6 +20,14 @@
           <div class="spinner" />
         </div>
 
+        <!-- A failed load is not the same as "there are no packages" -->
+        <div v-else-if="packagesStatus === 'error'" class="catalog__state" role="alert">
+          <p class="catalog__empty-title">{{ $t('common.error.load') }}</p>
+          <button type="button" class="button catalog__retry" @click="refresh()">
+            {{ $t('payment.try_again') }}
+          </button>
+        </div>
+
         <div v-else-if="!packages.length" class="catalog__state">
           <p class="catalog__empty-title">{{ $t('pages.packages.empty_title') }}</p>
           <p class="catalog__empty-sub">{{ $t('pages.packages.empty_sub') }}</p>
@@ -84,7 +92,11 @@ const { fetchPackages } = useGames()
 const auth = useAuthStore()
 const { t } = useI18n()
 
-const { data: packagesData, status: packagesStatus } = useAsyncData(
+const {
+  data: packagesData,
+  status: packagesStatus,
+  refresh,
+} = useAsyncData(
   'packages',
   async () => {
     const result = await fetchPackages()
@@ -198,6 +210,10 @@ $hero-divider: var(--divider);
   &__inner {
     max-width: 1100px;
     margin: 0 auto;
+  }
+
+  &__retry {
+    margin-top: 1rem;
   }
 
   &__state {

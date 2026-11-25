@@ -511,6 +511,8 @@ onMounted(async () => {
       fetchAdminEvents(),
       fetchAdminLocations(),
     ])
+  } catch (err: unknown) {
+    notify((err as { message?: string }).message ?? t('admin.errors.load'), 'error')
   } finally {
     loading.value = false
   }

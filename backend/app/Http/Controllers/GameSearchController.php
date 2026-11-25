@@ -50,7 +50,7 @@ class GameSearchController extends Controller
                 if ($ref === null) {
                     $term = $parsed['reference'] ?? '';
                     $games = $baseQuery
-                        ->where('title', 'like', "%{$term}%")
+                        ->whereLike('title', "%{$term}%")
                         ->orderBy('title')
                         ->get();
                     $meta = ['intent' => 'FULLTEXT', 'query' => $term];
@@ -90,8 +90,8 @@ class GameSearchController extends Controller
                 $term = $parsed['query'] ?? $q;
                 $games = $baseQuery
                     ->where(function ($query) use ($term): void {
-                        $query->where('title', 'like', "%{$term}%")
-                            ->orWhere('description', 'like', "%{$term}%");
+                        $query->whereLike('title', "%{$term}%")
+                            ->orWhereLike('description', "%{$term}%");
                     })
                     ->orderBy('title')
                     ->get();

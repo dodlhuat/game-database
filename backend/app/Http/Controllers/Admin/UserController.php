@@ -21,8 +21,8 @@ class UserController extends Controller
             ->when($request->status, fn ($q, $status) => $q->where('status', $status))
             ->when($request->role, fn ($q, $role) => $q->where('role', $role))
             ->when($request->string('search')->toString(), fn ($q, string $search) => $q->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%");
+                $q->whereLike('name', "%{$search}%")
+                    ->orWhereLike('email', "%{$search}%");
             }))
             ->orderByDesc('created_at')
             ->paginate(20);

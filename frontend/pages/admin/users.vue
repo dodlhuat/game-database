@@ -385,8 +385,9 @@ async function submitCreate() {
     total.value++
     showCreate.value = false
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string } }
-    createError.value = err?.data?.message ?? t('admin.users.create_error')
+    // useApi throws the response body itself: the message sits on top
+    const err = e as { message?: string }
+    createError.value = err?.message ?? t('admin.users.create_error')
   } finally {
     createLoading.value = false
   }
@@ -425,8 +426,9 @@ async function submitEdit() {
     if (idx !== -1) users.value[idx] = { ...users.value[idx], ...res.data }
     showEdit.value = false
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string } }
-    editError.value = err?.data?.message ?? t('admin.users.edit_error')
+    // useApi throws the response body itself: the message sits on top
+    const err = e as { message?: string }
+    editError.value = err?.message ?? t('admin.users.edit_error')
   } finally {
     editLoading.value = false
   }

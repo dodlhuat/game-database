@@ -351,8 +351,8 @@ onMounted(async () => {
       deposit_pct_good: data.deposit_pct_good ?? 80,
     }
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string }; message?: string }
-    loadError.value = err?.data?.message ?? err?.message ?? t('admin.loan_settings.load_error')
+    const err = e as { message?: string }
+    loadError.value = err?.message ?? t('admin.loan_settings.load_error')
   } finally {
     loading.value = false
   }
@@ -387,8 +387,9 @@ async function save() {
       saved.value = false
     }, 3000)
   } catch (e: unknown) {
-    const err = e as { data?: { message?: string } }
-    saveError.value = err?.data?.message ?? t('common.error.save')
+    // useApi throws the response body itself: the message sits on top
+    const err = e as { message?: string }
+    saveError.value = err?.message ?? t('common.error.save')
   } finally {
     saving.value = false
   }
