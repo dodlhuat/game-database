@@ -34,7 +34,7 @@ class NewsletterController extends Controller
 
         foreach ($recipients as $recipient) {
             Mail::to($recipient->email)->queue(
-                new NewsletterMail($validated['subject'], $validated['body'])
+                new NewsletterMail($validated['subject'], $validated['body'], $recipient)
             );
         }
 

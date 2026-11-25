@@ -33,6 +33,7 @@ use App\Http\Controllers\MechanicController;
 use App\Http\Controllers\MembershipCancellationController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\MollieWebhookController;
+use App\Http\Controllers\NewsletterUnsubscribeController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PackageLoanController;
 use App\Http\Controllers\PaymentController;
@@ -70,6 +71,11 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])->middleware('throttle:auth-email');
     Route::post('/reset-password', [ResetPasswordController::class, 'store'])->middleware('throttle:auth-token');
 });
+
+Route::post('/newsletter/unsubscribe/{user}', NewsletterUnsubscribeController::class)
+    ->whereNumber('user')
+    ->middleware('throttle:auth-token')
+    ->name('newsletter.unsubscribe');
 
 Route::get('/loan-settings', [LoanSettingController::class, 'show']);
 Route::get('/tokens/packages', [TokenController::class, 'packages']);

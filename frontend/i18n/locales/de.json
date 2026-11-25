@@ -149,6 +149,17 @@
       "no_loan_history": "Noch keine zurückgegebenen Ausleihen."
     }
   },
+  "newsletter_unsubscribe": {
+    "title": "Vom Newsletter abmelden?",
+    "text": "Du bekommst dann keine Newsletter-Mails mehr von uns. Mails zu deinen Ausleihen und deinem Konto kommen weiterhin.",
+    "confirm": "Ja, abmelden",
+    "sending": "Wird abgemeldet…",
+    "done_title": "Abgemeldet",
+    "done_text": "Du bekommst keinen Newsletter mehr. Falls du es dir anders überlegst, kannst du ihn in deinem Konto jederzeit wieder abonnieren.",
+    "home": "Zur Startseite",
+    "invalid_title": "Link ungültig",
+    "invalid_text": "Dieser Abmeldelink funktioniert nicht. Melde dich an und schalte den Newsletter in deinem Konto ab."
+  },
   "auth": {
     "member_area": "Mitgliederbereich",
     "login_title": "Anmelden",

@@ -4,8 +4,15 @@ import { useAuthStore } from '~/stores/auth'
  * Seiten, die im Wartungsmodus erreichbar bleiben: Startseite (zeigt die
  * Wartungsansicht), Login sowie Passwort vergessen/zurücksetzen, damit sich
  * ein Admin auch ohne bekanntes Passwort wieder Zugang verschaffen kann.
+ * Die Newsletter-Abmeldung muss immer funktionieren.
  */
-const ALLOWED_PATHS = new Set(['/', '/login', '/forgot-password', '/reset-password'])
+const ALLOWED_PATHS = new Set([
+  '/',
+  '/login',
+  '/forgot-password',
+  '/reset-password',
+  '/newsletter/abmelden',
+])
 
 /**
  * Wartungsmodus (NUXT_PUBLIC_MAINTENANCE_MODE=true)

@@ -35,7 +35,7 @@ class NewsletterTest extends TestCase
 
     public function test_body_is_escaped_and_line_breaks_are_kept_once(): void
     {
-        $html = (new NewsletterMail('Betreff', "Zeile 1\nZeile 2 <script>x</script>"))->render();
+        $html = (new NewsletterMail('Betreff', "Zeile 1\nZeile 2 <script>x</script>", User::factory()->create()))->render();
 
         $this->assertStringContainsString('Zeile 1<br />', $html);
         $this->assertStringNotContainsString('<script>', $html);
@@ -68,5 +68,72 @@ class NewsletterTest extends TestCase
             ->postJson('/api/admin/newsletters', ['subject' => 'x', 'body' => 'y'])
             ->assertForbidden();
         Mail::assertNothingQueued();
+    }
+
+    // ── Unsubscribing ────────────────────────────────────────────
+
+    private function mailFor(User $user): NewsletterMail
+    {
+        return new NewsletterMail('Spieleabend', 'Hallo!', $user);
+    }
+
+    public function test_every_mail_carries_a_footer_link_and_one_click_headers(): void
+    {
+        $user = User::factory()->create(['newsletter_opt_in' => true]);
+        $mail = $this->mailFor($user);
+
+        $this->assertStringContainsString(e($mail->unsubscribePageUrl()), $mail->render());
+        $this->assertStringStartsWith(config()->string('frontend.url').'/newsletter/abmelden?user='.$user->id.'&signature=', $mail->unsubscribePageUrl());
+
+        $headers = $mail->headers()->text;
+        $this->assertSame('<'.$mail->signedUnsubscribeUrl().'>', $headers['List-Unsubscribe']);
+        $this->assertSame('List-Unsubscribe=One-Click', $headers['List-Unsubscribe-Post']);
+    }
+
+    public function test_one_click_post_from_the_mail_client_unsubscribes(): void
+    {
+        $user = User::factory()->create(['newsletter_opt_in' => true]);
+
+        $this->post($this->mailFor($user)->signedUnsubscribeUrl(), ['List-Unsubscribe' => 'One-Click'])->assertOk();
+        $this->assertFalse($user->fresh()?->newsletter_opt_in);
+    }
+
+    public function test_the_footer_page_posts_the_same_signature_without_logging_in(): void
+    {
+        $user = User::factory()->create(['newsletter_opt_in' => true]);
+        parse_str((string) parse_url($this->mailFor($user)->unsubscribePageUrl(), PHP_URL_QUERY), $query);
+
+        $this->postJson("/api/newsletter/unsubscribe/{$query['user']}?signature={$query['signature']}")->assertOk();
+        $this->assertFalse($user->fresh()?->newsletter_opt_in);
+
+        // a second click does no harm
+        $this->postJson("/api/newsletter/unsubscribe/{$query['user']}?signature={$query['signature']}")->assertOk();
+    }
+
+    public function test_a_forged_or_borrowed_signature_unsubscribes_nobody(): void
+    {
+        $mia = User::factory()->create(['newsletter_opt_in' => true]);
+        $tom = User::factory()->create(['newsletter_opt_in' => true]);
+        parse_str((string) parse_url($this->mailFor($mia)->signedUnsubscribeUrl(), PHP_URL_QUERY), $query);
+
+        $this->postJson("/api/newsletter/unsubscribe/{$tom->id}?signature={$query['signature']}")
+            ->assertForbidden()
+            ->assertJsonPath('reason', 'invalid_link');
+        $this->postJson("/api/newsletter/unsubscribe/{$mia->id}?signature=falsch")->assertForbidden();
+        $this->postJson("/api/newsletter/unsubscribe/{$mia->id}")->assertForbidden();
+
+        $this->assertTrue($mia->fresh()?->newsletter_opt_in);
+        $this->assertTrue($tom->fresh()?->newsletter_opt_in);
+    }
+
+    public function test_sent_mails_link_to_their_own_recipient(): void
+    {
+        Mail::fake();
+        $admin = User::factory()->admin()->create(['newsletter_opt_in' => false]);
+        $mia = User::factory()->create(['status' => 'ACTIVE', 'newsletter_opt_in' => true]);
+
+        $this->actingAs($admin)->postJson('/api/admin/newsletters', ['subject' => 'x', 'body' => 'y'])->assertCreated();
+
+        Mail::assertQueued(NewsletterMail::class, fn (NewsletterMail $m) => $m->hasTo($mia->email) && $m->recipient->is($mia));
     }
 }
