@@ -6,7 +6,7 @@ RUN apk add --no-cache \
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
  && docker-php-ext-install -j$(nproc) \
-    pdo pdo_pgsql pgsql gd zip exif pcntl bcmath
+    pdo pdo_mysql gd zip exif pcntl bcmath
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -19,10 +19,12 @@ RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
 # App-Code kopieren (.dockerignore schließt vendor/ und .env aus)
 COPY backend/ .
 
-RUN composer dump-autoload --optimize --no-dev \
- && mkdir -p storage/framework/views storage/framework/sessions \
+# The directories first: .dockerignore leaves out bootstrap/cache, and
+# dump-autoload writes the package manifest there
+RUN mkdir -p storage/framework/views storage/framework/sessions \
              storage/framework/cache storage/logs storage/app/public \
              bootstrap/cache \
+ && composer dump-autoload --optimize --no-dev \
  && chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
 

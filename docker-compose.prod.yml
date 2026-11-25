@@ -1,20 +1,23 @@
 services:
 
   # ----------------------------------------------------------------
-  # PostgreSQL
+  # MariaDB — same version as the live server and local development
   # ----------------------------------------------------------------
-  postgres:
-    image: postgres:17-alpine
-    container_name: game-db-postgres
+  mariadb:
+    image: mariadb:11.8
+    container_name: game-db-mariadb
     restart: unless-stopped
     environment:
-      POSTGRES_DB:       ${DB_DATABASE}
-      POSTGRES_USER:     ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER:     ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      # No root login needed by the app; a random one is printed once to the log
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+      MARIADB_AUTO_UPGRADE: "1"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mariadb_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -39,9 +42,9 @@ services:
       APP_LOCALE:          de
       APP_FALLBACK_LOCALE: de
 
-      DB_CONNECTION: pgsql
-      DB_HOST:       postgres
-      DB_PORT:       5432
+      DB_CONNECTION: mysql
+      DB_HOST:       mariadb
+      DB_PORT:       3306
       DB_DATABASE:   "${DB_DATABASE}"
       DB_USERNAME:   "${DB_USERNAME}"
       DB_PASSWORD:   "${DB_PASSWORD}"
@@ -68,15 +71,14 @@ services:
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS}"
       MAIL_FROM_NAME:    "${APP_NAME}"
 
-      CLOUDINARY_CLOUD_NAME:    "${CLOUDINARY_CLOUD_NAME}"
-      CLOUDINARY_API_KEY:       "${CLOUDINARY_API_KEY}"
-      CLOUDINARY_API_SECRET:    "${CLOUDINARY_API_SECRET}"
-      CLOUDINARY_UPLOAD_PRESET: "${CLOUDINARY_UPLOAD_PRESET}"
+      # Payments (token packages, membership fee)
+      MOLLIE_KEY:         "${MOLLIE_KEY}"
+      MOLLIE_WEBHOOK_URL: "https://${DOMAIN}/api/webhooks/mollie"
     volumes:
       - backend_storage:/var/www/backend/storage
       - backend_cache:/var/www/backend/bootstrap/cache
     depends_on:
-      postgres:
+      mariadb:
         condition: service_healthy
 
   # ----------------------------------------------------------------
@@ -98,7 +100,27 @@ services:
       - backend_storage:/var/www/backend/storage
       - backend_cache:/var/www/backend/bootstrap/cache
     depends_on:
-      postgres:
+      mariadb:
+        condition: service_healthy
+
+  # ----------------------------------------------------------------
+  # Queue-Worker: verschickt die Mails, die in die Warteschlange gestellt
+  # werden (Newsletter, Benachrichtigungen). Ohne ihn bleiben sie liegen.
+  # ----------------------------------------------------------------
+  queue-worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: game-db-queue-worker
+    restart: unless-stopped
+    entrypoint: []
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=3"]
+    environment: *backend-env
+    volumes:
+      - backend_storage:/var/www/backend/storage
+      - backend_cache:/var/www/backend/bootstrap/cache
+    depends_on:
+      mariadb:
         condition: service_healthy
 
   # ----------------------------------------------------------------
@@ -133,6 +155,6 @@ services:
     entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done"
 
 volumes:
-  postgres_data:
+  mariadb_data:
   backend_storage:
   backend_cache:

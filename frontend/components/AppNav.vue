@@ -113,7 +113,6 @@ onUnmounted(() => {
 // gives a hover/backdrop wash that goes the right direction in either
 // theme (a light wash on dark bg, a dark wash on light bg).
 $nav-height: 64px;
-$hero-bg-85: color-mix(in srgb, var(--background) 85%, transparent);
 $hero-text: var(--primary-text);
 $hero-text-08: color-mix(in srgb, var(--primary-text) 8%, transparent);
 $hero-text-10: color-mix(in srgb, var(--primary-text) 10%, transparent);
@@ -133,9 +132,10 @@ $hero-divider: var(--divider);
   right: 0;
   z-index: 100;
   height: $nav-height;
-  background: $hero-bg-85;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  // Fully opaque: at 85% the page showed through wherever a browser skipped
+  // backdrop-filter (e.g. without hardware acceleration), so large headings
+  // scrolled visibly behind the links
+  background: var(--background);
   border-bottom: 1px solid $hero-divider;
 
   &__inner {
