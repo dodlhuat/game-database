@@ -69,9 +69,9 @@ shell-backend:
 shell-frontend:
 	docker compose exec frontend sh
 
-## PostgreSQL-Shell öffnen
+## MariaDB-Shell öffnen (lokale Entwicklungsdatenbank)
 db:
-	docker compose exec postgres psql -U postgres -d game_database
+	docker compose exec mariadb mariadb -ugame_user -psecret game_database
 
 ## OpenAPI-Spec exportieren und TypeScript-Typen generieren
 api-generate:

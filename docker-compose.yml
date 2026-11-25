@@ -4,7 +4,9 @@ services:
   # MariaDB
   # ----------------------------------------------------------------
   mariadb:
-    image: mariadb:11-jammy
+    # Same major/minor as the live server (11.8, LTS) so the MariaDB test run
+    # in the pre-commit hook checks what production checks
+    image: mariadb:11.8
     container_name: game-db-mariadb
     restart: unless-stopped
     environment:
@@ -12,6 +14,8 @@ services:
       MARIADB_USER: game_user
       MARIADB_PASSWORD: secret
       MARIADB_ROOT_PASSWORD: rootsecret
+      # Lifts an existing data volume to the image's version on start
+      MARIADB_AUTO_UPGRADE: "1"
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:

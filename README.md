@@ -8,13 +8,13 @@ Eine Plattform zur Verwaltung und Ausleihe von Brettspielen. Mitglieder können 
 |---|---|
 | Backend | Laravel 12 (PHP 8.2+) |
 | Auth | Laravel Sanctum (Token-basiert) |
-| Datenbank | PostgreSQL 16 |
+| Datenbank | MariaDB 11 (Tests: SQLite, zusätzlich MariaDB mit `make test-mariadb`) |
 | Bilder | Lokaler Speicher (public disk) + Intervention Image |
 | Frontend | Nuxt 4 (Vue 3.5 + TypeScript) |
 | Styling | Basix SCSS Komponenten-Library |
 | State | Pinia 3 |
 | Admin | Custom Nuxt Frontend (/admin) |
-| Infrastruktur | Docker Compose (Nginx, PHP-FPM, PostgreSQL, Node) |
+| Infrastruktur | Docker Compose (Nginx, PHP-FPM, MariaDB, Node) |
 
 ## Projektstruktur (Monorepo)
 
@@ -43,7 +43,7 @@ docker compose up
 - PHP 8.2+
 - Composer
 - Node.js 20+
-- PostgreSQL
+- MariaDB (oder MySQL)
 
 #### Backend
 
