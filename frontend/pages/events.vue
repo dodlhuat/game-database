@@ -486,7 +486,9 @@ $hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
 }
 .rich-content :deep(ul),
 .rich-content :deep(ol) {
-  margin: 0 0 0.6rem 1.25rem;
+  // basix already indents lists (padding-left); a margin on top doubled it
+  margin: 0 0 0.6rem;
+  padding-left: 1.25rem;
 }
 .rich-content :deep(a) {
   color: $amber;

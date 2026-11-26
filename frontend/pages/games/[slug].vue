@@ -1312,10 +1312,11 @@ $bar-h: 72px;
   :deep(div) {
     color: inherit;
   }
+  // basix already indents lists (padding-left); a margin on top doubled it
   :deep(ul),
   :deep(ol) {
-    margin-left: 1.5rem;
-    margin-bottom: 0.75rem;
+    margin: 0 0 0.75rem;
+    padding-left: 1.25rem;
   }
   :deep(ul) {
     list-style: disc;
@@ -1326,6 +1327,8 @@ $bar-h: 72px;
   :deep(li) {
     margin-bottom: 0.2rem;
     line-height: 1.65;
+    // basix gives li the full text colour; match the paragraphs around it
+    color: inherit;
   }
   :deep(strong),
   :deep(b) {
