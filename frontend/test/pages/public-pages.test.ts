@@ -79,6 +79,18 @@ describe('/about', () => {
     expect(wrapper.text()).not.toMatch(/about\.[a-z_.]+/)
     expect(wrapper.findAll('.about-facts__row')).toHaveLength(4)
   })
+
+  it('shows the team photo with a description and the caption', async () => {
+    wrapper = await mountSuspended(AboutPage)
+
+    const img = wrapper.find('.team-photo img')
+    expect(img.attributes('src')).toBe('/images/about/team-640.webp')
+    expect(img.attributes('alt')).toContain('an einem Holztisch')
+    // fixed size, so nothing jumps while it loads
+    expect(img.attributes('width')).toBe('640')
+    expect(img.attributes('height')).toBe('800')
+    expect(wrapper.find('.team-photo figcaption').text()).toBe('Das Team hinter AUA')
+  })
 })
 
 describe('/email-verified', () => {

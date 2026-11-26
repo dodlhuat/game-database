@@ -1211,6 +1211,10 @@
   "about": {
     "tag": "Über uns",
     "title": "Wer wir sind",
+    "team": {
+      "caption": "Das Team hinter AUA",
+      "alt": "Drei Vereinsmitglieder von AUA sitzen lächelnd nebeneinander an einem Holztisch."
+    },
     "lead": "AUA – Alle.Unsere.Abenteuer ist ein Verein zur Förderung des gemeinsamen Spielens. Wir bringen Kinder, Jugendliche und Erwachsene an einen Tisch: analog, miteinander und ohne Bildschirm.",
     "facts": {
       "name_label": "Name",

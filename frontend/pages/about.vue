@@ -21,7 +21,24 @@
     <!-- ── Content ───────────────────────────────────────────────── -->
     <div class="legal-content">
       <div class="legal-content__inner">
-        <p class="about-lead">{{ $t('about.lead') }}</p>
+        <!-- Lead and team photo side by side; the photo, tilted like a card on
+             the table, reaches up into the hero -->
+        <div class="about-intro">
+          <p class="about-lead">{{ $t('about.lead') }}</p>
+          <figure class="team-photo">
+            <img
+              class="team-photo__img"
+              src="/images/about/team-640.webp"
+              srcset="/images/about/team-640.webp 640w, /images/about/team-960.webp 960w"
+              sizes="(max-width: 720px) 90vw, 260px"
+              width="640"
+              height="800"
+              :alt="$t('about.team.alt')"
+              fetchpriority="high"
+            />
+            <figcaption class="team-photo__caption">{{ $t('about.team.caption') }}</figcaption>
+          </figure>
+        </div>
 
         <dl class="about-facts">
           <div v-for="key in factKeys" :key="key" class="about-facts__row">
@@ -181,6 +198,92 @@ $hero-muted: color-mix(in srgb, var(--secondary-text) 80%, transparent);
 }
 
 // ─── Body ─────────────────────────────────────────────────────────
+.about-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 2.25rem;
+  align-items: start;
+  margin-bottom: 2.5rem;
+
+  .about-lead {
+    margin: 0;
+    align-self: center;
+  }
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+}
+
+// ─── Team photo: a card lying slightly askew on the table ─────────
+.team-photo {
+  position: relative;
+  z-index: 2;
+  margin: -7rem 0 0;
+  transform: rotate(2.5deg);
+  animation: teamPhotoSettle 0.9s cubic-bezier(0.34, 1.4, 0.64, 1) 0.15s both;
+
+  &__img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid var(--divider);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.35),
+      0 0 0 6px color-mix(in srgb, var(--background) 85%, transparent),
+      0 0 46px rgba(212, 146, 30, 0.18);
+  }
+
+  &__caption {
+    margin-top: 0.85rem;
+    text-align: center;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--secondary-text);
+  }
+
+  // On phones: straight, below the lead, nothing reaching into the hero
+  @media (max-width: 720px) {
+    margin: 0 auto;
+    max-width: 420px;
+    width: 100%;
+    transform: none;
+    animation-name: teamPhotoFade;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes teamPhotoSettle {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(2.5deg);
+  }
+}
+
+@keyframes teamPhotoFade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .about-lead {
   font-size: clamp(1.15rem, 3.6vw, 1.45rem);
   font-weight: 600;
