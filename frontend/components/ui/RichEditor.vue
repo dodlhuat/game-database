@@ -109,6 +109,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { Editor } from '@dodlhuat/basix/js/editor'
+import { wrapLooseLineAtCursor } from '~/utils/richText'
 
 const props = defineProps<{ modelValue: string }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
@@ -128,6 +129,18 @@ onMounted(() => {
   }
 
   editor = new Editor({ root: editorRoot.value })
+
+  // Runs before basix's own button handler (capture phase): give a loose
+  // line a block first, or the H1/H2/P buttons do nothing on it
+  editorRoot.value.addEventListener(
+    'click',
+    (e) => {
+      if ((e.target as Element).closest?.('[data-cmd="formatBlock"]')) {
+        wrapLooseLineAtCursor(editableEl)
+      }
+    },
+    { capture: true }
+  )
 
   observer = new MutationObserver(() => {
     if (ignoreNext) {

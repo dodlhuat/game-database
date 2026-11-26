@@ -42,21 +42,40 @@
     <!-- ── Content ──────────────────────────────────────────────── -->
     <div class="admin-content">
       <div class="admin-content__inner">
-        <div v-if="loading" class="admin-state">
-          <div class="spinner" />
-        </div>
-
-        <section v-else class="dash-section">
+        <!-- The header with the search stays while loading, so typing keeps focus -->
+        <section class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">{{ $t('admin.games.all') }}</h2>
             <span class="dash-section__count">{{ total }}</span>
+            <div class="title-search">
+              <svg class="icon-svg title-search__icon" aria-hidden="true">
+                <use href="/svg-icons/icons.svg#search" />
+              </svg>
+              <input
+                v-model="search"
+                type="search"
+                class="title-search__input"
+                :placeholder="$t('admin.games.search_placeholder')"
+                :aria-label="$t('admin.games.search_placeholder')"
+              />
+            </div>
           </header>
 
-          <div v-if="!games.length" class="dash-empty">
+          <div v-if="loading" class="admin-state">
+            <div class="spinner" />
+          </div>
+
+          <div v-else-if="!games.length" class="dash-empty">
             <svg class="icon-svg dash-empty__icon" aria-hidden="true">
               <use href="/svg-icons/icons.svg#article" />
             </svg>
-            <p class="dash-empty__text">{{ $t('admin.empty.games') }}</p>
+            <p class="dash-empty__text">
+              {{
+                search.trim()
+                  ? $t('admin.games.search_none', { term: search.trim() })
+                  : $t('admin.empty.games')
+              }}
+            </p>
           </div>
 
           <div v-else class="table-wrap">
@@ -693,7 +712,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import QRCode from 'qrcode'
 
 definePageMeta({ middleware: ['auth', 'admin'] })
@@ -846,10 +865,19 @@ const page = ref(1)
 const lastPage = ref(1)
 const total = ref(0)
 
+// Title search: waits for a short pause in typing, then starts on page 1
+const search = ref('')
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+watch(search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => load(1), 300)
+})
+
 async function load(target = page.value) {
   loading.value = true
   try {
-    const data = await fetchAdminGames({ page: target })
+    const term = search.value.trim()
+    const data = await fetchAdminGames({ page: target, ...(term ? { search: term } : {}) })
     games.value = data.data as Game[]
     page.value = data.meta.current_page
     lastPage.value = data.meta.last_page
@@ -1419,6 +1447,7 @@ $hero-divider: var(--divider);
 }
 .dash-section__header {
   display: flex;
+  flex-wrap: wrap; // the search moves below the title on narrow screens
   align-items: center;
   gap: 0.75rem;
   padding: 1.1rem 1.5rem;
@@ -2046,6 +2075,41 @@ td.actions-cell {
     font-size: 0.8rem;
     color: $hero-muted-50;
     padding-bottom: 0;
+  }
+}
+
+// ─── Title search in the list header ─────────────────────────────
+.title-search {
+  position: relative;
+  margin-left: auto;
+  width: min(100%, 260px);
+
+  &__icon {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    width: 1rem;
+    height: 1rem;
+    transform: translateY(-50%);
+    color: var(--secondary-text);
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: 0.5rem 0.75rem 0.5rem 2.1rem;
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--primary-text);
+    background: var(--background);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    transition: border-color 0.15s;
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent-color);
+    }
   }
 }
 </style>

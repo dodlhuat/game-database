@@ -203,3 +203,40 @@ describe('admin/games.vue — copies', () => {
     expect(notifyMock).toHaveBeenCalledWith('Server nicht erreichbar.', 'error')
   })
 })
+
+describe('admin/games.vue — title search', () => {
+  it('searches by title after a short pause, from the first page', async () => {
+    await mountPage()
+    adm.fetchAdminGames.mockClear()
+
+    const input = wrapper!.find('.title-search__input')
+    await input.setValue('az')
+    await input.setValue('azul')
+    await new Promise((r) => setTimeout(r, 400))
+    await flushPromises()
+
+    // one request for the whole word, not one per keystroke
+    expect(adm.fetchAdminGames).toHaveBeenCalledTimes(1)
+    expect(adm.fetchAdminGames).toHaveBeenCalledWith({ page: 1, search: 'azul' })
+    // the field stays while the list reloads
+    expect(wrapper!.find('.title-search__input').exists()).toBe(true)
+  })
+
+  it('names the search term when nothing matches and lists all again when cleared', async () => {
+    await mountPage()
+    adm.fetchAdminGames.mockResolvedValue({
+      data: [],
+      meta: { current_page: 1, last_page: 1, total: 0 },
+    })
+
+    await wrapper!.find('.title-search__input').setValue('Monopoly')
+    await new Promise((r) => setTimeout(r, 400))
+    await flushPromises()
+    expect(wrapper!.find('.dash-empty__text').text()).toContain('„Monopoly“')
+
+    await wrapper!.find('.title-search__input').setValue('')
+    await new Promise((r) => setTimeout(r, 400))
+    await flushPromises()
+    expect(adm.fetchAdminGames).toHaveBeenLastCalledWith({ page: 1 })
+  })
+})

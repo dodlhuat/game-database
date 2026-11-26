@@ -706,6 +706,8 @@
       "preview": "Vorschau"
     },
     "games": {
+      "search_placeholder": "Titel suchen …",
+      "search_none": "Kein Spiel mit „{term}“ im Titel gefunden.",
       "title": "Spiele verwalten",
       "delete_title": "Spiel löschen",
       "confirm_delete": "„{name}“ mit allen Exemplaren wirklich löschen? Das lässt sich nicht rückgängig machen.",
