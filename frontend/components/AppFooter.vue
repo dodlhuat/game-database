@@ -38,8 +38,9 @@ onMounted(() => {
           <NuxtLink to="/privacy" class="app-footer__link">{{ $t('nav.privacy') }}</NuxtLink>
           <NuxtLink to="/cookies" class="app-footer__link">{{ $t('nav.cookies') }}</NuxtLink>
           <NuxtLink to="/impressum" class="app-footer__link">{{ $t('nav.imprint') }}</NuxtLink>
+          <!-- In the same wrapping row, so its separator dot follows the same rules -->
+          <span class="app-footer__copy">{{ $t('common.copyright_short', { year }) }}</span>
         </nav>
-        <span class="app-footer__copy">{{ $t('common.copyright_short', { year }) }}</span>
       </div>
     </div>
   </footer>
@@ -65,6 +66,9 @@ $_badge-glow: color-mix(in srgb, $amber 45%, transparent);
 // than the badge — a small masthead-style detail.
 $_hex-size: 1.85rem;
 $_brand-gap: 0.55rem;
+
+// Width of the "·" separator box in the legal row (see __legal)
+$_sep-w: 1.4rem;
 
 .app-footer {
   background: var(--background);
@@ -110,9 +114,11 @@ $_brand-gap: 0.55rem;
     align-items: flex-start;
     gap: 0.4rem;
 
+    // Never narrower than its own content: the legal row next to it wraps
+    // instead. (It used to shrink to nothing while the links held their
+    // width, which crushed the tagline one word per line.)
     @media (min-width: 640px) {
-      flex: 1 1 auto;
-      min-width: 0;
+      flex: 1 0 auto;
     }
   }
 
@@ -231,11 +237,16 @@ $_brand-gap: 0.55rem;
     column-gap: 0;
     padding-top: 1.25rem;
     border-top: 1px solid $_sep;
+    // Cuts off the separator dot that leads each wrapped line (see __legal);
+    // only sideways, so focus outlines above and below stay visible
+    overflow-x: clip;
+    overflow-clip-margin: 2px;
 
     @media (min-width: 640px) {
       // __inner's own gap already spaces this away from __divider — no
       // extra padding needed here, that would double it up.
-      flex-shrink: 0;
+      flex: 0 1 auto;
+      min-width: 0;
       justify-content: flex-end;
       padding-top: 0;
       border-top: none;
@@ -255,8 +266,12 @@ $_brand-gap: 0.55rem;
     flex-basis: max-content;
     // Row-gap only (for the wrap case on narrow viewports) — horizontal
     // spacing between links is carried entirely by the separator dot's
-    // own margins below, so it isn't doubled up with a column-gap too.
+    // own box below, so it isn't doubled up with a column-gap too.
     row-gap: 0.5rem;
+    // Every item carries its dot in front; shifting the row left by one dot
+    // puts the dot that starts each line outside __end, which clips it — so
+    // no line ever begins or ends with a stray "·", wherever it wraps.
+    margin-left: -$_sep-w;
   }
 
   &__link {
@@ -268,10 +283,11 @@ $_brand-gap: 0.55rem;
     line-height: 1.5;
     transition: color 0.18s ease;
 
-    &:not(:last-child)::after {
+    &::before {
       content: '·';
       display: inline-block;
-      margin: 0 0.65rem;
+      width: $_sep-w;
+      text-align: center;
       color: $_sep;
     }
 
@@ -298,7 +314,9 @@ $_brand-gap: 0.55rem;
 
     &::before {
       content: '·';
-      margin: 0 0.65rem;
+      display: inline-block;
+      width: $_sep-w;
+      text-align: center;
       color: $_sep;
       font-style: normal;
     }
