@@ -24,7 +24,9 @@
         <!-- Lead and team photo side by side; the photo, tilted like a card on
              the table, reaches up into the hero -->
         <div class="about-intro">
-          <p class="about-lead">{{ $t('about.lead') }}</p>
+          <p class="about-lead">
+            {{ $t('about.pre-lead') }}<br />{{ $t('about.lead') }}<br />{{ $t('about.post-lead') }}
+          </p>
           <figure class="team-photo">
             <img
               class="team-photo__img"
@@ -49,7 +51,9 @@
 
         <section class="about-section">
           <h2>{{ $t('about.why.title') }}</h2>
+          <p>{{ $t('about.why.pre') }}</p>
           <p>{{ $t('about.why.text') }}</p>
+          <p>{{ $t('about.why.post') }}</p>
         </section>
 
         <section class="about-section">
@@ -61,11 +65,14 @@
 
         <section class="about-section about-section--open">
           <h2>{{ $t('about.open.title') }}</h2>
+          <p>{{ $t('about.open.pre-text') }}</p>
           <p>{{ $t('about.open.text') }}</p>
+          <p>{{ $t('about.open.post-text') }}</p>
         </section>
 
         <section class="about-section">
           <h2>{{ $t('about.funding.title') }}</h2>
+          <p>{{ $t('about.funding.pre-text') }}</p>
           <p>{{ $t('about.funding.text') }}</p>
         </section>
 

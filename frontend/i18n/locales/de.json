@@ -1210,12 +1210,14 @@
   },
   "about": {
     "tag": "Über uns",
-    "title": "Wer wir sind",
+    "title": "Wer hinter AUA steckt",
     "team": {
       "caption": "Das Team hinter AUA",
       "alt": "Drei Vereinsmitglieder von AUA sitzen lächelnd nebeneinander an einem Holztisch."
     },
-    "lead": "AUA – Alle.Unsere.Abenteuer ist ein Verein zur Förderung des gemeinsamen Spielens. Wir bringen Kinder, Jugendliche und Erwachsene an einen Tisch: analog, miteinander und ohne Bildschirm.",
+    "pre-lead": "Drei Menschen, eine gemeinsame Leidenschaft und unzählige Abenteuer in Spieleschachteln.",
+    "lead": "Was mit gemeinsamen Spieleabenden und der Begeisterung für Brettspiele begann, entwickelte sich zu einer Idee: Wir möchten unsere Leidenschaft mit anderen teilen und die vielfältige Welt der Gesellschaftsspiele für möglichst viele Menschen zugänglich machen.",
+    "post-lead": "So entstand AUA – Alle.Unsere.Abenteuer",
     "facts": {
       "name_label": "Name",
       "name": "AUA-Alle.Unsere.Abenteuer – Verein zur Förderung des gemeinsamen Spielens",
@@ -1228,24 +1230,29 @@
     },
     "why": {
       "title": "Warum wir spielen",
-      "text": "Brett-, Karten-, Würfel- und Denkspiele fördern kognitive, emotionale, soziale, kommunikative, motorische, wahrnehmungsgebundene und kreative Fähigkeiten. Uns ist wichtig, dass Kinder, Jugendliche und Erwachsene gemeinsam etwas erleben und es dazu attraktive Alternativen zur bildschirmbasierten Freizeitgestaltung gibt."
+      "pre": "In jeder Spieleschachtel steckt ein kleines Abenteuer.",
+      "text": "Spielen verbindet Menschen, schafft gemeinsame Erinnerungen und eröffnet neue Welten. Gleichzeitig fördern Brett-, Karten-, Würfel- und Denkspiele kognitive, emotionale, soziale, kommunikative, motorische und kreative Fähigkeiten sowie die Wahrnehmung.",
+      "post": "Wir möchten Kinder, Jugendliche und Erwachsene dazu ermutigen, gemeinsam Neues zu entdecken, Zeit miteinander zu verbringen und die Vielfalt des Spielens als attraktive Alternative zur bildschirmbasierten Freizeitgestaltung zu erleben."
     },
     "do": {
       "title": "Was wir tun",
-      "events": "Themenbezogene Spieleabende, Spieletreffen, Turniere und Spielangebote für Kinder, Jugendliche und Erwachsene",
-      "library": "Ein Spielverleih für Vereinsmitglieder über unsere Onlineplattform",
-      "workshops": "Workshops, Vorträge und Informationsveranstaltungen",
-      "training": "Aus- und Weiterbildung für alle, die bei uns Spiele erklären oder Veranstaltungen betreuen",
-      "content": "Spielvorstellungen, Spielanleitungen und Empfehlungen zum Nachlesen",
-      "partners": "Zusammenarbeit mit Spieleautor:innen, Verlagen, Fachhandel und Bildungseinrichtungen"
+      "events": "Spieleverleih: Eine vielfältige Auswahl an Brett-, Karten- und Gesellschaftsspielen, die unsere Vereinsmitglieder bequem über unsere Onlineplattform ausborgen können.",
+      "library": "Spielvorstellungen und Empfehlungen: Rezensionen, Spielvorstellungen, Spielanleitungen und persönliche Spielerfahrungen auf unserer Homepage und unseren Social-Media-Kanälen.",
+      "workshops": "Persönliche Spieleberatung: Wir unterstützen euch gerne bei der Auswahl passender Spiele, geben individuelle Empfehlungen, erklären Spiele und helfen euch bei Fragen zu Spielregeln und Spielabläufen.",
+      "training": "Gemeinsame Spielerlebnisse: Gelegentliche Spieleveranstaltungen, Turniere und themenbezogene Spieletreffen für Kinder, Jugendliche und Erwachsene.",
+      "content": "Kooperationen und Vernetzung: Zusammenarbeit mit Spieleautor, Verlagen, Fachhandel, Vereinen sowie Bildungs- und Betreuungseinrichtungen.",
+      "partners": "Spielen und Wissen: Perspektivisch möchten wir unser Angebot durch Workshops, Vorträge und Informationsveranstaltungen rund um das Thema Spielen erweitern."
     },
     "open": {
       "title": "Für alle offen",
-      "text": "Wir möchten einen möglichst niederschwelligen Zugang zu Brett- und Gesellschaftsspielen ermöglichen. Alter, Geschlecht, Herkunft, finanzielle Möglichkeiten oder Spielerfahrung sollen kein Hindernis für die Teilnahme an unseren Angeboten sein."
+      "pre-text": "Wir möchten einen möglichst niederschwelligen Zugang zur vielfältigen Welt der Brett- und Gesellschaftsspiele ermöglichen.",
+      "text": "Alter, Geschlecht, Herkunft, finanzielle Möglichkeiten oder bisherige Spielerfahrung sollen kein Hindernis sein, neue Spiele zu entdecken und an unseren Angeboten teilzunehmen.",
+      "post-text": "Durch unseren Spieleverleih möchten wir außerdem die Möglichkeit schaffen, Spiele auszuprobieren, ohne sie gleich kaufen zu müssen. Gemeinsam nutzen, teilen und entdecken – statt alles selbst besitzen zu müssen."
     },
     "funding": {
       "title": "Wie wir uns finanzieren",
-      "text": "Unser Verein finanziert sich aus Mitgliedsbeiträgen, freiwilligen Beiträgen und Spenden, Förderungen, Sponsoring, Veranstaltungseinnahmen und angemessenen Leihgebühren. Alle Mittel werden ausschließlich für die Vereinszwecke verwendet. Mitglieder erhalten keine Gewinnanteile.",
+      "pre-text": "Unser gemeinnütziger Verein finanziert sich aus Mitgliedsbeiträgen, freiwilligen Beiträgen und Spenden, Förderungen, Sponsoring, Veranstaltungseinnahmen und angemessenen Leihgebühren.",
+      "text": "Alle Einnahmen dienen ausschließlich der Erfüllung unserer Vereinszwecke, dem Erhalt und Ausbau unseres Spieleangebots sowie der Umsetzung unserer Vereinsaktivitäten. Mitglieder erhalten keine Gewinnanteile.",
       "donate": "Spiele spenden"
     },
     "cta_collection": "Zur Spielesammlung"
