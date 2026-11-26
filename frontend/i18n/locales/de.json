@@ -358,8 +358,8 @@
       "hero_desc": "Greife auf unsere wachsende Sammlung von Brettspielen zu — ausleihen, einfach zurückgeben, gemeinsam genießen.",
       "features_title": "Was wir bieten",
       "features_sub": "Alles, was du für einen gelungenen Spieleabend brauchst.",
-      "feature_variety_title": "Große Auswahl",
-      "feature_variety_desc": "Von Klassikern bis zu modernen Strategiespielen — für jeden Anlass das passende Spiel.",
+      "feature_variety_title": "Wachsende Spieleauswahl",
+      "feature_variety_desc": "Von Klassikern bis zu modernen Strategiespielen — für jeden Anlass das passende Spiel. Durchsuche regelmäßig unsere Sammlung. Wir ergänzen und erweitern ständig unser Angebot.",
       "feature_easy_title": "Einfach ausleihen",
       "feature_easy_desc": "Spiel aussuchen, Ausleihzeit wählen und abholen — unkompliziert und in wenigen Klicks.",
       "feature_for_all_title": "Für alle",
@@ -1199,7 +1199,7 @@
     },
     "direction": {
       "title": "Grundlegende Richtung",
-      "text": "Diese Website informiert über die Tätigkeit des Vereins – Spieleabende, Veranstaltungen und die Spielothek – und dient Mitgliedern zum Ausleihen von Spielen."
+      "text": "Diese Website informiert über die Tätigkeit des Vereins – Themenbezogene Spieleabende, Spieletreffen, Turniere und Spielangebote für Kinder, Jugendliche und Erwachsene – und dient Mitgliedern zum Ausleihen von Spielen."
     },
     "liability": {
       "title": "Haftung für Links",
@@ -1226,8 +1226,8 @@
     },
     "do": {
       "title": "Was wir tun",
-      "events": "Spieleabende, Spieletreffen, Turniere und Spielangebote für Kinder, Jugendliche und Erwachsene",
-      "library": "Eine Spielothek: ein Spielverleih für Vereinsmitglieder",
+      "events": "Themenbezogene Spieleabende, Spieletreffen, Turniere und Spielangebote für Kinder, Jugendliche und Erwachsene",
+      "library": "Ein Spielverleih für Vereinsmitglieder über unsere Onlineplattform",
       "workshops": "Workshops, Vorträge und Informationsveranstaltungen",
       "training": "Aus- und Weiterbildung für alle, die bei uns Spiele erklären oder Veranstaltungen betreuen",
       "content": "Spielvorstellungen, Spielanleitungen und Empfehlungen zum Nachlesen",
