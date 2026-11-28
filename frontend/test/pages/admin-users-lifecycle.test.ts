@@ -82,12 +82,22 @@ describe('admin/users.vue — suspended, rejected and anonymized accounts', () =
     expect(items).toEqual(expect.arrayContaining(['Entsperren', 'Löschen']))
   })
 
-  it('offers delete but no unlock for a rejected user', async () => {
+  it('offers approve and delete but no unlock for a rejected user', async () => {
     await mountPage([user(2, 'Tom', 'REJECTED')])
 
     const items = (await menuOf('Tom')).map((i) => i.text())
-    expect(items).toContain('Löschen')
+    expect(items).toEqual(expect.arrayContaining(['Freischalten', 'Löschen']))
     expect(items).not.toContain('Entsperren')
+  })
+
+  it('approves a rejected user later and shows them active', async () => {
+    api.patch.mockResolvedValue({})
+    await mountPage([user(2, 'Tom', 'REJECTED')])
+
+    await choose('Tom', 'Freischalten')
+
+    expect(api.patch).toHaveBeenCalledWith('/admin/users/2/approve')
+    expect(row('Tom').text()).toContain('Aktiv')
   })
 
   it('offers neither for an anonymized account', async () => {
@@ -96,6 +106,7 @@ describe('admin/users.vue — suspended, rejected and anonymized accounts', () =
     expect(row('Gelöschtes Konto').text()).toContain('Anonymisiert')
     const items = (await menuOf('Gelöschtes Konto')).map((i) => i.text())
     expect(items).not.toContain('Entsperren')
+    expect(items).not.toContain('Freischalten')
     expect(items).not.toContain('Löschen')
   })
 

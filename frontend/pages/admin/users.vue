@@ -625,6 +625,14 @@ function openRowMenu(event: MouseEvent, user: User) {
       action: () => suspend(user.id),
     })
   }
+  // A rejected registration can still be approved later (sends the approval mail)
+  if (user.status === 'REJECTED' && !user.anonymized_at) {
+    items.push({
+      label: t('admin.users.approve'),
+      icon: 'lock_open',
+      action: () => approve(user.id),
+    })
+  }
   // Anonymized accounts have no data left — nothing to unlock or delete
   if (user.status === 'SUSPENDED' && !user.anonymized_at) {
     items.push({
