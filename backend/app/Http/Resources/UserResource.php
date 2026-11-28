@@ -40,6 +40,8 @@ class UserResource extends JsonResource
             'is_member' => $this->isMember(),
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
+            'deleted_at' => $this->deleted_at,
+            'anonymized_at' => $this->anonymized_at,
         ];
     }
 }

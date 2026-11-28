@@ -29,4 +29,5 @@ Schedule::command('loans:send-pickup-reminders')->dailyAt('10:00');
 Schedule::command('tokens:expire-bonus')->dailyAt('02:00');
 Schedule::command('model:prune')->dailyAt('03:00');
 Schedule::command('accounts:prune-inactive')->dailyAt('03:30');
+Schedule::command('accounts:anonymize-deleted')->dailyAt('03:40');
 Schedule::command('auth:prune-idle-sessions')->dailyAt('03:45');

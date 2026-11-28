@@ -125,6 +125,7 @@ class NotificationContentTest extends TestCase
             'ReservationAvailable' => [fn (self $t, User $u) => new Notifications\ReservationAvailable(Game::factory()->create(['title' => 'Azul']))],
             'ResetPassword' => [fn (self $t, User $u) => new Notifications\ResetPasswordNotification('token123')],
             'UserApproved' => [fn (self $t, User $u) => new Notifications\UserApproved],
+            'UserUnsuspended' => [fn (self $t, User $u) => new Notifications\UserUnsuspended],
             'UserRejected' => [fn (self $t, User $u) => new Notifications\UserRejected('Unvollständige Angaben')],
             'VerifyEmail' => [fn (self $t, User $u) => new Notifications\VerifyEmailNotification],
             'WelcomeMember' => [fn (self $t, User $u) => new Notifications\WelcomeMemberNotification],

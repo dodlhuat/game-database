@@ -177,6 +177,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::patch('/users/{user}/approve', [UserController::class, 'approve']);
     Route::patch('/users/{user}/reject', [UserController::class, 'reject']);
     Route::patch('/users/{user}/suspend', [UserController::class, 'suspend']);
+    Route::patch('/users/{user}/unsuspend', [UserController::class, 'unsuspend']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    Route::patch('/users/{user}/restore', [UserController::class, 'restore'])->withTrashed();
 
     // Kündigungen
     Route::get('/cancellations', [App\Http\Controllers\Admin\MembershipCancellationController::class, 'index']);

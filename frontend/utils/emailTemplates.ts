@@ -72,6 +72,12 @@ export const EMAIL_TEMPLATE_META: Record<string, TemplateMeta> = {
     icon: 'undo',
     vars: ['name', 'email', 'amount', 'date', 'payment_id'],
   },
+  user_unsuspended: {
+    label: 'Konto entsperrt',
+    recipient: 'Mitglied',
+    icon: 'lock_open',
+    vars: ['name'],
+  },
   pickup_event_reminder: {
     label: 'Abholtermin morgen',
     recipient: 'Mitglied',

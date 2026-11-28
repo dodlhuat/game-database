@@ -4,11 +4,10 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use App\Notifications\InactiveAccountNotice;
+use App\Services\AccountAnonymizer;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * Privacy policy §5: accounts without any activity for 3 years are deleted
@@ -37,6 +36,11 @@ class PruneInactiveAccounts extends Command
 
     public const GRACE_DAYS = 30;
 
+    public function __construct(private AccountAnonymizer $anonymizer)
+    {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $dryRun = (bool) $this->option('dry-run');
@@ -60,7 +64,7 @@ class PruneInactiveAccounts extends Command
         foreach ($toAnonymize as $user) {
             $this->line("Anonymize: #{$user->id}");
             if (! $dryRun) {
-                $this->anonymize($user);
+                $this->anonymizer->anonymize($user);
             }
         }
 
@@ -101,35 +105,5 @@ class PruneInactiveAccounts extends Command
         if ($blocked->isNotEmpty()) {
             $this->warn('Inactive but skipped (open loans, membership, cancellation or tokens), review manually: #'.$blocked->implode(', #'));
         }
-    }
-
-    private function anonymize(User $user): void
-    {
-        DB::transaction(function () use ($user) {
-            $email = $user->email;
-
-            $user->tokens()->delete();
-            $user->favorites()->delete();
-            $user->reservations()->delete();
-            $user->reviews()->delete();
-            $user->emailLogs()->delete();
-            DB::table('password_reset_tokens')->where('email', $email)->delete();
-            DB::table('sessions')->where('user_id', $user->id)->delete();
-
-            $user->forceFill([
-                'name' => 'Gelöschtes Konto',
-                'email' => "deleted-{$user->id}@anonymized.invalid",
-                'address' => null,
-                'street' => null,
-                'postal_code' => null,
-                'city' => null,
-                'date_of_birth' => null,
-                'password' => Hash::make(Str::random(64)),
-                'remember_token' => null,
-                'newsletter_opt_in' => false,
-                'status' => 'SUSPENDED',
-                'anonymized_at' => now(),
-            ])->saveQuietly();
-        });
     }
 }

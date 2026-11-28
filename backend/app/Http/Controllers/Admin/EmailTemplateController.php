@@ -88,6 +88,13 @@ class EmailTemplateController extends Controller
             'body' => '<p><strong>{name}</strong> ({email}) hat die Mitgliedschaft doppelt bezahlt. Die zweite Zahlung über <strong>{amount}</strong> vom {date} wurde nicht verbucht.</p><p>Bitte erstatte sie im Mollie-Dashboard (Zahlung <strong>{payment_id}</strong>). Sobald Mollie die Erstattung meldet, wird sie in der Liste automatisch abgehakt – du kannst sie dort auch selbst als erstattet markieren.</p>',
             'action_text' => 'Zur Erstattungsliste',
         ],
+        'user_unsuspended' => [
+            'key' => 'user_unsuspended',
+            'subject' => 'Dein Konto ist wieder freigeschaltet',
+            'greeting' => 'Hallo {name},',
+            'body' => '<p>dein Konto bei AUA – Alle.Unsere.Abenteuer ist wieder freigeschaltet. Du kannst dich ab sofort wieder anmelden und Spiele ausleihen.</p>',
+            'action_text' => 'Jetzt anmelden',
+        ],
         'pickup_event_reminder' => [
             'key' => 'pickup_event_reminder',
             'subject' => 'Morgen: Abholung bei {location}',

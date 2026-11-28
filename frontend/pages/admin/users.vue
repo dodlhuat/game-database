@@ -19,29 +19,41 @@
 
     <div class="admin-content">
       <div class="admin-content__inner">
-        <div v-if="pending" class="admin-state"><div class="spinner" /></div>
-
-        <section v-else class="dash-section">
+        <!-- The header with its filters stays while the list reloads -->
+        <section class="dash-section">
           <header class="dash-section__header">
             <h2 class="dash-section__title">
-              {{ statusFilter ? $t('admin.users.pending_only') : $t('admin.users.all') }}
+              {{
+                showDeleted
+                  ? $t('admin.users.deleted_only')
+                  : statusFilter
+                    ? $t('admin.users.pending_only')
+                    : $t('admin.users.all')
+              }}
             </h2>
             <span class="dash-section__count">{{ total }}</span>
             <button
-              v-if="statusFilter"
+              v-if="statusFilter && !showDeleted"
               type="button"
               class="action-btn filter-clear"
               @click="clearStatusFilter"
             >
               {{ $t('admin.users.show_all') }}
             </button>
+            <div class="deleted-toggle">
+              <UiSwitch v-model="showDeleted" :label="$t('admin.users.show_deleted')" />
+            </div>
           </header>
 
-          <div v-if="!users.length" class="dash-empty">
+          <div v-if="pending" class="admin-state"><div class="spinner" /></div>
+
+          <div v-else-if="!users.length" class="dash-empty">
             <svg class="icon-svg dash-empty__icon" aria-hidden="true">
               <use href="/svg-icons/icons.svg#person" />
             </svg>
-            <p class="dash-empty__text">{{ $t('admin.empty.users') }}</p>
+            <p class="dash-empty__text">
+              {{ showDeleted ? $t('admin.users.empty_deleted') : $t('admin.empty.users') }}
+            </p>
           </div>
 
           <div
@@ -72,7 +84,13 @@
                   </td>
                   <td class="user-table__role text-muted">{{ roleLabel(user.role) }}</td>
                   <td class="user-table__status">
-                    <span class="badge" :class="statusClass(user.status)">{{
+                    <span v-if="user.anonymized_at" class="badge">{{
+                      $t('admin.users.anonymized')
+                    }}</span>
+                    <span v-else-if="user.deleted_at" class="badge badge-error">{{
+                      $t('admin.users.deleted_on', { date: formatDate(user.deleted_at) })
+                    }}</span>
+                    <span v-else class="badge" :class="statusClass(user.status)">{{
                       statusLabel(user.status)
                     }}</span>
                   </td>
@@ -94,7 +112,17 @@
                     <span v-else class="text-muted">—</span>
                   </td>
                   <td class="user-table__actions">
-                    <div class="action-row">
+                    <!-- Deleted: restoring is the only thing to do (anonymized: nothing) -->
+                    <div v-if="user.deleted_at" class="action-row">
+                      <button
+                        v-if="!user.anonymized_at"
+                        class="action-btn action-btn--success"
+                        @click="restoreUser(user)"
+                      >
+                        {{ $t('admin.users.restore') }}
+                      </button>
+                    </div>
+                    <div v-else class="action-row">
                       <button
                         v-if="user.status === 'PENDING'"
                         class="action-btn action-btn--success"
@@ -341,7 +369,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import type { PageMeta } from '~/composables/useAdmin'
 import { useRowMenu, type RowMenuItem } from '~/composables/useRowMenu'
 
@@ -358,6 +386,8 @@ interface User {
   bonus_tokens?: number
   tokens_blocked?: number
   membership_expires_at?: string | null
+  deleted_at?: string | null
+  anonymized_at?: string | null
 }
 interface TxItem {
   id: number
@@ -369,7 +399,7 @@ interface TxItem {
 
 const api = useApi()
 const { t } = useI18n()
-const { notify } = useDialogs()
+const { confirmDialog, notify } = useDialogs()
 const year = new Date().getFullYear()
 const users = ref<User[]>([])
 const pending = ref(true)
@@ -527,11 +557,22 @@ function clearStatusFilter() {
   loadUsers(1)
 }
 
+// Deleted users are a separate view; switching starts on page 1
+const showDeleted = ref(false)
+watch(showDeleted, () => loadUsers(1))
+
 async function loadUsers(target = page.value) {
   pending.value = true
   try {
     const data = await api.get<{ data: User[]; meta?: PageMeta }>('/admin/users', {
-      params: { page: target, ...(statusFilter.value ? { status: statusFilter.value } : {}) },
+      params: {
+        page: target,
+        ...(showDeleted.value
+          ? { deleted: 1 }
+          : statusFilter.value
+            ? { status: statusFilter.value }
+            : {}),
+      },
     })
     users.value = data.data
     page.value = data.meta?.current_page ?? 1
@@ -584,6 +625,22 @@ function openRowMenu(event: MouseEvent, user: User) {
       action: () => suspend(user.id),
     })
   }
+  // Anonymized accounts have no data left — nothing to unlock or delete
+  if (user.status === 'SUSPENDED' && !user.anonymized_at) {
+    items.push({
+      label: t('admin.users.unsuspend'),
+      icon: 'lock_open',
+      action: () => unsuspend(user),
+    })
+  }
+  if ((user.status === 'SUSPENDED' || user.status === 'REJECTED') && !user.anonymized_at) {
+    items.push({
+      label: t('admin.users.delete'),
+      icon: 'delete',
+      destructive: true,
+      action: () => removeUser(user),
+    })
+  }
   rowMenu.open(event.currentTarget as HTMLElement, items)
 }
 
@@ -614,6 +671,51 @@ async function suspend(id: number) {
   await api.patch(`/admin/users/${id}/suspend`)
   const u = users.value.find((u) => u.id === id)
   if (u) u.status = 'SUSPENDED'
+}
+
+function apiMessage(err: unknown, fallback: string) {
+  const message = (err as { message?: unknown })?.message
+  return typeof message === 'string' && message ? message : fallback
+}
+
+async function unsuspend(user: User) {
+  try {
+    await api.patch(`/admin/users/${user.id}/unsuspend`)
+    user.status = 'ACTIVE'
+    notify(t('admin.users.unsuspended', { name: user.name }))
+  } catch (err: unknown) {
+    notify(apiMessage(err, t('common.error.generic')), 'error')
+  }
+}
+
+async function removeUser(user: User) {
+  const ok = await confirmDialog({
+    title: t('admin.users.delete_title'),
+    message: t('admin.users.delete_confirm', { name: user.name }),
+    confirmLabel: t('admin.users.delete'),
+    danger: true,
+  })
+  if (!ok) return
+  try {
+    await api.delete(`/admin/users/${user.id}`)
+    users.value = users.value.filter((u) => u.id !== user.id)
+    total.value = Math.max(0, total.value - 1)
+    notify(t('admin.users.deleted', { name: user.name }))
+  } catch (err: unknown) {
+    // e.g. games still out
+    notify(apiMessage(err, t('common.error.generic')), 'error')
+  }
+}
+
+async function restoreUser(user: User) {
+  try {
+    await api.patch(`/admin/users/${user.id}/restore`)
+    users.value = users.value.filter((u) => u.id !== user.id)
+    total.value = Math.max(0, total.value - 1)
+    notify(t('admin.users.restored', { name: user.name }))
+  } catch (err: unknown) {
+    notify(apiMessage(err, t('common.error.generic')), 'error')
+  }
 }
 
 function statusLabel(s: string) {
@@ -769,6 +871,7 @@ $hero-divider: var(--divider);
 }
 .dash-section__header {
   display: flex;
+  flex-wrap: wrap; // the deleted toggle moves below the title on narrow screens
   align-items: center;
   gap: 0.75rem;
   padding: 1.1rem 1.5rem;
@@ -1243,5 +1346,14 @@ $hero-divider: var(--divider);
     color: $hero-muted-50;
     padding-bottom: 0;
   }
+}
+
+// "Show deleted" sits at the far end of the header
+.deleted-toggle {
+  margin-left: auto;
+  font-size: 0.82rem;
+}
+.filter-clear + .deleted-toggle {
+  margin-left: 0;
 }
 </style>
